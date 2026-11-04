@@ -41,12 +41,8 @@ const SCHEMA_LIST_RESPONSE: TSchemaListResponse = {
       resource_type: 'custom',
     },
   ],
-  total: 1,
-  page: 1,
-  per_page: 10,
-  total_pages: 1,
-  next_page: null,
-  prev_page: null,
+  total_size: 1,
+  next_page_token: null,
   objects: { items: [], children: {} },
 };
 

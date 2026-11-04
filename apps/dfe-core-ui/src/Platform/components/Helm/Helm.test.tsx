@@ -39,7 +39,11 @@ describe('Helm', () => {
     {
       case: 'gitops off',
       status: 503,
-      body: { code: 'not_configured', message: 'gitops is not enabled' },
+      body: {
+        title: 'Error',
+        code: 'not_configured',
+        detail: 'gitops is not enabled',
+      },
       reason: 'gitops is not enabled',
     },
     {

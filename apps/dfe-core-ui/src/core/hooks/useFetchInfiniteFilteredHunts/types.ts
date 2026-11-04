@@ -16,5 +16,5 @@ export type UseFetchInfiniteFilteredHuntsProps = {
   search?: string;
   sort_by?: HuntSortBy;
   sort_order?: 'asc' | 'desc';
-  per_page?: number;
+  page_size?: number;
 };

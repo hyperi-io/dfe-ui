@@ -158,12 +158,13 @@ describe('CreateAccountForm password length', () => {
       http.post(API_CONFIG_MOCKS.accounts.default.mockedUrl, () =>
         HttpResponse.json(
           {
+            title: 'Error',
             code: 'validation_error',
-            message: '1 validation error(s)',
+            detail: '1 validation error(s)',
             errors: [
               {
                 field: 'password',
-                message: 'String should have at least 12 characters',
+                detail: 'String should have at least 12 characters',
                 code: 'string_too_short',
               },
             ],

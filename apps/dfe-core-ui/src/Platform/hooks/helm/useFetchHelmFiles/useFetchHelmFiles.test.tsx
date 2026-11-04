@@ -19,7 +19,7 @@ describe('.useFetchHelmFiles', () => {
   test('should return helm files', async () => {
     const { result } = renderHook(() => useFetchHelmFiles(), { wrapper });
 
-    const response: THelmFilesResponse = ['string'];
+    const response: THelmFilesResponse['items'] = ['string'];
 
     await waitFor(() => {
       expect(result.current).toEqual({

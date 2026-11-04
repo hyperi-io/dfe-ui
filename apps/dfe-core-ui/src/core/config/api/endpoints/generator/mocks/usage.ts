@@ -59,7 +59,11 @@ export const usage = {
       error: ({ status = 403 }: { status?: number } = {}) =>
         http.get(usage.overview.mockedUrl, () =>
           HttpResponse.json(
-            { code: 'forbidden', message: 'Missing action usage:read' },
+            {
+              title: 'Error',
+              code: 'forbidden',
+              detail: 'Missing action usage:read',
+            },
             { status },
           ),
         ),

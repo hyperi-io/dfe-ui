@@ -130,7 +130,7 @@ describe('.useCreateSource', () => {
       server.use(
         http.post(API_CONFIG_MOCKS.sources.fromCatalogue.mockedUrl, () =>
           HttpResponse.json(
-            { code: 'validation_error', message },
+            { title: 'Error', code: 'validation_error', detail: message },
             { status: 422 },
           ),
         ),
@@ -158,7 +158,7 @@ describe('.useCreateSource', () => {
       });
 
       await waitFor(() => expect(onError).toHaveBeenCalled());
-      expect(getApiErrorResponseBody(onError.mock.calls[0][0])?.message).toBe(
+      expect(getApiErrorResponseBody(onError.mock.calls[0][0])?.detail).toBe(
         message,
       );
     });

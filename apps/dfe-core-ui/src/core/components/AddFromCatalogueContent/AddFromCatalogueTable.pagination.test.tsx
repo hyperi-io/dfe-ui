@@ -10,16 +10,16 @@ import { AddFromCatalogueTable } from './AddFromCatalogueTable';
 vi.mock('@/core/hooks/useFetchInfiniteSourceCatalogues', () => ({
   useFetchInfiniteSourceCatalogues: ({
     page = 1,
-    per_page = 50,
+    page_size = 50,
   }: {
     page?: number;
-    per_page?: number;
+    page_size?: number;
   } = {}) => ({
     data: {
-      items: Array.from({ length: per_page }, (_, index) =>
-        catalogueItem((page - 1) * per_page + index),
+      items: Array.from({ length: page_size }, (_, index) =>
+        catalogueItem((page - 1) * page_size + index),
       ),
-      total: 1064,
+      total_size: 1064,
     },
     isLoading: false,
     isFetchingNextPage: false,

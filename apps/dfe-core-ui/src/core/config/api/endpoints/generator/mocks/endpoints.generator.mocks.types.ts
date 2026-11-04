@@ -1,11 +1,12 @@
 import { components } from '@repo/dfe-engine-types';
 
-export const DEFAULT_VALIDATION_ERROR: TValidationError = {
-  loc: [],
-  msg: '',
-  type: '',
-  input: undefined,
-  ctx: undefined,
-};
+export type TValidationError = components['schemas']['Problem'];
 
-export type TValidationError = components['schemas']['ValidationError'];
+export const DEFAULT_VALIDATION_ERROR: TValidationError = {
+  type: 'about:blank',
+  title: 'Unprocessable Content',
+  status: 422,
+  detail: '',
+  code: 'validation_error',
+  errors: [],
+};

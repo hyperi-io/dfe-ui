@@ -157,7 +157,7 @@ export const AppConfigCard = ({
   const cardMessage =
     conflict || onField
       ? undefined
-      : (getApiErrorResponseBody(updateError)?.message ??
+      : (getApiErrorResponseBody(updateError)?.detail ??
         updateError?.message ??
         // A write that never left the browser still has to say why.
         (fieldError ? `${fieldError.path}: ${fieldError.message}` : undefined));

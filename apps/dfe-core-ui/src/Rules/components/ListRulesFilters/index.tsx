@@ -10,7 +10,7 @@ export const ListRulesFilters = ({
   onCollapseChange?: (open: boolean) => void;
 }) => {
   const {
-    data: { items: rules, total },
+    data: { items: rules, total_size: total },
     hasFilters,
     filters,
   } = useListRulesContext();

@@ -99,7 +99,11 @@ export const ingest = {
       error: ({ status = 500 }: { status?: number } = {}) =>
         http.get(ingest.rules.mockedUrl, () =>
           HttpResponse.json(
-            { code: 'internal_error', message: 'An unexpected error occurred' },
+            {
+              title: 'Error',
+              code: 'internal_error',
+              detail: 'An unexpected error occurred',
+            },
             { status },
           ),
         ),
@@ -117,13 +121,12 @@ export const ingest = {
       error: ({
         status = 409,
         body = {
+          title: 'Error',
           code: 'order_conflict',
-          message:
+          detail:
             'The _source blocks are not the ones listed: send every one of them',
-          context: {
-            target: '_source',
-            blocks: ['source.cisco-ios', 'source.okta', 'source.syslog'],
-          },
+          target: '_source',
+          blocks: ['source.cisco-ios', 'source.okta', 'source.syslog'],
         },
       }: { status?: number; body?: Record<string, unknown> } = {}) =>
         http.post(ingest.rulesOrder.mockedUrl, () =>
@@ -160,9 +163,10 @@ export const ingest = {
       error: ({
         status = 412,
         body = {
+          title: 'Error',
           code: 'etag_mismatch',
-          message: 'If-Match does not match the current ETag',
-          context: { etag: '"compat-2"' },
+          detail: 'If-Match does not match the current ETag',
+          etag: '"compat-2"',
         },
       }: { status?: number; body?: Record<string, unknown> } = {}) =>
         http.put(ingest.compat.mockedUrl, () =>

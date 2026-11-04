@@ -6,4 +6,4 @@ export const appFileLinksPath = API_CONFIG.apps.fileLinks;
 
 export const fetchAppFileLinksApi = (
   options: DfeClientRequestOptions<typeof appFileLinksPath, 'get'>,
-) => apiClient.get(appFileLinksPath, options);
+) => apiClient.getAll(appFileLinksPath, options);

@@ -426,7 +426,7 @@ export interface paths {
          *     regular user is never git-persisted, so it reports not-git-backed (durable in
          *     its own store).
          */
-        get: operations["auth.accounts.git-status.list"];
+        get: operations["auth.accounts.git-status"];
         put?: never;
         post?: never;
         delete?: never;
@@ -842,7 +842,7 @@ export interface paths {
          * Test Provider
          * @description Test connectivity to an OIDC provider (admin only).
          */
-        get: operations["auth.oidc-providers.test.list"];
+        get: operations["auth.oidc-providers.test"];
         put?: never;
         post?: never;
         delete?: never;
@@ -867,7 +867,7 @@ export interface paths {
          *     generic providers. Checks: the client_id resolves, the client_secret
          *     resolves, and the issuer's discovery document is reachable and well-formed.
          */
-        get: operations["auth.oidc-providers.verify-login.list"];
+        get: operations["auth.oidc-providers.verify-login"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1241,8 +1241,6 @@ export interface paths {
         /**
          * Get Source Schema Columns
          * @description Get composed schema columns for a source version (profile + meta/derived/additional).
-         *
-         *     Use ``per_page=-1`` to return all columns in one page.
          */
         get: operations["sources.columns.list"];
         put?: never;
@@ -1408,7 +1406,7 @@ export interface paths {
          *     deployment, and one resolver is what keeps the drawing and the deployed
          *     config the same answer.
          */
-        get: operations["sources.flow.list"];
+        get: operations["sources.flow"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1432,7 +1430,7 @@ export interface paths {
          *     with nulls and the reason, because "no lag" and "could not look" call for
          *     opposite reactions.
          */
-        get: operations["sources.lag.list"];
+        get: operations["sources.lag"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1458,7 +1456,7 @@ export interface paths {
          *     absent: a source that was only just defined has nothing to report, and that
          *     is not an error.
          */
-        get: operations["sources.signals.list"];
+        get: operations["sources.signals"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1484,7 +1482,7 @@ export interface paths {
          *     REFERENCE and a version pin rather than a copy of its columns, so importing
          *     the bundle cannot fork the read-only definition dfe-schemas ships.
          */
-        get: operations["sources.export.list"];
+        get: operations["sources.export"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1508,7 +1506,7 @@ export interface paths {
          *
          *     ``enable`` / ``disable`` / ``dormant`` / ``delete`` apply immediately.
          *     ``deploy`` submits one ``source:deploy`` background task per accepted source
-         *     (poll ``GET /tasks/{task_id}``); refused names land in ``failed``.
+         *     (poll ``GET /operations/{operation}``); refused names land in ``failed``.
          *
          *     An action that applies immediately reports the one reconcile it ends with, as
          *     a single-source write does.
@@ -2251,7 +2249,7 @@ export interface paths {
          *     Authenticated but ungated on purpose: the console footer is on every page, and
          *     the body carries versions only.
          */
-        get: operations["system.version.list"];
+        get: operations["system.version"];
         put?: never;
         post?: never;
         delete?: never;
@@ -2277,7 +2275,7 @@ export interface paths {
          *     failed here and the cause in the engine log, and observed -- another applier
          *     held the lease for the whole wait -- stays NotReady until a later pass converges.
          */
-        get: operations["system.schema.list"];
+        get: operations["system.schema"];
         put?: never;
         post?: never;
         delete?: never;
@@ -2300,7 +2298,7 @@ export interface paths {
          *     A refused YAML write keeps the old file or the old deploy-repo content, so reads
          *     stay correct and readiness is not failed; this is where the refusal shows.
          */
-        get: operations["system.status.list"];
+        get: operations["system.status"];
         put?: never;
         post?: never;
         delete?: never;
@@ -2320,7 +2318,7 @@ export interface paths {
          * Get Settings
          * @description Get a redacted summary of current settings. No secrets exposed.
          */
-        get: operations["system.settings.list"];
+        get: operations["system.settings"];
         put?: never;
         post?: never;
         delete?: never;
@@ -2448,10 +2446,9 @@ export interface paths {
          *
          *     ``core`` is true for an engine-owned source, which the apply endpoint will
          *     refuse. The landing source is never listed. ``search`` matches the source
-         *     name, a drifted field name, or a stored or live value. ``per_page=-1``
-         *     returns every match.
+         *     name, a drifted field name, or a stored or live value.
          */
-        get: operations["system.defaults.drift.list"];
+        get: operations["system.defaults.drift"];
         put?: never;
         post?: never;
         delete?: never;
@@ -3004,7 +3001,7 @@ export interface paths {
         };
         /**
          * List Streams
-         * @description List stream tasks (most recent first).
+         * @description List stream operations (most recent first).
          */
         get: operations["synthetic-data.streams"];
         put?: never;
@@ -3015,7 +3012,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/synthetic-data/streams/{task_id}": {
+    "/api/v1/synthetic-data/streams/{operation}": {
         parameters: {
             query?: never;
             header?: never;
@@ -3024,16 +3021,32 @@ export interface paths {
         };
         /**
          * Get Stream
-         * @description Poll a stream task's status and summary.
+         * @description Poll a stream, under the same action that lists it.
          */
         get: operations["synthetic-data.streams.get"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/synthetic-data/streams/{operation}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
         /**
          * Cancel Stream
-         * @description Cancel a running stream task.
+         * @description Cancel a stream, under the same action that starts it.
          */
-        delete: operations["synthetic-data.streams.delete"];
+        post: operations["synthetic-data.streams.cancel"];
+        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
@@ -3070,9 +3083,7 @@ export interface paths {
         put?: never;
         /**
          * Build Pipeline
-         * @description Trigger pipeline manifest generation.
-         *
-         *     Returns 202 with a task_id that can be polled via ``GET /tasks/{task_id}``.
+         * @description Start pipeline manifest generation, answering the operation to poll.
          */
         post: operations["pipeline.build"];
         delete?: never;
@@ -3081,7 +3092,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/tasks": {
+    "/api/v1/operations": {
         parameters: {
             query?: never;
             header?: never;
@@ -3089,10 +3100,10 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * List Tasks
-         * @description List the tasks the caller may see, optionally filtered by kind.
+         * List Operations
+         * @description List the operations the caller may see, optionally filtered by kind.
          */
-        get: operations["tasks.list"];
+        get: operations["operations.list"];
         put?: never;
         post?: never;
         delete?: never;
@@ -3101,7 +3112,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/tasks/{task_id}": {
+    "/api/v1/operations/{operation}": {
         parameters: {
             query?: never;
             header?: never;
@@ -3109,10 +3120,10 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Get Task
-         * @description Get current status of a task.
+         * Get Operation
+         * @description Get an operation: ``done`` with its ``response`` or ``error``, else its progress.
          */
-        get: operations["tasks.get"];
+        get: operations["operations.get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -3121,7 +3132,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/tasks/{task_id}/cancel": {
+    "/api/v1/operations/{operation}/cancel": {
         parameters: {
             query?: never;
             header?: never;
@@ -3131,10 +3142,10 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Cancel Task
-         * @description Cancel a running task.
+         * Cancel Operation
+         * @description Cancel a running operation.
          */
-        post: operations["tasks.cancel"];
+        post: operations["operations.cancel"];
         delete?: never;
         options?: never;
         head?: never;
@@ -3272,8 +3283,7 @@ export interface paths {
          * Get Meta Schema
          * @description Get one meta-schema definition by registry path (e.g. ``aws/cloudtrail``).
          *
-         *     Columns are paginated under ``version.columns``; use ``per_page=-1`` to return all
-         *     matching columns (after search/filters) in one page.
+         *     ``items`` is a page of the selected version's columns, after search and filters.
          */
         get: operations["schemas.definitions.versions.columns"];
         put?: never;
@@ -3371,7 +3381,7 @@ export interface paths {
          *     and updates those definitions, so an embedded copy would fork the read-only
          *     schema on every import.
          */
-        get: operations["schemas.definitions.export.list"];
+        get: operations["schemas.definitions.export"];
         put?: never;
         post?: never;
         delete?: never;
@@ -3442,8 +3452,6 @@ export interface paths {
         /**
          * Get Schema Columns
          * @description Get composed schema columns for a source version (profile + meta/derived/additional).
-         *
-         *     Use ``per_page=-1`` to return all columns in one page.
          */
         get: operations["schemas.columns.list"];
         put?: never;
@@ -3500,7 +3508,7 @@ export interface paths {
          *     A caller without a platform grant holding ``schema:read`` reads only its own
          *     orgs' rows, as the sampler holds it, and a table it cannot be held on is 403.
          */
-        get: operations["schemas.json-paths.list"];
+        get: operations["schemas.json-paths"];
         put?: never;
         post?: never;
         delete?: never;
@@ -3532,7 +3540,7 @@ export interface paths {
          *     A caller without a platform grant holding ``schema:read`` reads only its own
          *     orgs' rows, as the sampler holds it, and a table it cannot be held on is 403.
          */
-        get: operations["schemas.sample-rows.list"];
+        get: operations["schemas.sample-rows"];
         put?: never;
         post?: never;
         delete?: never;
@@ -6208,51 +6216,6 @@ export interface components {
             url_scheme: string;
         };
         /**
-         * AliasConflictContext
-         * @description Structured context for an alias two enabled sources claim under one profile.
-         */
-        AliasConflictContext: {
-            /**
-             * Source
-             * @description Source identifier being saved
-             */
-            source: string;
-            /**
-             * Conflicting Source
-             * @description Other enabled source that already has the alias
-             */
-            conflicting_source: string;
-            /**
-             * Profile
-             * @description The compatibility profile both name it under
-             */
-            profile: string;
-            /**
-             * Alias
-             * @description The alias
-             */
-            alias: string;
-        };
-        /**
-         * AliasConflictErrorResponse
-         * @description 409 when two enabled sources claim one alias under the same compatibility profile.
-         */
-        AliasConflictErrorResponse: {
-            /**
-             * @description discriminator enum property added by openapi-typescript
-             * @enum {string}
-             */
-            code: "alias_conflict";
-            /**
-             * Message
-             * @description Human-readable explanation
-             */
-            message: string;
-            /** Errors */
-            errors?: components["schemas"]["FieldError"][];
-            context: components["schemas"]["AliasConflictContext"];
-        };
-        /**
          * AppConfigResponse
          * @description Every option an instance has, and the overlay keys none of them explain.
          */
@@ -6827,7 +6790,7 @@ export interface components {
             }[];
             /**
              * Deployments
-             * @description Deploy only: one ``source:deploy`` task per accepted source. Poll via GET /tasks/{task_id}.
+             * @description Deploy only: one ``source:deploy`` task per accepted source. Poll each at GET /api/v1/<operation>.
              */
             deployments?: components["schemas"]["BulkDeployTask"][];
             /**
@@ -6859,10 +6822,10 @@ export interface components {
              */
             version?: string | null;
             /**
-             * Task Id
-             * @description Task id for polling via GET /tasks/{task_id}
+             * Operation
+             * @description The operation to poll, such as operations/7f3a
              */
-            task_id: string;
+            operation: string;
             /**
              * Kind
              * @description Task kind
@@ -6901,49 +6864,16 @@ export interface components {
             definitions?: components["schemas"]["MetaSchemaExport-Output"][];
         };
         /**
-         * CancelResponse
-         * @description Result of a cancel request.
-         */
-        CancelResponse: {
-            /** Task Id */
-            task_id: string;
-            /**
-             * Cancelled
-             * @description True when cancellation was requested
-             */
-            cancelled: boolean;
-        };
-        /**
          * CasbinScopesResponse
-         * @description Assignable Casbin scopes (paginated) plus picker metadata.
+         * @description A page of assignable Casbin scopes, plus picker metadata.
          */
         CasbinScopesResponse: {
-            /**
-             * Scopes
-             * @description Permission patterns for the current page
-             */
-            scopes: string[];
-            /**
-             * Total
-             * @description Total scopes matching filters
-             */
-            total: number;
-            /**
-             * Page
-             * @description Current page (1-based)
-             */
-            page: number;
-            /**
-             * Per Page
-             * @description Page size; -1 means all scopes in one page
-             */
-            per_page: number;
-            /** Total Pages */
-            total_pages: number;
-            /** Next Page */
-            next_page?: number | null;
-            /** Prev Page */
-            prev_page?: number | null;
+            /** Items */
+            items: string[];
+            /** Next Page Token */
+            next_page_token?: string | null;
+            /** Total Size */
+            total_size?: number | null;
             /** Wildcard */
             wildcard: boolean;
             /** Argo Namespace Prefix */
@@ -8002,36 +7932,6 @@ export interface components {
             skipped?: string[];
         };
         /**
-         * CoreResourceConflictContext
-         * @description Structured context for a write that named an engine-owned resource.
-         */
-        CoreResourceConflictContext: {
-            /**
-             * Source
-             * @description The engine-owned source the write named
-             */
-            source: string;
-        };
-        /**
-         * CoreResourceConflictErrorResponse
-         * @description 409 when a write names a resource the engine owns and reconciles itself.
-         */
-        CoreResourceConflictErrorResponse: {
-            /**
-             * @description discriminator enum property added by openapi-typescript
-             * @enum {string}
-             */
-            code: "conflict";
-            /**
-             * Message
-             * @description Human-readable explanation
-             */
-            message: string;
-            /** Errors */
-            errors?: components["schemas"]["FieldError"][];
-            context: components["schemas"]["CoreResourceConflictContext"];
-        };
-        /**
          * CostEstimate
          * @description What the alert-volume preview measured over its lookback window.
          */
@@ -8949,37 +8849,6 @@ export interface components {
             };
         };
         /**
-         * ErrorResponse
-         * @description Unified error response.
-         *
-         *     All API errors return this shape. The UI can always parse:
-         *     - ``code`` for programmatic branching
-         *     - ``message`` for a human-readable summary
-         *     - ``errors`` for field-level validation details (422 only)
-         *     - ``context`` for optional structured data on specific errors (e.g. conflicts)
-         */
-        ErrorResponse: {
-            /**
-             * Code
-             * @description Machine-readable error code
-             */
-            code: string;
-            /**
-             * Message
-             * @description Human-readable error summary
-             */
-            message: string;
-            /** Errors */
-            errors?: components["schemas"]["FieldError"][];
-            /**
-             * Context
-             * @description Structured details for specific errors (e.g. match_conflict)
-             */
-            context?: {
-                [key: string]: unknown;
-            } | null;
-        };
-        /**
          * ExternalConnectionModel
          * @description What the customer's own pipeline connects with. Never a secret.
          */
@@ -9109,25 +8978,26 @@ export interface components {
         };
         /**
          * FieldError
-         * @description A validation error on a specific field.
+         * @description One invalid field in a request.
+         *
+         *     Attributes:
+         *         field: Dotted path to the field below its location, ``""`` for the whole location.
+         *         location: ``body``, ``query``, ``path``, ``header`` or ``cookie``.
+         *         detail: What is wrong with it.
+         *         code: Machine-readable reason, such as ``missing`` or ``int_parsing``.
+         *         pointer: JSON Pointer into the request body, for a body field only.
          */
         FieldError: {
-            /**
-             * Field
-             * @description Dotted path to the invalid field
-             */
+            /** Field */
             field: string;
-            /**
-             * Message
-             * @description Human-readable error message
-             */
-            message: string;
-            /**
-             * Code
-             * @description Machine-readable error code
-             * @default validation_error
-             */
-            code: string;
+            /** Location */
+            location?: string | null;
+            /** Detail */
+            detail: string;
+            /** Code */
+            code?: string | null;
+            /** Pointer */
+            pointer?: string | null;
         };
         /**
          * FieldMap
@@ -9652,11 +9522,6 @@ export interface components {
         GroupedLogResponse: {
             /** Groups */
             groups: components["schemas"]["LogGroup"][];
-        };
-        /** HTTPValidationError */
-        HTTPValidationError: {
-            /** Detail */
-            detail?: components["schemas"]["ValidationError"][];
         };
         /**
          * HeaderFieldModel
@@ -10257,42 +10122,6 @@ export interface components {
             deployment_default: number;
         };
         /**
-         * InvalidRuleContext
-         * @description Structured context for a source whose rule the receiver would refuse.
-         */
-        InvalidRuleContext: {
-            /**
-             * Source
-             * @description Source identifier being saved
-             */
-            source: string;
-            /**
-             * Rule Errors
-             * @description Every refusal, each with its span
-             */
-            rule_errors: components["schemas"]["RuleError"][];
-        };
-        /**
-         * InvalidRuleErrorResponse
-         * @description 422 when a source's match, when or profile bindings would not compile in the receiver.
-         */
-        InvalidRuleErrorResponse: {
-            /**
-             * Code
-             * @default invalid_rule
-             * @constant
-             */
-            code: "invalid_rule";
-            /**
-             * Message
-             * @description Human-readable explanation
-             */
-            message: string;
-            /** Errors */
-            errors?: components["schemas"]["FieldError"][];
-            context: components["schemas"]["InvalidRuleContext"];
-        };
-        /**
          * InvokeRequest
          * @description Optional invoke body: values for the action's declared params.
          */
@@ -10742,51 +10571,6 @@ export interface components {
          */
         ManagedBy: "dfe" | "provider" | "external";
         /**
-         * MatchConflictContext
-         * @description Structured context for a receiver condition another enabled source already has.
-         */
-        MatchConflictContext: {
-            /**
-             * Source
-             * @description Source identifier being saved
-             */
-            source: string;
-            /**
-             * Conflicting Source
-             * @description Other enabled source that already uses this condition
-             */
-            conflicting_source: string;
-            /**
-             * Field
-             * @description Receiver match JSON field name, empty for a group or a when
-             */
-            field: string;
-            /**
-             * Value
-             * @description Receiver match expected value, empty for a group or a when
-             */
-            value: string;
-        };
-        /**
-         * MatchConflictErrorResponse
-         * @description 409 when two enabled sources share the same receiver match rule.
-         */
-        MatchConflictErrorResponse: {
-            /**
-             * @description discriminator enum property added by openapi-typescript
-             * @enum {string}
-             */
-            code: "match_conflict";
-            /**
-             * Message
-             * @description Human-readable explanation
-             */
-            message: string;
-            /** Errors */
-            errors?: components["schemas"]["FieldError"][];
-            context: components["schemas"]["MatchConflictContext"];
-        };
-        /**
          * MeshFacts
          * @description Whether this deployment's stage pools sit behind balancing listeners.
          */
@@ -10969,9 +10753,15 @@ export interface components {
         };
         /**
          * MetaSchemaGetResponse
-         * @description Meta-schema definition for a single requested version.
+         * @description A page of one version's columns, with the meta-schema's metadata.
          */
         MetaSchemaGetResponse: {
+            /** Items */
+            items: components["schemas"]["dfe_engine__schema__models__SchemaColumn-Output"][];
+            /** Next Page Token */
+            next_page_token?: string | null;
+            /** Total Size */
+            total_size?: number | null;
             /**
              * Resource Type
              * @description core for system schemas, custom for user-created schemas
@@ -10989,7 +10779,7 @@ export interface components {
              * @description Version id requested via query parameter
              */
             selected: string;
-            /** @description Metadata and paginated columns for ``selected`` */
+            /** @description Metadata for ``selected`` */
             version: components["schemas"]["SchemaVersionGet"];
             /**
              * Path
@@ -11339,6 +11129,20 @@ export interface components {
              */
             authorization_url?: string | null;
         };
+        /** Operation[TaskInfo, Any] */
+        Operation_TaskInfo_Any_: {
+            /** Name */
+            name: string;
+            /**
+             * Done
+             * @default false
+             */
+            done: boolean;
+            metadata?: components["schemas"]["TaskInfo"] | null;
+            error?: components["schemas"]["Problem"] | null;
+            /** Response */
+            response?: unknown;
+        };
         /**
          * Org
          * @description A customer organisation.
@@ -11460,10 +11264,190 @@ export interface components {
              */
             hinted_columns: number;
         };
+        /** Page[APIKeyResponse] */
+        Page_APIKeyResponse_: {
+            /** Items */
+            items: components["schemas"]["APIKeyResponse"][];
+            /** Next Page Token */
+            next_page_token?: string | null;
+            /** Total Size */
+            total_size?: number | null;
+        };
+        /** Page[AccountResponse] */
+        Page_AccountResponse_: {
+            /** Items */
+            items: components["schemas"]["AccountResponse"][];
+            /** Next Page Token */
+            next_page_token?: string | null;
+            /** Total Size */
+            total_size?: number | null;
+        };
+        /** Page[AdminLinkResponse] */
+        Page_AdminLinkResponse_: {
+            /** Items */
+            items: components["schemas"]["AdminLinkResponse"][];
+            /** Next Page Token */
+            next_page_token?: string | null;
+            /** Total Size */
+            total_size?: number | null;
+        };
+        /** Page[AlertDestinationSummary] */
+        Page_AlertDestinationSummary_: {
+            /** Items */
+            items: components["schemas"]["AlertDestinationSummary"][];
+            /** Next Page Token */
+            next_page_token?: string | null;
+            /** Total Size */
+            total_size?: number | null;
+        };
+        /** Page[ArtifactModel] */
+        Page_ArtifactModel_: {
+            /** Items */
+            items: components["schemas"]["ArtifactModel"][];
+            /** Next Page Token */
+            next_page_token?: string | null;
+            /** Total Size */
+            total_size?: number | null;
+        };
+        /** Page[BackingServiceConfig] */
+        Page_BackingServiceConfig_: {
+            /** Items */
+            items: components["schemas"]["BackingServiceConfig"][];
+            /** Next Page Token */
+            next_page_token?: string | null;
+            /** Total Size */
+            total_size?: number | null;
+        };
+        /** Page[BindingSummary] */
+        Page_BindingSummary_: {
+            /** Items */
+            items: components["schemas"]["BindingSummary"][];
+            /** Next Page Token */
+            next_page_token?: string | null;
+            /** Total Size */
+            total_size?: number | null;
+        };
+        /** Page[CatalogRuleSummary] */
+        Page_CatalogRuleSummary_: {
+            /** Items */
+            items: components["schemas"]["CatalogRuleSummary"][];
+            /** Next Page Token */
+            next_page_token?: string | null;
+            /** Total Size */
+            total_size?: number | null;
+        };
+        /** Page[CatalogueEntryObject] */
+        Page_CatalogueEntryObject_: {
+            /** Items */
+            items: components["schemas"]["CatalogueEntryObject"][];
+            /** Next Page Token */
+            next_page_token?: string | null;
+            /** Total Size */
+            total_size?: number | null;
+        };
+        /** Page[CatalogueEntry] */
+        Page_CatalogueEntry_: {
+            /** Items */
+            items: components["schemas"]["CatalogueEntry"][];
+            /** Next Page Token */
+            next_page_token?: string | null;
+            /** Total Size */
+            total_size?: number | null;
+        };
+        /** Page[CatalogueTagObject] */
+        Page_CatalogueTagObject_: {
+            /** Items */
+            items: components["schemas"]["CatalogueTagObject"][];
+            /** Next Page Token */
+            next_page_token?: string | null;
+            /** Total Size */
+            total_size?: number | null;
+        };
+        /** Page[ClassInfo] */
+        Page_ClassInfo_: {
+            /** Items */
+            items: components["schemas"]["ClassInfo"][];
+            /** Next Page Token */
+            next_page_token?: string | null;
+            /** Total Size */
+            total_size?: number | null;
+        };
         /** Page[CompatProfileSummary] */
         Page_CompatProfileSummary_: {
             /** Items */
             items: components["schemas"]["CompatProfileSummary"][];
+            /** Next Page Token */
+            next_page_token?: string | null;
+            /** Total Size */
+            total_size?: number | null;
+        };
+        /** Page[ConfigHistoryEntry] */
+        Page_ConfigHistoryEntry_: {
+            /** Items */
+            items: components["schemas"]["ConfigHistoryEntry"][];
+            /** Next Page Token */
+            next_page_token?: string | null;
+            /** Total Size */
+            total_size?: number | null;
+        };
+        /** Page[CostLeaderboardRow] */
+        Page_CostLeaderboardRow_: {
+            /** Items */
+            items: components["schemas"]["CostLeaderboardRow"][];
+            /** Next Page Token */
+            next_page_token?: string | null;
+            /** Total Size */
+            total_size?: number | null;
+        };
+        /** Page[DerivedSchemaSummary] */
+        Page_DerivedSchemaSummary_: {
+            /** Items */
+            items: components["schemas"]["DerivedSchemaSummary"][];
+            /** Next Page Token */
+            next_page_token?: string | null;
+            /** Total Size */
+            total_size?: number | null;
+        };
+        /** Page[FieldMapSummary] */
+        Page_FieldMapSummary_: {
+            /** Items */
+            items: components["schemas"]["FieldMapSummary"][];
+            /** Next Page Token */
+            next_page_token?: string | null;
+            /** Total Size */
+            total_size?: number | null;
+        };
+        /** Page[FileSummary] */
+        Page_FileSummary_: {
+            /** Items */
+            items: components["schemas"]["FileSummary"][];
+            /** Next Page Token */
+            next_page_token?: string | null;
+            /** Total Size */
+            total_size?: number | null;
+        };
+        /** Page[GroupResponse] */
+        Page_GroupResponse_: {
+            /** Items */
+            items: components["schemas"]["GroupResponse"][];
+            /** Next Page Token */
+            next_page_token?: string | null;
+            /** Total Size */
+            total_size?: number | null;
+        };
+        /** Page[HistoryEntry] */
+        Page_HistoryEntry_: {
+            /** Items */
+            items: components["schemas"]["HistoryEntry"][];
+            /** Next Page Token */
+            next_page_token?: string | null;
+            /** Total Size */
+            total_size?: number | null;
+        };
+        /** Page[HuntSummary] */
+        Page_HuntSummary_: {
+            /** Items */
+            items: components["schemas"]["HuntSummary"][];
             /** Next Page Token */
             next_page_token?: string | null;
             /** Total Size */
@@ -11478,6 +11462,105 @@ export interface components {
             /** Total Size */
             total_size?: number | null;
         };
+        /** Page[KindModel] */
+        Page_KindModel_: {
+            /** Items */
+            items: components["schemas"]["KindModel"][];
+            /** Next Page Token */
+            next_page_token?: string | null;
+            /** Total Size */
+            total_size?: number | null;
+        };
+        /** Page[LinkStatusModel] */
+        Page_LinkStatusModel_: {
+            /** Items */
+            items: components["schemas"]["LinkStatusModel"][];
+            /** Next Page Token */
+            next_page_token?: string | null;
+            /** Total Size */
+            total_size?: number | null;
+        };
+        /** Page[LogsourceMatch] */
+        Page_LogsourceMatch_: {
+            /** Items */
+            items: components["schemas"]["LogsourceMatch"][];
+            /** Next Page Token */
+            next_page_token?: string | null;
+            /** Total Size */
+            total_size?: number | null;
+        };
+        /** Page[ObjectEntry] */
+        Page_ObjectEntry_: {
+            /** Items */
+            items: components["schemas"]["ObjectEntry"][];
+            /** Next Page Token */
+            next_page_token?: string | null;
+            /** Total Size */
+            total_size?: number | null;
+        };
+        /** Page[Operation[TaskInfo, Any]] */
+        Page_Operation_TaskInfo__Any__: {
+            /** Items */
+            items: components["schemas"]["Operation_TaskInfo_Any_"][];
+            /** Next Page Token */
+            next_page_token?: string | null;
+            /** Total Size */
+            total_size?: number | null;
+        };
+        /** Page[OrgResponse] */
+        Page_OrgResponse_: {
+            /** Items */
+            items: components["schemas"]["OrgResponse"][];
+            /** Next Page Token */
+            next_page_token?: string | null;
+            /** Total Size */
+            total_size?: number | null;
+        };
+        /** Page[PackInfo] */
+        Page_PackInfo_: {
+            /** Items */
+            items: components["schemas"]["PackInfo"][];
+            /** Next Page Token */
+            next_page_token?: string | null;
+            /** Total Size */
+            total_size?: number | null;
+        };
+        /** Page[PipelineTemplate] */
+        Page_PipelineTemplate_: {
+            /** Items */
+            items: components["schemas"]["PipelineTemplate"][];
+            /** Next Page Token */
+            next_page_token?: string | null;
+            /** Total Size */
+            total_size?: number | null;
+        };
+        /** Page[ProviderConfig] */
+        Page_ProviderConfig_: {
+            /** Items */
+            items: components["schemas"]["ProviderConfig"][];
+            /** Next Page Token */
+            next_page_token?: string | null;
+            /** Total Size */
+            total_size?: number | null;
+        };
+        /** Page[ProviderResponse] */
+        Page_ProviderResponse_: {
+            /** Items */
+            items: components["schemas"]["ProviderResponse"][];
+            /** Next Page Token */
+            next_page_token?: string | null;
+            /** Total Size */
+            total_size?: number | null;
+        };
+        /** Page[RoleResponse] */
+        Page_RoleResponse_: {
+            /** Items */
+            items: components["schemas"]["RoleResponse"][];
+            /** Next Page Token */
+            next_page_token?: string | null;
+            /** Total Size */
+            total_size?: number | null;
+        };
         /** Page[RuleBlockResponse] */
         Page_RuleBlockResponse_: {
             /** Items */
@@ -11487,750 +11570,133 @@ export interface components {
             /** Total Size */
             total_size?: number | null;
         };
-        /** PaginatedResponse[APIKeyResponse] */
-        PaginatedResponse_APIKeyResponse_: {
-            /** Items */
-            items: components["schemas"]["APIKeyResponse"][];
-            /**
-             * Total
-             * @description Total matching items across all pages
-             */
-            total: number;
-            /**
-             * Page
-             * @description Current page number (1-based)
-             */
-            page: number;
-            /**
-             * Per Page
-             * @description Items per page
-             */
-            per_page: number;
-            /**
-             * Total Pages
-             * @description Number of pages, 1 when ``per_page`` is -1 and every item is on one page.
-             */
-            readonly total_pages: number;
-            /**
-             * Next Page
-             * @description The next page number, or None on the last page or when every item is on one.
-             */
-            readonly next_page: number | null;
-            /**
-             * Prev Page
-             * @description The previous page number, or None on the first page.
-             */
-            readonly prev_page: number | null;
-        };
-        /** PaginatedResponse[AccountResponse] */
-        PaginatedResponse_AccountResponse_: {
-            /** Items */
-            items: components["schemas"]["AccountResponse"][];
-            /**
-             * Total
-             * @description Total matching items across all pages
-             */
-            total: number;
-            /**
-             * Page
-             * @description Current page number (1-based)
-             */
-            page: number;
-            /**
-             * Per Page
-             * @description Items per page
-             */
-            per_page: number;
-            /**
-             * Total Pages
-             * @description Number of pages, 1 when ``per_page`` is -1 and every item is on one page.
-             */
-            readonly total_pages: number;
-            /**
-             * Next Page
-             * @description The next page number, or None on the last page or when every item is on one.
-             */
-            readonly next_page: number | null;
-            /**
-             * Prev Page
-             * @description The previous page number, or None on the first page.
-             */
-            readonly prev_page: number | null;
-        };
-        /** PaginatedResponse[AlertDestinationSummary] */
-        PaginatedResponse_AlertDestinationSummary_: {
-            /** Items */
-            items: components["schemas"]["AlertDestinationSummary"][];
-            /**
-             * Total
-             * @description Total matching items across all pages
-             */
-            total: number;
-            /**
-             * Page
-             * @description Current page number (1-based)
-             */
-            page: number;
-            /**
-             * Per Page
-             * @description Items per page
-             */
-            per_page: number;
-            /**
-             * Total Pages
-             * @description Number of pages, 1 when ``per_page`` is -1 and every item is on one page.
-             */
-            readonly total_pages: number;
-            /**
-             * Next Page
-             * @description The next page number, or None on the last page or when every item is on one.
-             */
-            readonly next_page: number | null;
-            /**
-             * Prev Page
-             * @description The previous page number, or None on the first page.
-             */
-            readonly prev_page: number | null;
-        };
-        /** PaginatedResponse[BindingSummary] */
-        PaginatedResponse_BindingSummary_: {
-            /** Items */
-            items: components["schemas"]["BindingSummary"][];
-            /**
-             * Total
-             * @description Total matching items across all pages
-             */
-            total: number;
-            /**
-             * Page
-             * @description Current page number (1-based)
-             */
-            page: number;
-            /**
-             * Per Page
-             * @description Items per page
-             */
-            per_page: number;
-            /**
-             * Total Pages
-             * @description Number of pages, 1 when ``per_page`` is -1 and every item is on one page.
-             */
-            readonly total_pages: number;
-            /**
-             * Next Page
-             * @description The next page number, or None on the last page or when every item is on one.
-             */
-            readonly next_page: number | null;
-            /**
-             * Prev Page
-             * @description The previous page number, or None on the first page.
-             */
-            readonly prev_page: number | null;
-        };
-        /** PaginatedResponse[CatalogRuleSummary] */
-        PaginatedResponse_CatalogRuleSummary_: {
-            /** Items */
-            items: components["schemas"]["CatalogRuleSummary"][];
-            /**
-             * Total
-             * @description Total matching items across all pages
-             */
-            total: number;
-            /**
-             * Page
-             * @description Current page number (1-based)
-             */
-            page: number;
-            /**
-             * Per Page
-             * @description Items per page
-             */
-            per_page: number;
-            /**
-             * Total Pages
-             * @description Number of pages, 1 when ``per_page`` is -1 and every item is on one page.
-             */
-            readonly total_pages: number;
-            /**
-             * Next Page
-             * @description The next page number, or None on the last page or when every item is on one.
-             */
-            readonly next_page: number | null;
-            /**
-             * Prev Page
-             * @description The previous page number, or None on the first page.
-             */
-            readonly prev_page: number | null;
-        };
-        /** PaginatedResponse[CatalogueEntryObject] */
-        PaginatedResponse_CatalogueEntryObject_: {
-            /** Items */
-            items: components["schemas"]["CatalogueEntryObject"][];
-            /**
-             * Total
-             * @description Total matching items across all pages
-             */
-            total: number;
-            /**
-             * Page
-             * @description Current page number (1-based)
-             */
-            page: number;
-            /**
-             * Per Page
-             * @description Items per page
-             */
-            per_page: number;
-            /**
-             * Total Pages
-             * @description Number of pages, 1 when ``per_page`` is -1 and every item is on one page.
-             */
-            readonly total_pages: number;
-            /**
-             * Next Page
-             * @description The next page number, or None on the last page or when every item is on one.
-             */
-            readonly next_page: number | null;
-            /**
-             * Prev Page
-             * @description The previous page number, or None on the first page.
-             */
-            readonly prev_page: number | null;
-        };
-        /** PaginatedResponse[CatalogueTagObject] */
-        PaginatedResponse_CatalogueTagObject_: {
-            /** Items */
-            items: components["schemas"]["CatalogueTagObject"][];
-            /**
-             * Total
-             * @description Total matching items across all pages
-             */
-            total: number;
-            /**
-             * Page
-             * @description Current page number (1-based)
-             */
-            page: number;
-            /**
-             * Per Page
-             * @description Items per page
-             */
-            per_page: number;
-            /**
-             * Total Pages
-             * @description Number of pages, 1 when ``per_page`` is -1 and every item is on one page.
-             */
-            readonly total_pages: number;
-            /**
-             * Next Page
-             * @description The next page number, or None on the last page or when every item is on one.
-             */
-            readonly next_page: number | null;
-            /**
-             * Prev Page
-             * @description The previous page number, or None on the first page.
-             */
-            readonly prev_page: number | null;
-        };
-        /** PaginatedResponse[DerivedSchemaSummary] */
-        PaginatedResponse_DerivedSchemaSummary_: {
-            /** Items */
-            items: components["schemas"]["DerivedSchemaSummary"][];
-            /**
-             * Total
-             * @description Total matching items across all pages
-             */
-            total: number;
-            /**
-             * Page
-             * @description Current page number (1-based)
-             */
-            page: number;
-            /**
-             * Per Page
-             * @description Items per page
-             */
-            per_page: number;
-            /**
-             * Total Pages
-             * @description Number of pages, 1 when ``per_page`` is -1 and every item is on one page.
-             */
-            readonly total_pages: number;
-            /**
-             * Next Page
-             * @description The next page number, or None on the last page or when every item is on one.
-             */
-            readonly next_page: number | null;
-            /**
-             * Prev Page
-             * @description The previous page number, or None on the first page.
-             */
-            readonly prev_page: number | null;
-        };
-        /** PaginatedResponse[FieldMapSummary] */
-        PaginatedResponse_FieldMapSummary_: {
-            /** Items */
-            items: components["schemas"]["FieldMapSummary"][];
-            /**
-             * Total
-             * @description Total matching items across all pages
-             */
-            total: number;
-            /**
-             * Page
-             * @description Current page number (1-based)
-             */
-            page: number;
-            /**
-             * Per Page
-             * @description Items per page
-             */
-            per_page: number;
-            /**
-             * Total Pages
-             * @description Number of pages, 1 when ``per_page`` is -1 and every item is on one page.
-             */
-            readonly total_pages: number;
-            /**
-             * Next Page
-             * @description The next page number, or None on the last page or when every item is on one.
-             */
-            readonly next_page: number | null;
-            /**
-             * Prev Page
-             * @description The previous page number, or None on the first page.
-             */
-            readonly prev_page: number | null;
-        };
-        /** PaginatedResponse[GroupResponse] */
-        PaginatedResponse_GroupResponse_: {
-            /** Items */
-            items: components["schemas"]["GroupResponse"][];
-            /**
-             * Total
-             * @description Total matching items across all pages
-             */
-            total: number;
-            /**
-             * Page
-             * @description Current page number (1-based)
-             */
-            page: number;
-            /**
-             * Per Page
-             * @description Items per page
-             */
-            per_page: number;
-            /**
-             * Total Pages
-             * @description Number of pages, 1 when ``per_page`` is -1 and every item is on one page.
-             */
-            readonly total_pages: number;
-            /**
-             * Next Page
-             * @description The next page number, or None on the last page or when every item is on one.
-             */
-            readonly next_page: number | null;
-            /**
-             * Prev Page
-             * @description The previous page number, or None on the first page.
-             */
-            readonly prev_page: number | null;
-        };
-        /** PaginatedResponse[HuntSummary] */
-        PaginatedResponse_HuntSummary_: {
-            /** Items */
-            items: components["schemas"]["HuntSummary"][];
-            /**
-             * Total
-             * @description Total matching items across all pages
-             */
-            total: number;
-            /**
-             * Page
-             * @description Current page number (1-based)
-             */
-            page: number;
-            /**
-             * Per Page
-             * @description Items per page
-             */
-            per_page: number;
-            /**
-             * Total Pages
-             * @description Number of pages, 1 when ``per_page`` is -1 and every item is on one page.
-             */
-            readonly total_pages: number;
-            /**
-             * Next Page
-             * @description The next page number, or None on the last page or when every item is on one.
-             */
-            readonly next_page: number | null;
-            /**
-             * Prev Page
-             * @description The previous page number, or None on the first page.
-             */
-            readonly prev_page: number | null;
-        };
-        /** PaginatedResponse[OrgResponse] */
-        PaginatedResponse_OrgResponse_: {
-            /** Items */
-            items: components["schemas"]["OrgResponse"][];
-            /**
-             * Total
-             * @description Total matching items across all pages
-             */
-            total: number;
-            /**
-             * Page
-             * @description Current page number (1-based)
-             */
-            page: number;
-            /**
-             * Per Page
-             * @description Items per page
-             */
-            per_page: number;
-            /**
-             * Total Pages
-             * @description Number of pages, 1 when ``per_page`` is -1 and every item is on one page.
-             */
-            readonly total_pages: number;
-            /**
-             * Next Page
-             * @description The next page number, or None on the last page or when every item is on one.
-             */
-            readonly next_page: number | null;
-            /**
-             * Prev Page
-             * @description The previous page number, or None on the first page.
-             */
-            readonly prev_page: number | null;
-        };
-        /** PaginatedResponse[ProviderResponse] */
-        PaginatedResponse_ProviderResponse_: {
-            /** Items */
-            items: components["schemas"]["ProviderResponse"][];
-            /**
-             * Total
-             * @description Total matching items across all pages
-             */
-            total: number;
-            /**
-             * Page
-             * @description Current page number (1-based)
-             */
-            page: number;
-            /**
-             * Per Page
-             * @description Items per page
-             */
-            per_page: number;
-            /**
-             * Total Pages
-             * @description Number of pages, 1 when ``per_page`` is -1 and every item is on one page.
-             */
-            readonly total_pages: number;
-            /**
-             * Next Page
-             * @description The next page number, or None on the last page or when every item is on one.
-             */
-            readonly next_page: number | null;
-            /**
-             * Prev Page
-             * @description The previous page number, or None on the first page.
-             */
-            readonly prev_page: number | null;
-        };
-        /** PaginatedResponse[RoleResponse] */
-        PaginatedResponse_RoleResponse_: {
-            /** Items */
-            items: components["schemas"]["RoleResponse"][];
-            /**
-             * Total
-             * @description Total matching items across all pages
-             */
-            total: number;
-            /**
-             * Page
-             * @description Current page number (1-based)
-             */
-            page: number;
-            /**
-             * Per Page
-             * @description Items per page
-             */
-            per_page: number;
-            /**
-             * Total Pages
-             * @description Number of pages, 1 when ``per_page`` is -1 and every item is on one page.
-             */
-            readonly total_pages: number;
-            /**
-             * Next Page
-             * @description The next page number, or None on the last page or when every item is on one.
-             */
-            readonly next_page: number | null;
-            /**
-             * Prev Page
-             * @description The previous page number, or None on the first page.
-             */
-            readonly prev_page: number | null;
-        };
-        /** PaginatedResponse[RuleSummary] */
-        PaginatedResponse_RuleSummary_: {
+        /** Page[RuleSummary] */
+        Page_RuleSummary_: {
             /** Items */
             items: components["schemas"]["RuleSummary"][];
-            /**
-             * Total
-             * @description Total matching items across all pages
-             */
-            total: number;
-            /**
-             * Page
-             * @description Current page number (1-based)
-             */
-            page: number;
-            /**
-             * Per Page
-             * @description Items per page
-             */
-            per_page: number;
-            /**
-             * Total Pages
-             * @description Number of pages, 1 when ``per_page`` is -1 and every item is on one page.
-             */
-            readonly total_pages: number;
-            /**
-             * Next Page
-             * @description The next page number, or None on the last page or when every item is on one.
-             */
-            readonly next_page: number | null;
-            /**
-             * Prev Page
-             * @description The previous page number, or None on the first page.
-             */
-            readonly prev_page: number | null;
+            /** Next Page Token */
+            next_page_token?: string | null;
+            /** Total Size */
+            total_size?: number | null;
         };
-        /** PaginatedResponse[ServiceConfigSummary] */
-        PaginatedResponse_ServiceConfigSummary_: {
+        /** Page[SchemaColumn] */
+        Page_SchemaColumn_: {
+            /** Items */
+            items: components["schemas"]["dfe_engine__api__v1__sources__SchemaColumn"][];
+            /** Next Page Token */
+            next_page_token?: string | null;
+            /** Total Size */
+            total_size?: number | null;
+        };
+        /** Page[ServiceConfigSummary] */
+        Page_ServiceConfigSummary_: {
             /** Items */
             items: components["schemas"]["ServiceConfigSummary"][];
-            /**
-             * Total
-             * @description Total matching items across all pages
-             */
-            total: number;
-            /**
-             * Page
-             * @description Current page number (1-based)
-             */
-            page: number;
-            /**
-             * Per Page
-             * @description Items per page
-             */
-            per_page: number;
-            /**
-             * Total Pages
-             * @description Number of pages, 1 when ``per_page`` is -1 and every item is on one page.
-             */
-            readonly total_pages: number;
-            /**
-             * Next Page
-             * @description The next page number, or None on the last page or when every item is on one.
-             */
-            readonly next_page: number | null;
-            /**
-             * Prev Page
-             * @description The previous page number, or None on the first page.
-             */
-            readonly prev_page: number | null;
+            /** Next Page Token */
+            next_page_token?: string | null;
+            /** Total Size */
+            total_size?: number | null;
         };
-        /** PaginatedResponse[SigmaViewSummary] */
-        PaginatedResponse_SigmaViewSummary_: {
+        /** Page[ServiceInfo] */
+        Page_ServiceInfo_: {
+            /** Items */
+            items: components["schemas"]["ServiceInfo"][];
+            /** Next Page Token */
+            next_page_token?: string | null;
+            /** Total Size */
+            total_size?: number | null;
+        };
+        /** Page[SigmaViewSummary] */
+        Page_SigmaViewSummary_: {
             /** Items */
             items: components["schemas"]["SigmaViewSummary"][];
-            /**
-             * Total
-             * @description Total matching items across all pages
-             */
-            total: number;
-            /**
-             * Page
-             * @description Current page number (1-based)
-             */
-            page: number;
-            /**
-             * Per Page
-             * @description Items per page
-             */
-            per_page: number;
-            /**
-             * Total Pages
-             * @description Number of pages, 1 when ``per_page`` is -1 and every item is on one page.
-             */
-            readonly total_pages: number;
-            /**
-             * Next Page
-             * @description The next page number, or None on the last page or when every item is on one.
-             */
-            readonly next_page: number | null;
-            /**
-             * Prev Page
-             * @description The previous page number, or None on the first page.
-             */
-            readonly prev_page: number | null;
+            /** Next Page Token */
+            next_page_token?: string | null;
+            /** Total Size */
+            total_size?: number | null;
         };
-        /** PaginatedResponse[SourceDefaultDrift] */
-        PaginatedResponse_SourceDefaultDrift_: {
+        /** Page[SourceDefaultDrift] */
+        Page_SourceDefaultDrift_: {
             /** Items */
             items: components["schemas"]["SourceDefaultDrift"][];
-            /**
-             * Total
-             * @description Total matching items across all pages
-             */
-            total: number;
-            /**
-             * Page
-             * @description Current page number (1-based)
-             */
-            page: number;
-            /**
-             * Per Page
-             * @description Items per page
-             */
-            per_page: number;
-            /**
-             * Total Pages
-             * @description Number of pages, 1 when ``per_page`` is -1 and every item is on one page.
-             */
-            readonly total_pages: number;
-            /**
-             * Next Page
-             * @description The next page number, or None on the last page or when every item is on one.
-             */
-            readonly next_page: number | null;
-            /**
-             * Prev Page
-             * @description The previous page number, or None on the first page.
-             */
-            readonly prev_page: number | null;
+            /** Next Page Token */
+            next_page_token?: string | null;
+            /** Total Size */
+            total_size?: number | null;
         };
-        /** PaginatedResponse[TableEngineObject] */
-        PaginatedResponse_TableEngineObject_: {
+        /** Page[TableEngineObject] */
+        Page_TableEngineObject_: {
             /** Items */
             items: components["schemas"]["TableEngineObject"][];
-            /**
-             * Total
-             * @description Total matching items across all pages
-             */
-            total: number;
-            /**
-             * Page
-             * @description Current page number (1-based)
-             */
-            page: number;
-            /**
-             * Per Page
-             * @description Items per page
-             */
-            per_page: number;
-            /**
-             * Total Pages
-             * @description Number of pages, 1 when ``per_page`` is -1 and every item is on one page.
-             */
-            readonly total_pages: number;
-            /**
-             * Next Page
-             * @description The next page number, or None on the last page or when every item is on one.
-             */
-            readonly next_page: number | null;
-            /**
-             * Prev Page
-             * @description The previous page number, or None on the first page.
-             */
-            readonly prev_page: number | null;
+            /** Next Page Token */
+            next_page_token?: string | null;
+            /** Total Size */
+            total_size?: number | null;
         };
-        /**
-         * PaginatedSchemaSummaryResponse
-         * @description Schema list: path tree in ``objects`` plus paginated ``items``.
-         */
-        PaginatedSchemaSummaryResponse: {
+        /** Page[TaskInfo] */
+        Page_TaskInfo_: {
             /** Items */
-            items: components["schemas"]["SchemaSummaryObject"][];
-            /**
-             * Total
-             * @description Total matching items across all pages
-             */
-            total: number;
-            /**
-             * Page
-             * @description Current page number (1-based)
-             */
-            page: number;
-            /**
-             * Per Page
-             * @description Items per page
-             */
-            per_page: number;
-            /** @description Full matching collection view (not limited to current page) */
-            objects: components["schemas"]["PathTree_SchemaSummaryObject_"];
-            /**
-             * Total Pages
-             * @description Number of pages, 1 when ``per_page`` is -1 and every item is on one page.
-             */
-            readonly total_pages: number;
-            /**
-             * Next Page
-             * @description The next page number, or None on the last page or when every item is on one.
-             */
-            readonly next_page: number | null;
-            /**
-             * Prev Page
-             * @description The previous page number, or None on the first page.
-             */
-            readonly prev_page: number | null;
+            items: components["schemas"]["TaskInfo"][];
+            /** Next Page Token */
+            next_page_token?: string | null;
+            /** Total Size */
+            total_size?: number | null;
         };
-        /**
-         * PaginatedSourceSummaryResponse
-         * @description Source list: path tree in ``objects`` plus paginated ``items``.
-         */
-        PaginatedSourceSummaryResponse: {
+        /** Page[UsageModel] */
+        Page_UsageModel_: {
             /** Items */
-            items: components["schemas"]["SourceSummaryObject"][];
-            /**
-             * Total
-             * @description Total matching items across all pages
-             */
-            total: number;
-            /**
-             * Page
-             * @description Current page number (1-based)
-             */
-            page: number;
-            /**
-             * Per Page
-             * @description Items per page
-             */
-            per_page: number;
-            /** @description Full matching collection view (not limited to current page) */
-            objects: components["schemas"]["PathTree_SourceSummaryObject_"];
-            /**
-             * Total Pages
-             * @description Number of pages, 1 when ``per_page`` is -1 and every item is on one page.
-             */
-            readonly total_pages: number;
-            /**
-             * Next Page
-             * @description The next page number, or None on the last page or when every item is on one.
-             */
-            readonly next_page: number | null;
-            /**
-             * Prev Page
-             * @description The previous page number, or None on the first page.
-             */
-            readonly prev_page: number | null;
+            items: components["schemas"]["UsageModel"][];
+            /** Next Page Token */
+            next_page_token?: string | null;
+            /** Total Size */
+            total_size?: number | null;
+        };
+        /** Page[VarEntry] */
+        Page_VarEntry_: {
+            /** Items */
+            items: components["schemas"]["VarEntry"][];
+            /** Next Page Token */
+            next_page_token?: string | null;
+            /** Total Size */
+            total_size?: number | null;
+        };
+        /** Page[VersionSummary] */
+        Page_VersionSummary_: {
+            /** Items */
+            items: components["schemas"]["VersionSummary"][];
+            /** Next Page Token */
+            next_page_token?: string | null;
+            /** Total Size */
+            total_size?: number | null;
+        };
+        /** Page[ViewDefinition] */
+        Page_ViewDefinition_: {
+            /** Items */
+            items: components["schemas"]["ViewDefinition"][];
+            /** Next Page Token */
+            next_page_token?: string | null;
+            /** Total Size */
+            total_size?: number | null;
+        };
+        /** Page[dict[str, Any]] */
+        Page_dict_str__Any__: {
+            /** Items */
+            items: {
+                [key: string]: unknown;
+            }[];
+            /** Next Page Token */
+            next_page_token?: string | null;
+            /** Total Size */
+            total_size?: number | null;
+        };
+        /** Page[str] */
+        Page_str_: {
+            /** Items */
+            items: string[];
+            /** Next Page Token */
+            next_page_token?: string | null;
+            /** Total Size */
+            total_size?: number | null;
         };
         /**
          * ParamSpec
@@ -12343,17 +11809,6 @@ export interface components {
             build_core: boolean;
         };
         /**
-         * PipelineBuildResponse
-         * @description Response from triggering a pipeline build.
-         */
-        PipelineBuildResponse: {
-            /**
-             * Task Id
-             * @description Task ID for polling via /tasks/{task_id}
-             */
-            task_id: string;
-        };
-        /**
          * PipelineTemplate
          * @description A discovered pipeline template.
          */
@@ -12380,6 +11835,40 @@ export interface components {
             };
             /** Etag */
             etag?: string | null;
+        };
+        /**
+         * Problem
+         * @description An RFC 9457 problem details object, open to extension members.
+         *
+         *     Attributes:
+         *         type: URI naming the problem type. ``about:blank`` means the status says it all.
+         *         title: Short summary of the problem type.
+         *         status: The HTTP status code.
+         *         detail: What went wrong in this occurrence.
+         *         instance: URI naming this occurrence.
+         *         code: Machine-readable code a client branches on.
+         *         errors: One entry per invalid field.
+         */
+        Problem: {
+            /**
+             * Type
+             * @default about:blank
+             */
+            type: string;
+            /** Title */
+            title: string;
+            /** Status */
+            status: number;
+            /** Detail */
+            detail?: string | null;
+            /** Instance */
+            instance?: string | null;
+            /** Code */
+            code?: string | null;
+            /** Errors */
+            errors?: components["schemas"]["FieldError"][];
+        } & {
+            [key: string]: unknown;
         };
         /**
          * PromoteFieldRequest
@@ -12913,6 +12402,8 @@ export interface components {
             /** @description Execution options (limit, timeout, etc.) */
             options?: components["schemas"]["QueryOptions"] | null;
         };
+        /** @enum {string} */
+        RbacScope: "group:write" | "group:read" | "group:delete" | "group:add_member" | "group:remove_member" | "account:write" | "account:read" | "account:delete" | "accounts:reset_password" | "account:attributes:read" | "account:attributes:write" | "account:attributes:read_sensitive" | "account:attributes:write_sensitive" | "group:attributes:read" | "group:attributes:write" | "group:attributes:read_sensitive" | "group:attributes:write_sensitive" | "alert:read" | "alert:write" | "alert:delete" | "api_key:read" | "api_key:write" | "api_key:delete" | "cel:check" | "clickhouse_cloud:manage" | "dashboard:read" | "synthetic-data:read" | "synthetic-data:run" | "deployment:read" | "deployment:write" | "deployment:delete" | "deployment:admin_links:read" | "fieldmap:read" | "fieldmap:write" | "fieldmap:delete" | "hunt:read" | "hunt:write" | "hunt:delete" | "hunt:execute" | "oidc:read" | "oidc:write" | "oidc:delete" | "org:read" | "org:write" | "org:delete" | "pipeline:read" | "pipeline:write" | "query:read" | "query:execute" | "raw_query:execute" | "repository:read" | "repository:write" | "role:read" | "role:write" | "role:delete" | "role:scopes" | "rule:read" | "rule:write" | "rule:delete" | "rule:validate" | "sampler:read" | "schema:read" | "schema:write" | "schema:delete" | "service_surface:read" | "service_surface:write" | "service:read" | "service:write" | "service:delete" | "service:validate" | "sigma:read" | "sigma:write" | "sigma:admin" | "source:read" | "source:write" | "source:delete" | "source:deploy" | "system:read" | "system:write" | "task:read" | "task:write" | "transform:compile" | "transform:test" | "usage:read" | "governance:read" | "governance:write" | "helmvars:read" | "helmvars:write" | "dryrun:execute" | "library:read" | "library:write" | "lifecycle:read" | "config:write";
         /**
          * RelinkResult
          * @description The write result, with the links it moved.
@@ -13390,40 +12881,6 @@ export interface components {
             };
             /** Title */
             title?: string | null;
-        };
-        /**
-         * RuleError
-         * @description One reason the receiver would refuse a source's rule.
-         */
-        RuleError: {
-            /**
-             * Field
-             * @description The body field at fault: when, match, aliases or compat_profiles
-             */
-            field: string;
-            /**
-             * Message
-             * @description What is wrong, as the receiver's rule engine reports it
-             */
-            message: string;
-            /** @description For when: the function name or character the check stopped at */
-            span?: components["schemas"]["RuleErrorSpan"] | null;
-        };
-        /**
-         * RuleErrorSpan
-         * @description Where in a CEL Fast condition a refusal points, in UTF-16 code units as a browser indexes.
-         */
-        RuleErrorSpan: {
-            /**
-             * Start
-             * @description First code unit of the text at fault
-             */
-            start: number;
-            /**
-             * End
-             * @description One past the last code unit
-             */
-            end: number;
         };
         /**
          * RuleFromHyperdxRequest
@@ -14442,6 +13899,19 @@ export interface components {
             column_count: number;
         };
         /**
+         * SchemaSummaryPage
+         * @description A page of schema summaries, with the folder tree over every match in ``objects``.
+         */
+        SchemaSummaryPage: {
+            /** Items */
+            items: components["schemas"]["SchemaSummaryObject"][];
+            /** Next Page Token */
+            next_page_token?: string | null;
+            /** Total Size */
+            total_size?: number | null;
+            objects: components["schemas"]["PathTree_SchemaSummaryObject_"];
+        };
+        /**
          * SchemaVersion
          * @description A version in the schema.
          */
@@ -14512,7 +13982,7 @@ export interface components {
         };
         /**
          * SchemaVersionGet
-         * @description Schema version payload for GET definition (columns paginated).
+         * @description The selected version's metadata, its columns paged in the answer's ``items``.
          */
         SchemaVersionGet: {
             /**
@@ -14530,8 +14000,6 @@ export interface components {
              * @description Summary of the version
              */
             summary: string;
-            /** @description Paginated columns for this version */
-            columns: components["schemas"]["dfe_engine__api__pagination__PaginatedResponse_SchemaColumn___2"];
         };
         /**
          * SelectionResponse
@@ -15525,25 +14993,6 @@ export interface components {
             any?: components["schemas"]["SourceMatch"][];
         };
         /**
-         * SourceNameConflictErrorResponse
-         * @description 409 when POST /sources and the source name already exists.
-         */
-        SourceNameConflictErrorResponse: {
-            /**
-             * Code
-             * @default conflict
-             * @constant
-             */
-            code: "conflict";
-            /**
-             * Message
-             * @description Human-readable explanation
-             */
-            message: string;
-            /** Errors */
-            errors?: components["schemas"]["FieldError"][];
-        };
-        /**
          * SourcePlanResponse
          * @description Dry-run ClickHouse deploy plan for a source version.
          */
@@ -15685,21 +15134,10 @@ export interface components {
         SourceSchemaColumnsResponse: {
             /** Items */
             items: components["schemas"]["dfe_engine__api__v1__schemas__SchemaColumn"][];
-            /**
-             * Total
-             * @description Total matching items across all pages
-             */
-            total: number;
-            /**
-             * Page
-             * @description Current page number (1-based)
-             */
-            page: number;
-            /**
-             * Per Page
-             * @description Items per page
-             */
-            per_page: number;
+            /** Next Page Token */
+            next_page_token?: string | null;
+            /** Total Size */
+            total_size?: number | null;
             /**
              * Resource Type
              * @description resource_type from the source version's meta-schema, when configured
@@ -15707,21 +15145,6 @@ export interface components {
              * @enum {string}
              */
             resource_type: "core" | "custom";
-            /**
-             * Total Pages
-             * @description Number of pages, 1 when ``per_page`` is -1 and every item is on one page.
-             */
-            readonly total_pages: number;
-            /**
-             * Next Page
-             * @description The next page number, or None on the last page or when every item is on one.
-             */
-            readonly next_page: number | null;
-            /**
-             * Prev Page
-             * @description The previous page number, or None on the first page.
-             */
-            readonly prev_page: number | null;
         };
         /**
          * SourceSignalsResponse
@@ -15854,6 +15277,19 @@ export interface components {
              * @description Naming-standard views on the deployed version (standard names)
              */
             views?: string[];
+        };
+        /**
+         * SourceSummaryPage
+         * @description A page of source summaries, with the folder tree over every match in ``objects``.
+         */
+        SourceSummaryPage: {
+            /** Items */
+            items: components["schemas"]["SourceSummaryObject"][];
+            /** Next Page Token */
+            next_page_token?: string | null;
+            /** Total Size */
+            total_size?: number | null;
+            objects: components["schemas"]["PathTree_SourceSummaryObject_"];
         };
         /**
          * SourceTransform
@@ -16354,31 +15790,6 @@ export interface components {
             wait?: number | null;
         };
         /**
-         * StreamSubmitResponse
-         * @description Envelope returned by a stream submit and by the poll endpoint.
-         */
-        StreamSubmitResponse: {
-            /**
-             * Task Id
-             * @description Task ID; poll via GET /synthetic-data/streams/{task_id}
-             */
-            task_id: string;
-            /** @description pending | running | completed | failed | cancelled */
-            status: components["schemas"]["TaskStatus"];
-            /**
-             * Result
-             * @description Stream summary once terminal
-             */
-            result?: {
-                [key: string]: unknown;
-            } | null;
-            /**
-             * Error
-             * @description Present on failure
-             */
-            error?: string | null;
-        };
-        /**
          * SyncReportModel
          * @description Counts from a provider sync into the catalogue, and whether its import awaits review.
          */
@@ -16670,22 +16081,6 @@ export interface components {
             error: string;
         };
         /**
-         * TopicNotCreated
-         * @description One Kafka topic a source deploy needed and the broker did not create.
-         */
-        TopicNotCreated: {
-            /**
-             * Topic
-             * @description The topic name
-             */
-            topic: string;
-            /**
-             * Reason
-             * @description Why, naming the broker's error code where it gave one and never its text
-             */
-            reason: string;
-        };
-        /**
          * TopicRemoveResponse
          * @description Outcome of a remove pass.
          */
@@ -16772,45 +16167,6 @@ export interface components {
              * @default false
              */
             dry_run: boolean;
-        };
-        /**
-         * TopicsNotCreatedContext
-         * @description Structured context for a source deploy refused because its topics were not created.
-         */
-        TopicsNotCreatedContext: {
-            /**
-             * Source
-             * @description The source being deployed
-             */
-            source: string;
-            /**
-             * Topics
-             * @description Every topic the broker did not create
-             */
-            topics: components["schemas"]["TopicNotCreated"][];
-        };
-        /**
-         * TopicsNotCreatedErrorResponse
-         * @description 502 when a source on the bus transport is deployed and the broker did not create its topics.
-         *
-         *     The source is not marked deployed. Its ClickHouse table is already in place,
-         *     and a later deploy re-runs both steps.
-         */
-        TopicsNotCreatedErrorResponse: {
-            /**
-             * Code
-             * @default topics_not_created
-             * @constant
-             */
-            code: "topics_not_created";
-            /**
-             * Message
-             * @description Human-readable explanation, naming each topic and reason
-             */
-            message: string;
-            /** Errors */
-            errors?: components["schemas"]["FieldError"][];
-            context: components["schemas"]["TopicsNotCreatedContext"];
         };
         /**
          * TransformDetect
@@ -17296,19 +16652,6 @@ export interface components {
                 [key: string]: unknown;
             }[];
         };
-        /** ValidationError */
-        ValidationError: {
-            /** Location */
-            loc: (string | number)[];
-            /** Message */
-            msg: string;
-            /** Error Type */
-            type: string;
-            /** Input */
-            input?: unknown;
-            /** Context */
-            ctx?: Record<string, never>;
-        };
         /**
          * ValidationModel
          * @description What the validation backend said about the content written.
@@ -17656,76 +16999,6 @@ export interface components {
             samples: string[];
             /** Source Hint */
             source_hint?: string | null;
-        };
-        /** PaginatedResponse[SchemaColumn] */
-        dfe_engine__api__pagination__PaginatedResponse_SchemaColumn___1: {
-            /** Items */
-            items: components["schemas"]["dfe_engine__api__v1__sources__SchemaColumn"][];
-            /**
-             * Total
-             * @description Total matching items across all pages
-             */
-            total: number;
-            /**
-             * Page
-             * @description Current page number (1-based)
-             */
-            page: number;
-            /**
-             * Per Page
-             * @description Items per page
-             */
-            per_page: number;
-            /**
-             * Total Pages
-             * @description Number of pages, 1 when ``per_page`` is -1 and every item is on one page.
-             */
-            readonly total_pages: number;
-            /**
-             * Next Page
-             * @description The next page number, or None on the last page or when every item is on one.
-             */
-            readonly next_page: number | null;
-            /**
-             * Prev Page
-             * @description The previous page number, or None on the first page.
-             */
-            readonly prev_page: number | null;
-        };
-        /** PaginatedResponse[SchemaColumn] */
-        dfe_engine__api__pagination__PaginatedResponse_SchemaColumn___2: {
-            /** Items */
-            items: components["schemas"]["dfe_engine__schema__models__SchemaColumn-Output"][];
-            /**
-             * Total
-             * @description Total matching items across all pages
-             */
-            total: number;
-            /**
-             * Page
-             * @description Current page number (1-based)
-             */
-            page: number;
-            /**
-             * Per Page
-             * @description Items per page
-             */
-            per_page: number;
-            /**
-             * Total Pages
-             * @description Number of pages, 1 when ``per_page`` is -1 and every item is on one page.
-             */
-            readonly total_pages: number;
-            /**
-             * Next Page
-             * @description The next page number, or None on the last page or when every item is on one.
-             */
-            readonly next_page: number | null;
-            /**
-             * Prev Page
-             * @description The previous page number, or None on the first page.
-             */
-            readonly prev_page: number | null;
         };
         /**
          * AttributesRequest
@@ -18135,7 +17408,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description The break-glass account is disabled in governance settings */
@@ -18144,7 +17417,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -18153,7 +17426,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Too many failed sign-ins for this username or from this address; Retry-After gives the seconds to wait */
@@ -18162,7 +17435,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -18191,16 +17473,25 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -18227,16 +17518,25 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -18265,16 +17565,25 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -18303,16 +17612,25 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -18333,6 +17651,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["SetupStatus"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -18361,16 +17688,25 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -18413,7 +17749,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -18451,7 +17796,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -18467,12 +17821,14 @@ export interface operations {
                 blocked?: boolean | null;
                 /** @description Include the local admin and break-glass recovery accounts. */
                 include_core?: boolean;
-                /** @description Sort field (username, created_at, updated_at) */
-                sort_by?: string | null;
-                /** @description Sort order: asc/desc */
-                sort_order?: string;
-                page?: number;
-                per_page?: number;
+                /** @description Items per page: 0 means 50, above 1000 is cut to it */
+                page_size?: number;
+                /** @description The next_page_token of the previous page */
+                page_token?: string | null;
+                /** @description Items to skip, after page_token */
+                skip?: number;
+                /** @description Ordering over created_at, updated_at, username, each optionally followed by desc */
+                order_by?: string | null;
             };
             header?: never;
             path?: never;
@@ -18486,7 +17842,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PaginatedResponse_AccountResponse_"];
+                    "application/json": components["schemas"]["Page_AccountResponse_"];
                 };
             };
             /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */
@@ -18495,16 +17851,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -18513,7 +17869,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -18546,16 +17911,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -18564,7 +17929,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -18593,16 +17967,25 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -18635,16 +18018,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -18653,7 +18036,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -18684,16 +18076,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -18702,7 +18094,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -18737,7 +18138,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description self_deactivate: an account cannot disable or block itself */
@@ -18746,7 +18147,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description last_admin: disabling, blocking, or stripping the system admin group from this account would leave no usable system admin */
@@ -18755,7 +18156,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -18764,7 +18165,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -18793,7 +18203,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description self_delete: an account cannot delete itself */
@@ -18802,7 +18212,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description last_admin: deleting this account would leave no usable system admin */
@@ -18811,7 +18221,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -18820,7 +18230,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -18853,7 +18272,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description current_password is not the account's password (invalid_current_password) */
@@ -18862,7 +18281,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -18871,7 +18290,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Too many wrong current passwords; Retry-After gives the seconds to wait */
@@ -18880,7 +18299,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -18915,16 +18343,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -18933,7 +18361,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -18968,16 +18405,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -18986,12 +18423,21 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
     };
-    "auth.accounts.git-status.list": {
+    "auth.accounts.git-status": {
         parameters: {
             query?: never;
             header?: never;
@@ -19017,16 +18463,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -19035,7 +18481,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -19066,16 +18521,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -19084,7 +18539,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -19119,16 +18583,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -19137,7 +18601,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -19168,16 +18641,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -19186,7 +18659,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -19221,16 +18703,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -19239,7 +18721,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -19249,12 +18740,14 @@ export interface operations {
             query?: {
                 /** @description Search in group name/description */
                 search?: string | null;
-                /** @description Sort field (name, scope) */
-                sort_by?: string | null;
-                /** @description Sort order: asc/desc */
-                sort_order?: string;
-                page?: number;
-                per_page?: number;
+                /** @description Items per page: 0 means 50, above 1000 is cut to it */
+                page_size?: number;
+                /** @description The next_page_token of the previous page */
+                page_token?: string | null;
+                /** @description Items to skip, after page_token */
+                skip?: number;
+                /** @description Ordering over name, scope, each optionally followed by desc */
+                order_by?: string | null;
             };
             header?: never;
             path?: never;
@@ -19268,7 +18761,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PaginatedResponse_GroupResponse_"];
+                    "application/json": components["schemas"]["Page_GroupResponse_"];
                 };
             };
             /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */
@@ -19277,16 +18770,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -19295,7 +18788,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -19328,16 +18830,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -19346,7 +18848,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -19377,16 +18888,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -19395,7 +18906,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -19430,16 +18950,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -19448,7 +18968,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -19477,16 +19006,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -19495,7 +19024,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -19530,16 +19068,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -19548,7 +19086,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -19580,16 +19127,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -19598,7 +19145,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -19629,16 +19185,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -19647,7 +19203,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -19682,16 +19247,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -19700,7 +19265,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -19731,16 +19305,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -19749,7 +19323,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -19784,16 +19367,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -19802,7 +19385,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -19812,12 +19404,14 @@ export interface operations {
             query?: {
                 /** @description Search in key name/description */
                 search?: string | null;
-                /** @description Sort field (name, created_at, expires_at) */
-                sort_by?: string | null;
-                /** @description Sort order: asc/desc */
-                sort_order?: string;
-                page?: number;
-                per_page?: number;
+                /** @description Items per page: 0 means 50, above 1000 is cut to it */
+                page_size?: number;
+                /** @description The next_page_token of the previous page */
+                page_token?: string | null;
+                /** @description Items to skip, after page_token */
+                skip?: number;
+                /** @description Ordering over created_at, expires_at, name, each optionally followed by desc */
+                order_by?: string | null;
             };
             header?: never;
             path?: never;
@@ -19831,7 +19425,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PaginatedResponse_APIKeyResponse_"];
+                    "application/json": components["schemas"]["Page_APIKeyResponse_"];
                 };
             };
             /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */
@@ -19840,16 +19434,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -19858,7 +19452,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -19891,16 +19494,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -19909,7 +19512,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -19938,16 +19550,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -19956,7 +19568,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -19968,8 +19589,12 @@ export interface operations {
                 search?: string | null;
                 /** @description Return only scopes that start with this prefix (e.g. config:, argo:) */
                 prefix?: string | null;
-                page?: number;
-                per_page?: number;
+                /** @description Items per page: 0 means 50, above 1000 is cut to it */
+                page_size?: number;
+                /** @description The next_page_token of the previous page */
+                page_token?: string | null;
+                /** @description Items to skip, after page_token */
+                skip?: number;
             };
             header?: never;
             path?: never;
@@ -19992,16 +19617,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -20010,7 +19635,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -20022,8 +19656,12 @@ export interface operations {
                 resource_type?: ("core" | "custom") | null;
                 /** @description Case-insensitive match on role name or description */
                 search?: string | null;
-                page?: number;
-                per_page?: number;
+                /** @description Items per page: 0 means 50, above 1000 is cut to it */
+                page_size?: number;
+                /** @description The next_page_token of the previous page */
+                page_token?: string | null;
+                /** @description Items to skip, after page_token */
+                skip?: number;
             };
             header?: never;
             path?: never;
@@ -20037,7 +19675,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PaginatedResponse_RoleResponse_"];
+                    "application/json": components["schemas"]["Page_RoleResponse_"];
                 };
             };
             /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */
@@ -20046,16 +19684,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -20064,7 +19702,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -20097,16 +19744,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -20115,7 +19762,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -20146,16 +19802,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -20164,7 +19820,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -20199,16 +19864,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -20217,7 +19882,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -20246,16 +19920,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -20264,7 +19938,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -20274,12 +19957,14 @@ export interface operations {
             query?: {
                 /** @description Search in provider name/display name */
                 search?: string | null;
-                /** @description Sort field (name, type, created_at) */
-                sort_by?: string | null;
-                /** @description Sort order: asc/desc */
-                sort_order?: string;
-                page?: number;
-                per_page?: number;
+                /** @description Items per page: 0 means 50, above 1000 is cut to it */
+                page_size?: number;
+                /** @description The next_page_token of the previous page */
+                page_token?: string | null;
+                /** @description Items to skip, after page_token */
+                skip?: number;
+                /** @description Ordering over created_at, name, type, each optionally followed by desc */
+                order_by?: string | null;
             };
             header?: never;
             path?: never;
@@ -20293,7 +19978,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PaginatedResponse_ProviderResponse_"];
+                    "application/json": components["schemas"]["Page_ProviderResponse_"];
                 };
             };
             /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */
@@ -20302,16 +19987,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -20320,7 +20005,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -20353,16 +20047,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -20371,7 +20065,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -20402,16 +20105,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -20420,7 +20123,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -20455,16 +20167,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -20473,7 +20185,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -20504,16 +20225,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -20522,7 +20243,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -20553,16 +20283,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -20571,12 +20301,21 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
     };
-    "auth.oidc-providers.test.list": {
+    "auth.oidc-providers.test": {
         parameters: {
             query?: never;
             header?: never;
@@ -20602,16 +20341,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -20620,12 +20359,21 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
     };
-    "auth.oidc-providers.verify-login.list": {
+    "auth.oidc-providers.verify-login": {
         parameters: {
             query?: never;
             header?: never;
@@ -20651,16 +20399,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -20669,7 +20417,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -20679,12 +20436,14 @@ export interface operations {
             query?: {
                 /** @description Search in org name/display name */
                 search?: string | null;
-                /** @description Sort field (name, display_name, updated_at) */
-                sort_by?: string | null;
-                /** @description Sort order: asc/desc */
-                sort_order?: string;
-                page?: number;
-                per_page?: number;
+                /** @description Items per page: 0 means 50, above 1000 is cut to it */
+                page_size?: number;
+                /** @description The next_page_token of the previous page */
+                page_token?: string | null;
+                /** @description Items to skip, after page_token */
+                skip?: number;
+                /** @description Ordering over display_name, name, updated_at, each optionally followed by desc */
+                order_by?: string | null;
             };
             header?: never;
             path?: never;
@@ -20698,7 +20457,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PaginatedResponse_OrgResponse_"];
+                    "application/json": components["schemas"]["Page_OrgResponse_"];
                 };
             };
             /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */
@@ -20707,16 +20466,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -20725,7 +20484,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -20758,16 +20526,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -20776,7 +20544,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -20808,16 +20585,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -20826,7 +20603,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -20857,16 +20643,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -20875,7 +20661,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -20910,16 +20705,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -20928,7 +20723,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -20957,16 +20761,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -20975,7 +20779,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -20987,10 +20800,8 @@ export interface operations {
                 page_size?: number;
                 /** @description The next_page_token of the previous page */
                 page_token?: string | null;
-                /** @description Filter expression */
-                filter?: string | null;
-                /** @description Ordering, such as `name desc` */
-                order_by?: string | null;
+                /** @description Items to skip, after page_token */
+                skip?: number;
             };
             header?: never;
             path: {
@@ -21015,16 +20826,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -21033,7 +20844,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -21053,6 +20873,8 @@ export interface operations {
             /** @description Successful Response */
             200: {
                 headers: {
+                    /** @description The current entity-tag, for If-Match */
+                    ETag?: string;
                     [name: string]: unknown;
                 };
                 content: {
@@ -21065,16 +20887,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -21083,7 +20905,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -21127,16 +20958,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -21145,7 +20976,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -21183,16 +21023,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -21201,7 +21041,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -21241,16 +21090,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -21259,7 +21108,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -21271,12 +21129,14 @@ export interface operations {
                 search?: string | null;
                 /** @description Filter by enabled status */
                 enabled?: boolean | null;
-                /** @description Sort field (source, display_name, enabled, current, deployed_version, updated_at) */
-                sort_by?: string | null;
-                /** @description Sort order: asc/desc */
-                sort_order?: string;
-                page?: number;
-                per_page?: number;
+                /** @description Items per page: 0 means 50, above 1000 is cut to it */
+                page_size?: number;
+                /** @description The next_page_token of the previous page */
+                page_token?: string | null;
+                /** @description Items to skip, after page_token */
+                skip?: number;
+                /** @description Ordering over current, deployed_version, display_name, enabled, source, updated_at, each optionally followed by desc */
+                order_by?: string | null;
             };
             header?: never;
             path?: never;
@@ -21290,7 +21150,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PaginatedSourceSummaryResponse"];
+                    "application/json": components["schemas"]["SourceSummaryPage"];
                 };
             };
             /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */
@@ -21299,16 +21159,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -21317,7 +21177,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -21359,16 +21228,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Source name already exists (code conflict), the name is the core landing the engine owns and reconciles itself (code conflict), receiver match duplicates another enabled source (code match_conflict), or an alias is another source's under the same profile (code alias_conflict) */
@@ -21377,16 +21246,25 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["SourceNameConflictErrorResponse"] | components["schemas"]["CoreResourceConflictErrorResponse"] | components["schemas"]["MatchConflictErrorResponse"] | components["schemas"]["AliasConflictErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused, nothing written. The body failed validation (code validation_error), or the receiver would refuse the source's rule (code invalid_rule): context.rule_errors names each field at fault and, for when, the span the check stopped at */
+            /** @description Refused, nothing written. The body failed validation (code validation_error), or the receiver would refuse the source's rule (code invalid_rule): rule_errors names each field at fault and, for when, the span the check stopped at */
             422: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["InvalidRuleErrorResponse"] | components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -21404,8 +21282,12 @@ export interface operations {
                 engine?: string | null;
                 /** @description List entries already stored as a source too. Off by default, so the create-from-catalogue page offers only what is left to create */
                 include_stored?: boolean;
-                page?: number;
-                per_page?: number;
+                /** @description Items per page: 0 means 50, above 1000 is cut to it */
+                page_size?: number;
+                /** @description The next_page_token of the previous page */
+                page_token?: string | null;
+                /** @description Items to skip, after page_token */
+                skip?: number;
             };
             header?: never;
             path?: never;
@@ -21419,7 +21301,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PaginatedResponse_CatalogueEntryObject_"];
+                    "application/json": components["schemas"]["Page_CatalogueEntryObject_"];
                 };
             };
             /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */
@@ -21428,16 +21310,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -21446,7 +21328,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -21456,8 +21347,12 @@ export interface operations {
             query?: {
                 /** @description Keep tags whose directory key or display name starts with this. The match ignores case */
                 name?: string | null;
-                page?: number;
-                per_page?: number;
+                /** @description Items per page: 0 means 50, above 1000 is cut to it */
+                page_size?: number;
+                /** @description The next_page_token of the previous page */
+                page_token?: string | null;
+                /** @description Items to skip, after page_token */
+                skip?: number;
             };
             header?: never;
             path?: never;
@@ -21471,7 +21366,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PaginatedResponse_CatalogueTagObject_"];
+                    "application/json": components["schemas"]["Page_CatalogueTagObject_"];
                 };
             };
             /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */
@@ -21480,16 +21375,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -21498,7 +21393,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -21506,8 +21410,12 @@ export interface operations {
     "sources.engines": {
         parameters: {
             query?: {
-                page?: number;
-                per_page?: number;
+                /** @description Items per page: 0 means 50, above 1000 is cut to it */
+                page_size?: number;
+                /** @description The next_page_token of the previous page */
+                page_token?: string | null;
+                /** @description Items to skip, after page_token */
+                skip?: number;
             };
             header?: never;
             path?: never;
@@ -21521,7 +21429,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PaginatedResponse_TableEngineObject_"];
+                    "application/json": components["schemas"]["Page_TableEngineObject_"];
                 };
             };
             /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */
@@ -21530,16 +21438,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -21548,7 +21456,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -21599,16 +21516,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Nothing was stored. Every entry was refused because it conflicts with a source that already exists, with the core landing, with another source's match, or with another source's alias under the same profile, or because the deployed transform does not ship its variant (code missing_variant) */
@@ -21617,7 +21534,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["CatalogueSourcesResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description The request failed before any source could be written. The body is {code, message}: the selection is longer than 50, empty, or not a valid request */
@@ -21626,7 +21543,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -21658,16 +21584,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -21676,7 +21602,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -21686,8 +21621,12 @@ export interface operations {
             query?: {
                 /** @description Source version id (defaults to deployed_version) */
                 version?: string | null;
-                page?: number;
-                per_page?: number;
+                /** @description Items per page: 0 means 50, above 1000 is cut to it */
+                page_size?: number;
+                /** @description The next_page_token of the previous page */
+                page_token?: string | null;
+                /** @description Items to skip, after page_token */
+                skip?: number;
             };
             header?: never;
             path: {
@@ -21703,7 +21642,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["dfe_engine__api__pagination__PaginatedResponse_SchemaColumn___1"];
+                    "application/json": components["schemas"]["Page_SchemaColumn_"];
                 };
             };
             /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */
@@ -21712,16 +21651,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -21730,7 +21669,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -21764,16 +21712,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -21782,7 +21730,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -21816,16 +21773,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -21834,7 +21791,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -21870,16 +21836,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -21888,7 +21854,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description A backing service refused the deploy: ClickHouse rejected the DDL, or the source rides the bus and the broker did not create its topics (code topics_not_created, naming each topic and the broker's error code) */
@@ -21897,7 +21863,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["TopicsNotCreatedErrorResponse"] | components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -21928,16 +21903,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -21946,7 +21921,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -21981,16 +21965,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Receiver match duplicates another enabled source (code match_conflict), an alias is another source's under the same profile (code alias_conflict), or the source is engine-owned and no write path may change it (code conflict) */
@@ -21999,16 +21983,25 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["MatchConflictErrorResponse"] | components["schemas"]["CoreResourceConflictErrorResponse"] | components["schemas"]["AliasConflictErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused, nothing written. The body failed validation (code validation_error), or the receiver would refuse the source's rule (code invalid_rule): context.rule_errors names each field at fault and, for when, the span the check stopped at */
+            /** @description Refused, nothing written. The body failed validation (code validation_error), or the receiver would refuse the source's rule (code invalid_rule): rule_errors names each field at fault and, for when, the span the check stopped at */
             422: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["InvalidRuleErrorResponse"] | components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -22039,16 +22032,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description The source is engine-owned and no write path may delete it */
@@ -22057,7 +22050,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["CoreResourceConflictErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -22066,7 +22059,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -22101,16 +22103,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Enabling would duplicate another enabled source's receiver match (code match_conflict) or alias (code alias_conflict), or the source is engine-owned and no write path may change it (code conflict) */
@@ -22119,21 +22121,30 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["MatchConflictErrorResponse"] | components["schemas"]["CoreResourceConflictErrorResponse"] | components["schemas"]["AliasConflictErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused, nothing written. The body failed validation (code validation_error), or the receiver would refuse the source's rule (code invalid_rule): context.rule_errors names each field at fault and, for when, the span the check stopped at */
+            /** @description Refused, nothing written. The body failed validation (code validation_error), or the receiver would refuse the source's rule (code invalid_rule): rule_errors names each field at fault and, for when, the span the check stopped at */
             422: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["InvalidRuleErrorResponse"] | components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
     };
-    "sources.flow.list": {
+    "sources.flow": {
         parameters: {
             query?: never;
             header?: never;
@@ -22159,16 +22170,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description The source's stages cannot be run as declared - the message names which stage refused and why */
@@ -22176,11 +22187,22 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
             };
         };
     };
-    "sources.lag.list": {
+    "sources.lag": {
         parameters: {
             query?: never;
             header?: never;
@@ -22206,16 +22228,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description The source's transform is not the customer's own pipeline */
@@ -22223,11 +22245,22 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
             };
         };
     };
-    "sources.signals.list": {
+    "sources.signals": {
         parameters: {
             query?: never;
             header?: never;
@@ -22253,16 +22286,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -22271,12 +22304,21 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
     };
-    "sources.export.list": {
+    "sources.export": {
         parameters: {
             query?: {
                 /** @description Version id to export; omitted takes the source's current */
@@ -22305,16 +22347,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -22323,7 +22365,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -22356,16 +22407,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -22374,7 +22425,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -22403,16 +22463,25 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -22441,16 +22510,25 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -22483,16 +22561,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description The source name already exists here, or a meta schema the bundle carries would land on an occupied path (code conflict) */
@@ -22501,7 +22579,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -22510,7 +22588,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -22522,10 +22609,8 @@ export interface operations {
                 page_size?: number;
                 /** @description The next_page_token of the previous page */
                 page_token?: string | null;
-                /** @description Filter expression */
-                filter?: string | null;
-                /** @description Ordering, such as `name desc` */
-                order_by?: string | null;
+                /** @description Items to skip, after page_token */
+                skip?: number;
             };
             header?: never;
             path?: never;
@@ -22548,16 +22633,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -22566,7 +22651,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -22607,25 +22701,25 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description The list names other blocks than the field has now, because a source or a binding changed since it was read (code order_conflict, the current list in context.blocks), or the deploy repo kept moving (code conflict) */
+            /** @description The list names other blocks than the field has now, because a source or a binding changed since it was read (code order_conflict, the current list in blocks), or the deploy repo kept moving (code conflict) */
             409: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Refused, nothing written: a block named twice or a pinned block (code invalid_order), or a binding the receiver could not compile (code invalid_binding) */
@@ -22634,7 +22728,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description No deploy repo, where the ingest rules live */
@@ -22643,7 +22737,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -22660,6 +22763,8 @@ export interface operations {
             /** @description Successful Response */
             200: {
                 headers: {
+                    /** @description The current entity-tag, for If-Match */
+                    ETag?: string;
                     [name: string]: unknown;
                 };
                 content: {
@@ -22672,16 +22777,25 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -22722,16 +22836,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Refused, nothing written: a block named twice or a pinned block (code invalid_order), or a binding the receiver could not compile (code invalid_binding) */
@@ -22740,7 +22854,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description No deploy repo, where the ingest rules live */
@@ -22749,7 +22863,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -22761,10 +22884,8 @@ export interface operations {
                 page_size?: number;
                 /** @description The next_page_token of the previous page */
                 page_token?: string | null;
-                /** @description Filter expression */
-                filter?: string | null;
-                /** @description Ordering, such as `name desc` */
-                order_by?: string | null;
+                /** @description Items to skip, after page_token */
+                skip?: number;
             };
             header?: never;
             path?: never;
@@ -22787,16 +22908,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -22805,7 +22926,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -22836,16 +22966,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description No such profile is stored */
@@ -22854,7 +22984,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -22863,7 +22993,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -22895,16 +23034,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -22913,7 +23052,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -22947,16 +23095,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -22965,7 +23113,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -22999,16 +23156,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -23017,7 +23174,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -23053,16 +23219,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -23071,7 +23237,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -23083,12 +23258,14 @@ export interface operations {
                 service?: string | null;
                 /** @description Search in service/instance names */
                 search?: string | null;
-                /** @description Sort field (service, instance, updated_at) */
-                sort_by?: string | null;
-                /** @description Sort order: asc/desc */
-                sort_order?: string;
-                page?: number;
-                per_page?: number;
+                /** @description Items per page: 0 means 50, above 1000 is cut to it */
+                page_size?: number;
+                /** @description The next_page_token of the previous page */
+                page_token?: string | null;
+                /** @description Items to skip, after page_token */
+                skip?: number;
+                /** @description Ordering over instance, service, updated_at, each optionally followed by desc */
+                order_by?: string | null;
             };
             header?: never;
             path?: never;
@@ -23102,7 +23279,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PaginatedResponse_ServiceConfigSummary_"];
+                    "application/json": components["schemas"]["Page_ServiceConfigSummary_"];
                 };
             };
             /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */
@@ -23111,16 +23288,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -23129,7 +23306,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -23161,16 +23347,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -23179,7 +23365,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -23217,16 +23412,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -23235,7 +23430,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -23265,16 +23469,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -23283,7 +23487,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -23321,16 +23534,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -23339,7 +23552,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -23348,6 +23570,12 @@ export interface operations {
         parameters: {
             query?: {
                 limit?: number;
+                /** @description Items per page: 0 means 50, above 1000 is cut to it */
+                page_size?: number;
+                /** @description The next_page_token of the previous page */
+                page_token?: string | null;
+                /** @description Items to skip, after page_token */
+                skip?: number;
             };
             header?: never;
             path: {
@@ -23364,7 +23592,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ConfigHistoryEntry"][];
+                    "application/json": components["schemas"]["Page_ConfigHistoryEntry_"];
                 };
             };
             /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */
@@ -23373,16 +23601,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -23391,7 +23619,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -23420,23 +23657,39 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
     };
     "deployment.admin-links.list": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Items per page: 0 means 50, above 1000 is cut to it */
+                page_size?: number;
+                /** @description The next_page_token of the previous page */
+                page_token?: string | null;
+                /** @description Items to skip, after page_token */
+                skip?: number;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -23449,7 +23702,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["AdminLinkResponse"][];
+                    "application/json": components["schemas"]["Page_AdminLinkResponse_"];
                 };
             };
             /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */
@@ -23458,16 +23711,34 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -23479,12 +23750,14 @@ export interface operations {
                 standard?: string | null;
                 /** @description Search in standard/source names */
                 search?: string | null;
-                /** @description Sort field (standard, source, mapping_count) */
-                sort_by?: string | null;
-                /** @description Sort order: asc/desc */
-                sort_order?: string;
-                page?: number;
-                per_page?: number;
+                /** @description Items per page: 0 means 50, above 1000 is cut to it */
+                page_size?: number;
+                /** @description The next_page_token of the previous page */
+                page_token?: string | null;
+                /** @description Items to skip, after page_token */
+                skip?: number;
+                /** @description Ordering over mapping_count, source, standard, each optionally followed by desc */
+                order_by?: string | null;
             };
             header?: never;
             path?: never;
@@ -23498,7 +23771,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PaginatedResponse_FieldMapSummary_"];
+                    "application/json": components["schemas"]["Page_FieldMapSummary_"];
                 };
             };
             /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */
@@ -23507,16 +23780,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -23525,7 +23798,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -23558,16 +23840,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -23576,7 +23858,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -23607,16 +23898,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -23625,7 +23916,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -23657,16 +23957,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -23675,7 +23975,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -23705,16 +24014,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -23723,7 +24032,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -23752,16 +24070,25 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -23775,12 +24102,14 @@ export interface operations {
                 severity?: string | null;
                 /** @description Filter by source label */
                 source?: string | null;
-                /** @description Sort field (name, display_name, severity, source, hunt_name, created_at) */
-                sort_by?: string | null;
-                /** @description Sort order: asc/desc */
-                sort_order?: string;
-                page?: number;
-                per_page?: number;
+                /** @description Items per page: 0 means 50, above 1000 is cut to it */
+                page_size?: number;
+                /** @description The next_page_token of the previous page */
+                page_token?: string | null;
+                /** @description Items to skip, after page_token */
+                skip?: number;
+                /** @description Ordering over created_at, display_name, hunt_name, name, severity, source, each optionally followed by desc */
+                order_by?: string | null;
             };
             header?: never;
             path?: never;
@@ -23794,7 +24123,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PaginatedResponse_RuleSummary_"];
+                    "application/json": components["schemas"]["Page_RuleSummary_"];
                 };
             };
             /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */
@@ -23803,16 +24132,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -23821,7 +24150,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -23854,25 +24192,34 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused, nothing written. The body failed validation (code validation_error). Or the hunt runner could not compile the rule -- its SQL does not parse as one SELECT, names no <db>.<table> source, names a source that is not a table name (letters, digits, '_' and '-'), has no WHERE to detect with, or calls a function that reads outside the row (url, s3, a dictionary) or sends it to another service (the ai* functions), or carries a CEL filter that does not transpile (code invalid_sql, the errors in context.sql_errors). Or the rule matches every event in its source (code rule_matches_everything, the source and detection WHERE in context). */
+            /** @description Refused, nothing written. The body failed validation (code validation_error). Or the hunt runner could not compile the rule -- its SQL does not parse as one SELECT, names no <db>.<table> source, names a source that is not a table name (letters, digits, '_' and '-'), has no WHERE to detect with, or calls a function that reads outside the row (url, s3, a dictionary) or sends it to another service (the ai* functions), or carries a CEL filter that does not transpile (code invalid_sql, the errors in sql_errors). Or the rule matches every event in its source (code rule_matches_everything, the source and detection WHERE in context). */
             422: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -23905,25 +24252,34 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused, nothing written. The body failed validation (code validation_error). Or the hunt runner could not compile the rule -- its SQL does not parse as one SELECT, names no <db>.<table> source, names a source that is not a table name (letters, digits, '_' and '-'), has no WHERE to detect with, or calls a function that reads outside the row (url, s3, a dictionary) or sends it to another service (the ai* functions), or carries a CEL filter that does not transpile (code invalid_sql, the errors in context.sql_errors). Or the rule matches every event in its source (code rule_matches_everything, the source and detection WHERE in context). */
+            /** @description Refused, nothing written. The body failed validation (code validation_error). Or the hunt runner could not compile the rule -- its SQL does not parse as one SELECT, names no <db>.<table> source, names a source that is not a table name (letters, digits, '_' and '-'), has no WHERE to detect with, or calls a function that reads outside the row (url, s3, a dictionary) or sends it to another service (the ai* functions), or carries a CEL filter that does not transpile (code invalid_sql, the errors in sql_errors). Or the rule matches every event in its source (code rule_matches_everything, the source and detection WHERE in context). */
             422: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -23956,16 +24312,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -23974,7 +24330,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -24005,16 +24370,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -24023,7 +24388,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -24058,25 +24432,34 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused, nothing written. The body failed validation (code validation_error). Or the hunt runner could not compile the rule -- its SQL does not parse as one SELECT, names no <db>.<table> source, names a source that is not a table name (letters, digits, '_' and '-'), has no WHERE to detect with, or calls a function that reads outside the row (url, s3, a dictionary) or sends it to another service (the ai* functions), or carries a CEL filter that does not transpile (code invalid_sql, the errors in context.sql_errors). Or the rule matches every event in its source (code rule_matches_everything, the source and detection WHERE in context). */
+            /** @description Refused, nothing written. The body failed validation (code validation_error). Or the hunt runner could not compile the rule -- its SQL does not parse as one SELECT, names no <db>.<table> source, names a source that is not a table name (letters, digits, '_' and '-'), has no WHERE to detect with, or calls a function that reads outside the row (url, s3, a dictionary) or sends it to another service (the ai* functions), or carries a CEL filter that does not transpile (code invalid_sql, the errors in sql_errors). Or the rule matches every event in its source (code rule_matches_everything, the source and detection WHERE in context). */
             422: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -24105,16 +24488,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -24123,7 +24506,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -24135,12 +24527,14 @@ export interface operations {
                 search?: string | null;
                 /** @description Hunt file name (YAML stem); only destinations referenced in that hunt's alerts */
                 hunt?: string | null;
-                /** @description Sort field (name, enabled) */
-                sort_by?: string | null;
-                /** @description Sort order: asc/desc */
-                sort_order?: string;
-                page?: number;
-                per_page?: number;
+                /** @description Items per page: 0 means 50, above 1000 is cut to it */
+                page_size?: number;
+                /** @description The next_page_token of the previous page */
+                page_token?: string | null;
+                /** @description Items to skip, after page_token */
+                skip?: number;
+                /** @description Ordering over enabled, name, each optionally followed by desc */
+                order_by?: string | null;
             };
             header?: never;
             path?: never;
@@ -24154,7 +24548,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PaginatedResponse_AlertDestinationSummary_"];
+                    "application/json": components["schemas"]["Page_AlertDestinationSummary_"];
                 };
             };
             /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */
@@ -24163,16 +24557,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -24181,7 +24575,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -24214,16 +24617,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -24232,7 +24635,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -24263,16 +24675,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -24281,7 +24693,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -24316,16 +24737,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -24334,7 +24755,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -24363,16 +24793,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -24381,7 +24811,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -24410,21 +24849,30 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
     };
-    "system.version.list": {
+    "system.version": {
         parameters: {
             query?: never;
             header?: never;
@@ -24448,21 +24896,30 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
     };
-    "system.schema.list": {
+    "system.schema": {
         parameters: {
             query?: never;
             header?: never;
@@ -24486,21 +24943,30 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
     };
-    "system.status.list": {
+    "system.status": {
         parameters: {
             query?: never;
             header?: never;
@@ -24524,21 +24990,30 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
     };
-    "system.settings.list": {
+    "system.settings": {
         parameters: {
             query?: never;
             header?: never;
@@ -24562,16 +25037,25 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -24600,16 +25084,25 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -24642,16 +25135,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -24660,7 +25153,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description reconcile_failed: the value is stored, and applying it to ClickHouse failed; sending the same value again applies it */
@@ -24669,7 +25162,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description not_configured: gitops is off, so there is nowhere to store the value */
@@ -24678,7 +25171,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -24707,16 +25209,25 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -24749,16 +25260,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description validation_error: a named value cannot be stored */
@@ -24767,7 +25278,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description reconcile_failed: ttl_days is stored, and applying it to ClickHouse failed; sending the same value again applies it */
@@ -24776,7 +25287,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description not_configured: gitops is off, so there is nowhere to store the value */
@@ -24785,7 +25296,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -24818,16 +25338,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description not_found: a named source does not exist */
@@ -24836,7 +25356,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description conflict: a named source is engine-owned and cannot be edited */
@@ -24845,7 +25365,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -24854,18 +25374,31 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
     };
-    "system.defaults.drift.list": {
+    "system.defaults.drift": {
         parameters: {
             query?: {
                 /** @description Search in source name, drifted field, and stored or live value */
                 search?: string | null;
-                page?: number;
-                per_page?: number;
+                /** @description Items per page: 0 means 50, above 1000 is cut to it */
+                page_size?: number;
+                /** @description The next_page_token of the previous page */
+                page_token?: string | null;
+                /** @description Items to skip, after page_token */
+                skip?: number;
             };
             header?: never;
             path?: never;
@@ -24879,7 +25412,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PaginatedResponse_SourceDefaultDrift_"];
+                    "application/json": components["schemas"]["Page_SourceDefaultDrift_"];
                 };
             };
             /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */
@@ -24888,16 +25421,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -24906,7 +25439,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description clickhouse_unavailable: a source is deployed and its table could not be read */
@@ -24915,7 +25448,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -24944,16 +25486,25 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -24982,16 +25533,25 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -25020,16 +25580,25 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -25062,16 +25631,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -25080,7 +25649,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -25113,16 +25691,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -25131,7 +25709,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -25160,16 +25747,25 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -25179,12 +25775,14 @@ export interface operations {
             query?: {
                 /** @description Case-insensitive search in name, display_name, customers, rules, source_table, target_table */
                 search?: string | null;
-                /** @description Sort field (name, display_name, source_table, target_table) */
-                sort_by?: string | null;
-                /** @description Sort order: asc/desc */
-                sort_order?: string;
-                page?: number;
-                per_page?: number;
+                /** @description Items per page: 0 means 50, above 1000 is cut to it */
+                page_size?: number;
+                /** @description The next_page_token of the previous page */
+                page_token?: string | null;
+                /** @description Items to skip, after page_token */
+                skip?: number;
+                /** @description Ordering over display_name, name, source_table, target_table, each optionally followed by desc */
+                order_by?: string | null;
             };
             header?: never;
             path?: never;
@@ -25198,7 +25796,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PaginatedResponse_HuntSummary_"];
+                    "application/json": components["schemas"]["Page_HuntSummary_"];
                 };
             };
             /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */
@@ -25207,16 +25805,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -25225,7 +25823,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -25258,16 +25865,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -25276,7 +25883,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -25307,16 +25923,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -25325,7 +25941,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -25360,16 +25985,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -25378,7 +26003,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -25407,16 +26041,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -25425,7 +26059,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -25456,16 +26099,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -25474,7 +26117,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -25484,6 +26136,12 @@ export interface operations {
             query?: {
                 /** @description Filter by namespace */
                 namespace?: string | null;
+                /** @description Items per page: 0 means 50, above 1000 is cut to it */
+                page_size?: number;
+                /** @description The next_page_token of the previous page */
+                page_token?: string | null;
+                /** @description Items to skip, after page_token */
+                skip?: number;
             };
             header?: never;
             path?: never;
@@ -25497,7 +26155,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ViewDefinition"][];
+                    "application/json": components["schemas"]["Page_ViewDefinition_"];
                 };
             };
             /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */
@@ -25506,16 +26164,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -25524,14 +26182,30 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
     };
     "queries.views.namespaces": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Items per page: 0 means 50, above 1000 is cut to it */
+                page_size?: number;
+                /** @description The next_page_token of the previous page */
+                page_token?: string | null;
+                /** @description Items to skip, after page_token */
+                skip?: number;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -25544,7 +26218,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": string[];
+                    "application/json": components["schemas"]["Page_str_"];
                 };
             };
             /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */
@@ -25553,16 +26227,34 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -25593,16 +26285,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -25611,7 +26303,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -25646,16 +26347,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -25664,7 +26365,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -25697,16 +26407,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -25715,7 +26425,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -25729,6 +26448,12 @@ export interface operations {
                 days?: number;
                 /** @description Max rows */
                 limit?: number;
+                /** @description Items per page: 0 means 50, above 1000 is cut to it */
+                page_size?: number;
+                /** @description The next_page_token of the previous page */
+                page_token?: string | null;
+                /** @description Items to skip, after page_token */
+                skip?: number;
             };
             header?: never;
             path?: never;
@@ -25742,7 +26467,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["CostLeaderboardRow"][];
+                    "application/json": components["schemas"]["Page_CostLeaderboardRow_"];
                 };
             };
             /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */
@@ -25751,16 +26476,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -25769,7 +26494,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -25804,16 +26538,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -25822,7 +26556,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -25855,16 +26598,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -25873,7 +26616,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -25904,16 +26656,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -25922,14 +26674,30 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
     };
     "samples.list": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Items per page: 0 means 50, above 1000 is cut to it */
+                page_size?: number;
+                /** @description The next_page_token of the previous page */
+                page_token?: string | null;
+                /** @description Items to skip, after page_token */
+                skip?: number;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -25942,7 +26710,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["TaskInfo"][];
+                    "application/json": components["schemas"]["Page_TaskInfo_"];
                 };
             };
             /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */
@@ -25951,23 +26719,48 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
     };
     "synthetic-data.packs": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Items per page: 0 means 50, above 1000 is cut to it */
+                page_size?: number;
+                /** @description The next_page_token of the previous page */
+                page_token?: string | null;
+                /** @description Items to skip, after page_token */
+                skip?: number;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -25980,7 +26773,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PackInfo"][];
+                    "application/json": components["schemas"]["Page_PackInfo_"];
                 };
             };
             /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */
@@ -25989,16 +26782,34 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -26031,16 +26842,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -26049,7 +26860,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -26082,16 +26902,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -26100,7 +26920,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -26118,13 +26947,15 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Successful Response */
-            200: {
+            /** @description Accepted: poll the operation at Location until done */
+            202: {
                 headers: {
+                    /** @description The operation to poll */
+                    Location?: string;
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["StreamSubmitResponse"];
+                    "application/json": components["schemas"]["Operation_TaskInfo_Any_"];
                 };
             };
             /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */
@@ -26133,16 +26964,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -26151,14 +26982,30 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
     };
     "synthetic-data.streams": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Items per page: 0 means 50, above 1000 is cut to it */
+                page_size?: number;
+                /** @description The next_page_token of the previous page */
+                page_token?: string | null;
+                /** @description Items to skip, after page_token */
+                skip?: number;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -26171,7 +27018,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["TaskInfo"][];
+                    "application/json": components["schemas"]["Page_Operation_TaskInfo__Any__"];
                 };
             };
             /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */
@@ -26180,16 +27027,34 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -26199,7 +27064,7 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                task_id: string;
+                operation: string;
             };
             cookie?: never;
         };
@@ -26211,7 +27076,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["StreamSubmitResponse"];
+                    "application/json": components["schemas"]["Operation_TaskInfo_Any_"];
                 };
             };
             /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */
@@ -26220,16 +27085,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -26238,17 +27103,26 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
     };
-    "synthetic-data.streams.delete": {
+    "synthetic-data.streams.cancel": {
         parameters: {
             query?: never;
             header?: never;
             path: {
-                task_id: string;
+                operation: string;
             };
             cookie?: never;
         };
@@ -26260,7 +27134,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["CancelResponse"];
+                    "application/json": components["schemas"]["Operation_TaskInfo_Any_"];
                 };
             };
             /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */
@@ -26269,16 +27143,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -26287,14 +27161,30 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
     };
     "pipeline.templates": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Items per page: 0 means 50, above 1000 is cut to it */
+                page_size?: number;
+                /** @description The next_page_token of the previous page */
+                page_token?: string | null;
+                /** @description Items to skip, after page_token */
+                skip?: number;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -26307,7 +27197,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PipelineTemplate"][];
+                    "application/json": components["schemas"]["Page_PipelineTemplate_"];
                 };
             };
             /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */
@@ -26316,16 +27206,34 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -26343,13 +27251,15 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Successful Response */
+            /** @description Accepted: poll the operation at Location until done */
             202: {
                 headers: {
+                    /** @description The operation to poll */
+                    Location?: string;
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PipelineBuildResponse"];
+                    "application/json": components["schemas"]["Operation_TaskInfo_Any_"];
                 };
             };
             /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */
@@ -26358,16 +27268,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -26376,16 +27286,31 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
     };
-    "tasks.list": {
+    "operations.list": {
         parameters: {
             query?: {
                 /** @description Filter by task kind */
                 kind?: string | null;
+                /** @description Items per page: 0 means 50, above 1000 is cut to it */
+                page_size?: number;
+                /** @description The next_page_token of the previous page */
+                page_token?: string | null;
+                /** @description Items to skip, after page_token */
+                skip?: number;
             };
             header?: never;
             path?: never;
@@ -26399,7 +27324,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["TaskInfo"][];
+                    "application/json": components["schemas"]["Page_Operation_TaskInfo__Any__"];
                 };
             };
             /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */
@@ -26408,16 +27333,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -26426,17 +27351,26 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
     };
-    "tasks.get": {
+    "operations.get": {
         parameters: {
             query?: never;
             header?: never;
             path: {
-                task_id: string;
+                operation: string;
             };
             cookie?: never;
         };
@@ -26448,7 +27382,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["TaskInfo"];
+                    "application/json": components["schemas"]["Operation_TaskInfo_Any_"];
                 };
             };
             /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */
@@ -26457,16 +27391,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -26475,17 +27409,26 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
     };
-    "tasks.cancel": {
+    "operations.cancel": {
         parameters: {
             query?: never;
             header?: never;
             path: {
-                task_id: string;
+                operation: string;
             };
             cookie?: never;
         };
@@ -26497,7 +27440,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["TaskInfo"];
+                    "application/json": components["schemas"]["Operation_TaskInfo_Any_"];
                 };
             };
             /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */
@@ -26506,16 +27449,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -26524,7 +27467,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -26553,7 +27505,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description No usage:read, or the caller is held to its orgs and holds no registered one */
@@ -26562,7 +27514,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description ClickHouse could not read the usage tables */
@@ -26571,7 +27523,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -26611,7 +27572,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description No usage:read, or the caller is held to its orgs and does not hold the one named */
@@ -26620,7 +27581,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description An unknown metric or org, a range ending before it starts, or an org named for a metric kept only for the whole deployment */
@@ -26629,7 +27590,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description ClickHouse could not read the usage tables */
@@ -26638,7 +27599,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -26648,12 +27618,14 @@ export interface operations {
             query?: {
                 /** @description Search in path and base */
                 search?: string | null;
-                /** @description Sort field (path, base, current, updated_at) */
-                sort_by?: string | null;
-                /** @description Sort order: asc/desc */
-                sort_order?: string;
-                page?: number;
-                per_page?: number;
+                /** @description Items per page: 0 means 50, above 1000 is cut to it */
+                page_size?: number;
+                /** @description The next_page_token of the previous page */
+                page_token?: string | null;
+                /** @description Items to skip, after page_token */
+                skip?: number;
+                /** @description Ordering over base, current, path, updated_at, each optionally followed by desc */
+                order_by?: string | null;
             };
             header?: never;
             path?: never;
@@ -26667,7 +27639,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PaginatedResponse_DerivedSchemaSummary_"];
+                    "application/json": components["schemas"]["Page_DerivedSchemaSummary_"];
                 };
             };
             /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */
@@ -26676,16 +27648,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -26694,7 +27666,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -26725,16 +27706,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -26743,7 +27724,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -26778,16 +27768,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -26796,7 +27786,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -26831,16 +27830,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -26849,7 +27848,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -26878,16 +27886,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -26896,7 +27904,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -26908,12 +27925,14 @@ export interface operations {
                 search?: string | null;
                 /** @description Filter by top-level schema path segment (repeat param for multiple), e.g. meta, common-header, additional, hunt-results */
                 schema_type?: string[] | null;
-                /** @description Sort field (path, current, updated_at) */
-                sort_by?: string | null;
-                /** @description Sort order: asc/desc */
-                sort_order?: string;
-                page?: number;
-                per_page?: number;
+                /** @description Items per page: 0 means 50, above 1000 is cut to it */
+                page_size?: number;
+                /** @description The next_page_token of the previous page */
+                page_token?: string | null;
+                /** @description Items to skip, after page_token */
+                skip?: number;
+                /** @description Ordering over current, path, updated_at, each optionally followed by desc */
+                order_by?: string | null;
             };
             header?: never;
             path?: never;
@@ -26927,7 +27946,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PaginatedSchemaSummaryResponse"];
+                    "application/json": components["schemas"]["SchemaSummaryPage"];
                 };
             };
             /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */
@@ -26936,16 +27955,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -26954,7 +27973,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -26980,8 +28008,12 @@ export interface operations {
                 attribute?: string | null;
                 /** @description Fields to apply ``search`` against (name, type, type_filter, use_case, expr, comment, attribute). Defaults to all column fields. */
                 searchable_columns?: string[] | null;
-                page?: number;
-                per_page?: number;
+                /** @description Items per page: 0 means 50, above 1000 is cut to it */
+                page_size?: number;
+                /** @description The next_page_token of the previous page */
+                page_token?: string | null;
+                /** @description Items to skip, after page_token */
+                skip?: number;
             };
             header?: never;
             path: {
@@ -27006,16 +28038,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -27024,7 +28056,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -27059,16 +28100,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -27077,7 +28118,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -27107,16 +28157,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -27125,7 +28175,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -27160,16 +28219,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -27178,7 +28237,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -27207,16 +28275,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -27225,7 +28293,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -27263,16 +28340,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -27281,12 +28358,21 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
     };
-    "schemas.definitions.export.list": {
+    "schemas.definitions.export": {
         parameters: {
             query?: {
                 /** @description Single version to export. Omitted exports the whole history of a custom schema, and pins a core one at its current version. */
@@ -27315,16 +28401,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -27333,7 +28419,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -27366,16 +28461,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description A meta schema already exists at the document's path, or that path holds a core schema no import may overwrite (code conflict) */
@@ -27384,7 +28479,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -27393,7 +28488,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -27426,16 +28530,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Upload or declared Content-Length exceeds api.elastic_converter_max_upload_bytes (HTTP 413, code upload_too_large). Tune via DFE_ENGINE_API_ELASTIC_CONVERTER_* env vars. */
@@ -27444,7 +28548,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -27453,7 +28557,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -27463,8 +28576,12 @@ export interface operations {
             query?: {
                 /** @description Source version id (defaults to deployed_version) */
                 version?: string | null;
-                page?: number;
-                per_page?: number;
+                /** @description Items per page: 0 means 50, above 1000 is cut to it */
+                page_size?: number;
+                /** @description The next_page_token of the previous page */
+                page_token?: string | null;
+                /** @description Items to skip, after page_token */
+                skip?: number;
             };
             header?: never;
             path: {
@@ -27489,16 +28606,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -27507,7 +28624,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -27541,16 +28667,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -27559,12 +28685,21 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
     };
-    "schemas.json-paths.list": {
+    "schemas.json-paths": {
         parameters: {
             query?: {
                 /** @description Random distinct example values per path */
@@ -27599,16 +28734,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -27617,12 +28752,21 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
     };
-    "schemas.sample-rows.list": {
+    "schemas.sample-rows": {
         parameters: {
             query?: {
                 /** @description Number of random rows to sample */
@@ -27653,16 +28797,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -27671,7 +28815,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -27709,16 +28862,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description The source is a core source the engine owns, such as the landing source main, whose columns no promotion may change (code conflict) */
@@ -27727,7 +28880,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -27736,7 +28889,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -27765,17 +28927,25 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A refused action answers in the RFC 7644 error envelope. */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                    "application/scim+json": unknown;
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -27804,17 +28974,25 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A refused action answers in the RFC 7644 error envelope. */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                    "application/scim+json": unknown;
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -27845,17 +29023,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A refused action answers in the RFC 7644 error envelope. */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                    "application/scim+json": unknown;
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -27864,7 +29041,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -27895,17 +29081,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A refused action answers in the RFC 7644 error envelope. */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                    "application/scim+json": unknown;
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -27914,7 +29099,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -27945,17 +29139,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A refused action answers in the RFC 7644 error envelope. */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                    "application/scim+json": unknown;
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -27964,7 +29157,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -27995,17 +29197,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A refused action answers in the RFC 7644 error envelope. */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                    "application/scim+json": unknown;
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -28014,7 +29215,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -28043,17 +29253,25 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A refused action answers in the RFC 7644 error envelope. */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                    "application/scim+json": unknown;
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -28082,17 +29300,25 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A refused action answers in the RFC 7644 error envelope. */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                    "application/scim+json": unknown;
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -28123,17 +29349,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A refused action answers in the RFC 7644 error envelope. */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                    "application/scim+json": unknown;
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -28142,7 +29367,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -28173,17 +29407,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A refused action answers in the RFC 7644 error envelope. */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                    "application/scim+json": unknown;
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -28192,7 +29425,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -28223,17 +29465,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A refused action answers in the RFC 7644 error envelope. */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                    "application/scim+json": unknown;
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -28242,7 +29483,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -28273,17 +29523,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A refused action answers in the RFC 7644 error envelope. */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                    "application/scim+json": unknown;
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -28292,7 +29541,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -28315,6 +29573,15 @@ export interface operations {
                     "application/json": unknown;
                 };
             };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
         };
     };
     "scim.v2.resource-types.list": {
@@ -28335,6 +29602,15 @@ export interface operations {
                     "application/json": unknown;
                 };
             };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
         };
     };
     "scim.v2.schemas.list": {
@@ -28353,6 +29629,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": unknown;
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -28383,16 +29668,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -28401,7 +29686,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -28409,8 +29703,12 @@ export interface operations {
     "sigma.views.list": {
         parameters: {
             query?: {
-                page?: number;
-                per_page?: number;
+                /** @description Items per page: 0 means 50, above 1000 is cut to it */
+                page_size?: number;
+                /** @description The next_page_token of the previous page */
+                page_token?: string | null;
+                /** @description Items to skip, after page_token */
+                skip?: number;
             };
             header?: never;
             path?: never;
@@ -28424,7 +29722,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PaginatedResponse_SigmaViewSummary_"];
+                    "application/json": components["schemas"]["Page_SigmaViewSummary_"];
                 };
             };
             /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */
@@ -28433,16 +29731,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -28451,7 +29749,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -28485,16 +29792,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -28503,7 +29810,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -28534,16 +29850,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -28552,7 +29868,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -28587,16 +29912,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -28605,7 +29930,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -28639,16 +29973,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -28657,7 +29991,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -28686,16 +30029,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -28704,7 +30047,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -28718,6 +30070,12 @@ export interface operations {
                 category?: string | null;
                 /** @description Sigma logsource service (e.g. sysmon, security) */
                 service?: string | null;
+                /** @description Items per page: 0 means 50, above 1000 is cut to it */
+                page_size?: number;
+                /** @description The next_page_token of the previous page */
+                page_token?: string | null;
+                /** @description Items to skip, after page_token */
+                skip?: number;
             };
             header?: never;
             path?: never;
@@ -28731,7 +30089,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["LogsourceMatch"][];
+                    "application/json": components["schemas"]["Page_LogsourceMatch_"];
                 };
             };
             /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */
@@ -28740,16 +30098,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -28758,14 +30116,30 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
     };
     "sigma.providers.list": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Items per page: 0 means 50, above 1000 is cut to it */
+                page_size?: number;
+                /** @description The next_page_token of the previous page */
+                page_token?: string | null;
+                /** @description Items to skip, after page_token */
+                skip?: number;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -28778,7 +30152,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ProviderConfig"][];
+                    "application/json": components["schemas"]["Page_ProviderConfig_"];
                 };
             };
             /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */
@@ -28787,16 +30161,34 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -28829,16 +30221,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -28847,7 +30239,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -28878,16 +30279,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -28896,7 +30297,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -28931,16 +30341,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -28949,7 +30359,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -28978,16 +30397,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -28996,7 +30415,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -29027,16 +30455,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -29045,7 +30473,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -29076,16 +30513,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -29094,7 +30531,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -29130,16 +30576,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -29148,7 +30594,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -29179,16 +30634,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -29197,7 +30652,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -29209,8 +30673,12 @@ export interface operations {
                 q?: string | null;
                 /** @description Filter by selection state */
                 selected?: boolean | null;
-                page?: number;
-                per_page?: number;
+                /** @description Items per page: 0 means 50, above 1000 is cut to it */
+                page_size?: number;
+                /** @description The next_page_token of the previous page */
+                page_token?: string | null;
+                /** @description Items to skip, after page_token */
+                skip?: number;
             };
             header?: never;
             path?: never;
@@ -29224,7 +30692,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PaginatedResponse_CatalogRuleSummary_"];
+                    "application/json": components["schemas"]["Page_CatalogRuleSummary_"];
                 };
             };
             /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */
@@ -29233,16 +30701,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -29251,7 +30719,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -29282,16 +30759,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -29300,7 +30777,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -29335,16 +30821,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -29353,7 +30839,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -29382,16 +30877,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -29400,7 +30895,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -29431,16 +30935,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -29449,7 +30953,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -29478,16 +30991,25 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -29518,16 +31040,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -29536,7 +31058,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -29567,16 +31098,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -29585,7 +31116,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -29621,16 +31161,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -29639,7 +31179,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -29670,16 +31219,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -29688,7 +31237,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -29700,8 +31258,12 @@ export interface operations {
                 source?: string | null;
                 /** @description Filter by drift state */
                 drift?: boolean | null;
-                page?: number;
-                per_page?: number;
+                /** @description Items per page: 0 means 50, above 1000 is cut to it */
+                page_size?: number;
+                /** @description The next_page_token of the previous page */
+                page_token?: string | null;
+                /** @description Items to skip, after page_token */
+                skip?: number;
             };
             header?: never;
             path?: never;
@@ -29715,7 +31277,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PaginatedResponse_BindingSummary_"];
+                    "application/json": components["schemas"]["Page_BindingSummary_"];
                 };
             };
             /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */
@@ -29724,16 +31286,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -29742,7 +31304,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -29773,16 +31344,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -29791,7 +31362,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -29820,16 +31400,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -29838,7 +31418,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -29871,16 +31460,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -29889,7 +31478,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -29922,16 +31520,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -29940,14 +31538,30 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
     };
     "helm.files": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Items per page: 0 means 50, above 1000 is cut to it */
+                page_size?: number;
+                /** @description The next_page_token of the previous page */
+                page_token?: string | null;
+                /** @description Items to skip, after page_token */
+                skip?: number;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -29960,7 +31574,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": string[];
+                    "application/json": components["schemas"]["Page_str_"];
                 };
             };
             /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */
@@ -29969,23 +31583,48 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
     };
     "helm.files.vars.list": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Items per page: 0 means 50, above 1000 is cut to it */
+                page_size?: number;
+                /** @description The next_page_token of the previous page */
+                page_token?: string | null;
+                /** @description Items to skip, after page_token */
+                skip?: number;
+            };
             header?: never;
             path: {
                 name: string;
@@ -30000,9 +31639,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": {
-                        [key: string]: unknown;
-                    }[];
+                    "application/json": components["schemas"]["Page_dict_str__Any__"];
                 };
             };
             /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */
@@ -30011,16 +31648,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -30029,7 +31666,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -30067,16 +31713,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -30085,7 +31731,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -30117,16 +31772,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -30135,14 +31790,30 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
     };
     "backing-services.list": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Items per page: 0 means 50, above 1000 is cut to it */
+                page_size?: number;
+                /** @description The next_page_token of the previous page */
+                page_token?: string | null;
+                /** @description Items to skip, after page_token */
+                skip?: number;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -30155,7 +31826,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["BackingServiceConfig"][];
+                    "application/json": components["schemas"]["Page_BackingServiceConfig_"];
                 };
             };
             /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */
@@ -30164,23 +31835,48 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
     };
     "backing-services.overlays": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Items per page: 0 means 50, above 1000 is cut to it */
+                page_size?: number;
+                /** @description The next_page_token of the previous page */
+                page_token?: string | null;
+                /** @description Items to skip, after page_token */
+                skip?: number;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -30193,7 +31889,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": string[];
+                    "application/json": components["schemas"]["Page_str_"];
                 };
             };
             /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */
@@ -30202,23 +31898,48 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
     };
     "backing-services.overlays.vars.list": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Items per page: 0 means 50, above 1000 is cut to it */
+                page_size?: number;
+                /** @description The next_page_token of the previous page */
+                page_token?: string | null;
+                /** @description Items to skip, after page_token */
+                skip?: number;
+            };
             header?: never;
             path: {
                 name: string;
@@ -30233,9 +31954,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": {
-                        [key: string]: unknown;
-                    }[];
+                    "application/json": components["schemas"]["Page_dict_str__Any__"];
                 };
             };
             /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */
@@ -30244,16 +31963,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -30262,7 +31981,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -30293,16 +32021,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -30311,7 +32039,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -30349,16 +32086,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description managed_by_provider: DFE does not run the service, so nothing in the deployment reads this value; context names who sizes it and set_in where. Also conflict (a stale If-Match) and review_required (production+team). */
@@ -30367,7 +32104,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -30376,7 +32113,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -30408,16 +32154,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description managed_by_provider: DFE does not run the service, so nothing in the deployment reads this value; context names who sizes it and set_in where. Also conflict (a stale If-Match) and review_required (production+team). */
@@ -30426,7 +32172,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -30435,7 +32181,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -30445,6 +32200,12 @@ export interface operations {
             query?: {
                 /** @description Deployment profile to judge each app's offer against, so the rule stays in one place rather than being re-derived by every caller. Omit it and this deployment's own profile is used; omit it where the deployment states none and every app is reported as offered. */
                 profile?: string;
+                /** @description Items per page: 0 means 50, above 1000 is cut to it */
+                page_size?: number;
+                /** @description The next_page_token of the previous page */
+                page_token?: string | null;
+                /** @description Items to skip, after page_token */
+                skip?: number;
             };
             header?: never;
             path?: never;
@@ -30458,7 +32219,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["CatalogueEntry"][];
+                    "application/json": components["schemas"]["Page_CatalogueEntry_"];
                 };
             };
             /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */
@@ -30467,16 +32228,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -30485,7 +32246,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -30522,16 +32292,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -30540,7 +32310,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -30560,6 +32339,8 @@ export interface operations {
             /** @description Successful Response */
             200: {
                 headers: {
+                    /** @description The current entity-tag, for If-Match */
+                    ETag?: string;
                     [name: string]: unknown;
                 };
                 content: {
@@ -30572,16 +32353,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -30590,7 +32371,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -30624,16 +32414,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -30642,7 +32432,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -30652,6 +32451,12 @@ export interface operations {
             query?: {
                 applied_revision?: string | null;
                 limit?: number;
+                /** @description Items per page: 0 means 50, above 1000 is cut to it */
+                page_size?: number;
+                /** @description The next_page_token of the previous page */
+                page_token?: string | null;
+                /** @description Items to skip, after page_token */
+                skip?: number;
             };
             header?: never;
             path: {
@@ -30668,7 +32473,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HistoryEntry"][];
+                    "application/json": components["schemas"]["Page_HistoryEntry_"];
                 };
             };
             /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */
@@ -30677,16 +32482,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -30695,7 +32500,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -30727,16 +32541,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -30745,7 +32559,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -30765,6 +32588,8 @@ export interface operations {
             /** @description Successful Response */
             200: {
                 headers: {
+                    /** @description The current entity-tag, for If-Match */
+                    ETag?: string;
                     [name: string]: unknown;
                 };
                 content: {
@@ -30777,16 +32602,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -30795,7 +32620,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -30833,16 +32667,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -30851,7 +32685,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -30888,16 +32731,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -30906,7 +32749,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -30926,6 +32778,8 @@ export interface operations {
             /** @description Successful Response */
             200: {
                 headers: {
+                    /** @description The current entity-tag, for If-Match */
+                    ETag?: string;
                     [name: string]: unknown;
                 };
                 content: {
@@ -30938,16 +32792,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -30956,7 +32810,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -30994,16 +32857,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -31012,14 +32875,30 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
     };
     "apps.files.list": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Items per page: 0 means 50, above 1000 is cut to it */
+                page_size?: number;
+                /** @description The next_page_token of the previous page */
+                page_token?: string | null;
+                /** @description Items to skip, after page_token */
+                skip?: number;
+            };
             header?: never;
             path: {
                 service: string;
@@ -31036,7 +32915,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["FileSummary"][];
+                    "application/json": components["schemas"]["Page_FileSummary_"];
                 };
             };
             /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */
@@ -31045,16 +32924,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -31063,14 +32942,30 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
     };
     "apps.files.links.list": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Items per page: 0 means 50, above 1000 is cut to it */
+                page_size?: number;
+                /** @description The next_page_token of the previous page */
+                page_token?: string | null;
+                /** @description Items to skip, after page_token */
+                skip?: number;
+            };
             header?: never;
             path: {
                 service: string;
@@ -31087,7 +32982,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["LinkStatusModel"][];
+                    "application/json": components["schemas"]["Page_LinkStatusModel_"];
                 };
             };
             /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */
@@ -31096,16 +32991,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -31114,7 +33009,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -31153,16 +33057,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -31171,7 +33075,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -31206,16 +33119,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -31224,7 +33137,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -31263,16 +33185,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -31281,7 +33203,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -31303,6 +33234,8 @@ export interface operations {
             /** @description Successful Response */
             200: {
                 headers: {
+                    /** @description The current entity-tag, for If-Match */
+                    ETag?: string;
                     [name: string]: unknown;
                 };
                 content: {
@@ -31315,16 +33248,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -31333,7 +33266,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -31376,16 +33318,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description The file exceeds repository.max_object_bytes (HTTP 413, code payload_too_large). Tune via DFE_ENGINE_REPOSITORY_MAX_OBJECT_BYTES. */
@@ -31394,7 +33336,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -31403,7 +33345,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -31439,16 +33390,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -31457,7 +33408,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -31489,16 +33449,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -31507,7 +33467,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -31541,16 +33510,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -31559,7 +33528,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -31596,16 +33574,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -31614,7 +33592,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -31646,16 +33633,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -31664,7 +33651,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -31696,16 +33692,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -31714,7 +33710,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -31749,16 +33754,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -31767,7 +33772,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -31798,16 +33812,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -31816,14 +33830,30 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
     };
     "library.kinds": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Items per page: 0 means 50, above 1000 is cut to it */
+                page_size?: number;
+                /** @description The next_page_token of the previous page */
+                page_token?: string | null;
+                /** @description Items to skip, after page_token */
+                skip?: number;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -31836,7 +33866,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["KindModel"][];
+                    "application/json": components["schemas"]["Page_KindModel_"];
                 };
             };
             /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */
@@ -31845,16 +33875,34 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -31869,6 +33917,12 @@ export interface operations {
                 label?: string[];
                 /** @description Substring of the name or the description. */
                 q?: string;
+                /** @description Items per page: 0 means 50, above 1000 is cut to it */
+                page_size?: number;
+                /** @description The next_page_token of the previous page */
+                page_token?: string | null;
+                /** @description Items to skip, after page_token */
+                skip?: number;
             };
             header?: never;
             path?: never;
@@ -31882,7 +33936,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ArtifactModel"][];
+                    "application/json": components["schemas"]["Page_ArtifactModel_"];
                 };
             };
             /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */
@@ -31891,16 +33945,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -31909,7 +33963,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -31942,16 +34005,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -31960,7 +34023,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -31979,6 +34051,8 @@ export interface operations {
             /** @description Successful Response */
             200: {
                 headers: {
+                    /** @description The current entity-tag, for If-Match */
+                    ETag?: string;
                     [name: string]: unknown;
                 };
                 content: {
@@ -31991,16 +34065,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -32009,7 +34083,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -32040,16 +34123,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -32058,7 +34141,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -32095,16 +34187,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -32113,7 +34205,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -32148,16 +34249,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -32166,14 +34267,30 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
     };
     "library.versions.list": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Items per page: 0 means 50, above 1000 is cut to it */
+                page_size?: number;
+                /** @description The next_page_token of the previous page */
+                page_token?: string | null;
+                /** @description Items to skip, after page_token */
+                skip?: number;
+            };
             header?: never;
             path: {
                 artifact: string;
@@ -32188,7 +34305,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["VersionSummary"][];
+                    "application/json": components["schemas"]["Page_VersionSummary_"];
                 };
             };
             /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */
@@ -32197,16 +34314,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -32215,7 +34332,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -32252,16 +34378,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -32270,7 +34396,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -32302,16 +34437,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -32320,7 +34455,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -32355,16 +34499,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -32373,7 +34517,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -32409,16 +34562,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -32427,7 +34580,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -32459,16 +34621,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -32477,14 +34639,30 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
     };
     "library.usage.get": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Items per page: 0 means 50, above 1000 is cut to it */
+                page_size?: number;
+                /** @description The next_page_token of the previous page */
+                page_token?: string | null;
+                /** @description Items to skip, after page_token */
+                skip?: number;
+            };
             header?: never;
             path: {
                 artifact: string;
@@ -32499,7 +34677,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["UsageModel"][];
+                    "application/json": components["schemas"]["Page_UsageModel_"];
                 };
             };
             /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */
@@ -32508,16 +34686,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -32526,14 +34704,30 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
     };
     "governance.actions.list": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Items per page: 0 means 50, above 1000 is cut to it */
+                page_size?: number;
+                /** @description The next_page_token of the previous page */
+                page_token?: string | null;
+                /** @description Items to skip, after page_token */
+                skip?: number;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -32546,7 +34740,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": string[];
+                    "application/json": components["schemas"]["Page_str_"];
                 };
             };
             /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */
@@ -32555,16 +34749,34 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -32595,16 +34807,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -32613,14 +34825,30 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
     };
     "governance.policies.list": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Items per page: 0 means 50, above 1000 is cut to it */
+                page_size?: number;
+                /** @description The next_page_token of the previous page */
+                page_token?: string | null;
+                /** @description Items to skip, after page_token */
+                skip?: number;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -32633,7 +34861,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": string[];
+                    "application/json": components["schemas"]["Page_str_"];
                 };
             };
             /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */
@@ -32642,16 +34870,34 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -32682,16 +34928,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -32700,7 +34946,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -32737,16 +34992,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -32755,7 +35010,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -32788,16 +35052,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -32806,7 +35070,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -32839,16 +35112,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -32857,7 +35130,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -32886,16 +35168,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -32904,7 +35186,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -32937,16 +35228,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -32955,7 +35246,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -32984,16 +35284,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -33002,7 +35302,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -33033,16 +35342,25 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -33071,16 +35389,25 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -33113,16 +35440,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -33131,14 +35458,30 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
     };
     "gitops.classes.list": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Items per page: 0 means 50, above 1000 is cut to it */
+                page_size?: number;
+                /** @description The next_page_token of the previous page */
+                page_token?: string | null;
+                /** @description Items to skip, after page_token */
+                skip?: number;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -33151,7 +35494,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ClassInfo"][];
+                    "application/json": components["schemas"]["Page_ClassInfo_"];
                 };
             };
             /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */
@@ -33160,23 +35503,48 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
     };
     "gitops.classes.resources.list": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Items per page: 0 means 50, above 1000 is cut to it */
+                page_size?: number;
+                /** @description The next_page_token of the previous page */
+                page_token?: string | null;
+                /** @description Items to skip, after page_token */
+                skip?: number;
+            };
             header?: never;
             path: {
                 cls: string;
@@ -33191,7 +35559,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": string[];
+                    "application/json": components["schemas"]["Page_str_"];
                 };
             };
             /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */
@@ -33200,16 +35568,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -33218,14 +35586,30 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
     };
     "gitops.classes.resources.vars.list": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Items per page: 0 means 50, above 1000 is cut to it */
+                page_size?: number;
+                /** @description The next_page_token of the previous page */
+                page_token?: string | null;
+                /** @description Items to skip, after page_token */
+                skip?: number;
+            };
             header?: never;
             path: {
                 cls: string;
@@ -33241,7 +35625,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["VarEntry"][];
+                    "application/json": components["schemas"]["Page_VarEntry_"];
                 };
             };
             /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */
@@ -33250,16 +35634,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -33268,7 +35652,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -33302,16 +35695,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -33320,14 +35713,30 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
     };
     "lifecycle.list": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Items per page: 0 means 50, above 1000 is cut to it */
+                page_size?: number;
+                /** @description The next_page_token of the previous page */
+                page_token?: string | null;
+                /** @description Items to skip, after page_token */
+                skip?: number;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -33340,7 +35749,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ServiceInfo"][];
+                    "application/json": components["schemas"]["Page_ServiceInfo_"];
                 };
             };
             /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */
@@ -33349,16 +35758,34 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -33393,16 +35820,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -33411,7 +35838,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -33446,16 +35882,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -33464,7 +35900,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -33499,16 +35944,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -33517,7 +35962,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -33550,16 +36004,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -33568,7 +36022,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -33601,16 +36064,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -33619,7 +36082,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -33652,16 +36124,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -33670,7 +36142,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -33703,16 +36184,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -33721,7 +36202,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -33750,16 +36240,25 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -33788,16 +36287,25 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -33826,16 +36334,25 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -33852,6 +36369,8 @@ export interface operations {
             /** @description Successful Response */
             200: {
                 headers: {
+                    /** @description The current entity-tag, for If-Match */
+                    ETag?: string;
                     [name: string]: unknown;
                 };
                 content: {
@@ -33864,16 +36383,25 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -33910,16 +36438,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -33928,14 +36456,30 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
     };
     "repository.objects.list": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Items per page: 0 means 50, above 1000 is cut to it */
+                page_size?: number;
+                /** @description The next_page_token of the previous page */
+                page_token?: string | null;
+                /** @description Items to skip, after page_token */
+                skip?: number;
+            };
             header?: never;
             path: {
                 scope: "system" | "org" | "group" | "user";
@@ -33952,7 +36496,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ObjectEntry"][];
+                    "application/json": components["schemas"]["Page_ObjectEntry_"];
                 };
             };
             /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */
@@ -33961,16 +36505,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -33979,7 +36523,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -34001,6 +36554,8 @@ export interface operations {
             /** @description Successful Response */
             200: {
                 headers: {
+                    /** @description The current entity-tag, for If-Match */
+                    ETag?: string;
                     [name: string]: unknown;
                 };
                 content: {
@@ -34013,16 +36568,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -34031,7 +36586,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -34067,16 +36631,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -34085,7 +36649,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -34117,16 +36690,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Validation Error */
@@ -34135,7 +36708,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };

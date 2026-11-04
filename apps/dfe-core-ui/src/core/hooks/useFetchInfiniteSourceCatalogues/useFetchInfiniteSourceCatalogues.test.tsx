@@ -30,7 +30,7 @@ const { wrapper } = buildTestWrapper().withReactQuery();
 
 const DEFAULT_HOOK_PROPS: UseFetchInfiniteSourceCataloguesProps = {
   search: '',
-  per_page: 10,
+  page_size: 10,
 };
 
 beforeAll(() =>
@@ -56,12 +56,8 @@ describe('useFetchInfiniteSourceCatalogues', () => {
       expect(result.current.isLoading).toBe(true);
       expect(result.current.data).toEqual({
         items: [],
-        total: 0,
-        page: 1,
-        per_page: 10,
-        total_pages: 0,
-        next_page: null,
-        prev_page: null,
+        total_size: 0,
+        next_page_token: null,
       });
       expect(result.current.isError).toBe(false);
       expect(result.current.isFetchingNextPage).toBe(false);
@@ -101,12 +97,8 @@ describe('useFetchInfiniteSourceCatalogues', () => {
 
       const expectedResponse = {
         items: expect.any(Array),
-        total: 25,
-        page: 1,
-        per_page: 10,
-        total_pages: 3,
-        next_page: 2,
-        prev_page: 0,
+        total_size: 25,
+        next_page_token: '10',
       };
 
       expect(result.current).toMatchObject({
@@ -192,7 +184,7 @@ describe('useFetchInfiniteSourceCatalogues', () => {
         () =>
           useFetchInfiniteSourceCatalogues({
             ...DEFAULT_HOOK_PROPS,
-            per_page: 10,
+            page_size: 10,
           }),
         {
           wrapper,
@@ -227,12 +219,12 @@ describe('useFetchInfiniteSourceCatalogues', () => {
   });
 
   describe('custom page size', () => {
-    it('should respect per_page parameter', async () => {
+    it('should respect page_size parameter', async () => {
       const { result } = renderHook(
         () =>
           useFetchInfiniteSourceCatalogues({
             ...DEFAULT_HOOK_PROPS,
-            per_page: 5,
+            page_size: 5,
           }),
         {
           wrapper,
@@ -246,12 +238,12 @@ describe('useFetchInfiniteSourceCatalogues', () => {
       expect(result.current.data.items).toHaveLength(5);
     });
 
-    it('should handle per_page larger than available data', async () => {
+    it('should handle page_size larger than available data', async () => {
       const { result } = renderHook(
         () =>
           useFetchInfiniteSourceCatalogues({
             ...DEFAULT_HOOK_PROPS,
-            per_page: 100,
+            page_size: 100,
           }),
         {
           wrapper,
@@ -287,12 +279,8 @@ describe('useFetchInfiniteSourceCatalogues', () => {
       // Data is empty array due to flattening logic when there's an error
       expect(result.current.data).toEqual({
         items: [],
-        total: 0,
-        page: 1,
-        per_page: 10,
-        total_pages: 0,
-        next_page: null,
-        prev_page: null,
+        total_size: 0,
+        next_page_token: null,
       });
     });
   });
@@ -308,20 +296,17 @@ describe('useFetchInfiniteSourceCatalogues', () => {
         http.get(
           API_CONFIG_MOCKS.sources.catalogue.mockedUrl,
           async ({ request }) => {
-            const page = Number(
-              new URL(request.url).searchParams.get('page') ?? '1',
+            const skip = Number(
+              new URL(request.url).searchParams.get('skip') ?? '0',
             );
+            const page = skip / 10 + 1;
             if (page > 1) {
               await nextPage;
             }
             return HttpResponse.json({
               items: [{ ...SOURCE_CATALOGUE_ITEM, name: `page-${page}` }],
-              total: 2,
-              page,
-              per_page: 10,
-              total_pages: 2,
-              next_page: page < 2 ? 2 : null,
-              prev_page: page > 1 ? 1 : null,
+              total_size: 2,
+              next_page_token: page < 2 ? '1' : null,
             });
           },
         ),
@@ -332,7 +317,7 @@ describe('useFetchInfiniteSourceCatalogues', () => {
           useFetchInfiniteSourceCatalogues(props),
         {
           wrapper,
-          initialProps: { per_page: 10, page: 1 },
+          initialProps: { page_size: 10, page: 1 },
         },
       );
 
@@ -340,7 +325,7 @@ describe('useFetchInfiniteSourceCatalogues', () => {
         expect(result.current.data.items[0]?.name).toBe('page-1');
       });
 
-      rerender({ per_page: 10, page: 2 });
+      rerender({ page_size: 10, page: 2 });
 
       await new Promise((resolve) => setTimeout(resolve, 50));
 
@@ -382,12 +367,8 @@ describe('useFetchInfiniteSourceCatalogues', () => {
             intakesAsked.push(new URL(request.url).searchParams.get('intake'));
             return HttpResponse.json({
               items: [SOURCE_CATALOGUE_ITEM],
-              total: 1,
-              page: 1,
-              per_page: 10,
-              total_pages: 1,
-              next_page: null,
-              prev_page: null,
+              total_size: 1,
+              next_page_token: null,
             });
           },
         ),
@@ -411,12 +392,12 @@ describe('useFetchInfiniteSourceCatalogues', () => {
       expect(result.current.data.items).toEqual([SOURCE_CATALOGUE_ITEM]);
     });
 
-    it('should include per_page filter in query', async () => {
+    it('should include page_size filter in query', async () => {
       const { result } = renderHook(
         () =>
           useFetchInfiniteSourceCatalogues({
             ...DEFAULT_HOOK_PROPS,
-            per_page: 10,
+            page_size: 10,
           }),
         {
           wrapper,
@@ -504,12 +485,8 @@ describe('useFetchInfiniteSourceCatalogues', () => {
         API_CONFIG_MOCKS.sources.catalogue.get.success({
           mockedResponse: {
             items: [],
-            total: 0,
-            page: 1,
-            per_page: 10,
-            total_pages: 0,
-            next_page: null,
-            prev_page: null,
+            total_size: 0,
+            next_page_token: null,
           },
         }),
       );

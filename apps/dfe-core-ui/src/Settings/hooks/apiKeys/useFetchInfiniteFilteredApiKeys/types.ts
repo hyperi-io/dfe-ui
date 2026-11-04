@@ -14,6 +14,5 @@ export interface useFetchInfiniteFilteredApiKeysProps {
   search?: string;
   sort_by?: 'name' | 'scope';
   sort_order?: 'asc' | 'desc';
-  page?: number;
-  per_page?: number;
+  page_size?: number;
 }

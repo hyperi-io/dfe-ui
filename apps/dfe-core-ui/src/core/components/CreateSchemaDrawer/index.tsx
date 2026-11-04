@@ -3,7 +3,7 @@ import { Drawer } from '@/core/components/Drawer';
 import { CreateSchemaForm } from '@/core/components/CreateSchemaForm';
 import { RbacProtected } from '@/core/components/RbacProtected';
 import { ReviewCreateSchemaForm } from '@/core/components/ReviewCreateSchemaForm';
-import { getApiErrorResponseBody } from '@/core/config/api/client';
+import { getApiErrorSummary } from '@/core/config/api/client';
 import {
   CreateSchemaReviewProvider,
   useCreateSchemaReviewContext,
@@ -60,11 +60,7 @@ const CreateSchemaDrawerBase = ({
         onSuccess?.(response);
       },
       onError: (error) => {
-        const body = getApiErrorResponseBody(error);
-        setFormErrorMessage({
-          message: body?.message ?? 'An unexpected error occurred',
-          errors: body?.errors ?? [],
-        });
+        setFormErrorMessage(getApiErrorSummary(error));
       },
     },
   );

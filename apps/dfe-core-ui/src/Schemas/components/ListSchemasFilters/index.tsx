@@ -10,7 +10,7 @@ export const ListSchemasFilters = ({
   onCollapseChange?: (open: boolean) => void;
 }) => {
   const {
-    data: { items: schemas, total },
+    data: { items: schemas, total_size: total },
     hasFilters,
     filters,
   } = useListSchemasContext();

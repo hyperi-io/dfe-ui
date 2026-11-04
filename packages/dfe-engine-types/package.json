@@ -14,7 +14,8 @@
     "clean": "rm -rf types",
     "generate:e2e-types": "openapi-typescript ./specs/openapi.e2e.json -o ./types/e2e.d.ts",
     "generate:engine-types": "openapi-typescript ./specs/openapi.json -o ./types/index.d.ts",
-    "generate": "yarn clean && yarn generate:e2e-types && yarn generate:engine-types"
+    "generate": "yarn clean && yarn generate:e2e-types && yarn generate:engine-types && yarn generate:scopes",
+    "generate:scopes": "node ./scripts/generate-scopes.mjs"
   },
   "devDependencies": {
     "openapi-typescript": "^7.13.0",

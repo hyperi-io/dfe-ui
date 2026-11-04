@@ -1,3 +1,4 @@
+import { pageOf } from '@/core/utils/test-utils/pageOf';
 import { API_CONFIG_MOCKS } from '@/core/config/api/endpoints/generator';
 import { OKTA_CATALOGUE_ENTRY } from '@/core/config/api/endpoints/generator/mocks/sources';
 import { Form } from '@/core/components/Form';
@@ -194,21 +195,10 @@ describe('TransformForm', () => {
           ({ request }) => {
             const params = new URL(request.url).searchParams;
             const engine = params.get('engine')?.toLowerCase();
-            const perPage = Number(params.get('per_page') ?? 25);
-            const page = Number(params.get('page') ?? 1);
             const all = [...elastic, vrl].filter(
               (entry) => !engine || entry.engine?.toLowerCase() === engine,
             );
-            const totalPages = Math.ceil(all.length / perPage);
-            return HttpResponse.json({
-              items: all.slice((page - 1) * perPage, page * perPage),
-              total: all.length,
-              page,
-              per_page: perPage,
-              total_pages: totalPages,
-              next_page: page < totalPages ? page + 1 : null,
-              prev_page: page > 1 ? page - 1 : null,
-            });
+            return HttpResponse.json(pageOf(all, request));
           },
         ),
       );
@@ -234,12 +224,8 @@ describe('TransformForm', () => {
             }
             return HttpResponse.json({
               items: [OKTA_CATALOGUE_ENTRY],
-              total: 1069,
-              page: 1,
-              per_page: 1,
-              total_pages: 1069,
-              next_page: 2,
-              prev_page: null,
+              total_size: 1069,
+              next_page_token: null,
             });
           },
         ),

@@ -33,12 +33,8 @@ export const schemas = {
               resource_type: RESOURCE_TYPES.CORE,
             },
           ],
-          total: 0,
-          page: 0,
-          per_page: 0,
-          total_pages: 0,
-          next_page: 0,
-          prev_page: 0,
+          total_size: 0,
+          next_page_token: null,
           objects: {
             items: [],
             children: {
@@ -288,25 +284,19 @@ export const schemas = {
             date: 'string',
             type: 'string',
             summary: 'string',
-            columns: {
-              items: [
-                {
-                  name: 'string',
-                  type: 'string',
-                  attribute: ['string'],
-                  use_case: 'string',
-                  expr: 'string',
-                  _field_type: SCHEMA_FIELD_TYPES.BASE,
-                },
-              ],
-              total: 1,
-              page: 1,
-              per_page: 25,
-              total_pages: 1,
-              next_page: null,
-              prev_page: null,
-            },
           },
+          items: [
+            {
+              name: 'string',
+              type: 'string',
+              attribute: ['string'],
+              use_case: 'string',
+              expr: 'string',
+              _field_type: SCHEMA_FIELD_TYPES.BASE,
+            },
+          ],
+          total_size: 1,
+          next_page_token: null,
         },
         schema_path = 'path',
       }: {

@@ -1,5 +1,6 @@
 import {
   DfeClientOperationFor,
+  DfeClientPageItem,
   DfeClientSuccessResponseBody,
 } from '@/core/config/api/client.types';
 
@@ -10,7 +11,7 @@ export type TAdminLinksResponse = DfeClientSuccessResponseBody<
 >;
 
 /** One admin UI the deployment runs, as its deployer listed it. */
-export type TAdminLink = TAdminLinksResponse[number];
+export type TAdminLink = DfeClientPageItem<TAdminLinksResponse>;
 
 /** `unknown` means the deployer gave the engine no address to probe. */
 export type TAdminLinkStatus = TAdminLink['status'];

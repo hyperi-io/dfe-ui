@@ -9,7 +9,7 @@ const SCROLL_LOAD_THRESHOLD = 5;
 export const RoleScopeSelect = (props: SelectProps) => {
   const [search, setSearch] = useState<string>('');
   const {
-    data: { scopes: roleScopes = [] } = {},
+    data: { items: roleScopes = [] } = {},
     isLoading,
     error,
     fetchNextPage,

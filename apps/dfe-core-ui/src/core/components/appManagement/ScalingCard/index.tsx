@@ -139,7 +139,7 @@ export const ScalingCard = ({
   const conflict = getApiWriteConflict(updateError);
   const updateMessage = conflict
     ? undefined
-    : (getApiErrorResponseBody(updateError)?.message ?? updateError?.message);
+    : (getApiErrorResponseBody(updateError)?.detail ?? updateError?.message);
 
   const reloadAfterConflict = () => {
     resetWriteResult();

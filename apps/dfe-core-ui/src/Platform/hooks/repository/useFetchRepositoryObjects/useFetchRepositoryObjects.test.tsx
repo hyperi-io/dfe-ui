@@ -29,7 +29,7 @@ describe('.useFetchRepositoryObjects', () => {
       },
     );
 
-    const response: TRepositoryObjectsResponse = [
+    const response: TRepositoryObjectsResponse['items'] = [
       {
         key: 'key',
         content_type: 'content_type',

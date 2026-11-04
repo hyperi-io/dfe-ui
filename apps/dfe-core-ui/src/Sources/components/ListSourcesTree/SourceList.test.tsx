@@ -57,8 +57,9 @@ describe('SourceList', () => {
   it('says why when the engine refuses the list with a 403', async () => {
     server.use(
       refuse(403, {
+        title: 'Error',
         code: 'forbidden',
-        message: "Role 'viewer' lacks the scope 'source:read'",
+        detail: "Role 'viewer' lacks the scope 'source:read'",
       }),
     );
     render(<SourceList />, { wrapper });
@@ -74,7 +75,11 @@ describe('SourceList', () => {
 
   it('shows the engine reason, not an empty list, when the list fails otherwise', async () => {
     server.use(
-      refuse(500, { code: 'internal_error', message: 'the registry is down' }),
+      refuse(500, {
+        title: 'Error',
+        code: 'internal_error',
+        detail: 'the registry is down',
+      }),
     );
     render(<SourceList />, { wrapper });
 
@@ -91,12 +96,8 @@ describe('SourceList', () => {
         mockedResponse: {
           items: [],
           objects: { items: [], children: {} },
-          total: 0,
-          page: 1,
-          per_page: 10,
-          total_pages: 1,
-          next_page: null,
-          prev_page: null,
+          total_size: 0,
+          next_page_token: null,
         },
       }),
     );
@@ -112,12 +113,8 @@ describe('SourceList', () => {
         return HttpResponse.json({
           items: [],
           objects: { items: [], children: {} },
-          total: 0,
-          page: 1,
-          per_page: 10,
-          total_pages: 1,
-          next_page: null,
-          prev_page: null,
+          total_size: 0,
+          next_page_token: null,
         });
       }),
     );
@@ -134,7 +131,7 @@ describe('SourceList', () => {
       http.get(API_CONFIG_MOCKS.sources.default.mockedUrl, () => {
         calls += 1;
         return HttpResponse.json(
-          { code: 'refused', message: 'refused' },
+          { title: 'Error', code: 'refused', detail: 'refused' },
           { status },
         );
       }),

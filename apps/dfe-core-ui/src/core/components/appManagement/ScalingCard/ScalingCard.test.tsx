@@ -268,10 +268,12 @@ describe('ScalingCard', () => {
         sent.push(request.headers.get('If-Match'));
         return HttpResponse.json(
           {
+            title: 'Error',
             code: 'conflict',
-            message: 'base revision is stale',
+            detail: 'base revision is stale',
             errors: [],
-            context: { current: 'aaaaaaa1111', head: 'bbbbbbb2222' },
+            current: 'aaaaaaa1111',
+            head: 'bbbbbbb2222',
           },
           { status: 409 },
         );

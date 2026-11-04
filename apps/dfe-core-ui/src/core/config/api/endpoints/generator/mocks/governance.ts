@@ -19,10 +19,10 @@ export const governance = {
       success: ({
         mockedResponse = ['string'],
       }: {
-        mockedResponse?: TGovernanceActionsResponse;
+        mockedResponse?: TGovernanceActionsResponse['items'];
       } = {}) => {
         return http.get(governance.actions.mockedUrl, () => {
-          return HttpResponse.json(mockedResponse);
+          return HttpResponse.json({ items: mockedResponse });
         });
       },
     },
@@ -63,9 +63,9 @@ export const governance = {
     get: {
       success: ({
         mockedResponse = ['string'],
-      }: { mockedResponse?: TGovernancePoliciesResponse } = {}) => {
+      }: { mockedResponse?: TGovernancePoliciesResponse['items'] } = {}) => {
         return http.get(governance.policies.mockedUrl, () => {
-          return HttpResponse.json(mockedResponse);
+          return HttpResponse.json({ items: mockedResponse });
         });
       },
     },

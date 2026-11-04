@@ -42,9 +42,9 @@ const parseFiltersFromParams = (
     sourceParam === null || sourceParam === '' ? undefined : sourceParam;
   const sort_by = params.get('sort_by') ?? undefined;
   const sort_order = params.get('sort_order') ?? undefined;
-  const per_pageParam = params.get('per_page');
-  const per_page = per_pageParam ? parseInt(per_pageParam, 10) : undefined;
-  return { search, severity, source, sort_by, sort_order, per_page };
+  const page_sizeParam = params.get('page_size');
+  const page_size = page_sizeParam ? parseInt(page_sizeParam, 10) : undefined;
+  return { search, severity, source, sort_by, sort_order, page_size };
 };
 
 const filtersToSearchString = (f: ListRulesQueryParams): string => {
@@ -54,7 +54,7 @@ const filtersToSearchString = (f: ListRulesQueryParams): string => {
   if (f.source) params.set('source', f.source);
   if (f.sort_by) params.set('sort_by', f.sort_by);
   if (f.sort_order) params.set('sort_order', f.sort_order);
-  if (f.per_page) params.set('per_page', String(f.per_page));
+  if (f.page_size) params.set('page_size', String(f.page_size));
   if (f.name) params.set('name', f.name);
   return params.toString();
 };
@@ -85,12 +85,8 @@ export interface ListRulesContextValue {
 
 const DEFAULT_RULE_LIST_RESPONSE: TRuleListResponse = {
   items: [] as TRuleListItem[],
-  total: 0,
-  page: 1,
-  per_page: 10,
-  total_pages: 0,
-  next_page: null,
-  prev_page: null,
+  total_size: 0,
+  next_page_token: null,
 };
 
 const ListRulesContext = createContext<ListRulesContextValue | null>(null);
@@ -139,7 +135,7 @@ export const ListRulesProvider = ({
     source: filters.source,
     sort_by: filters.sort_by,
     sort_order: filters.sort_order,
-    per_page: filters.per_page,
+    page_size: filters.page_size,
   });
 
   const handleSetFilters = useCallback(

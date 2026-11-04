@@ -6,4 +6,4 @@ export const appsPath = API_CONFIG.apps.default;
 
 export const fetchAppsApi = (
   options?: DfeClientRequestOptions<typeof appsPath, 'get'>,
-) => apiClient.get(appsPath, options);
+) => apiClient.getAll(appsPath, options);

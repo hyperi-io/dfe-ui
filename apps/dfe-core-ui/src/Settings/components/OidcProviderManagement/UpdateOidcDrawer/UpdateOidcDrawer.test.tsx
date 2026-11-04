@@ -292,12 +292,13 @@ describe(
           () =>
             HttpResponse.json(
               {
+                title: 'Error',
                 code: 'validation_error',
-                message: '1 validation error(s)',
+                detail: '1 validation error(s)',
                 errors: [
                   {
                     field: 'groups.api_token_env',
-                    message,
+                    detail: message,
                     code: 'env_var_not_set',
                   },
                 ],

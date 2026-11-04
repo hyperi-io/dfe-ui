@@ -1,11 +1,11 @@
-import { TAppsResponse } from '@/core/hooks/apps/instances/useFetchApps/types';
+import { TAppCatalogueEntry } from '@/core/hooks/apps/instances/useFetchApps/types';
 import { describe, expect, test } from 'vitest';
 import {
   getInitialAssignTransform,
   getTransformEngines,
 } from './TransformTabContent.helpers';
 
-const app = (service: string): TAppsResponse[number] => ({
+const app = (service: string): TAppCatalogueEntry => ({
   service,
   scale_deployed: true,
   multiplicity: 'per_config',
@@ -36,7 +36,7 @@ describe('getInitialAssignTransform', () => {
 
 describe('getTransformEngines', () => {
   test('takes the engine name off each catalogued transform app', () => {
-    const apps: TAppsResponse = [
+    const apps: TAppCatalogueEntry[] = [
       app('dfe-transform-vrl'),
       app('dfe-transform-vector'),
     ];
@@ -48,7 +48,7 @@ describe('getTransformEngines', () => {
   });
 
   test('leaves out the apps that are not transforms', () => {
-    const apps: TAppsResponse = [
+    const apps: TAppCatalogueEntry[] = [
       app('dfe-receiver'),
       app('dfe-fetcher'),
       app('dfe-transform-elastic'),

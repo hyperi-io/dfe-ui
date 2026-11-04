@@ -56,6 +56,7 @@ export const CloneSchemaModal = ({
   const {
     mutate: cloneSchemaMutation,
     isPending,
+    isReadingColumns,
     error,
   } = useCloneSchema({
     schema_path: schemaFullName,
@@ -182,7 +183,7 @@ export const CloneSchemaModal = ({
             </Button>
             <Button
               loading={isPending}
-              disabled={isPending}
+              disabled={isPending || isReadingColumns}
               htmlType="submit"
               type="primary"
             >

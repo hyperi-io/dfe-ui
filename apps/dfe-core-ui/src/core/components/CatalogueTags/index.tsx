@@ -34,7 +34,7 @@ export const CatalogueTags = ({
     isFetchingNextPage,
   } = useFetchInfiniteFilteredSourceCatalogueTags({
     name: search,
-    per_page: TAGS_PER_REQUEST,
+    page_size: TAGS_PER_REQUEST,
   });
 
   const items = data?.items ?? NO_TAGS;

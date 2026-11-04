@@ -13,10 +13,10 @@ export const helm = {
       success: ({
         mockedResponse = ['string'],
       }: {
-        mockedResponse?: THelmFilesResponse;
+        mockedResponse?: THelmFilesResponse['items'];
       } = {}) => {
         return http.get(helm.listFiles.mockedUrl, () => {
-          return HttpResponse.json(mockedResponse);
+          return HttpResponse.json({ items: mockedResponse });
         });
       },
     },
@@ -32,13 +32,13 @@ export const helm = {
         ],
         name = 'name',
       }: {
-        mockedResponse?: THelmFileVariablesResponse;
+        mockedResponse?: THelmFileVariablesResponse['items'];
         name?: string;
       } = {}) => {
         return http.get(
           helm.fileVariables.mockedUrl.replace('{name}', name),
           () => {
-            return HttpResponse.json(mockedResponse);
+            return HttpResponse.json({ items: mockedResponse });
           },
         );
       },

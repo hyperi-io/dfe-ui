@@ -19,7 +19,7 @@ describe('QUERY_KEYS.sources', () => {
   });
 
   it('keys the same filters the same way and starts from the sources prefix', () => {
-    const filters = { search: 'a', status: 'enabled' as const, per_page: 20 };
+    const filters = { search: 'a', status: 'enabled' as const, page_size: 20 };
 
     expect(QUERY_KEYS.sources.default(filters)).toEqual(
       QUERY_KEYS.sources.default({ ...filters }),

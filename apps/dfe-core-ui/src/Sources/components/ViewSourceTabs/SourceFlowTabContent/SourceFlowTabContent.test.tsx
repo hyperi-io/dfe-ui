@@ -1,3 +1,4 @@
+import { problem } from '@/core/utils/test-utils/problem';
 import { API_CONFIG_MOCKS } from '@/core/config/api/endpoints/generator';
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
 import { render, screen } from '@testing-library/react';
@@ -60,11 +61,11 @@ describe('SourceFlowTabContent', () => {
   it('shows a refused flow in the engine own words', async () => {
     server.use(
       API_CONFIG_MOCKS.sources.sourceFlow.get.error({
-        mockedResponse: {
-          code: 'flow_error',
-          message:
-            "source 'source' is on the direct transport, but dfe-archiver carries only bus",
-        },
+        mockedResponse: problem(
+          422,
+          'flow_error',
+          "source 'source' is on the direct transport, but dfe-archiver carries only bus",
+        ),
       }),
     );
 
@@ -84,7 +85,7 @@ describe('SourceFlowTabContent', () => {
     async (status, message) => {
       server.use(
         API_CONFIG_MOCKS.sources.sourceFlow.get.error({
-          mockedResponse: { code: 'error', message },
+          mockedResponse: problem(status, 'error', message),
           status,
         }),
       );

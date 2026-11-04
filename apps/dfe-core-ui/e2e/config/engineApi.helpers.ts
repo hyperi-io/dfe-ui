@@ -72,8 +72,9 @@ export type AppRow = {
   instances: string[];
 };
 
-export const appCatalogue = () =>
-  engine<AppRow[]>('GET', '/api/v1/apps?per_page=50');
+export const appCatalogue = async () =>
+  (await engine<{ items: AppRow[] }>('GET', '/api/v1/apps?page_size=1000'))
+    .items;
 
 export const appInstances = async (service: string) =>
   (await appCatalogue()).find((row) => row.service === service)?.instances ??

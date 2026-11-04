@@ -240,8 +240,10 @@ Both edges are declared data -- read them with
 the engine's `openapi-spec/openapi.json`, so drift is measurable by hashing
 both copies, and dfe-engine's Sync dfe-engine-types workflow re-vendors it by
 pull request on a push to its main -- an engine API change arrives here on its
-own. The second edge is generated: `packages/dfe-engine-types/scopes/index.ts`,
-whose header names the engine module. A hand edit to either is drift.
+own. The second edge is derived: `packages/dfe-engine-types/scopes/index.ts` is
+written from the `RbacScope` enum in that spec by
+`yarn workspace @repo/dfe-engine-types generate`. A hand edit to either is
+drift.
 
 **dfe-ui -> dfe-infra, outbound, lockstep.** dfe-infra's `dfe-ui` Helm chart
 pins the container this repo publishes, as a tag plus the digest that makes the
