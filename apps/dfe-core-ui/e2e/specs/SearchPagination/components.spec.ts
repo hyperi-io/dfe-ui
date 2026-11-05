@@ -3,6 +3,7 @@ import { Page, expect, test } from '@playwright/test';
 import { seedAppManagement } from '@e2e/config/appManagement.helpers';
 import { BASE_URL, e2eClient } from '@e2e/config/e2e.client';
 import { loginAs } from '@e2e/config/login.helpers';
+import { TAGS } from '@e2e/config/tags.constants';
 
 test.beforeEach(async ({ playwright, page }) => {
   await e2eClient({ playwright, seedScript: 'reset_all' });
@@ -24,7 +25,7 @@ const openComponents = async (page: Page) => {
 const searchComponents = (page: Page) =>
   page.getByRole('searchbox', { name: 'Search components' });
 
-test.describe('', { tag: ['@core', '@search'] }, () => {
+test.describe('', { tag: [TAGS.core, TAGS.search, TAGS.pagination] }, () => {
   test('A search keeps the components whose name matches', async ({ page }) => {
     await openComponents(page);
 

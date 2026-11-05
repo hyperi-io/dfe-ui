@@ -3,6 +3,7 @@ import { Page, expect, test } from '@playwright/test';
 import { seedAppManagement } from '@e2e/config/appManagement.helpers';
 import { BASE_URL, e2eClient } from '@e2e/config/e2e.client';
 import { loginAs } from '@e2e/config/login.helpers';
+import { TAGS } from '@e2e/config/tags.constants';
 
 /** The fixture source every app-management seed binds its instances to. */
 const SEED_SOURCE = 'seedsource';
@@ -41,7 +42,7 @@ const openProcessingTab = async (page: Page, source = SEED_SOURCE) => {
   await page.getByRole('tab', { name: 'Processing', exact: true }).click();
 };
 
-test.describe('', { tag: ['@core', '@source'] }, () => {
+test.describe('', { tag: [TAGS.core, TAGS.source] }, () => {
   test('Receiver routing', async ({ page }) => {
     await openProcessingTab(page);
 

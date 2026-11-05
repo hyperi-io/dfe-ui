@@ -2,6 +2,7 @@ import { expect, test } from '@playwright/test';
 
 import { BASE_URL, e2eClient } from '@e2e/config/e2e.client';
 import { loginAs } from '@e2e/config/login.helpers';
+import { TAGS } from '@e2e/config/tags.constants';
 
 /**
  * Creating a source from an installed catalogue entry.
@@ -33,7 +34,7 @@ test.beforeEach(async ({ playwright, page }) => {
   await loginAs(page, 'dfe_admin');
 });
 
-test.describe('', { tag: ['@core', '@source'] }, () => {
+test.describe('', { tag: [TAGS.core, TAGS.source] }, () => {
   test('user can add a source from the catalogue', async ({ page }) => {
     await page.goto(`${BASE_URL}/sources`);
     await page

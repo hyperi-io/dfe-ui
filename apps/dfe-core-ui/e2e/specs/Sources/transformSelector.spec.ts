@@ -6,6 +6,7 @@ import {
 } from '@e2e/config/appManagement.helpers';
 import { BASE_URL, ENGINE_API_URL, e2eClient } from '@e2e/config/e2e.client';
 import { adminPassword, loginAs } from '@e2e/config/login.helpers';
+import { TAGS } from '@e2e/config/tags.constants';
 
 /**
  * The transform a source runs is one choice out of the catalogued transforms.
@@ -64,7 +65,7 @@ const engineTransformEngine = async (
   return body.versions[body.current]?.transform?.engine;
 };
 
-test.describe('', { tag: ['@core', '@source'] }, () => {
+test.describe('', { tag: [TAGS.core, TAGS.source] }, () => {
   test.describe('every transform bound to a source of its own', () => {
     test.beforeEach(async ({ playwright, page }) => {
       await seedThree(playwright);

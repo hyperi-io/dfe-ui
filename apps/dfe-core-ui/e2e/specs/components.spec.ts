@@ -8,6 +8,7 @@ import {
   forgetEngineToken,
 } from '@e2e/config/engineApi.helpers';
 import { loginAs } from '@e2e/config/login.helpers';
+import { TAGS } from '@e2e/config/tags.constants';
 
 test.beforeEach(async ({ playwright, page }) => {
   await e2eClient({ playwright, seedScript: 'reset_all' });
@@ -76,7 +77,7 @@ test('A pool carries the name the engine gives it, else its id', async ({
  */
 test(
   'Scaling dials are refused off Kubernetes',
-  { tag: ['@docker-only'] },
+  { tag: [TAGS.docker] },
   async ({ page }) => {
     await openComponents(page);
 

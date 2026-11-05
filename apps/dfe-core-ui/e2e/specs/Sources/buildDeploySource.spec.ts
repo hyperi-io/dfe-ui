@@ -8,6 +8,7 @@ import {
   qualifiedTable,
 } from '@e2e/config/engineApi.helpers';
 import { loginAs } from '@e2e/config/login.helpers';
+import { TAGS } from '@e2e/config/tags.constants';
 
 /**
  * Building and deploying a receiver source onto its own table.
@@ -47,7 +48,7 @@ test.beforeEach(async ({ playwright, page }) => {
   await loginAs(page, 'dfe_admin');
 });
 
-test.describe('Build and deploy', { tag: ['@core', '@source'] }, () => {
+test.describe('Build and deploy', { tag: [TAGS.core, TAGS.source] }, () => {
   test('user can build and deploy a source', async ({ page }) => {
     await page.goto(`${BASE_URL}/sources`);
     await page.getByRole('button', { name: 'Add Source', exact: true }).click();

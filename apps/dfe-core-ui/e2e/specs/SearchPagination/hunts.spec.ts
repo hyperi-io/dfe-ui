@@ -2,6 +2,7 @@ import { Page, expect, test } from '@playwright/test';
 
 import { BASE_URL, e2eClient } from '@e2e/config/e2e.client';
 import { loginAs } from '@e2e/config/login.helpers';
+import { TAGS } from '@e2e/config/tags.constants';
 
 /** The list asks for a page and then loads the next as it scrolls, so the count moves. */
 const SEEDED = /of 50 results/;
@@ -54,7 +55,7 @@ const searchHunts = async (page: Page, keyword: string) => {
   );
 };
 
-test.describe('', { tag: ['@core', '@search'] }, () => {
+test.describe('', { tag: [TAGS.core, TAGS.search, TAGS.pagination] }, () => {
   test('A search keeps the hunts whose name matches', async ({ page }) => {
     await openHunts(page);
 

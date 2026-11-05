@@ -2,6 +2,7 @@ import { APIRequestContext, Page, expect, test } from '@playwright/test';
 
 import { BASE_URL, ENGINE_API_URL, e2eClient } from '@e2e/config/e2e.client';
 import { adminPassword, loginAs } from '@e2e/config/login.helpers';
+import { TAGS } from '@e2e/config/tags.constants';
 
 /**
  * Compound and expression source matches, the receiver's rule order and the
@@ -93,7 +94,7 @@ test.beforeEach(async ({ page }) => {
   await loginAs(page, 'initial_user');
 });
 
-test.describe('', { tag: ['@core', '@source'] }, () => {
+test.describe('', { tag: [TAGS.core, TAGS.source] }, () => {
   test('a source matched on grouped and negated conditions saves the tree it shows', async ({
     page,
     request,

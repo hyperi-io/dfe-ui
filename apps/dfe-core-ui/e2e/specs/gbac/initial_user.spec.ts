@@ -11,6 +11,7 @@ import {
   loginAs,
 } from '@e2e/config/login.helpers';
 import { expectSettingsMenu, logOut } from '@e2e/config/settingsMenu.helpers';
+import { TAGS } from '@e2e/config/tags.constants';
 
 test.beforeEach(async ({ playwright, page }) => {
   await e2eClient({ playwright, seedScript: 'reset_all' });
@@ -18,7 +19,7 @@ test.beforeEach(async ({ playwright, page }) => {
   await loginAs(page, 'initial_user');
 });
 
-test.describe('', { tag: ['@core', '@gbac'] }, () => {
+test.describe('', { tag: [TAGS.core, TAGS.gbac] }, () => {
   test('Sidebar Navigation', async ({ page }) => {
     await page.goto(BASE_URL);
     await expectSourcesLanding(page);

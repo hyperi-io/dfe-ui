@@ -11,6 +11,7 @@ import {
   tableIndices,
 } from '@e2e/config/engineApi.helpers';
 import { loginAs } from '@e2e/config/login.helpers';
+import { TAGS } from '@e2e/config/tags.constants';
 
 /**
  * A JSON path promoted out of `_json` into a meta-schema column.
@@ -166,7 +167,7 @@ test.beforeAll(async () => {
 
 test(
   'a discovered path is not promoted yet',
-  { tag: ['@docker-only'] },
+  { tag: [TAGS.docker] },
   async () => {
     const before = await discover(`${UI_PATH},${API_PATH}`);
     expect(before.paths.map((path) => path.path).sort()).toEqual(
@@ -185,10 +186,10 @@ test(
   },
 );
 
-test.describe('', { tag: ['@core', '@source'] }, () => {
+test.describe('', { tag: [TAGS.core, TAGS.source] }, () => {
   test(
     'a dry run returns the diff and writes nothing',
-    { tag: ['@docker-only'] },
+    { tag: [TAGS.docker] },
     async () => {
       const preview = await engine<PromoteResponse>(
         'POST',
@@ -215,7 +216,7 @@ test.describe('', { tag: ['@core', '@source'] }, () => {
 
   test(
     'the console promotes a path and the meta schema carries the column',
-    { tag: ['@docker-only'] },
+    { tag: [TAGS.docker] },
     async ({ page }) => {
       await loginAs(page, 'initial_user');
       await page.goto(
@@ -314,7 +315,7 @@ test.describe('', { tag: ['@core', '@source'] }, () => {
 
   test(
     'deploying the promoted version lands the column and discovery says so',
-    { tag: ['@docker-only'] },
+    { tag: [TAGS.docker] },
     async () => {
       // A promotion repins the source at a NEW version that is not deployed, and
       // discovery falls back to the landing table until it is -- so a re-discover
@@ -339,7 +340,7 @@ test.describe('', { tag: ['@core', '@source'] }, () => {
 
   test(
     'a use case promoted with the path becomes an index on the table',
-    { tag: ['@docker-only'] },
+    { tag: [TAGS.docker] },
     async () => {
       const before = await sourceSchemaPin();
 

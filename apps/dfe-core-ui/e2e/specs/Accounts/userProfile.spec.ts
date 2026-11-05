@@ -1,5 +1,3 @@
-import { randomBytes } from 'node:crypto';
-import { expect, test, type Page } from '@playwright/test';
 import { BASE_URL, e2eClient } from '@e2e/config/e2e.client';
 import {
   adminPassword,
@@ -7,6 +5,9 @@ import {
   loginAs,
   textbox,
 } from '@e2e/config/login.helpers';
+import { TAGS } from '@e2e/config/tags.constants';
+import { expect, test, type Page } from '@playwright/test';
+import { randomBytes } from 'node:crypto';
 
 const USER = 'dfe_admin';
 const ACCOUNT = `${BASE_URL}/account`;
@@ -30,7 +31,7 @@ const signIn = async (page: Page, password: string) => {
   await page.getByRole('button', { name: 'Login', exact: true }).click();
 };
 
-test.describe('user profile', { tag: ['@core', '@account'] }, () => {
+test.describe('user profile', { tag: [TAGS.core, TAGS.account] }, () => {
   test.beforeEach(async ({ playwright, page }) => {
     test.slow();
     await e2eClient({ playwright, seedScript: 'reset_all' });

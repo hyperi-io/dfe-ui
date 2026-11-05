@@ -6,6 +6,7 @@ import {
 } from '@e2e/config/appManagement.helpers';
 import { BASE_URL, e2eClient } from '@e2e/config/e2e.client';
 import { loginAs } from '@e2e/config/login.helpers';
+import { TAGS } from '@e2e/config/tags.constants';
 
 /**
  * The Flow tab is the page that explains the product, so it is measured rather
@@ -51,7 +52,7 @@ const openFlowTab = async (page: Page) => {
   await expect(page.getByTestId('source-flow')).toBeVisible();
 };
 
-test.describe('', { tag: ['@core', '@source'] }, () => {
+test.describe('', { tag: [TAGS.core, TAGS.source] }, () => {
   test('the three stages stand at one height', async ({ page }) => {
     await openFlowTab(page);
 

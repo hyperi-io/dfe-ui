@@ -6,6 +6,7 @@ import {
 } from '@e2e/config/appManagement.helpers';
 import { BASE_URL, e2eClient } from '@e2e/config/e2e.client';
 import { loginAs } from '@e2e/config/login.helpers';
+import { TAGS } from '@e2e/config/tags.constants';
 
 /**
  * One source per transform app.
@@ -65,7 +66,7 @@ const openProcessingTab = async (page: Page, source: string) => {
   );
   await page.getByRole('tab', { name: 'Processing', exact: true }).click();
 };
-test.describe('', { tag: ['@core', '@source'] }, () => {
+test.describe('', { tag: [TAGS.core, TAGS.source] }, () => {
   for (const { engine, source, app } of TRANSFORMS) {
     test(`${engine}: its own source carries its own instance`, async ({
       page,

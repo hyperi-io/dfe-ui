@@ -2,6 +2,7 @@ import { APIRequestContext, Page, expect, test } from '@playwright/test';
 
 import { BASE_URL, ENGINE_API_URL, e2eClient } from '@e2e/config/e2e.client';
 import { adminPassword, loginAs } from '@e2e/config/login.helpers';
+import { TAGS } from '@e2e/config/tags.constants';
 
 /**
  * Common headers from Other Schemas: typed by hand, read from a CSV, read
@@ -176,7 +177,7 @@ const forgetSchema = async (request: APIRequestContext, schemaPath: string) => {
   expect([200, 204, 404]).toContain(removed.status());
 };
 
-test.describe('', { tag: ['@core', '@schema'] }, () => {
+test.describe('', { tag: [TAGS.core, TAGS.schema] }, () => {
   test('a common header typed by hand is stored and shown', async ({
     page,
     request,

@@ -2,6 +2,7 @@ import { Page, expect, test } from '@playwright/test';
 
 import { BASE_URL, e2eClient } from '@e2e/config/e2e.client';
 import { loginAs } from '@e2e/config/login.helpers';
+import { TAGS } from '@e2e/config/tags.constants';
 
 /** The description of one seeded artefact. The table shows its name, not this text. */
 const MATCH_DESCRIPTION = 'Searchable Library 49';
@@ -33,7 +34,7 @@ const searchLibraries = async (page: Page, keyword: string) => {
   await field.press('Enter');
 };
 
-test.describe('', { tag: ['@core', '@search'] }, () => {
+test.describe('', { tag: [TAGS.core, TAGS.search, TAGS.pagination] }, () => {
   test('A search keeps the library whose name or description matches', async ({
     page,
   }) => {

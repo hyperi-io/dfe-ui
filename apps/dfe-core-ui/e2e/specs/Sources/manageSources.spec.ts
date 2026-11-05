@@ -2,6 +2,7 @@ import { Page, expect, test } from '@playwright/test';
 
 import { BASE_URL, e2eClient } from '@e2e/config/e2e.client';
 import { loginAs } from '@e2e/config/login.helpers';
+import { TAGS } from '@e2e/config/tags.constants';
 
 /**
  * Creating, updating, cloning, enabling and deleting a receiver source from the sources page.
@@ -66,7 +67,7 @@ const openConfiguration = async (page: Page) => {
     .click();
 };
 
-test.describe('', { tag: ['@core', '@source'] }, () => {
+test.describe('', { tag: [TAGS.core, TAGS.source] }, () => {
   test('user can add and view a basic source', async ({ page }) => {
     await createSource(page, {
       displayName: 'Test Source',

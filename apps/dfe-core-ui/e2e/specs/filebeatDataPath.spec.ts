@@ -27,6 +27,7 @@ import {
   restartFor,
 } from '@e2e/config/filebeatCorpus.helpers';
 import { loginAs } from '@e2e/config/login.helpers';
+import { TAGS } from '@e2e/config/tags.constants';
 
 /**
  * The filebeat corpus, from the console to the source's own table and back out
@@ -238,7 +239,7 @@ test.beforeAll(async () => {
 
 test(
   'a source is created on the catalogue routing convention',
-  { tag: ['@docker-only'] },
+  { tag: [TAGS.docker] },
   async ({ page }) => {
     await loginAs(page, 'initial_user');
     for (const source of SOURCES) {
@@ -260,7 +261,7 @@ test(
 
 test(
   'deploying a source binds its own transform app',
-  { tag: ['@docker-only'] },
+  { tag: [TAGS.docker] },
   async ({ page }) => {
     await loginAs(page, 'initial_user');
     for (const { name, variant } of SOURCES) {
@@ -315,7 +316,7 @@ const giveInstanceItsPipeline = async (
 
 test(
   'each transform instance takes the bundled filebeat pipeline',
-  { tag: ['@docker-only'] },
+  { tag: [TAGS.docker] },
   async () => {
     test.skip(
       !programsAvailable(),
@@ -368,13 +369,13 @@ const landsOnItsOwnTable = async ({
 
 test(
   'cisco-meraki: the corpus lands on its own table, not the catch-all',
-  { tag: ['@docker-only'] },
+  { tag: [TAGS.docker] },
   () => landsOnItsOwnTable(SOURCES[0]),
 );
 
 test(
   'HyperDX carries the source, pointed at its own table',
-  { tag: ['@docker-only'] },
+  { tag: [TAGS.docker] },
   async ({ page }) => {
     await loginAs(page, 'initial_user');
     // A team gets its connection on first contact, and the source is written to
@@ -410,13 +411,13 @@ test(
 
 test(
   'cisco-ios: the corpus lands on its own table, not the catch-all',
-  { tag: ['@docker-only'] },
+  { tag: [TAGS.docker] },
   () => landsOnItsOwnTable(SOURCES[2]),
 );
 
 test(
   'a source changes transform app and the data follows',
-  { tag: ['@docker-only'] },
+  { tag: [TAGS.docker] },
   async ({ page }) => {
     await loginAs(page, 'initial_user');
     // cisco-ios moves from elastic to vrl, onto an instance created by the switch.
@@ -486,7 +487,7 @@ test(
 
 test(
   'cisco-umbrella: the corpus lands on its own table, not the catch-all',
-  { tag: ['@docker-only'] },
+  { tag: [TAGS.docker] },
   () => landsOnItsOwnTable(SOURCES[1]),
 );
 
@@ -495,7 +496,7 @@ const LEAN_SOURCE = 'cisco-ios-lean';
 
 test(
   'a derived schema narrows its base on the deployed table',
-  { tag: ['@docker-only'] },
+  { tag: [TAGS.docker] },
   async () => {
     // A derived schema is a file in the engine's schemas tree, which the console
     // has no field for and this spec cannot write, so the source is a precondition.

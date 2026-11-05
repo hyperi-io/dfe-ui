@@ -1,4 +1,3 @@
-import { expect, test, type Page } from '@playwright/test';
 import { e2eClient } from '@e2e/config/e2e.client';
 import {
   adminPassword,
@@ -7,8 +6,10 @@ import {
   expectSourcesLanding,
   textbox,
 } from '@e2e/config/login.helpers';
+import { expect, test, type Page } from '@playwright/test';
 
 import { BASE_URL } from '@e2e/config/e2e.client';
+import { TAGS } from '@e2e/config/tags.constants';
 
 const baseUrl = BASE_URL;
 const welcomePageUrl = `${baseUrl}/setup/welcome`;
@@ -39,7 +40,7 @@ const login = async (page: Page) => {
   await page.getByRole('button', { name: 'Login', exact: true }).click();
 };
 
-test.describe('', { tag: ['@core'] }, () => {
+test.describe('', { tag: [TAGS.core] }, () => {
   test.describe('redirect when setup is not complete', () => {
     test('an anonymous visitor is sent to the login, not the wizard', async ({
       page,
