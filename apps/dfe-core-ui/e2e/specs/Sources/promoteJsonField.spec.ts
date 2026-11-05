@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 
-import { BASE_URL, e2eClient } from '../../config/e2e.client';
+import { BASE_URL, e2eClient } from '@e2e/config/e2e.client';
 import {
   clickhouse,
   engine,
@@ -9,8 +9,8 @@ import {
   qualifiedTable,
   tableColumns,
   tableIndices,
-} from '../../config/engineApi.helpers';
-import { loginAs } from '../../config/login.helpers';
+} from '@e2e/config/engineApi.helpers';
+import { loginAs } from '@e2e/config/login.helpers';
 
 /**
  * A JSON path promoted out of `_json` into a meta-schema column.

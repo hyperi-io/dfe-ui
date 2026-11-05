@@ -3,9 +3,9 @@ import { APIRequestContext, Page, expect, test } from '@playwright/test';
 import {
   deploySeededSources,
   seedAppManagement,
-} from '../../config/appManagement.helpers';
-import { BASE_URL, ENGINE_API_URL, e2eClient } from '../../config/e2e.client';
-import { adminPassword, loginAs } from '../../config/login.helpers';
+} from '@e2e/config/appManagement.helpers';
+import { BASE_URL, ENGINE_API_URL, e2eClient } from '@e2e/config/e2e.client';
+import { adminPassword, loginAs } from '@e2e/config/login.helpers';
 
 /**
  * The transform a source runs is one choice out of the catalogued transforms.

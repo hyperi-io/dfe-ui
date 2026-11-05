@@ -1,6 +1,6 @@
 import { Page, expect, test } from '@playwright/test';
 
-import { BASE_URL, e2eClient } from '../config/e2e.client';
+import { BASE_URL, e2eClient } from '@e2e/config/e2e.client';
 import {
   HyperdxTeams,
   appInstances,
@@ -12,7 +12,7 @@ import {
   rowCount,
   tableColumns,
   tableIndices,
-} from '../config/engineApi.helpers';
+} from '@e2e/config/engineApi.helpers';
 import {
   CorpusModule,
   ENRICHMENT,
@@ -25,8 +25,8 @@ import {
   pushEnvelopes,
   readProgram,
   restartFor,
-} from '../config/filebeatCorpus.helpers';
-import { loginAs } from '../config/login.helpers';
+} from '@e2e/config/filebeatCorpus.helpers';
+import { loginAs } from '@e2e/config/login.helpers';
 
 /**
  * The filebeat corpus, from the console to the source's own table and back out

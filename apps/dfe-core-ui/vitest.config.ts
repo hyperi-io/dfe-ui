@@ -40,6 +40,7 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': path.resolve(appRoot, 'src'),
+      '@e2e': path.resolve(appRoot, 'e2e'),
     },
   },
   test: {

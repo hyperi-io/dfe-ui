@@ -1,14 +1,14 @@
 import { expect, test, type Page } from '@playwright/test';
-import { e2eClient } from '../config/e2e.client';
+import { e2eClient } from '@e2e/config/e2e.client';
 import {
   adminPassword,
   completeForcedPasswordChange,
   expectForcedPasswordChange,
   expectSourcesLanding,
   textbox,
-} from '../config/login.helpers';
+} from '@e2e/config/login.helpers';
 
-import { BASE_URL } from '../config/e2e.client';
+import { BASE_URL } from '@e2e/config/e2e.client';
 
 const baseUrl = BASE_URL;
 const welcomePageUrl = `${baseUrl}/setup/welcome`;

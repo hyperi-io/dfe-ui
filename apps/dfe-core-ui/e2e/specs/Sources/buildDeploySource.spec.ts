@@ -1,13 +1,13 @@
 import { expect, test } from '@playwright/test';
 
-import { BASE_URL, e2eClient } from '../../config/e2e.client';
+import { BASE_URL, e2eClient } from '@e2e/config/e2e.client';
 import {
   clickhouse,
   forgetDeployRecords,
   forgetEngineToken,
   qualifiedTable,
-} from '../../config/engineApi.helpers';
-import { loginAs } from '../../config/login.helpers';
+} from '@e2e/config/engineApi.helpers';
+import { loginAs } from '@e2e/config/login.helpers';
 
 /**
  * Building and deploying a receiver source onto its own table.

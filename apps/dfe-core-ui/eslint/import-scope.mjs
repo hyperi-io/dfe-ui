@@ -86,6 +86,27 @@ const testWrapperException = {
 };
 
 /**
+ * Playwright specs sit outside src, so they use @e2e rather than ../.
+ */
+const e2eImportOverride = {
+  files: ['e2e/**/*.ts'],
+  rules: {
+    [RULE_ID]: [
+      ERROR,
+      {
+        patterns: [
+          {
+            group: ['../**'],
+            message:
+              'Relative parent imports (../) are not allowed. Use the @e2e alias instead.',
+          },
+        ],
+      },
+    ],
+  },
+};
+
+/**
  * App and other src files: only restrict relative parent imports.
  */
 const appAndOtherImportsOverride = {
@@ -109,4 +130,5 @@ export const importScopeOverrides = [
   ...scopeImportOverrides,
   coreImportOverride,
   testWrapperException,
+  e2eImportOverride,
 ];

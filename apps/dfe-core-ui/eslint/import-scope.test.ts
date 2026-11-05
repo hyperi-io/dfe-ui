@@ -212,6 +212,27 @@ describe('import-scope', () => {
       );
     });
 
+    test('../ is not allowed in e2e specs', async () => {
+      const { errors } = await lint(
+        `import { loginAs } from '../../config/login.helpers';`,
+        'e2e/specs/SearchPagination/components.spec.ts',
+      );
+      expect(errors).toContainEqual(
+        expect.objectContaining({
+          ruleId: RULE_ID,
+          message: expect.stringContaining('@e2e'),
+        }),
+      );
+    });
+
+    test('@e2e is allowed in e2e specs', async () => {
+      const { errors } = await lint(
+        `import { loginAs } from '@e2e/config/login.helpers';`,
+        'e2e/specs/SearchPagination/components.spec.ts',
+      );
+      expect(errors.filter((e) => e.ruleId === RULE_ID)).toHaveLength(0);
+    });
+
     test('./ is allowed', async () => {
       const { errors } = await lint(
         `import { local } from './local';`,

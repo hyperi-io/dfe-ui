@@ -1,12 +1,12 @@
 import { randomBytes } from 'node:crypto';
 import { expect, test, type Page } from '@playwright/test';
-import { BASE_URL, e2eClient } from '../../config/e2e.client';
+import { BASE_URL, e2eClient } from '@e2e/config/e2e.client';
 import {
   adminPassword,
   expectSourcesLanding,
   loginAs,
   textbox,
-} from '../../config/login.helpers';
+} from '@e2e/config/login.helpers';
 
 const USER = 'dfe_admin';
 const ACCOUNT = `${BASE_URL}/account`;

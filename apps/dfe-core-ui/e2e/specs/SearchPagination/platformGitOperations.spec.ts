@@ -1,8 +1,8 @@
 import { Page, expect, test } from '@playwright/test';
 
-import { BASE_URL, e2eClient } from '../../config/e2e.client';
-import { loginAs } from '../../config/login.helpers';
-import { TAGS } from '../../config/tags.constants';
+import { BASE_URL, e2eClient } from '@e2e/config/e2e.client';
+import { loginAs } from '@e2e/config/login.helpers';
+import { TAGS } from '@e2e/config/tags.constants';
 
 /**
  * The log pages fifty at a time, newest first. Reset commits land above the

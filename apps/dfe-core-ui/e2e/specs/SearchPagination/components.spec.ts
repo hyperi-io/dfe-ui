@@ -1,8 +1,8 @@
 import { Page, expect, test } from '@playwright/test';
 
-import { seedAppManagement } from '../../config/appManagement.helpers';
-import { BASE_URL, e2eClient } from '../../config/e2e.client';
-import { loginAs } from '../../config/login.helpers';
+import { seedAppManagement } from '@e2e/config/appManagement.helpers';
+import { BASE_URL, e2eClient } from '@e2e/config/e2e.client';
+import { loginAs } from '@e2e/config/login.helpers';
 
 test.beforeEach(async ({ playwright, page }) => {
   await e2eClient({ playwright, seedScript: 'reset_all' });

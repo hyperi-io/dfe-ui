@@ -1,11 +1,7 @@
 import { APIRequestContext, Page, expect, test } from '@playwright/test';
 
-import {
-  BASE_URL,
-  ENGINE_API_URL,
-  e2eClient,
-} from '../../../config/e2e.client';
-import { adminPassword, loginAs } from '../../../config/login.helpers';
+import { BASE_URL, ENGINE_API_URL, e2eClient } from '@e2e/config/e2e.client';
+import { adminPassword, loginAs } from '@e2e/config/login.helpers';
 
 /**
  * Compound and expression source matches, the receiver's rule order and the

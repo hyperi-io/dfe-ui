@@ -1,6 +1,6 @@
 import { randomBytes } from 'node:crypto';
 import { expect, test, type Locator, type Page } from '@playwright/test';
-import { BASE_URL, e2eClient } from '../config/e2e.client';
+import { BASE_URL, e2eClient } from '@e2e/config/e2e.client';
 import {
   adminPassword,
   completeForcedPasswordChange,
@@ -8,8 +8,8 @@ import {
   expectSourcesLanding,
   loginAs,
   textbox,
-} from '../config/login.helpers';
-import { logOut, openSettingsMenu } from '../config/settingsMenu.helpers';
+} from '@e2e/config/login.helpers';
+import { logOut, openSettingsMenu } from '@e2e/config/settingsMenu.helpers';
 
 /*
  * The security accounts drawer against a real engine: every account it lists

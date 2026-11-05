@@ -1,7 +1,7 @@
 import { Page, expect, test } from '@playwright/test';
 
-import { BASE_URL, e2eClient } from '../../config/e2e.client';
-import { loginAs } from '../../config/login.helpers';
+import { BASE_URL, e2eClient } from '@e2e/config/e2e.client';
+import { loginAs } from '@e2e/config/login.helpers';
 
 /** The list asks for a page and then loads the next as it scrolls, so the count moves. */
 const SEEDED = /of 50 results/;

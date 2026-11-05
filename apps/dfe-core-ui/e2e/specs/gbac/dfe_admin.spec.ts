@@ -1,16 +1,16 @@
 import { expect, test } from '@playwright/test';
 
-import { BASE_URL, e2eClient } from '../../config/e2e.client';
+import { BASE_URL, e2eClient } from '@e2e/config/e2e.client';
 import {
   expectAutoMergeToggle,
   openGitOpsTab,
-} from '../../config/gitops.helpers';
+} from '@e2e/config/gitops.helpers';
 import {
   expectLoggedOut,
   expectSourcesLanding,
   loginAs,
-} from '../../config/login.helpers';
-import { expectSettingsMenu, logOut } from '../../config/settingsMenu.helpers';
+} from '@e2e/config/login.helpers';
+import { expectSettingsMenu, logOut } from '@e2e/config/settingsMenu.helpers';
 
 test.beforeEach(async ({ playwright, page }) => {
   await e2eClient({ playwright, seedScript: 'reset_all' });

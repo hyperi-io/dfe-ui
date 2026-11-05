@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 
-import { BASE_URL, ENGINE_API_URL, e2eClient } from '../config/e2e.client';
-import { expectLoggedOut, loginAs } from '../config/login.helpers';
+import { BASE_URL, ENGINE_API_URL, e2eClient } from '@e2e/config/e2e.client';
+import { expectLoggedOut, loginAs } from '@e2e/config/login.helpers';
 
 const SIGN_OUT_PATH = '/api/auth/signout';
 
