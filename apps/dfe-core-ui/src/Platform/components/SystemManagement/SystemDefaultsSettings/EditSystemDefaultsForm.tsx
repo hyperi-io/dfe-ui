@@ -11,7 +11,7 @@ import { useCallback, useMemo, useState } from 'react';
 import z from 'zod';
 
 const formSchema = z.object({
-  ttl_days: z.number().min(1).max(365),
+  ttl_days: z.number().min(0).max(365),
   engine: z.string().min(1),
   common_header_version: z.string().min(1),
   common_header_type: z.string().min(1),
@@ -131,14 +131,13 @@ export const EditSystemDefaultsForm = ({
     });
 
   const handleChangeTtlDays = (value: number | null) => {
-    if (!value) {
+    // 0 is a retention: the view shows it as kept forever.
+    if (value == null) {
       return;
     }
-    if (!isInteger(value)) {
-      return form.setFieldsValue({ ttl_days: Math.floor(value) });
-    }
-
-    form.setFieldsValue({ ttl_days: value });
+    form.setFieldsValue({
+      ttl_days: isInteger(value) ? value : Math.floor(value),
+    });
   };
 
   const [commonHeaderVersions, setCommonHeaderVersions] = useState<string[]>(
