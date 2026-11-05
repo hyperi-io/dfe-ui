@@ -5,6 +5,8 @@ import { loginAs } from '../../config/login.helpers';
 
 /** The list asks for a page and then loads the next as it scrolls, so the count moves. */
 const SEEDED = /of 50 results/;
+const FIRST_PAGE = '25 of 50 results';
+const ALL_PAGES = '50 of 50 results';
 /** A seeded display name past the first page, so a hit cannot be the loaded rows alone. */
 const MATCH = 'Searchable Rule 49';
 const OTHER = 'Searchable Rule 0';
@@ -23,6 +25,17 @@ test.beforeEach(async ({ playwright, page }) => {
 const openRules = async (page: Page) => {
   await page.goto(`${BASE_URL}/rules`);
   await expect(page).toHaveURL(`${BASE_URL}/rules`);
+};
+
+/** The next page loads when the sentinel under the last row scrolls into view. */
+const scrollListToEnd = async (page: Page) => {
+  const list = page.getByRole('list').filter({
+    has: page.getByText(OTHER, { exact: true }),
+  });
+  await list.evaluate((node) => {
+    const scroller = node.parentElement;
+    if (scroller) scroller.scrollTop = scroller.scrollHeight;
+  });
 };
 
 const searchRules = async (page: Page, keyword: string) => {
@@ -60,6 +73,21 @@ test.describe('', { tag: ['@core', '@search'] }, () => {
 
     await expect(page.getByText(SEEDED)).toBeVisible();
     await expect(page.getByText(OTHER, { exact: true })).toBeVisible();
+  });
+
+  test('Scrolling the list loads the next page', async ({ page }) => {
+    await openRules(page);
+
+    await expect(page.getByText(FIRST_PAGE)).toBeVisible();
+    await expect(page.getByText(OTHER, { exact: true })).toBeVisible();
+    await expect(page.getByText(MATCH, { exact: true })).toHaveCount(0);
+
+    await expect(async () => {
+      await scrollListToEnd(page);
+      await expect(page.getByText(ALL_PAGES)).toBeVisible();
+    }).toPass();
+
+    await expect(page.getByText(MATCH, { exact: true })).toBeAttached();
   });
 
   test('A search that matches nothing says so', async ({ page }) => {
