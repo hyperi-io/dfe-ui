@@ -36,5 +36,14 @@ export const e2eClient = async ({
   const responseBody = await response.json();
   expect(responseBody.success).toBeTruthy();
 
-  await apiContext.dispose();
+  // A passed test removes its trace while the next test is still closing this
+  // context, so the network log can already be gone. The seed was checked above.
+  try {
+    await apiContext.dispose();
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    if (!message.includes('ENOENT')) {
+      throw error;
+    }
+  }
 };

@@ -60,7 +60,11 @@ const closeDrift = async (drawer: Locator) => {
   await expect(drawer).toBeHidden();
 };
 
-const setRetention = async (page: Page, days: number) => {
+const setRetention = async (
+  page: Page,
+  days: number,
+  attempt = 0,
+): Promise<Locator> => {
   const actions = page.getByRole('button', { name: 'System defaults actions' });
   await actions.scrollIntoViewIfNeeded();
   await actions.click();
@@ -83,7 +87,20 @@ const setRetention = async (page: Page, days: number) => {
   await update.click();
 
   // Saving the override commits it, which outlasts the default expect.
-  await expect(saved).toBeVisible({ timeout: 60_000 });
+  // A git refresh can end the session between opening the form and the save.
+  await expect(async () => {
+    if (/\/login/.test(page.url())) {
+      return;
+    }
+    await expect(saved).toBeVisible();
+  }).toPass({ timeout: 60_000 });
+  if (/\/login/.test(page.url())) {
+    if (attempt > 0) {
+      throw new Error('signed out while saving system defaults');
+    }
+    await loginAs(page, 'dfe_admin');
+    return setRetention(page, days, attempt + 1);
+  }
   await expect(shownRetention(page)).toHaveText(retentionLabel(days));
 
   const drawer = page.getByRole('dialog', { name: 'Identify Config Drift' });
