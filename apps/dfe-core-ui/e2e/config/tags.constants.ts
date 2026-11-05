@@ -7,4 +7,6 @@ export const TAGS = Object.freeze({
   account: '@account',
   schema: '@schema',
   source: '@source',
+  settings: '@settings',
+  organisation: '@organisation',
 });
