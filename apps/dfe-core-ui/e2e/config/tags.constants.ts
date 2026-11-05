@@ -9,4 +9,6 @@ export const TAGS = Object.freeze({
   source: '@source',
   settings: '@settings',
   organisation: '@organisation',
+  roles: '@roles',
+  groups: '@groups',
 });
