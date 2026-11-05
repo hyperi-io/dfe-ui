@@ -102,13 +102,16 @@ test.describe('', { tag: [TAGS.core, TAGS.source] }, () => {
     await openFlowTab(page);
 
     // A glyph standing in for a shape is the defect this tab was filed for.
-    const furniture = await page.evaluate((glyphs) => {
-      const edges = new Set(glyphs);
-      return [...document.querySelectorAll('*')]
-        .filter((el) => el.children.length === 0)
-        .map((el) => (el.textContent ?? '').trim())
-        .filter((text) => edges.has(text));
-    }, [...EDGE_GLYPHS]);
+    const furniture = await page.evaluate(
+      (glyphs) => {
+        const edges = new Set(glyphs);
+        return [...document.querySelectorAll('*')]
+          .filter((el) => el.children.length === 0)
+          .map((el) => (el.textContent ?? '').trim())
+          .filter((text) => edges.has(text));
+      },
+      [...EDGE_GLYPHS],
+    );
     expect(furniture).toEqual([]);
 
     // Two stages joined by an edge means two edges, each named by what carries

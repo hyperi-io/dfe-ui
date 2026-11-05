@@ -191,7 +191,7 @@ They are listed in `apps/dfe-core-ui/.env.example`.
 | `E2E_ADMIN_PASSWORD`                                                 | the password every seeded account logs in with. On a stack with the e2e helpers, the engine's well-known e2e password.                                                          |
 | `E2E_ADMIN_NEW_PASSWORD`                                             | the password the suite changes an issued one to, and the one `ingestRules.spec.ts` tries for `admin` after the seeds. At least 12 characters, or the engine refuses the change. |
 | `DFE_OIDC_FIXTURE_PASSWORD`                                          | OIDC login only. A provider with no password is skipped. The user defaults to `dfe-test@dfe-oidc.test`.                                                                         |
-| `E2E_TEST_TIMEOUT_MS`, `E2E_EXPECT_TIMEOUT_MS`, `E2E_NAV_TIMEOUT_MS` | optional. Unset keeps 120000, 5000 and 0. The test budget covers `reset_all` in `beforeEach`. Raise them when the stack is slower than local docker. |
+| `E2E_TEST_TIMEOUT_MS`, `E2E_EXPECT_TIMEOUT_MS`, `E2E_NAV_TIMEOUT_MS` | optional. Unset keeps 120000, 5000 and 0. The test budget covers `reset_all` in `beforeEach`. Raise them when the stack is slower than local docker.                            |
 
 Specs tagged `@docker-only` (`filebeatDataPath.spec.ts`,
 `promoteJsonField.spec.ts`, and the Compose scaling case in
