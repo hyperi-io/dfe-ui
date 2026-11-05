@@ -23,6 +23,9 @@ const SEED_SOURCE = 'filebeatvrl';
 /** The width the console is designed at, and the one the defect was filed at. */
 const DESKTOP = { width: 1280, height: 900 };
 
+/** Glyphs that stand in for an edge when the diagram fails to draw one. */
+const EDGE_GLYPHS = new Set(['->', '=>', '-->', '<-', '<=', '|', '*']);
+
 test.beforeEach(async ({ playwright, page }) => {
   await e2eClient({ playwright, seedScript: 'reset_all' });
   await e2eClient({ playwright, seedScript: 'seed_setup_complete' });
@@ -99,12 +102,13 @@ test.describe('', { tag: [TAGS.core, TAGS.source] }, () => {
     await openFlowTab(page);
 
     // A glyph standing in for a shape is the defect this tab was filed for.
-    const furniture = await page.evaluate(() =>
-      [...document.querySelectorAll('*')]
+    const furniture = await page.evaluate((glyphs) => {
+      const edges = new Set(glyphs);
+      return [...document.querySelectorAll('*')]
         .filter((el) => el.children.length === 0)
         .map((el) => (el.textContent ?? '').trim())
-        .filter((text) => /^(->|=>|-->|<-|<=|\||\*)$/.test(text)),
-    );
+        .filter((text) => edges.has(text));
+    }, [...EDGE_GLYPHS]);
     expect(furniture).toEqual([]);
 
     // Two stages joined by an edge means two edges, each named by what carries
