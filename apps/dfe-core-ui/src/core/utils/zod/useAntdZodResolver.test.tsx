@@ -44,6 +44,15 @@ describe('isZodFieldRequired', () => {
     expect(isZodFieldRequired(schema, 'label')).toBe(false);
     expect(isZodFieldRequired(schema, ['nested', 'hint'])).toBe(false);
   });
+
+  test('follows the value a preprocess produces', () => {
+    const preprocessed = z.object({
+      expires_at: z.preprocess((value) => value, z.date().optional()),
+      when: z.preprocess((value) => value, z.date()),
+    });
+    expect(isZodFieldRequired(preprocessed, 'expires_at')).toBe(false);
+    expect(isZodFieldRequired(preprocessed, 'when')).toBe(true);
+  });
 });
 
 describe('useAntdZodResolver', () => {
