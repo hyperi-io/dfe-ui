@@ -161,7 +161,18 @@ export const loginAs = async (
   await letClicksThroughDevIndicator(page);
   await page.goto(`${BASE_URL}/login`);
 
-  await textbox(page, 'Username').fill(user);
+  // An enabled provider offers OIDC first and keeps the local form on the other tab.
+  const localTab = page.getByRole('tab', {
+    name: 'Login with Local',
+    exact: true,
+  });
+  const username = textbox(page, 'Username');
+  await expect(username.or(localTab)).toBeVisible();
+  if (await localTab.isVisible()) {
+    await localTab.click();
+  }
+
+  await username.fill(user);
   await textbox(page, 'Password').fill(adminPassword());
   await page.getByRole('button', { name: 'Login', exact: true }).click();
   // Either the console lands, or the account is on an issued password and must change it first.
