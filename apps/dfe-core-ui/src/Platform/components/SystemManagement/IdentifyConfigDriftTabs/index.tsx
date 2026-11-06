@@ -2,7 +2,7 @@ import { NotificationCard } from '@/core/components/NotificationCard';
 import { TBulkActionSourcesRequestBody } from '@/core/hooks/useBulkActionSources/types';
 import { TApplyDefaultsResponse } from '@/Platform/hooks/system/useApplyDefaults/types';
 import { useFetchInfiniteDefaultsDriftSources } from '@/Platform/hooks/system/useFetchInifniteDefaultDriftSources';
-import { Spin, Steps, StepsProps } from 'antd';
+import { Input, Spin, Steps, StepsProps } from 'antd';
 import { useEffect, useState } from 'react';
 import { BuildDeployTab } from './BuildDeployTab';
 import { ConfigDriftTab } from './ConfigDriftTab';
@@ -66,6 +66,7 @@ export const IdentifyConfigDriftTabs = ({
 
   const [appliedSuccessMessage, setAppliedSuccessMessage] =
     useState<string>('');
+  const [search, setSearch] = useState('');
 
   const buildDeployUnlocked = appliedSources.length > 0;
 
@@ -110,70 +111,79 @@ export const IdentifyConfigDriftTabs = ({
     error,
     loadMoreRef,
     isFetchingNextPage,
-  } = useFetchInfiniteDefaultsDriftSources();
-
-  if (error) {
-    return <NotificationCard type="error" title={error.message} />;
-  }
-
-  if (isLoading) {
-    return (
-      <>
-        <Spin /> <p className="sr-only">Loading defaults drift sources</p>
-      </>
-    );
-  }
+  } = useFetchInfiniteDefaultsDriftSources({ search });
 
   const hasDriftSources = (defaultsDriftSources?.length ?? 0) > 0;
   const renderNotFound =
+    !isLoading &&
+    !error &&
     defaultsDriftSources != null &&
     !hasDriftSources &&
     appliedSources.length === 0;
 
   return (
-    <>
+    <div className="flex flex-col gap-4">
+      <Input.Search
+        className="ml-auto w-60"
+        placeholder="Search sources"
+        aria-label="Search sources"
+        allowClear
+        value={search}
+        onChange={(event) => setSearch(event.target.value)}
+      />
+      {error && <NotificationCard type="error" title={error.message} />}
+      {isLoading && (
+        <>
+          <Spin /> <p className="sr-only">Loading defaults drift sources</p>
+        </>
+      )}
       {renderNotFound && (
         <NotificationCard title="No sources with config drift found in your environment." />
       )}
-      {(hasDriftSources || appliedSources.length > 0) && (
-        <div className="flex flex-col gap-4">
-          <NotificationCard
-            title={formatNotificationCardTitleAndDescription(currentStep).title}
-            description={
-              formatNotificationCardTitleAndDescription(currentStep).description
-            }
-          />
-          <Steps
-            size="small"
-            current={steps.findIndex((step) => step.key === currentStep)}
-            onChange={handleStepChange}
-            items={steps.map((step) =>
-              step.key === 'build-deploy'
-                ? { ...step, disabled: !buildDeployUnlocked }
-                : step,
-            )}
-          />
+      {!isLoading &&
+        !error &&
+        (hasDriftSources || appliedSources.length > 0) && (
+          <div className="flex flex-col gap-4">
+            <NotificationCard
+              title={
+                formatNotificationCardTitleAndDescription(currentStep).title
+              }
+              description={
+                formatNotificationCardTitleAndDescription(currentStep)
+                  .description
+              }
+            />
+            <Steps
+              size="small"
+              current={steps.findIndex((step) => step.key === currentStep)}
+              onChange={handleStepChange}
+              items={steps.map((step) =>
+                step.key === 'build-deploy'
+                  ? { ...step, disabled: !buildDeployUnlocked }
+                  : step,
+              )}
+            />
 
-          {appliedSuccessMessage && (
-            <NotificationCard title={appliedSuccessMessage} type="success" />
-          )}
-          {liveResults.length > 0 && <LiveApplyResult live={liveResults} />}
-          {currentStep === 'config-drift' && (
-            <ConfigDriftTab
-              onSuccess={handleConfigDriftSuccess}
-              defaultsDriftSources={defaultsDriftSources ?? []}
-              loadMoreRef={loadMoreRef}
-              isFetchingNextPage={isFetchingNextPage}
-            />
-          )}
-          {currentStep === 'build-deploy' && (
-            <BuildDeployTab
-              appliedSources={appliedSources}
-              onSuccess={onSuccess}
-            />
-          )}
-        </div>
-      )}
-    </>
+            {appliedSuccessMessage && (
+              <NotificationCard title={appliedSuccessMessage} type="success" />
+            )}
+            {liveResults.length > 0 && <LiveApplyResult live={liveResults} />}
+            {currentStep === 'config-drift' && (
+              <ConfigDriftTab
+                onSuccess={handleConfigDriftSuccess}
+                defaultsDriftSources={defaultsDriftSources ?? []}
+                loadMoreRef={loadMoreRef}
+                isFetchingNextPage={isFetchingNextPage}
+              />
+            )}
+            {currentStep === 'build-deploy' && (
+              <BuildDeployTab
+                appliedSources={appliedSources}
+                onSuccess={onSuccess}
+              />
+            )}
+          </div>
+        )}
+    </div>
   );
 };

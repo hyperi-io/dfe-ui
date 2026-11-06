@@ -55,6 +55,18 @@ export const transformFormDataToRequestBody = (
   return { requestBody, uploadedColumns, schemaColumns };
 };
 
+/**
+ * The create form's schema type is not always the registry path segment.
+ * A header is `common_header` in the form and `common-header` in the registry,
+ * which is also the segment the other-schemas list asks for.
+ */
+const SCHEMA_TYPE_PATH: Record<string, string> = {
+  common_header: 'common-header',
+};
+
+const schemaTypePath = (schemaType: string) =>
+  SCHEMA_TYPE_PATH[schemaType] ?? schemaType;
+
 export const joinSchemaApiPath = ({
   schema_type,
   path,
@@ -65,8 +77,9 @@ export const joinSchemaApiPath = ({
   if (!schema_type) {
     return path;
   }
+  const prefix = schemaTypePath(schema_type);
   if (!path) {
-    return schema_type;
+    return prefix;
   }
-  return `${schema_type}/${path}`;
+  return `${prefix}/${path}`;
 };

@@ -12,6 +12,7 @@ type ZodDefBag = {
   type?: string;
   innerType?: z.ZodType;
   in?: z.ZodType;
+  out?: z.ZodType;
   shape?: Record<string, z.ZodType>;
   element?: z.ZodType;
   items?: z.ZodType[];
@@ -58,7 +59,14 @@ const isOptionalOrNullable = (schema: z.ZodType): boolean => {
       continue;
     }
     if (type === 'pipe' || type === 'transform' || type === 'overwrite') {
-      current = def.in ?? def.innerType;
+      // preprocess is a pipe whose input is a bare transform, so whether the
+      // field can be left empty is decided by the value it produces.
+      const input = def.in;
+      if (input && defOf(input).type === 'transform' && def.out) {
+        current = def.out;
+        continue;
+      }
+      current = input ?? def.innerType;
       continue;
     }
     break;

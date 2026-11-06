@@ -4,10 +4,13 @@ import { RbacProtected } from '@/core/components/RbacProtected';
 import { SectionCard } from '@/core/components/SectionCard';
 import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
 import { IconInfoCircle } from '@repo/dfe-icons';
+import { Input } from 'antd';
+import { useState } from 'react';
 import { CreateOidcProviderDrawer } from './CreateOidcProviderDrawer';
 import { OidcProviderList } from './OidcProviderList';
 
 export const OidcProviderManagement = () => {
+  const [search, setSearch] = useState('');
   const { componentHeight } = useSetComponentHeight({
     offset: 100,
   });
@@ -23,10 +26,19 @@ export const OidcProviderManagement = () => {
       <SectionCard
         title="OIDC providers"
         description="Manage OIDC providers and their configurations."
+        rightTitleSlot={
+          <Input.Search
+            className="ml-auto w-60"
+            placeholder="Search providers"
+            onChange={(e) => setSearch(e.target.value)}
+            value={search}
+            allowClear
+          />
+        }
       >
         <RbacProtected action={RbacProtected.rbacActions.oidc_read}>
           <RbacProtected.Unrestricted>
-            <OidcProviderList />
+            <OidcProviderList search={search} />
           </RbacProtected.Unrestricted>
           <RbacProtected.Restricted>
             <NotificationCard

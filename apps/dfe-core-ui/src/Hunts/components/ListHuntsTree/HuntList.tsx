@@ -61,7 +61,7 @@ export const HuntList = ({
 
   return (
     <CustomScrollbar height={componentHeight}>
-      <ul className={cn('h-full flex flex-col gap-2 pt-2', className)}>
+      <ul className={cn('flex flex-col gap-2 pt-2', className)}>
         {hunts.map((hunt: THuntListItem) => {
           const isSelected = selectedHuntName === hunt.name;
           return (
