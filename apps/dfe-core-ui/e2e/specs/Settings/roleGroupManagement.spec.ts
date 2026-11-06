@@ -78,11 +78,18 @@ const choose = async (
 
 const deleteRole = async (page: Page, name: string) => {
   const card = roleCard(page, name);
+  // A closing dialog's wrap still covers the card and steals the click.
+  await expect(page.locator('.ant-modal-wrap')).toHaveCount(0);
   await card.scrollIntoViewIfNeeded();
   await card.getByRole('button', { name: 'Role actions', exact: true }).click();
-  await page
-    .getByRole('button', { name: `Delete ${name}`, exact: true })
-    .click();
+  const removeAction = page.getByRole('button', {
+    name: `Delete ${name}`,
+    exact: true,
+  });
+  // The item is in the DOM while the menu fades in. Clicking it then scrolls
+  // the page, and that scroll closes the menu.
+  await expect(removeAction).toBeVisible();
+  await removeAction.click();
   const remove = page.getByRole('dialog', { name: 'Delete Role' });
   await remove.getByPlaceholder('Enter role name to be deleted').fill(name);
   await remove.getByRole('button', { name: 'Delete', exact: true }).click();

@@ -9,8 +9,12 @@ import { TAGS } from '@e2e/config/tags.constants';
  * Custom: `searchable-role-0` is on the first page, `searchable-role-11` is the
  * first name on the next, and `searchable-role-49` is a unique search hit.
  * Core: `admin` is first, `data_viewer` is the first name on the next page.
+ *
+ * reset_all deletes only the searchable-role-* set. Other custom roles stay
+ * and sort ahead of it, so the custom tests search this prefix first.
  */
 const FIRST_PAGE = 3;
+const SEEDED_ROLES = 'searchable-role-';
 const CUSTOM_MATCH = 'searchable-role-49';
 const CUSTOM_OTHER = 'searchable-role-0';
 const CUSTOM_NEXT = 'searchable-role-11';
@@ -66,6 +70,7 @@ test.describe('', { tag: [TAGS.core, TAGS.search, TAGS.pagination] }, () => {
     test('A search keeps the role whose name matches', async ({ page }) => {
       await openRoles(page);
       const section = roleSection(page, 'Manage roles', 'Search custom roles');
+      await searchRoles(section, 'Search custom roles', SEEDED_ROLES);
 
       await expect(roleName(section, CUSTOM_OTHER)).toBeVisible();
       await expect(roleName(section, CUSTOM_MATCH)).toHaveCount(0);
@@ -75,7 +80,7 @@ test.describe('', { tag: [TAGS.core, TAGS.search, TAGS.pagination] }, () => {
       await expect(roleName(section, CUSTOM_MATCH)).toBeVisible();
       await expect(roleName(section, CUSTOM_OTHER)).toBeHidden();
 
-      await searchRoles(section, 'Search custom roles', '');
+      await searchRoles(section, 'Search custom roles', SEEDED_ROLES);
 
       await expect(roleName(section, CUSTOM_OTHER)).toBeVisible();
       await expect(roleName(section, CUSTOM_MATCH)).toHaveCount(0);
@@ -84,6 +89,7 @@ test.describe('', { tag: [TAGS.core, TAGS.search, TAGS.pagination] }, () => {
     test('Show more loads the next page', async ({ page }) => {
       await openRoles(page);
       const section = roleSection(page, 'Manage roles', 'Search custom roles');
+      await searchRoles(section, 'Search custom roles', SEEDED_ROLES);
 
       await expect(cards(section)).toHaveCount(FIRST_PAGE);
       await expect(roleName(section, CUSTOM_OTHER)).toBeVisible();
@@ -100,6 +106,7 @@ test.describe('', { tag: [TAGS.core, TAGS.search, TAGS.pagination] }, () => {
     test('A search that matches nothing says so', async ({ page }) => {
       await openRoles(page);
       const section = roleSection(page, 'Manage roles', 'Search custom roles');
+      await searchRoles(section, 'Search custom roles', SEEDED_ROLES);
       await expect(roleName(section, CUSTOM_OTHER)).toBeVisible();
 
       await searchRoles(section, 'Search custom roles', 'no-such-role');

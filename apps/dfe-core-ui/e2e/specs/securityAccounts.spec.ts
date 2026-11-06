@@ -84,9 +84,33 @@ const signOut = async (page: Page) => {
 
 const signIn = async (page: Page, username: string, password: string) => {
   await page.goto(`${BASE_URL}/login`);
-  await textbox(page, 'Username').fill(username);
+  // An enabled provider offers OIDC first and keeps the local form on the other tab.
+  const localTab = page.getByRole('tab', {
+    name: 'Login with Local',
+    exact: true,
+  });
+  const usernameField = textbox(page, 'Username');
+  // Once the local tab is selected, the tab and the username field are both
+  // present. Waiting for exactly one of them fails that page.
+  await expect(localTab.or(usernameField).first()).toBeVisible();
+  if (await localTab.isVisible()) {
+    await localTab.click();
+  }
+  await usernameField.fill(username);
   await textbox(page, 'Password').fill(password);
   await page.getByRole('button', { name: 'Login', exact: true }).click();
+};
+
+/** Leave the OIDC step. Next is there once the provider has tested. */
+const continueOidc = async (page: Page) => {
+  const next = page.getByRole('button', { name: 'Next', exact: true });
+  const skip = page.getByRole('button', { name: 'Skip for now', exact: true });
+  await expect(next.or(skip).first()).toBeVisible();
+  if (await next.isVisible()) {
+    await next.click();
+    return;
+  }
+  await skip.click();
 };
 
 test.describe('security accounts', () => {
@@ -149,15 +173,24 @@ test.describe('the admin through the setup wizard', () => {
     await page
       .getByRole('button', { name: 'Save and continue', exact: true })
       .click();
-    // The source screen, then the login screen: skip both.
-    for (const path of ['configureSource', 'configureLogin']) {
-      await expect(page).toHaveURL(`${BASE_URL}/setup/${path}`);
-      await page
-        .getByRole('button', { name: 'Skip for now', exact: true })
-        .click();
-    }
+    await expect(page).toHaveURL(`${BASE_URL}/setup/configureSource`);
+    await page
+      .getByRole('button', { name: 'Skip for now', exact: true })
+      .click();
+    await expect(page).toHaveURL(`${BASE_URL}/setup/configureLogin`);
+    await continueOidc(page);
     await expect(page).toHaveURL(`${BASE_URL}/setup/configureUser`);
-    await textbox(page, 'Username').fill('wizard_user');
+    // A configured provider opens on its own tab. The local account form is the other one.
+    const localUser = page.getByRole('tab', {
+      name: 'Configure Local User',
+      exact: true,
+    });
+    const username = textbox(page, 'Username');
+    await expect(localUser.or(username).first()).toBeVisible();
+    if (await localUser.isVisible()) {
+      await localUser.click();
+    }
+    await username.fill('wizard_user');
     await textbox(page, 'Email').fill('wizard_user@example.com');
     await textbox(page, 'Password').fill(freshPassword('wizard_user'));
     await page

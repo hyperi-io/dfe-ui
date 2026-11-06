@@ -26,7 +26,20 @@ const openProfile = async (page: Page) => {
 };
 
 const signIn = async (page: Page, password: string) => {
-  await textbox(page, 'Username').fill(USER);
+  // An enabled provider offers OIDC first and keeps the local form on the other tab.
+  const localTab = page.getByRole('tab', {
+    name: 'Login with Local',
+    exact: true,
+  });
+  const username = textbox(page, 'Username');
+  // Once the local tab is selected, the tab and the username field are both
+  // present. Waiting for exactly one of them fails that page.
+  await expect(localTab.or(username).first()).toBeVisible();
+  if (await localTab.isVisible()) {
+    await localTab.click();
+  }
+
+  await username.fill(USER);
   await textbox(page, 'Password').fill(password);
   await page.getByRole('button', { name: 'Login', exact: true }).click();
 };

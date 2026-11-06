@@ -46,6 +46,20 @@ const openProcessingTab = async (page: Page, source: string) => {
   await page.getByRole('tab', { name: 'Processing', exact: true }).click();
 };
 
+/**
+ * Confirm the switch once the catalogue has answered.
+ *
+ * Until then the button shows a spinner and the click is ignored, so the
+ * source is never written.
+ */
+const confirmSwitch = async (page: Page) => {
+  const confirm = page
+    .getByRole('dialog')
+    .getByRole('button', { name: 'Switch transform' });
+  await expect(confirm).not.toHaveClass(/ant-btn-loading/, { timeout: 30_000 });
+  await confirm.click();
+};
+
 /** The engine's own answer for which transform a source names. */
 const engineTransformEngine = async (
   request: APIRequestContext,
@@ -149,10 +163,7 @@ test.describe('', { tag: [TAGS.core, TAGS.source] }, () => {
           req.url().endsWith(`/api/v1/sources/${SOURCE}`),
       );
       await page.getByRole('radio', { name: /dfe-transform-vector/ }).click();
-      await page
-        .getByRole('dialog')
-        .getByRole('button', { name: 'Switch transform' })
-        .click();
+      await confirmSwitch(page);
 
       // The choice is written to the SOURCE. Nothing is deployed, and no app
       // endpoint is called: the engine derives the instance from the source.
@@ -216,10 +227,7 @@ test.describe('', { tag: [TAGS.core, TAGS.source] }, () => {
 
       // The move is one action, with no undeploy in between.
       await page.getByRole('radio', { name: /dfe-transform-vector/ }).click();
-      await page
-        .getByRole('dialog')
-        .getByRole('button', { name: 'Switch transform' })
-        .click();
+      await confirmSwitch(page);
       await expect(
         page.getByRole('radio', { name: /dfe-transform-vector/ }),
       ).toBeChecked();

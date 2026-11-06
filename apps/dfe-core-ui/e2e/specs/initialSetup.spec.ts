@@ -35,9 +35,34 @@ test.beforeEach(async ({ playwright }) => {
 // runs on authenticated engine calls, so a wrong password here fails setup the
 // same way a baked-in one did in the product (dfe-ui#206).
 const login = async (page: Page) => {
-  await textbox(page, 'Username').fill('admin');
+  // An enabled provider offers OIDC first and keeps the local form on the other tab.
+  const localTab = page.getByRole('tab', {
+    name: 'Login with Local',
+    exact: true,
+  });
+  const username = textbox(page, 'Username');
+  // Once the local tab is selected, the tab and the username field are both
+  // present. Waiting for exactly one of them fails that page.
+  await expect(localTab.or(username).first()).toBeVisible();
+  if (await localTab.isVisible()) {
+    await localTab.click();
+  }
+
+  await username.fill('admin');
   await textbox(page, 'Password').fill(adminPassword());
   await page.getByRole('button', { name: 'Login', exact: true }).click();
+};
+
+/** Leave the OIDC step. Next is there once the provider has tested. */
+const continueOidc = async (page: Page) => {
+  const next = page.getByRole('button', { name: 'Next', exact: true });
+  const skip = page.getByRole('button', { name: 'Skip for now', exact: true });
+  await expect(next.or(skip).first()).toBeVisible();
+  if (await next.isVisible()) {
+    await next.click();
+    return;
+  }
+  await skip.click();
 };
 
 test.describe('', { tag: [TAGS.core] }, () => {
@@ -129,26 +154,29 @@ test.describe('', { tag: [TAGS.core] }, () => {
 
     /* CONFIGURE LOGIN (OIDC) */
     await expect(page).toHaveURL(configureLoginPageUrl);
-    // Next appears after the provider is tested. Until then, skip is the way on.
-    await expect(
-      page.getByRole('button', { name: 'Next', exact: true }),
-    ).toHaveCount(0);
-    await page
-      .getByRole('button', { name: 'Skip for now', exact: true })
-      .click();
+    // A tested provider offers Next. Until the test passes, Skip is the way on.
+    await continueOidc(page);
     await expect(page).toHaveURL(configureUserPageUrl);
     await page.getByRole('button', { name: 'Back', exact: true }).click();
     await expect(page).toHaveURL(configureLoginPageUrl);
-    await page
-      .getByRole('button', { name: 'Skip for now', exact: true })
-      .click();
+    await continueOidc(page);
 
     /* CONFIGURE USER */
     await expect(page).toHaveURL(configureUserPageUrl);
     await expect(
       page.getByRole('button', { name: 'Next', exact: true }),
     ).toBeDisabled();
-    await textbox(page, 'Username').fill('test_username');
+    // A configured provider opens on its own tab. The local account form is the other one.
+    const localUser = page.getByRole('tab', {
+      name: 'Configure Local User',
+      exact: true,
+    });
+    const username = textbox(page, 'Username');
+    await expect(localUser.or(username).first()).toBeVisible();
+    if (await localUser.isVisible()) {
+      await localUser.click();
+    }
+    await username.fill('test_username');
     await textbox(page, 'Email').fill('test_username@example.com');
     await textbox(page, 'Password').fill('test_password');
     await page
