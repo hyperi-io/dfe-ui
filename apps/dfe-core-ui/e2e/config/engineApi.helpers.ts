@@ -1,4 +1,6 @@
 import { execFileSync } from 'node:child_process';
+import { existsSync, rmSync } from 'node:fs';
+import { dirname, join } from 'node:path';
 
 import { ENGINE_API_URL } from './e2e.client';
 import { adminPassword } from './login.helpers';
@@ -93,8 +95,36 @@ export const CONTAINER_PREFIX = process.env.DFE_CONTAINER_PREFIX ?? 'e2e-';
  * Through the container's own client rather than the HTTP port, so the test
  * needs no warehouse credential of its own.
  */
-export const CLICKHOUSE_CONTAINER =
-  process.env.DFE_CLICKHOUSE_CONTAINER || `${CONTAINER_PREFIX}dfe-clickhouse`;
+const containerIsRunning = (name: string) => {
+  try {
+    return (
+      execFileSync('docker', ['inspect', '-f', '{{.State.Running}}', name], {
+        encoding: 'utf8',
+        stdio: ['ignore', 'pipe', 'ignore'],
+      }).trim() === 'true'
+    );
+  } catch {
+    return false;
+  }
+};
+
+/** The prefixed name when that container is up, else the compose service name. */
+const resolveContainer = (
+  explicit: string | undefined,
+  prefixed: string,
+  bare: string,
+) => {
+  if (explicit) return explicit;
+  if (containerIsRunning(prefixed)) return prefixed;
+  if (prefixed !== bare && containerIsRunning(bare)) return bare;
+  return prefixed;
+};
+
+export const CLICKHOUSE_CONTAINER = resolveContainer(
+  process.env.DFE_CLICKHOUSE_CONTAINER,
+  `${CONTAINER_PREFIX}dfe-clickhouse`,
+  'dfe-clickhouse',
+);
 
 export const clickhouse = async (query: string) =>
   execFileSync(
@@ -103,10 +133,29 @@ export const clickhouse = async (query: string) =>
     { encoding: 'utf8' },
   ).trim();
 
+let dataDb: string | undefined;
+
+/** The database the engine deploys source tables into. */
+export const dataDatabase = async () => {
+  if (dataDb) return dataDb;
+  const settings = await engine<{ clickhouse_data_database: string }>(
+    'GET',
+    '/api/v1/system/settings',
+  );
+  dataDb = settings.clickhouse_data_database;
+  return dataDb;
+};
+
+const quoteIdent = (name: string) => `\`${name.replaceAll('`', '``')}\``;
+
+/** `database`.`table` for the engine's data database. */
+export const qualifiedTable = async (table: string) =>
+  `${quoteIdent(await dataDatabase())}.${quoteIdent(table)}`;
+
 export const tableColumns = async (table: string) =>
   (
     await clickhouse(
-      `SELECT name FROM system.columns WHERE database = 'dfe' AND table = '${table}' ORDER BY position FORMAT TSV`,
+      `SELECT name FROM system.columns WHERE database = '${await dataDatabase()}' AND table = '${table}' ORDER BY position FORMAT TSV`,
     )
   )
     .split('\n')
@@ -116,7 +165,7 @@ export const tableIndices = async (table: string) =>
   Object.fromEntries(
     (
       await clickhouse(
-        `SELECT expr, type_full FROM system.data_skipping_indices WHERE database = 'dfe' AND table = '${table}' FORMAT TSV`,
+        `SELECT expr, type_full FROM system.data_skipping_indices WHERE database = '${await dataDatabase()}' AND table = '${table}' FORMAT TSV`,
       )
     )
       .split('\n')
@@ -124,8 +173,11 @@ export const tableIndices = async (table: string) =>
       .map((row) => row.split('\t') as [string, string]),
   );
 
-export const ENGINE_CONTAINER =
-  process.env.DFE_ENGINE_CONTAINER || `${CONTAINER_PREFIX}dfe-engine`;
+export const ENGINE_CONTAINER = resolveContainer(
+  process.env.DFE_ENGINE_CONTAINER,
+  `${CONTAINER_PREFIX}dfe-engine`,
+  'dfe-engine',
+);
 
 /**
  * Drop a source's build, plan and deploy records.
@@ -134,18 +186,29 @@ export const ENGINE_CONTAINER =
  * not reach them -- so a recreated source of the same name shows in the console
  * as already built and deployed against a table that no longer exists.
  */
-export const forgetDeployRecords = (source: string) => {
-  execFileSync('docker', [
-    'exec',
-    ENGINE_CONTAINER,
-    'sh',
-    '-c',
-    `rm -f /app/config/source-builds/${source}.yaml /app/config/source-plans/${source}.yaml /app/config/source-deploys/${source}.yaml`,
-  ]);
+export const forgetDeployRecords = async (source: string) => {
+  const { sources_dir } = await engine<{ sources_dir: string }>(
+    'GET',
+    '/api/v1/system/settings',
+  );
+  const parent = dirname(sources_dir);
+  const files = ['source-builds', 'source-plans', 'source-deploys'].map((dir) =>
+    join(parent, dir, `${source}.yaml`),
+  );
+  // A host engine reports a path this process can see. A container engine
+  // reports the path inside the container, which is removed there.
+  if (files.some((file) => existsSync(file))) {
+    for (const file of files) rmSync(file, { force: true });
+    return;
+  }
+  if (!containerIsRunning(ENGINE_CONTAINER)) return;
+  execFileSync('docker', ['exec', ENGINE_CONTAINER, 'rm', '-f', ...files]);
 };
 
 export const rowCount = async (table: string) =>
-  Number(await clickhouse(`SELECT count() FROM dfe.\`${table}\``));
+  Number(
+    await clickhouse(`SELECT count() FROM ${await qualifiedTable(table)}`),
+  );
 
 /** Records that named no table and fell back to the default, which is a WARN and not an error. */
 export const loaderFallbacks = async () => {

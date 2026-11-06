@@ -252,4 +252,10 @@ describe('joinSchemaApiPath', () => {
       'meta/path',
     );
   });
+
+  test('stores a header schema under common-header', () => {
+    expect(
+      joinSchemaApiPath({ schema_type: 'common_header', path: 'timeseries' }),
+    ).toBe('common-header/timeseries');
+  });
 });

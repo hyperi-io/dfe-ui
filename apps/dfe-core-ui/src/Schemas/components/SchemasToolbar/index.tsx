@@ -64,7 +64,7 @@ export const SchemasToolbarBase = () => {
       </nav>
       <div className="flex gap-2">
         {/* No tree lists derived schemas yet, so creating one selects nothing. */}
-        <CreateDerivedSchemaDrawer />
+        {pathname === '/schemas/meta-schemas' && <CreateDerivedSchemaDrawer />}
         <CreateSchemaDrawer onSuccess={handleSuccess} />
       </div>
     </Toolbar>

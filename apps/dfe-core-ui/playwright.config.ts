@@ -19,10 +19,14 @@ for (const name of ['.env.local', '.env']) {
  * specs tagged @docker-only (filebeatDataPath.spec.ts, promoteJsonField.spec.ts):
  * `npx playwright test --grep-invert @docker-only`.
  *
- * The time budgets default to Playwright's own. A deployment that answers more
- * slowly than the local docker stack raises them by environment:
+ * Expect and navigation budgets default to Playwright's own. The test budget
+ * is longer, because every spec's beforeEach calls reset_all and that call
+ * takes about 40s while sharing the test's clock. At 30s the hook is killed
+ * while the engine is still resetting and still holding its write turn, so
+ * the next test queues behind it and times out too. A deployment that answers
+ * more slowly than the local docker stack raises the budgets by environment:
  *
- * - E2E_TEST_TIMEOUT_MS: each test, its beforeEach and afterEach included (30000).
+ * - E2E_TEST_TIMEOUT_MS: each test, its beforeEach and afterEach included (120000).
  * - E2E_EXPECT_TIMEOUT_MS: each web-first assertion, toHaveURL included (5000).
  * - E2E_NAV_TIMEOUT_MS: each page.goto and waitForURL; 0 is no limit inside the
  *   test's own budget (0).
@@ -43,7 +47,7 @@ const budgetMs = (name: string, fallback: number): number => {
 
 export default defineConfig({
   testDir: './e2e',
-  timeout: budgetMs('E2E_TEST_TIMEOUT_MS', 30_000),
+  timeout: budgetMs('E2E_TEST_TIMEOUT_MS', 120_000),
   expect: { timeout: budgetMs('E2E_EXPECT_TIMEOUT_MS', 5_000) },
   /* Fail the build on CI if you accidentally left test.only in the source code. */
   forbidOnly: !!process.env.CI,

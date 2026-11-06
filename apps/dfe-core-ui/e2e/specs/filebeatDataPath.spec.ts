@@ -1,7 +1,18 @@
 import { Page, expect, test } from '@playwright/test';
 
-import { BASE_URL, e2eClient } from '../config/e2e.client';
-import { loginAs } from '../config/login.helpers';
+import { BASE_URL, e2eClient } from '@e2e/config/e2e.client';
+import {
+  HyperdxTeams,
+  appInstances,
+  clickhouse,
+  engine,
+  forgetDeployRecords,
+  forgetEngineToken,
+  loaderFallbacks,
+  rowCount,
+  tableColumns,
+  tableIndices,
+} from '@e2e/config/engineApi.helpers';
 import {
   CorpusModule,
   ENRICHMENT,
@@ -14,19 +25,9 @@ import {
   pushEnvelopes,
   readProgram,
   restartFor,
-} from '../config/filebeatCorpus.helpers';
-import {
-  HyperdxTeams,
-  appInstances,
-  clickhouse,
-  engine,
-  forgetDeployRecords,
-  forgetEngineToken,
-  loaderFallbacks,
-  rowCount,
-  tableColumns,
-  tableIndices,
-} from '../config/engineApi.helpers';
+} from '@e2e/config/filebeatCorpus.helpers';
+import { loginAs } from '@e2e/config/login.helpers';
+import { TAGS } from '@e2e/config/tags.constants';
 
 /**
  * The filebeat corpus, from the console to the source's own table and back out
@@ -222,7 +223,7 @@ test.beforeAll(async () => {
   // plan refuses a version with no DDL to apply, so the tables go with them.
   for (const { name } of SOURCES) {
     await clickhouse(`DROP TABLE IF EXISTS dfe.\`${name}\``);
-    forgetDeployRecords(name);
+    await forgetDeployRecords(name);
   }
   // The receiver and loader compile their routing from an instance overlay, so
   // without one they keep the committed defaults and no source rule is in force.
@@ -236,43 +237,47 @@ test.beforeAll(async () => {
   }
 });
 
-test('a source is created on the catalogue routing convention @docker-only', async ({
-  page,
-}) => {
-  await loginAs(page, 'initial_user');
-  for (const source of SOURCES) {
-    await addSource(page, source);
-  }
-
-  for (const { name, module } of SOURCES) {
-    const stored = await engine<{
-      match: { field: string; operator: string; value: string };
-    }>('GET', `/api/v1/sources/${name}`);
-    expect(stored.match).toEqual({
-      field: 'data_stream.dataset',
-      operator: 'equals',
-      value: datasetOf(module),
-    });
-  }
-});
-
-test('deploying a source binds its own transform app @docker-only', async ({
-  page,
-}) => {
-  await loginAs(page, 'initial_user');
-  for (const { name, variant } of SOURCES) {
-    if (variant) {
-      await nameVariant(name, variant);
+test(
+  'a source is created on the catalogue routing convention',
+  { tag: [TAGS.docker] },
+  async ({ page }) => {
+    await loginAs(page, 'initial_user');
+    for (const source of SOURCES) {
+      await addSource(page, source);
     }
-    deployHints.set(name, await buildAndDeploy(page, name));
-  }
 
-  // One instance per app, each named for the source it serves: this is what
-  // makes the surface per-SOURCE rather than one shared transform.
-  for (const { name, engine: transformEngine } of SOURCES) {
-    expect(await appInstances(transformEngine)).toEqual([name]);
-  }
-});
+    for (const { name, module } of SOURCES) {
+      const stored = await engine<{
+        match: { field: string; operator: string; value: string };
+      }>('GET', `/api/v1/sources/${name}`);
+      expect(stored.match).toEqual({
+        field: 'data_stream.dataset',
+        operator: 'equals',
+        value: datasetOf(module),
+      });
+    }
+  },
+);
+
+test(
+  'deploying a source binds its own transform app',
+  { tag: [TAGS.docker] },
+  async ({ page }) => {
+    await loginAs(page, 'initial_user');
+    for (const { name, variant } of SOURCES) {
+      if (variant) {
+        await nameVariant(name, variant);
+      }
+      deployHints.set(name, await buildAndDeploy(page, name));
+    }
+
+    // One instance per app, each named for the source it serves: this is what
+    // makes the surface per-SOURCE rather than one shared transform.
+    for (const { name, engine: transformEngine } of SOURCES) {
+      expect(await appInstances(transformEngine)).toEqual([name]);
+    }
+  },
+);
 
 /**
  * Give one transform instance the bundled pipeline and restart it.
@@ -309,33 +314,37 @@ const giveInstanceItsPipeline = async (
   await restartFor(hints);
 };
 
-test('each transform instance takes the bundled filebeat pipeline @docker-only', async () => {
-  test.skip(
-    !programsAvailable(),
-    'the bundled pipelines are not named: set DFE_FILEBEAT_VRL_PROGRAM, DFE_FILEBEAT_VECTOR_PROGRAM and DFE_FILEBEAT_ENRICHMENT',
-  );
-
-  // Compose acts on no hint by itself, so the deploy's hints create each
-  // instance's container here, once its program is in place.
-  for (const source of SOURCES) {
-    await giveInstanceItsPipeline(
-      source.engine,
-      source.name,
-      deployHints.get(source.name),
+test(
+  'each transform instance takes the bundled filebeat pipeline',
+  { tag: [TAGS.docker] },
+  async () => {
+    test.skip(
+      !programsAvailable(),
+      'the bundled pipelines are not named: set DFE_FILEBEAT_VRL_PROGRAM, DFE_FILEBEAT_VECTOR_PROGRAM and DFE_FILEBEAT_ENRICHMENT',
     );
-  }
 
-  for (const { name, engine: transformEngine } of SOURCES) {
-    if (!PROGRAMS[transformEngine]) {
-      continue;
+    // Compose acts on no hint by itself, so the deploy's hints create each
+    // instance's container here, once its program is in place.
+    for (const source of SOURCES) {
+      await giveInstanceItsPipeline(
+        source.engine,
+        source.name,
+        deployHints.get(source.name),
+      );
     }
-    const files = await engine<{ items?: { name: string }[] }>(
-      'GET',
-      `/api/v1/apps/${transformEngine}/${name}/files/transforms`,
-    );
-    expect(JSON.stringify(files)).toContain(PROGRAMS[transformEngine].file);
-  }
-});
+
+    for (const { name, engine: transformEngine } of SOURCES) {
+      if (!PROGRAMS[transformEngine]) {
+        continue;
+      }
+      const files = await engine<{ items?: { name: string }[] }>(
+        'GET',
+        `/api/v1/apps/${transformEngine}/${name}/files/transforms`,
+      );
+      expect(JSON.stringify(files)).toContain(PROGRAMS[transformEngine].file);
+    }
+  },
+);
 
 const landsOnItsOwnTable = async ({
   name,
@@ -358,160 +367,177 @@ const landsOnItsOwnTable = async ({
   expect(await loaderFallbacks()).toBe(fallbacksBefore);
 };
 
-test('cisco-meraki: the corpus lands on its own table, not the catch-all @docker-only', () =>
-  landsOnItsOwnTable(SOURCES[0]));
+test(
+  'cisco-meraki: the corpus lands on its own table, not the catch-all',
+  { tag: [TAGS.docker] },
+  () => landsOnItsOwnTable(SOURCES[0]),
+);
 
-test('HyperDX carries the source, pointed at its own table @docker-only', async ({
-  page,
-}) => {
-  await loginAs(page, 'initial_user');
-  // A team gets its connection on first contact, and the source is written to
-  // every team that has one -- so the console has to have been opened once.
-  await page.goto(`${BASE_URL}/observe`);
-  await expect(page.locator('iframe')).toBeVisible();
+test(
+  'HyperDX carries the source, pointed at its own table',
+  { tag: [TAGS.docker] },
+  async ({ page }) => {
+    await loginAs(page, 'initial_user');
+    // A team gets its connection on first contact, and the source is written to
+    // every team that has one -- so the console has to have been opened once.
+    await page.goto(`${BASE_URL}/observe`);
+    await expect(page.locator('iframe')).toBeVisible();
 
-  for (const { name } of SOURCES) {
-    const deployed = await engine<{ hyperdx_source_teams: number | null }>(
-      'POST',
-      `/api/v1/sources/${name}/deploy`,
+    for (const { name } of SOURCES) {
+      const deployed = await engine<{ hyperdx_source_teams: number | null }>(
+        'POST',
+        `/api/v1/sources/${name}/deploy`,
+      );
+      expect(deployed.hyperdx_source_teams).toBeGreaterThan(0);
+    }
+
+    const { teams } = await engine<HyperdxTeams>(
+      'GET',
+      '/api/v1/hyperdx/sources',
     );
-    expect(deployed.hyperdx_source_teams).toBeGreaterThan(0);
-  }
+    for (const { name } of SOURCES) {
+      const holding = teams.filter((team) =>
+        team.sources.some(
+          (source) =>
+            source.name === name &&
+            source.table.databaseName === 'dfe' &&
+            source.table.tableName === name,
+        ),
+      );
+      expect(holding.length).toBeGreaterThan(0);
+    }
+  },
+);
 
-  const { teams } = await engine<HyperdxTeams>(
-    'GET',
-    '/api/v1/hyperdx/sources',
-  );
-  for (const { name } of SOURCES) {
-    const holding = teams.filter((team) =>
-      team.sources.some(
-        (source) =>
-          source.name === name &&
-          source.table.databaseName === 'dfe' &&
-          source.table.tableName === name,
+test(
+  'cisco-ios: the corpus lands on its own table, not the catch-all',
+  { tag: [TAGS.docker] },
+  () => landsOnItsOwnTable(SOURCES[2]),
+);
+
+test(
+  'a source changes transform app and the data follows',
+  { tag: [TAGS.docker] },
+  async ({ page }) => {
+    await loginAs(page, 'initial_user');
+    // cisco-ios moves from elastic to vrl, onto an instance created by the switch.
+    const moved = SOURCES[2];
+    const freed = SOURCES[0];
+    const before = await rowCount(moved.name);
+
+    // Compose runs one of each transform, so the target app's slot is freed
+    // first. Deleting the instance is not enough -- the next reconcile derives it
+    // again from the source still bound to that engine -- so the source goes.
+    await engine('DELETE', `/api/v1/sources/${freed.name}`);
+
+    await page.goto(
+      `${BASE_URL}/sources?source_name=${moved.name}&source_version=1.0.0`,
+    );
+    // The accessible name on the actions trigger arrives with this change; a
+    // console built before it has an icon-only button in the same place.
+    const actions = page.getByRole('button', { name: 'Actions', exact: true });
+    await (
+      (await actions.count())
+        ? actions
+        : page.locator('div.ml-auto.relative > button').first()
+    ).click();
+    await page.getByRole('button', { name: 'Edit Source' }).click();
+    const drawer = page.locator('.ant-drawer');
+    await drawer.getByRole('tab', { name: 'Transform', exact: true }).click();
+    await page.locator('#transform_engine').click();
+    await page
+      .locator('.ant-select-dropdown:visible .ant-select-item-option-content', {
+        hasText: freed.engine,
+      })
+      .first()
+      .click();
+    await drawer.getByRole('button', { name: 'Update Source' }).click();
+
+    // The edit mints a version and the apps follow the DEPLOYED one, so the new
+    // version is what moves the instance. A refused save leaves the old one
+    // selected, which would otherwise deploy as a no-op and assert nothing.
+    await expect(page).toHaveURL(
+      (url) => url.searchParams.get('source_version') !== '1.0.0',
+    );
+    const version = await page.evaluate(() =>
+      new URL(window.location.href).searchParams.get('source_version')!,
+    );
+    const deployed = await engine<{ restart_required: string[] }>(
+      'POST',
+      `/api/v1/sources/${moved.name}/deploy?version=${version}`,
+    );
+    await restartFor(deployed.restart_required);
+
+    expect(await appInstances(moved.engine)).toEqual([]);
+    expect(await appInstances(freed.engine)).toContain(moved.name);
+
+    // The instance the switch created is new, so it carries no pipeline yet.
+    await giveInstanceItsPipeline(freed.engine, moved.name);
+
+    await pushEnvelopes(
+      corpusLines([moved.module])[moved.module].map((line) =>
+        agentEnvelope(moved.module, line, 'switched'),
       ),
     );
-    expect(holding.length).toBeGreaterThan(0);
-  }
-});
+    await expect
+      .poll(() => rowCount(moved.name), { timeout: 120_000 })
+      .toBeGreaterThan(before);
+  },
+);
 
-test('cisco-ios: the corpus lands on its own table, not the catch-all @docker-only', () =>
-  landsOnItsOwnTable(SOURCES[2]));
-
-test('a source changes transform app and the data follows @docker-only', async ({
-  page,
-}) => {
-  await loginAs(page, 'initial_user');
-  // cisco-ios moves from elastic to vrl, onto an instance created by the switch.
-  const moved = SOURCES[2];
-  const freed = SOURCES[0];
-  const before = await rowCount(moved.name);
-
-  // Compose runs one of each transform, so the target app's slot is freed
-  // first. Deleting the instance is not enough -- the next reconcile derives it
-  // again from the source still bound to that engine -- so the source goes.
-  await engine('DELETE', `/api/v1/sources/${freed.name}`);
-
-  await page.goto(
-    `${BASE_URL}/sources?source_name=${moved.name}&source_version=1.0.0`,
-  );
-  // The accessible name on the actions trigger arrives with this change; a
-  // console built before it has an icon-only button in the same place.
-  const actions = page.getByRole('button', { name: 'Actions', exact: true });
-  await (
-    (await actions.count())
-      ? actions
-      : page.locator('div.ml-auto.relative > button').first()
-  ).click();
-  await page.getByRole('button', { name: 'Edit Source' }).click();
-  const drawer = page.locator('.ant-drawer');
-  await drawer.getByRole('tab', { name: 'Transform', exact: true }).click();
-  await page.locator('#transform_engine').click();
-  await page
-    .locator('.ant-select-dropdown:visible .ant-select-item-option-content', {
-      hasText: freed.engine,
-    })
-    .first()
-    .click();
-  await drawer.getByRole('button', { name: 'Update Source' }).click();
-
-  // The edit mints a version and the apps follow the DEPLOYED one, so the new
-  // version is what moves the instance. A refused save leaves the old one
-  // selected, which would otherwise deploy as a no-op and assert nothing.
-  await expect(page).toHaveURL(
-    (url) => url.searchParams.get('source_version') !== '1.0.0',
-  );
-  const version = await page.evaluate(() =>
-    new URL(window.location.href).searchParams.get('source_version')!,
-  );
-  const deployed = await engine<{ restart_required: string[] }>(
-    'POST',
-    `/api/v1/sources/${moved.name}/deploy?version=${version}`,
-  );
-  await restartFor(deployed.restart_required);
-
-  expect(await appInstances(moved.engine)).toEqual([]);
-  expect(await appInstances(freed.engine)).toContain(moved.name);
-
-  // The instance the switch created is new, so it carries no pipeline yet.
-  await giveInstanceItsPipeline(freed.engine, moved.name);
-
-  await pushEnvelopes(
-    corpusLines([moved.module])[moved.module].map((line) =>
-      agentEnvelope(moved.module, line, 'switched'),
-    ),
-  );
-  await expect
-    .poll(() => rowCount(moved.name), { timeout: 120_000 })
-    .toBeGreaterThan(before);
-});
-
-test('cisco-umbrella: the corpus lands on its own table, not the catch-all @docker-only', () =>
-  landsOnItsOwnTable(SOURCES[1]));
+test(
+  'cisco-umbrella: the corpus lands on its own table, not the catch-all',
+  { tag: [TAGS.docker] },
+  () => landsOnItsOwnTable(SOURCES[1]),
+);
 
 /** A source whose schema config names a derived schema mounted on the engine. */
 const LEAN_SOURCE = 'cisco-ios-lean';
 
-test('a derived schema narrows its base on the deployed table @docker-only', async () => {
-  // A derived schema is a file in the engine's schemas tree, which the console
-  // has no field for and this spec cannot write, so the source is a precondition.
-  const lean = await tableColumns(LEAN_SOURCE);
-  test.skip(
-    lean.length === 0,
-    `${LEAN_SOURCE} is not deployed: create a source whose schema.derived_schema names a narrowed filebeat schema`,
-  );
+test(
+  'a derived schema narrows its base on the deployed table',
+  { tag: [TAGS.docker] },
+  async () => {
+    // A derived schema is a file in the engine's schemas tree, which the console
+    // has no field for and this spec cannot write, so the source is a precondition.
+    const lean = await tableColumns(LEAN_SOURCE);
+    test.skip(
+      lean.length === 0,
+      `${LEAN_SOURCE} is not deployed: create a source whose schema.derived_schema names a narrowed filebeat schema`,
+    );
 
-  // The base promotes what suits a system or nginx module; a cisco source fills
-  // four of its twelve columns and pays for the rest. The derived schema drops
-  // them -- everything it leaves out is still in _json, just not indexed.
-  const base = await tableColumns(SOURCES[2].name);
+    // The base promotes what suits a system or nginx module; a cisco source fills
+    // four of its twelve columns and pays for the rest. The derived schema drops
+    // them -- everything it leaves out is still in _json, just not indexed.
+    const base = await tableColumns(SOURCES[2].name);
 
-  expect(base).toEqual(expect.arrayContaining(['host_name', 'user_name']));
-  // Exactly the select list in its order, after the common header: the point of
-  // a derived schema is what is NOT there, so absence is what is asserted.
-  expect(lean.slice(-4)).toEqual([
-    'timestamp',
-    'agent_type',
-    'agent_version',
-    'message',
-  ]);
-  for (const dropped of [
-    'host_name',
-    'event_module',
-    'event_dataset',
-    'log_file_path',
-    'source_ip',
-    'user_name',
-    'process_name',
-    'process_pid',
-  ]) {
-    expect(lean).not.toContain(dropped);
-  }
+    expect(base).toEqual(expect.arrayContaining(['host_name', 'user_name']));
+    // Exactly the select list in its order, after the common header: the point of
+    // a derived schema is what is NOT there, so absence is what is asserted.
+    expect(lean.slice(-4)).toEqual([
+      'timestamp',
+      'agent_type',
+      'agent_version',
+      'message',
+    ]);
+    for (const dropped of [
+      'host_name',
+      'event_module',
+      'event_dataset',
+      'log_file_path',
+      'source_ip',
+      'user_name',
+      'process_name',
+      'process_pid',
+    ]) {
+      expect(lean).not.toContain(dropped);
+    }
 
-  // The index use case the schema declares, resolved to the ClickHouse primitive.
-  const indices = await tableIndices(LEAN_SOURCE);
-  expect(indices['timestamp']).toBe('minmax');
-  expect(indices['agent_type']).toBe('set(0)');
-  expect(indices['message']).toContain('text(tokenizer');
-  expect(indices['agent_version']).toBeUndefined();
-});
+    // The index use case the schema declares, resolved to the ClickHouse primitive.
+    const indices = await tableIndices(LEAN_SOURCE);
+    expect(indices['timestamp']).toBe('minmax');
+    expect(indices['agent_type']).toBe('set(0)');
+    expect(indices['message']).toContain('text(tokenizer');
+    expect(indices['agent_version']).toBeUndefined();
+  },
+);

@@ -12,7 +12,8 @@ import { NotificationCard } from '@/core/components/NotificationCard';
 import { RbacProtected } from '@/core/components/RbacProtected';
 import { useFetchApps } from '@/core/hooks/apps/instances/useFetchApps';
 import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
-import { Spin, Tabs } from 'antd';
+import { Input, Spin, Tabs } from 'antd';
+import { useState } from 'react';
 
 /**
  * The fleet-wide pools: one deployment serving every source.
@@ -26,6 +27,8 @@ import { Spin, Tabs } from 'antd';
  */
 export const ComponentsScene = () => {
   const { data: apps, isLoading, error } = useFetchApps();
+  const [search, setSearch] = useState('');
+  const [activeKey, setActiveKey] = useState<string>();
 
   const { componentHeight } = useSetComponentHeight({
     offset: 200,
@@ -64,6 +67,18 @@ export const ComponentsScene = () => {
       })),
     );
 
+  const needle = search.trim().toLowerCase();
+  const visiblePools = needle
+    ? pools.filter(
+        (pool) =>
+          pool.label.toLowerCase().includes(needle) ||
+          pool.service.toLowerCase().includes(needle),
+      )
+    : pools;
+  const selectedKey =
+    visiblePools.find((pool) => pool.key === activeKey)?.key ??
+    visiblePools[0]?.key;
+
   // The data layer is declared separately from the DFE pools and does not
   // depend on any being deployed, so it renders either way.
   if (pools.length === 0) {
@@ -86,46 +101,64 @@ export const ComponentsScene = () => {
       <CustomScrollbar height={componentHeight}>
         <RbacProtected action={RbacProtected.rbacActions.deployment_read}>
           <RbacProtected.Unrestricted>
-            <Tabs
-              className="h-full min-h-0"
-              tabPlacement="start"
-              classNames={{
-                root: 'min-h-0',
-                header: 'w-full max-w-68 shrink-0',
-                content: 'min-w-0 flex-1 pl-6',
-              }}
-              items={pools.map((pool) => ({
-                key: pool.key,
-                label: (
-                  <NavigationTabLabel
-                    label={pool.label}
-                    description={`Instance ${pool.instance}`}
-                  />
-                ),
-                children: (
-                  <div className="flex flex-col">
-                    <AppOperationalCard
-                      service={pool.service}
-                      instance={pool.instance}
+            <div className="mb-3 max-w-68">
+              <Input
+                allowClear
+                type="search"
+                aria-label="Search components"
+                placeholder="Search components"
+                value={search}
+                onChange={(event) => setSearch(event.target.value)}
+              />
+            </div>
+            {visiblePools.length === 0 ? (
+              <p className="m-0 text-sm text-foreground/60 dark:text-dark-foreground/60">
+                No components match this search.
+              </p>
+            ) : (
+              <Tabs
+                className="h-full min-h-0"
+                tabPlacement="start"
+                activeKey={selectedKey}
+                onChange={setActiveKey}
+                classNames={{
+                  root: 'min-h-0',
+                  header: 'w-full max-w-68 shrink-0',
+                  content: 'min-w-0 flex-1 pl-6',
+                }}
+                items={visiblePools.map((pool) => ({
+                  key: pool.key,
+                  label: (
+                    <NavigationTabLabel
+                      label={pool.label}
+                      description={`Instance ${pool.instance}`}
                     />
-                    {pool.scaleDeployed && (
-                      <ScalingCard
+                  ),
+                  children: (
+                    <div className="flex flex-col">
+                      <AppOperationalCard
                         service={pool.service}
                         instance={pool.instance}
                       />
-                    )}
-                    <AppConfigCard
-                      service={pool.service}
-                      instance={pool.instance}
-                    />
-                    <AppHistoryCard
-                      service={pool.service}
-                      instance={pool.instance}
-                    />
-                  </div>
-                ),
-              }))}
-            />
+                      {pool.scaleDeployed && (
+                        <ScalingCard
+                          service={pool.service}
+                          instance={pool.instance}
+                        />
+                      )}
+                      <AppConfigCard
+                        service={pool.service}
+                        instance={pool.instance}
+                      />
+                      <AppHistoryCard
+                        service={pool.service}
+                        instance={pool.instance}
+                      />
+                    </div>
+                  ),
+                }))}
+              />
+            )}
           </RbacProtected.Unrestricted>
           <RbacProtected.Restricted className="h-full">
             <RbacProtected.RestrictedRoute />

@@ -1,3 +1,4 @@
+import { NotificationCard } from '@/core/components/NotificationCard';
 import { useFetchInfiniteFilteredSourceCatalogueTags } from '@/core/hooks/useFetchInfiniteFilteredSourceCatalogueTags';
 import { cn } from '@repo/dfe-shared-ui';
 import { Button } from 'antd';
@@ -15,7 +16,7 @@ export const TagSelect = ({
     per_page: 9,
   });
 
-  return (
+  return items?.length > 0 ? (
     <ul className="grid grid-cols-3 gap-2">
       {items.map((item) => (
         <li key={item.id} className="flex justify-center">
@@ -40,5 +41,10 @@ export const TagSelect = ({
         </Button>
       )}
     </ul>
+  ) : (
+    <NotificationCard
+      title="No catalogues found"
+      description="Unable to configure sources from catalogue as there were no catalogues found. Skip this step, complete application setup and manually add sources from the source list."
+    />
   );
 };

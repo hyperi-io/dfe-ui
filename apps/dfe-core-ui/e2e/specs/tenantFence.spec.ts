@@ -1,8 +1,8 @@
 import { expect, Page, test } from '@playwright/test';
 
-import { BASE_URL, e2eClient } from '../config/e2e.client';
-import { engine, forgetEngineToken } from '../config/engineApi.helpers';
-import { loginAs } from '../config/login.helpers';
+import { BASE_URL, e2eClient } from '@e2e/config/e2e.client';
+import { engine, forgetEngineToken } from '@e2e/config/engineApi.helpers';
+import { loginAs } from '@e2e/config/login.helpers';
 
 /**
  * The organisation, hunt and rule surfaces against the engine's tenant fence:
@@ -12,7 +12,9 @@ import { loginAs } from '../config/login.helpers';
  */
 
 const ORG = 'fenceco';
+const ORG_LABEL = 'Fence Co';
 const HUNT = 'fence_hunt';
+const HUNT_LABEL = 'Fence Hunt';
 const RULE = 'fence_rule';
 const ACTION = 'fence-plant-held-ids';
 const HELD_ID = 'fence-held-1';
@@ -38,17 +40,18 @@ test.beforeEach(async ({ playwright, page }) => {
 
   await engine('POST', '/api/v1/orgs', {
     name: ORG,
-    display_name: 'Fence Co',
+    display_name: ORG_LABEL,
     org_ids: [`${ORG}-1`],
   });
   await engine('POST', '/api/v1/rules', {
     name: RULE,
     severity: 'medium',
-    user_sql: "SELECT * FROM dfe.main WHERE event_type = 'fence'",
+    user_sql: "SELECT * FROM dfe.main WHERE _source = 'fence'",
     estimate_cost: false,
   });
   await engine('POST', '/api/v1/hunts', {
     name: HUNT,
+    display_name: HUNT_LABEL,
     cron: '*/5 * * * *',
     log_buffer: 60,
     customers: [ORG],
@@ -89,11 +92,11 @@ const expectHeldNotification = async (page: Page) => {
       'Hunts still read these organisation IDs for another organisation',
     ),
   ).toBeVisible();
-  const hunt = drawer.getByRole('link', { name: HUNT, exact: true });
-  await expect(hunt).toHaveAttribute('href', `/hunts?name=${HUNT}`);
   await expect(drawer.getByRole('listitem')).toHaveText(
-    `${HUNT} reads ${HELD_ID} for ${ORG}`,
+    `${HUNT_LABEL} reads ${HELD_ID} for ${ORG_LABEL}`,
   );
+  const hunt = drawer.getByRole('link', { name: HUNT_LABEL, exact: true });
+  await expect(hunt).toHaveAttribute('href', `/hunts?name=${HUNT}`);
   await expect(
     drawer.getByText('Use other organisation IDs, or edit those hunts first.'),
   ).toBeVisible();
@@ -200,9 +203,8 @@ test('A rule its hunt holds to no organisation is unmeasured', async ({
     .click();
 
   await expect(page.getByRole('dialog')).toHaveCount(0);
-  await expect(
-    page.getByText(
-      "The alert-volume preview could not finish: it may count no org's rows for this rule. This rule's alert volume is unknown until it runs.",
-    ),
-  ).toBeVisible();
+  const preview =
+    "The alert-volume preview could not finish: it may count no org's rows for this rule. This rule's alert volume is unknown until it runs.";
+  await expect(page.getByRole('main').getByText(preview)).toBeVisible();
+  await expect(page.getByText(preview)).toHaveCount(2);
 });

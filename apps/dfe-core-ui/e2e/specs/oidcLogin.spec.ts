@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { oidcFixture } from '../config/login.helpers';
+import { oidcFixture } from '@e2e/config/login.helpers';
 import {
   IDP_SIGN_IN,
   assertConsoleSession,
@@ -8,7 +8,7 @@ import {
   clickLogin,
   oidcProviders,
   openProviderPicker,
-} from '../config/oidc.helpers';
+} from '@e2e/config/oidc.helpers';
 
 test.use({ storageState: { cookies: [], origins: [] } });
 

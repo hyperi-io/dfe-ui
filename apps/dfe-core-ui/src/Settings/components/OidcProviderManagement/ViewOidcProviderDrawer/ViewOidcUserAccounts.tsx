@@ -8,14 +8,15 @@ import { renderColumns } from '@/Settings/helpers/accountManagementHelpers';
 import { useFetchInfiniteFilteredAccounts } from '@/Settings/hooks/accounts/useFetchInfiniteFilteredAccounts';
 import { TAccountsItemSummary } from '@/Settings/hooks/accounts/useFetchInfiniteFilteredAccounts/types';
 import { IconInfoCircle } from '@repo/dfe-icons';
-import { Spin } from 'antd';
-import { useCallback } from 'react';
+import { Input, Spin } from 'antd';
+import { useCallback, useState } from 'react';
 
 export const ViewOidcUserAccounts = ({
   oidcProviderId,
 }: {
   oidcProviderId: string;
 }) => {
+  const [search, setSearch] = useState('');
   const {
     data: { items: accounts = [] },
     isLoading,
@@ -24,6 +25,7 @@ export const ViewOidcUserAccounts = ({
     fetchNextPage,
     error,
   } = useFetchInfiniteFilteredAccounts({
+    search,
     oidc_id: oidcProviderId,
     blocked: false,
   });
@@ -57,6 +59,15 @@ export const ViewOidcUserAccounts = ({
   return (
     <RbacProtected action={RbacProtected.rbacActions.account_read}>
       <RbacProtected.Unrestricted>
+        <div className="mb-4 flex justify-end">
+          <Input.Search
+            className="w-60"
+            placeholder="Search users"
+            onChange={(e) => setSearch(e.target.value)}
+            value={search}
+            allowClear
+          />
+        </div>
         {isLoading && (
           <>
             <Spin /> <p className="sr-only">Loading accounts</p>

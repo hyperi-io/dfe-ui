@@ -7,14 +7,14 @@ import { useFetchInfiniteFilteredOidcProviders } from '@/Settings/hooks/oidcProv
 import { IconInfoCircle } from '@repo/dfe-icons';
 import { Spin } from 'antd';
 
-export const OidcProviderList = () => {
+export const OidcProviderList = ({ search = '' }: { search?: string }) => {
   const {
     data: { items: oidcProviders },
     isFetchingNextPage,
     loadMoreRef,
     isLoading,
     error,
-  } = useFetchInfiniteFilteredOidcProviders();
+  } = useFetchInfiniteFilteredOidcProviders({ search });
 
   const { componentHeight } = useSetComponentHeight({
     offset: 295,

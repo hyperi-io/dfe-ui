@@ -66,7 +66,20 @@ export const completeForcedPasswordChange = async (
   await expect(page).toHaveURL((url) => url.pathname === '/login');
   await expect(page.getByText('Password changed')).toBeVisible();
 
-  await textbox(page, 'Username').fill(user);
+  // An enabled provider offers OIDC first and keeps the local form on the other tab.
+  const localTab = page.getByRole('tab', {
+    name: 'Login with Local',
+    exact: true,
+  });
+  const username = textbox(page, 'Username');
+  // Once the local tab is selected, the tab and the username field are both
+  // present. Waiting for exactly one of them fails that page.
+  await expect(localTab.or(username).first()).toBeVisible();
+  if (await localTab.isVisible()) {
+    await localTab.click();
+  }
+
+  await username.fill(user);
   await textbox(page, 'Password').fill(password);
   await page.getByRole('button', { name: 'Login', exact: true }).click();
   await expect(page).not.toHaveURL(
@@ -133,19 +146,53 @@ export const expectLoggedOut = (page: Page, from = SOURCES_LANDING) =>
       (url.searchParams.get('callbackUrl') ?? '').startsWith(from),
   );
 
+/**
+ * The Next dev indicator is a closed shadow host, so Playwright's click lands
+ * on it while reporting the button underneath. It sits on drawer and dialog
+ * submits. Production has no such host.
+ */
+const letClicksThroughDevIndicator = async (page: Page) => {
+  await page.addInitScript(() => {
+    const hide = () => {
+      document.querySelectorAll('nextjs-portal').forEach((node) => {
+        (node as HTMLElement).style.setProperty('pointer-events', 'none');
+      });
+    };
+    hide();
+    new MutationObserver(hide).observe(document.documentElement, {
+      childList: true,
+      subtree: true,
+    });
+  });
+};
+
 export const loginAs = async (
   page: Page,
   user: string,
   landing = SOURCES_LANDING,
 ) => {
+  await letClicksThroughDevIndicator(page);
   await page.goto(`${BASE_URL}/login`);
 
-  await textbox(page, 'Username').fill(user);
+  // An enabled provider offers OIDC first and keeps the local form on the other tab.
+  const localTab = page.getByRole('tab', {
+    name: 'Login with Local',
+    exact: true,
+  });
+  const username = textbox(page, 'Username');
+  await expect(username.or(localTab)).toBeVisible();
+  if (await localTab.isVisible()) {
+    await localTab.click();
+  }
+
+  await username.fill(user);
   await textbox(page, 'Password').fill(adminPassword());
   await page.getByRole('button', { name: 'Login', exact: true }).click();
   // Either the console lands, or the account is on an issued password and must change it first.
+  // The first navigation compiles the landing page, which outlasts the default expect.
   await expect(page).toHaveURL(
     (url) => url.pathname === landing || url.pathname === CHANGE_PASSWORD_PATH,
+    { timeout: 30_000 },
   );
   if (new URL(page.url()).pathname === CHANGE_PASSWORD_PATH) {
     await completeForcedPasswordChange(page, user);

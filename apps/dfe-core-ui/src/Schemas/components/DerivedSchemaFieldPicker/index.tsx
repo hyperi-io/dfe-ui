@@ -18,8 +18,8 @@ import {
   withIndexUseCase,
 } from './DerivedSchemaFieldPicker.helpers';
 
-/** One request covers most base schemas; the rest are drained below. */
-const BASE_COLUMNS_PER_PAGE = 200;
+/** The engine accepts -1 as every column, and refuses a page larger than 100. */
+const BASE_COLUMNS_PER_PAGE = -1;
 
 const EMPTY_SELECTION: DerivedSelectEntry[] = [];
 
