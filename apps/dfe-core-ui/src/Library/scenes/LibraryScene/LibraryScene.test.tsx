@@ -30,7 +30,11 @@ describe('LibraryScene', () => {
     render(<LibraryScene />, { wrapper });
 
     expect(
-      await screen.findByText('stable -> 2', {}, { timeout: 15_000 }),
+      await screen.findByText(
+        'stable points to version 2',
+        {},
+        { timeout: 15_000 },
+      ),
     ).toBeInTheDocument();
     expect(screen.getByText('team=platform')).toBeInTheDocument();
   });

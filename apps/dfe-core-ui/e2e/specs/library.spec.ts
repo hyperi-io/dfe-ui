@@ -36,7 +36,7 @@ test('Artefact list', async ({ page }) => {
   await expect(page.getByText('enabled', { exact: true })).toBeVisible();
 
   /* Tags point at versions; labels classify. Both render, and apart */
-  await expect(page.getByText('stable -> 1')).toBeVisible();
+  await expect(page.getByText('stable points to version 1')).toBeVisible();
   await expect(page.getByText('team=platform')).toBeVisible();
   await expect(page.getByText('tier=gold')).toBeVisible();
 });

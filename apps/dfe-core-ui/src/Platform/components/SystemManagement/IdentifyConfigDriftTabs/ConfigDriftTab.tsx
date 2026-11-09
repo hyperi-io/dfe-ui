@@ -6,7 +6,7 @@ import { TApplyDefaultsResponse } from '@/Platform/hooks/system/useApplyDefaults
 import { TDefaultsDriftSourceItem } from '@/Platform/hooks/system/useFetchInifniteDefaultDriftSources/types';
 import { Button, Spin, Tag } from 'antd';
 import { type RefObject, useState } from 'react';
-import { ValueMove } from './ValueMove';
+import { ValueMove } from '@/core/components/ValueMove';
 
 const NoDriftTag = () => {
   return (
