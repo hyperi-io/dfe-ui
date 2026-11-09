@@ -6,6 +6,10 @@ import { SectionCard } from '@/core/components/SectionCard';
 import { Table } from '@/core/components/Table';
 import { Spin, Tag } from 'antd';
 
+const SCROLL_AFTER_ROWS = 5;
+// About five small-table rows
+const SCROLL_HEIGHT_PX = 200;
+
 const STATE_COLOUR: Record<string, string> = {
   applied: 'green',
   pending: 'orange',
@@ -79,9 +83,19 @@ export const AppHistoryCard = ({
     );
   }
 
+  const rows = data ?? [];
+
   return (
     <SectionCard title="History">
-      <Table rowKey="sha" columns={COLUMNS} dataSource={data ?? []} />
+      <Table
+        rowKey="sha"
+        columns={COLUMNS}
+        dataSource={rows}
+        // Past five changes the table scrolls rather than growing the page
+        scroll={
+          rows.length > SCROLL_AFTER_ROWS ? { y: SCROLL_HEIGHT_PX } : undefined
+        }
+      />
     </SectionCard>
   );
 };

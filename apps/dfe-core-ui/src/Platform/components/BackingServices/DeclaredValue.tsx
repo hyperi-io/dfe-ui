@@ -1,4 +1,4 @@
-import { TDeclaredValue } from '@/Apps/hooks/backingServices/useFetchBackingServices/types';
+import { TDeclaredValue } from '@/Platform/hooks/backingServices/useFetchBackingServices/types';
 import { Tooltip } from '@/core/components/Tooltip';
 import { IconLock } from '@repo/dfe-icons';
 import { Tag } from 'antd';

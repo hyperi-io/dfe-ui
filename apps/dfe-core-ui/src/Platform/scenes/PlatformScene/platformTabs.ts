@@ -6,6 +6,16 @@ export const PLATFORM_TAB_DETAILS = Object.freeze({
     label: 'System Settings',
     description: 'View Platform configuration data and restart cloud services',
   },
+  components: {
+    key: 'components',
+    label: 'Components',
+    description: 'Configure the scaling and settings of each component',
+  },
+  backingServices: {
+    key: 'backing-services',
+    label: 'Backing Services',
+    description: 'Scale the data layer, which grows but never shrinks',
+  },
   gitops: {
     key: 'gitops',
     label: 'Git Operations',
