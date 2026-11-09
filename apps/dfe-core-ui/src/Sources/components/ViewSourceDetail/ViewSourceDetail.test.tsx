@@ -54,17 +54,17 @@ const server = setupServer(
         },
       ],
       objects: { items: [], children: {} },
-      total: 1,
-      page: 1,
-      per_page: 10,
-      total_pages: 1,
-      next_page: null,
-      prev_page: null,
+      total_size: 1,
+      next_page_token: null,
     }),
   ),
   http.get('/api/v1/sources/:name/versions/:version', ({ params }) =>
     HttpResponse.json(
-      { code: 'not_found', message: `Source ${String(params.name)} not found` },
+      {
+        title: 'Error',
+        code: 'not_found',
+        detail: `Source ${String(params.name)} not found`,
+      },
       { status: 404 },
     ),
   ),
@@ -109,7 +109,7 @@ describe('ViewSourceDetail', () => {
         http.get('/api/v1/sources/:name/versions/:version', () => {
           calls += 1;
           return HttpResponse.json(
-            { code: 'refused', message: 'the engine said no' },
+            { title: 'Error', code: 'refused', detail: 'the engine said no' },
             { status },
           );
         }),

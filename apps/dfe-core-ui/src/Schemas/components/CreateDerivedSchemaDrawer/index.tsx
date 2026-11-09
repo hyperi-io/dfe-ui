@@ -1,9 +1,6 @@
 import { Drawer } from '@/core/components/Drawer';
 import { RbacProtected } from '@/core/components/RbacProtected';
-import {
-  ApiErrorResponseBody,
-  getApiErrorResponseBody,
-} from '@/core/config/api/client';
+import { getApiErrorSummary } from '@/core/config/api/client';
 import { useCreateDerivedSchema } from '@/Schemas/hooks/useCreateDerivedSchema';
 import { TCreateDerivedSchemaResponse } from '@/Schemas/hooks/useCreateDerivedSchema/types';
 import { transformFormDataToRequestBody } from '@/Schemas/hooks/useCreateDerivedSchema/useCreateDerivedSchema.helpers';
@@ -29,9 +26,9 @@ export const CreateDerivedSchemaDrawer = ({
   const [isDrawerVisible, setIsDrawerVisible] = useState<boolean>(
     open ?? false,
   );
-  const [errorMessage, setErrorMessage] = useState<ApiErrorResponseBody | null>(
-    null,
-  );
+  const [errorMessage, setErrorMessage] = useState<ReturnType<
+    typeof getApiErrorSummary
+  > | null>(null);
 
   const [api, notificationContextHolder] = notification.useNotification();
 
@@ -51,11 +48,7 @@ export const CreateDerivedSchemaDrawer = ({
       onSuccess?.(response);
     },
     onError: (error) => {
-      const body = getApiErrorResponseBody(error);
-      setErrorMessage({
-        message: body?.message ?? 'An unexpected error occurred',
-        errors: body?.errors ?? [],
-      });
+      setErrorMessage(getApiErrorSummary(error));
     },
   });
 

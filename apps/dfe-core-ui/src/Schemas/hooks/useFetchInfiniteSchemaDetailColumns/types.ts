@@ -24,7 +24,8 @@ export type UseFetchInfiniteFilteredSchemaDetailColumnsProps = {
   expr?: string;
   comment?: string;
   attribute?: string;
-  per_page?: number;
+  page_size?: number;
+  fetch_all?: boolean;
   enabled?: boolean;
 };
 
@@ -33,4 +34,4 @@ export type TMetaSchemaDetailResponse = DfeClientSuccessResponseBody<
 >;
 
 export type TMetaSchemaDetailColumnItem =
-  TMetaSchemaDetailResponse['version']['columns']['items'][number];
+  TMetaSchemaDetailResponse['items'][number];

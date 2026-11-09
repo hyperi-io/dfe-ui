@@ -1,3 +1,4 @@
+import { problem } from '@/core/utils/test-utils/problem';
 import { API_CONFIG_MOCKS } from '@/core/config/api/endpoints/generator';
 import { TAuthMeResponse } from '@/core/hooks/useAuthMe/types';
 import { TSchemaListResponse } from '@/core/hooks/useFetchInfiniteFilteredSchemas/types';
@@ -38,29 +39,19 @@ const SCHEMA_LIST: TSchemaListResponse = {
       resource_type: 'custom',
     },
   ],
-  total: 1,
-  page: 1,
-  per_page: 10,
-  total_pages: 1,
-  next_page: null,
-  prev_page: null,
+  total_size: 1,
+  next_page_token: null,
   objects: { items: [], children: {} },
 };
 
 /** What the schema page holds: one filtered page of the four columns. */
 export const FILTERED_PAGE: TMetaSchemaDetailResponse = {
   ...BASE_COLUMNS_RESPONSE,
-  version: {
-    ...BASE_COLUMNS_RESPONSE.version,
-    columns: {
-      ...BASE_COLUMNS_RESPONSE.version.columns,
-      items: BASE_COLUMNS_RESPONSE.version.columns.items.slice(0, 1),
-      total: 1,
-    },
-  },
+  items: BASE_COLUMNS_RESPONSE.items.slice(0, 1),
+  total_size: 1,
 };
 
-/** Whether the full-schema read (`per_page=-1`) answers 500. */
+/** Whether the full-schema read, which pages at the largest size, answers 500. */
 export const fullRead = { fails: true };
 
 export const server = setupServer(
@@ -73,7 +64,9 @@ export const server = setupServer(
     ),
     () =>
       fullRead.fails
-        ? HttpResponse.json({ message: 'engine down' }, { status: 500 })
+        ? HttpResponse.json(problem(500, 'internal_error', 'engine down'), {
+            status: 500,
+          })
         : HttpResponse.json(BASE_COLUMNS_RESPONSE),
   ),
 );

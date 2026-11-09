@@ -1,3 +1,4 @@
+import { getNextPageToken, MAX_PAGE_SIZE } from '@/core/config/api/pagination';
 import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
 import { useDebounce } from '@/core/hooks/useDebounce';
 import { keepPreviousData, useInfiniteQuery } from '@tanstack/react-query';
@@ -24,7 +25,8 @@ const optionalTextFilterParam = (value: string) =>
  * @param expr - The expr of the column to filter by.
  * @param comment - The comment of the column to filter by.
  * @param attribute - The attribute of the column to filter by.
- * @param per_page - The number of schemas to fetch per page.
+ * @param page_size - The number of schemas to fetch per page.
+ * @param fetch_all - Keep reading pages until `next_page_token` runs out. `data` stays null, and `isLoading` true, until the last page lands, and a failed page is an error rather than a short list.
  *
  * @returns A list of schema detail columns.
  */
@@ -38,7 +40,8 @@ export const useFetchInfiniteFilteredSchemaDetailColumns = ({
   expr,
   comment,
   attribute,
-  per_page = 10,
+  page_size = 10,
+  fetch_all = false,
   enabled = true,
 }: UseFetchInfiniteFilteredSchemaDetailColumnsProps) => {
   const searchableColumnsOptions: {
@@ -56,6 +59,8 @@ export const useFetchInfiniteFilteredSchemaDetailColumns = ({
   const [selectedSearchableColumns, setSelectedSearchableColumns] = useState<
     string[]
   >(searchableColumnsOptions.map((column) => column.value));
+
+  const pageSize = fetch_all ? MAX_PAGE_SIZE : page_size;
 
   const debouncedSearch = useDebounce(search ?? '', TEXT_FILTER_DEBOUNCE_MS);
   const debouncedName = useDebounce(name ?? '', TEXT_FILTER_DEBOUNCE_MS);
@@ -91,9 +96,9 @@ export const useFetchInfiniteFilteredSchemaDetailColumns = ({
       comment: optionalTextFilterParam(debouncedComment),
       attribute: optionalTextFilterParam(debouncedAttribute),
       selectedSearchableColumns,
-      per_page,
+      page_size: pageSize,
     }),
-    queryFn: async ({ pageParam = 1, signal }) =>
+    queryFn: async ({ pageParam, signal }) =>
       fetchInfiniteSchemaDetailColumns({
         pathParams: { schema_path: schema_path ?? '' },
         queryParams: {
@@ -106,17 +111,15 @@ export const useFetchInfiniteFilteredSchemaDetailColumns = ({
           comment: optionalTextFilterParam(debouncedComment),
           attribute: optionalTextFilterParam(debouncedAttribute),
           searchable_columns: selectedSearchableColumns,
-          page: pageParam,
-          per_page,
+          page_token: pageParam,
+          page_size: pageSize,
         },
         signal,
       }),
-    getNextPageParam: (lastPage) => {
-      const nextPage = lastPage.version.columns.next_page;
-      return nextPage != null && nextPage > 0 ? nextPage : undefined;
-    },
-    initialPageParam: 1,
-    placeholderData: keepPreviousData,
+    getNextPageParam: getNextPageToken,
+    initialPageParam: undefined as string | undefined,
+    // A whole-schema read never shows another version's columns while this one loads.
+    placeholderData: fetch_all ? undefined : keepPreviousData,
   });
 
   const flattenedData = useMemo(() => {
@@ -124,19 +127,9 @@ export const useFetchInfiniteFilteredSchemaDetailColumns = ({
       return null;
     }
 
-    const firstPage = data.pages[0];
-    const allItems = data.pages.flatMap(
-      (page) => page.version.columns.items || [],
-    );
     return {
-      ...firstPage,
-      version: {
-        ...firstPage.version,
-        columns: {
-          ...firstPage.version.columns,
-          items: allItems,
-        },
-      },
+      ...data.pages[0],
+      items: data.pages.flatMap((page) => page.items || []),
     };
   }, [data]);
 
@@ -164,14 +157,24 @@ export const useFetchInfiniteFilteredSchemaDetailColumns = ({
     };
   }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
 
+  const readingAllPages = fetch_all && !!hasNextPage && !isError;
+  const readEnabled = enabled && !!schema_path && !!version;
+
+  useEffect(() => {
+    if (readEnabled && readingAllPages && !isFetchingNextPage) {
+      void fetchNextPage();
+    }
+  }, [readEnabled, readingAllPages, fetchNextPage, isFetchingNextPage]);
+
   const hasSelection = !!schema_path && !!version;
+  const isIncomplete = fetch_all && !!hasNextPage;
 
   return {
-    data: hasSelection ? flattenedData : null,
+    data: hasSelection && !isIncomplete ? flattenedData : null,
     searchableColumnsOptions,
     selectedSearchableColumns,
     setSelectedSearchableColumns,
-    isLoading,
+    isLoading: isLoading || readingAllPages,
     isError,
     isFetching,
     error,

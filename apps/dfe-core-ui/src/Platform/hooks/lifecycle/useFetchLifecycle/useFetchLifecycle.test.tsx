@@ -19,7 +19,7 @@ describe('.useFetchLifecycle', () => {
   test('should return lifecycle', async () => {
     const { result } = renderHook(() => useFetchLifecycle(), { wrapper });
 
-    const response: TLifecycleResponse = [
+    const response: TLifecycleResponse['items'] = [
       {
         name: 'string',
         tier: 'string',

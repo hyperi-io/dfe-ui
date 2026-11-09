@@ -46,12 +46,8 @@ export const catalogueOf = (
   ...entries: TSourceCatalogueItem[]
 ): TSourceCataloguesResponse => ({
   items: entries,
-  total: entries.length,
-  page: 1,
-  per_page: 20,
-  total_pages: 1,
-  next_page: null,
-  prev_page: null,
+  total_size: entries.length,
+  next_page_token: null,
 });
 
 export const listCatalogue = (...entries: TSourceCatalogueItem[]) =>

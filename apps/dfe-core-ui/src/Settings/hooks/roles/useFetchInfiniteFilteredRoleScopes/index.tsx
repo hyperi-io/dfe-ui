@@ -1,3 +1,4 @@
+import { getNextPageToken } from '@/core/config/api/pagination';
 import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
 import { useDebounce } from '@/core/hooks/useDebounce';
 import { keepPreviousData, useInfiniteQuery } from '@tanstack/react-query';
@@ -10,14 +11,14 @@ const SEARCH_DEBOUNCE_MS = 300;
 /** useFetchInfiniteFilteredRoles props */
 /**
  * @param search - The search query to filter the role scopes.
- * @param per_page - The number of role scopes to fetch per page.
+ * @param page_size - The number of role scopes to fetch per page.
  */
 /**
  * @returns A list of role scopes.
  */
 export const useFetchInfiniteFilteredRoleScopes = ({
   search,
-  per_page,
+  page_size,
 }: UseFetchInfiniteFilteredRoleScopesProps = {}) => {
   const debouncedSearch = useDebounce(search ?? '', SEARCH_DEBOUNCE_MS);
 
@@ -32,46 +33,37 @@ export const useFetchInfiniteFilteredRoleScopes = ({
   } = useInfiniteQuery({
     queryKey: QUERY_KEYS.roles.scopes({
       search: debouncedSearch,
-      per_page,
+      page_size,
     }),
-    queryFn: async ({ pageParam = 1, signal }) =>
+    queryFn: async ({ pageParam, signal }) =>
       fetchInfiniteFilteredRoleScopes({
         queryParams: {
           search: debouncedSearch || undefined,
-          page: pageParam,
-          per_page,
+          page_token: pageParam,
+          page_size,
         },
         signal,
       }),
-    getNextPageParam: (lastPage, allPages) => {
-      const pageSize = per_page ?? lastPage.per_page;
-      const hasMore =
-        lastPage.scopes && pageSize > 0 && lastPage.scopes.length >= pageSize;
-      return hasMore ? allPages.length + 1 : undefined;
-    },
-    initialPageParam: 1,
+    getNextPageParam: getNextPageToken,
+    initialPageParam: undefined as string | undefined,
     placeholderData: keepPreviousData,
   });
 
   const flattenedData = useMemo(() => {
     if (!data?.pages?.length) {
       return {
-        scopes: [],
-        total: 0,
-        page: 1,
-        per_page: per_page ?? 10,
-        total_pages: 0,
-        next_page: null as number | null,
-        prev_page: null as number | null,
+        items: [],
+        total_size: 0,
+        next_page_token: null,
       };
     }
 
-    const allScopes = data.pages.flatMap((page) => page.scopes || []);
+    const allScopes = data.pages.flatMap((page) => page.items || []);
     return {
       ...data.pages[0],
-      scopes: allScopes,
+      items: allScopes,
     };
-  }, [data, per_page]);
+  }, [data]);
 
   const loadMoreRef = useRef<HTMLDivElement>(null);
   useEffect(() => {

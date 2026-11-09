@@ -24,7 +24,7 @@ export const UserGroups = () => {
     error,
   } = useFetchInfiniteFilteredGroups({
     search,
-    per_page: 12,
+    page_size: 12,
   });
 
   const { componentHeight: outerComponentHeight } = useSetComponentHeight({

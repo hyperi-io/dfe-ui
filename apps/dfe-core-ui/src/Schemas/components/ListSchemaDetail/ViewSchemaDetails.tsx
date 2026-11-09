@@ -44,13 +44,14 @@ interface ViewSchemaDetailsProps extends TMetaSchemaDetailResponse {
   };
 }
 
-type SchemaColumnItem =
-  TMetaSchemaDetailResponse['version']['columns']['items'][number];
+type SchemaColumnItem = TMetaSchemaDetailResponse['items'][number];
 
 export const ViewSchemaDetails = ({
   current: currentVersion,
   versions: allVersions,
   version: selectedVersion,
+  items,
+  total_size,
   path,
   selected,
   columnFilters,
@@ -74,7 +75,7 @@ export const ViewSchemaDetails = ({
     },
     [path, setSelectedSchema, onClearAllFilters],
   );
-  const totalColumns = selectedVersion.columns.total;
+  const totalColumns = total_size ?? 0;
   const coreResource = resource_type === RESOURCE_TYPES.CORE;
 
   const { componentHeight } = useSetComponentHeight({
@@ -332,6 +333,7 @@ export const ViewSchemaDetails = ({
               current: currentVersion,
               selected: selected ?? selectedSchemaVersion ?? '',
               version: selectedVersion,
+              items,
               versions: allVersions,
               resource_type,
             }}
@@ -376,7 +378,7 @@ export const ViewSchemaDetails = ({
             </div>
           </div>
         )}
-        dataSource={selectedVersion.columns.items}
+        dataSource={items}
         rowKey="name"
         loading={isLoading}
         pagination={false}

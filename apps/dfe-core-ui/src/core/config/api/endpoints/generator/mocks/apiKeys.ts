@@ -13,12 +13,8 @@ export const apiKeys = {
       success: ({
         mockedResponse = {
           items: [],
-          total: 0,
-          page: 1,
-          per_page: 10,
-          total_pages: 1,
-          next_page: 1,
-          prev_page: 1,
+          total_size: 0,
+          next_page_token: null,
         },
       }: {
         mockedResponse?: TApiKeysResponse;

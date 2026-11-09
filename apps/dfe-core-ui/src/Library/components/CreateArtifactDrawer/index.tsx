@@ -71,7 +71,7 @@ export const CreateArtifactDrawer = () => {
     });
   };
 
-  const message = getApiErrorResponseBody(error)?.message ?? error?.message;
+  const message = getApiErrorResponseBody(error)?.detail ?? error?.message;
 
   return (
     <>

@@ -29,6 +29,9 @@ export type DfeClientSuccessResponseBody<Op> = Op extends {
       ? R
       : never;
 
+/** The item type of a list response: `{items: T[], next_page_token}`. */
+export type DfeClientPageItem<R> = R extends { items: (infer T)[] } ? T : never;
+
 /** Request body when present (JSON or multipart; prefer FormData for multipart endpoints). */
 export type DfeClientRequestBody<Op> = Op extends {
   requestBody: { content: { 'application/json': infer B } };

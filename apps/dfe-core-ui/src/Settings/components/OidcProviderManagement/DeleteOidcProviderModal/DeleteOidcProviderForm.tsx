@@ -41,7 +41,7 @@ export const DeleteOidcProviderForm = ({
   };
 
   const {
-    data: { total: accountsCount },
+    data: { total_size: accountsCount = 0 },
     isLoading: isLoadingAccounts,
   } = useFetchInfiniteFilteredAccounts({
     oidc_id: oidcProviderName,
@@ -63,7 +63,7 @@ export const DeleteOidcProviderForm = ({
           </>
         )}
 
-        {accountsCount > 0 && (
+        {(accountsCount ?? 0) > 0 && (
           <NotificationCard
             type="error"
             title="This action cannot be undone."

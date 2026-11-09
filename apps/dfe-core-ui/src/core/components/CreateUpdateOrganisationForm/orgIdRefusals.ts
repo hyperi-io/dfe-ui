@@ -39,7 +39,7 @@ const isHeldEntry = (
 /** Every hunt a `tenant_id_held` refusal names, and none for any other failure. */
 export const getHeldOrgIds = (error: unknown): HeldOrgIds[] => {
   const body = getApiErrorResponseBody(error);
-  const held = body?.code === TENANT_ID_HELD_CODE ? body.context?.held : null;
+  const held = body?.code === TENANT_ID_HELD_CODE ? body.held : null;
   if (!Array.isArray(held)) return [];
   return held.filter(isHeldEntry).map((entry) => ({
     hunt: entry.hunt,
@@ -74,5 +74,5 @@ export const getRefusedOrgIdMessages = (
       const id = orgIds[Number(e.field?.split('.')[1])];
       return e.code === 'string_pattern_mismatch' && id !== undefined
         ? `Organisation ID ${JSON.stringify(id)} may not be blank, hold a comma or a control character such as a tab, or start or end with a space`
-        : e.message;
+        : e.detail;
     });

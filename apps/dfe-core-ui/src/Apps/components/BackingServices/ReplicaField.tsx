@@ -51,7 +51,7 @@ export const ReplicaField = ({
       ? { allowed: false as const }
       : checkReplicaChange(service, current, draft);
 
-  const message = getApiErrorResponseBody(error)?.message ?? error?.message;
+  const message = getApiErrorResponseBody(error)?.detail ?? error?.message;
   // The engine's scale-down message names the before, the after and the cost,
   // so it is shown as sent rather than replaced with our own wording.
   const serverRefused =

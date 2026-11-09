@@ -6,6 +6,10 @@ import { TAGS } from '@e2e/config/tags.constants';
 
 /** The list asks for a page and then loads the next as it scrolls, so the count moves. */
 const SEEDED = /of 50 results/;
+/**
+ * The engine's own page is 50, which is this whole seed. The scroll test asks
+ * for 25 so one rule stays on the next page.
+ */
 const FIRST_PAGE = '25 of 50 results';
 const ALL_PAGES = '50 of 50 results';
 /** A seeded display name past the first page, so a hit cannot be the loaded rows alone. */
@@ -23,9 +27,10 @@ test.beforeEach(async ({ playwright, page }) => {
   await loginAs(page, 'dfe_admin');
 });
 
-const openRules = async (page: Page) => {
-  await page.goto(`${BASE_URL}/rules`);
-  await expect(page).toHaveURL(`${BASE_URL}/rules`);
+const openRules = async (page: Page, pageSize?: number) => {
+  const path = pageSize ? `/rules?page_size=${pageSize}` : '/rules';
+  await page.goto(`${BASE_URL}${path}`);
+  await expect(page).toHaveURL(`${BASE_URL}${path}`);
 };
 
 /** The next page loads when the sentinel under the last row scrolls into view. */
@@ -77,7 +82,7 @@ test.describe('', { tag: [TAGS.core, TAGS.search, TAGS.pagination] }, () => {
   });
 
   test('Scrolling the list loads the next page', async ({ page }) => {
-    await openRules(page);
+    await openRules(page, 25);
 
     await expect(page.getByText(FIRST_PAGE)).toBeVisible();
     await expect(page.getByText(OTHER, { exact: true })).toBeVisible();

@@ -156,14 +156,13 @@ export const buildChanges = (
  * The option a refused write names, so the reason lands on the box that caused
  * it rather than at the bottom of the card.
  *
- * The engine refuses with `{code, path, message}`; its handler moves everything
- * outside code and message into `context`, so the path arrives there and
+ * The engine refuses with a problem whose `path` is an extension member, and
  * `errors[]` stays empty. Reading `errors[]` alone loses the field entirely.
  */
 export const fieldErrorFrom = (error: unknown): TFieldError | null => {
   const body = getApiErrorResponseBody(error);
   if (!body) return null;
-  const path = body.context?.path;
+  const path = body.path;
   if (typeof path !== 'string' || !path) return null;
-  return { path, message: body.message };
+  return { path, message: body.detail ?? body.title };
 };

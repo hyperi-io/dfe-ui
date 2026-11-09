@@ -125,10 +125,11 @@ describe('CreateUpdateOrganisationForm refusals', () => {
     }[],
   ) =>
     new ApiError(409, 'Conflict', {
+      title: 'Error',
       code: 'tenant_id_held',
-      message:
+      detail:
         "Org 'newco' cannot take a tenant id a hunt still reads for another org: hunt 'windows' reads acme-1 for org 'oldco' on main. Merge or close that review, or edit the hunt, first",
-      context: { held },
+      held,
     });
 
   const renderForm = (error: Error, orgIds: string[] = ['acme-1']) =>
@@ -182,12 +183,8 @@ describe('CreateUpdateOrganisationForm refusals', () => {
 
   const listed = <T,>(items: T[]) => ({
     items,
-    total: items.length,
-    page: 1,
-    per_page: 10,
-    total_pages: 1,
-    next_page: null,
-    prev_page: null,
+    total_size: items.length,
+    next_page_token: null,
   });
   const windowsHunt = {
     name: 'windows',
@@ -319,12 +316,13 @@ describe('CreateUpdateOrganisationForm refusals', () => {
   test('shows a refused organisation ID on its field in the console words', async () => {
     renderForm(
       new ApiError(422, 'Unprocessable Entity', {
+        title: 'Error',
         code: 'validation_error',
-        message: '1 validation error(s)',
+        detail: '1 validation error(s)',
         errors: [
           {
             field: 'org_ids.1',
-            message: "String should match pattern '^[^\\s,]+$'",
+            detail: "String should match pattern '^[^\\s,]+$'",
             code: 'string_pattern_mismatch',
           },
         ],
@@ -344,9 +342,10 @@ describe('CreateUpdateOrganisationForm refusals', () => {
   test('keeps a refusal of any other field below the form', async () => {
     renderForm(
       new ApiError(422, 'Unprocessable Entity', {
+        title: 'Error',
         code: 'validation_error',
-        message: '1 validation error(s)',
-        errors: [{ field: 'display_name', message: 'Field required' }],
+        detail: '1 validation error(s)',
+        errors: [{ field: 'display_name', detail: 'Field required' }],
       }),
     );
 

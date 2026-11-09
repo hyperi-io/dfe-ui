@@ -1,10 +1,8 @@
-import { TAppsResponse } from '@/core/hooks/apps/instances/useFetchApps/types';
+import { TAppCatalogueEntry } from '@/core/hooks/apps/instances/useFetchApps/types';
 import { describe, expect, test } from 'vitest';
 import { getFetcherSourceTypes } from './helpers';
 
-const app = (
-  overrides: Partial<TAppsResponse[number]>,
-): TAppsResponse[number] =>
+const app = (overrides: Partial<TAppCatalogueEntry>): TAppCatalogueEntry =>
   ({
     service: 'dfe-transform-vrl',
     scale_deployed: true,
@@ -14,11 +12,11 @@ const app = (
     file_sets: [],
     instances: [],
     ...overrides,
-  }) as TAppsResponse[number];
+  }) as TAppCatalogueEntry;
 
 describe('getFetcherSourceTypes', () => {
   test('reads the families off whichever app declares them', () => {
-    const apps: TAppsResponse = [
+    const apps: TAppCatalogueEntry[] = [
       app({ service: 'dfe-receiver' }),
       app({
         service: 'dfe-fetcher',
@@ -36,7 +34,7 @@ describe('getFetcherSourceTypes', () => {
   });
 
   test('a family declared by two apps is listed once', () => {
-    const apps: TAppsResponse = [
+    const apps: TAppCatalogueEntry[] = [
       app({ service: 'dfe-fetcher', source_types: ['okta'] }),
       app({ service: 'dfe-fetcher-edge', source_types: ['okta', 'aws'] }),
     ];

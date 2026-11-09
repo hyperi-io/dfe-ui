@@ -6,4 +6,4 @@ export const libraryPath = API_CONFIG.library.default;
 
 export const fetchLibraryArtifactsApi = (
   options?: DfeClientRequestOptions<typeof libraryPath, 'get'>,
-) => apiClient.get(libraryPath, options);
+) => apiClient.getAll(libraryPath, options);

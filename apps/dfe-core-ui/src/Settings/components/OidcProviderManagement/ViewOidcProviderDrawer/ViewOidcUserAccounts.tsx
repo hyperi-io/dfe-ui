@@ -9,6 +9,7 @@ import { useFetchInfiniteFilteredAccounts } from '@/Settings/hooks/accounts/useF
 import { TAccountsItemSummary } from '@/Settings/hooks/accounts/useFetchInfiniteFilteredAccounts/types';
 import { IconInfoCircle } from '@repo/dfe-icons';
 import { Input, Spin } from 'antd';
+import { useSearchParams } from 'next/navigation';
 import { useCallback, useState } from 'react';
 
 export const ViewOidcUserAccounts = ({
@@ -17,6 +18,13 @@ export const ViewOidcUserAccounts = ({
   oidcProviderId: string;
 }) => {
   const [search, setSearch] = useState('');
+  const pageSizeParam = useSearchParams().get('page_size');
+  const parsedPageSize = pageSizeParam
+    ? Number.parseInt(pageSizeParam, 10)
+    : undefined;
+  const page_size = Number.isInteger(parsedPageSize)
+    ? parsedPageSize
+    : undefined;
   const {
     data: { items: accounts = [] },
     isLoading,
@@ -28,6 +36,7 @@ export const ViewOidcUserAccounts = ({
     search,
     oidc_id: oidcProviderId,
     blocked: false,
+    page_size,
   });
 
   const { componentHeight } = useSetComponentHeight({

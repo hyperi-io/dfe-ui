@@ -17,7 +17,6 @@ export type TFetchAccountsQueryParams = {
   include_core?: boolean;
   sort_by?: 'created_at' | 'updated_at';
   sort_order?: 'asc' | 'desc';
-  page?: number;
-  per_page?: number;
+  page_size?: number;
 };
 export type useFetchInfiniteFilteredAccountsProps = TFetchAccountsQueryParams;

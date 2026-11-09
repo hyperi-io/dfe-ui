@@ -148,8 +148,9 @@ const refuseCurrentPassword = () =>
       () =>
         HttpResponse.json(
           {
+            title: 'Error',
             code: 'invalid_current_password',
-            message: "That is not this account's current password.",
+            detail: "That is not this account's current password.",
           },
           { status: 403 },
         ),
@@ -179,7 +180,12 @@ const refuseAsReused = () =>
       API_CONFIG_MOCKS.accounts.resetCurrentUserPassword.mockedUrl,
       () =>
         HttpResponse.json(
-          { code: 'password_reused', message: REUSED, errors: [] },
+          {
+            title: 'Error',
+            code: 'password_reused',
+            detail: REUSED,
+            errors: [],
+          },
           { status: 400 },
         ),
     ),

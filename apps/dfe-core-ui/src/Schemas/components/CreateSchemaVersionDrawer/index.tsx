@@ -3,7 +3,7 @@ import { Drawer } from '@/core/components/Drawer';
 import { CreateSchemaForm } from '@/core/components/CreateSchemaForm';
 import { RbacProtected } from '@/core/components/RbacProtected';
 import { ReviewCreateSchemaForm } from '@/core/components/ReviewCreateSchemaForm';
-import { getApiErrorResponseBody } from '@/core/config/api/client';
+import { getApiErrorSummary } from '@/core/config/api/client';
 import {
   CreateSchemaReviewProvider,
   useCreateSchemaReviewContext,
@@ -72,11 +72,7 @@ export const CreateSchemaVersionDrawerBase = ({
         handleClose();
       },
       onError: (error) => {
-        const body = getApiErrorResponseBody(error);
-        setFormErrorMessage({
-          message: body?.message ?? 'An unexpected error occurred',
-          errors: body?.errors ?? [],
-        });
+        setFormErrorMessage(getApiErrorSummary(error));
       },
     });
 
@@ -104,7 +100,7 @@ export const CreateSchemaVersionDrawerBase = ({
   } = useFetchInfiniteFilteredSchemaDetailColumns({
     schema_path: selectedSchemaPath,
     version: sourceVersion,
-    per_page: -1,
+    fetch_all: true,
     enabled: isDrawerVisible,
   });
 
@@ -178,7 +174,7 @@ export const CreateSchemaVersionDrawerBase = ({
         <div className={isReviewing ? 'hidden' : undefined}>
           {formReady ? (
             <CreateSchemaForm
-              key={`${selectedSchemaPath}-${sourceVersion}-${detailForForm?.version.columns.items.length ?? 0}`}
+              key={`${selectedSchemaPath}-${sourceVersion}-${detailForForm?.items.length ?? 0}`}
               buttonLabel="Review Schema Version"
               onFinish={handleReview}
               isPending={isCreatingSchemaVersion}

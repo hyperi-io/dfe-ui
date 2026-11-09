@@ -161,8 +161,9 @@ describe('CreateUpdateHuntForm refusals', () => {
         isPending={false}
         error={
           new ApiError(422, 'Unprocessable Entity', {
+            title: 'Error',
             code: UNKNOWN_ORG_CODE,
-            message: refusal,
+            detail: refusal,
           })
         }
       />,
@@ -182,8 +183,9 @@ describe('CreateUpdateHuntForm refusals', () => {
         isPending={false}
         error={
           new ApiError(409, 'Conflict', {
+            title: 'Error',
             code: 'conflict',
-            message: "Hunt 'brute_force' already exists",
+            detail: "Hunt 'brute_force' already exists",
           })
         }
       />,

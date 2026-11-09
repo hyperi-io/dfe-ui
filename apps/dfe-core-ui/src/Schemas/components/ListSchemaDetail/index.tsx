@@ -59,7 +59,7 @@ export const ListSchemaDetail = () => {
   } = useFetchInfiniteFilteredSchemaDetailColumns({
     schema_path: schema_path,
     version: version,
-    per_page: 50,
+    page_size: 50,
     ...columnFilters,
   });
 

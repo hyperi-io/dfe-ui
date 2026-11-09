@@ -1,6 +1,8 @@
 import { API_CONFIG_MOCKS } from '@/core/config/api/endpoints/generator';
+import { problem } from '@/core/utils/test-utils/problem';
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
 import { renderHook, waitFor } from '@testing-library/react';
+import { http, HttpResponse } from 'msw';
 import {
   afterAll,
   afterEach,
@@ -85,10 +87,8 @@ describe('useFetchInfiniteFilteredSchemaDetailColumns', () => {
       };
 
       expect(result.current.data).toBeDefined();
-      expect(result.current.data?.version.columns.items).toHaveLength(10);
-      expect(result.current.data?.version.columns.items[0]).toMatchObject(
-        responseItem,
-      );
+      expect(result.current.data?.items).toHaveLength(10);
+      expect(result.current.data?.items[0]).toMatchObject(responseItem);
       expect(result.current.isError).toBe(false);
     });
 
@@ -107,17 +107,9 @@ describe('useFetchInfiniteFilteredSchemaDetailColumns', () => {
       expect(result.current).toMatchObject({
         data: {
           path: MOCK_SCHEMA_PATH,
-          version: {
-            columns: {
-              items: expect.any(Array),
-              total: 25,
-              page: 1,
-              per_page: 10,
-              total_pages: 3,
-              next_page: 2,
-              prev_page: null,
-            },
-          },
+          items: expect.any(Array),
+          total_size: 25,
+          next_page_token: expect.any(String),
         },
         isLoading: false,
         isError: false,
@@ -144,21 +136,19 @@ describe('useFetchInfiniteFilteredSchemaDetailColumns', () => {
         expect(result.current.isLoading).toBe(false);
       });
 
-      expect(result.current.data?.version.columns.items).toHaveLength(10);
+      expect(result.current.data?.items).toHaveLength(10);
 
       void result.current.fetchNextPage();
 
       await waitFor(
         () => {
-          expect(result.current.data?.version.columns.items).toHaveLength(20);
+          expect(result.current.data?.items).toHaveLength(20);
         },
         { timeout: 3000 },
       );
 
-      expect(result.current.data?.version.columns.items[0].name).toBe('string');
-      expect(result.current.data?.version.columns.items[10].name).toBe(
-        'string',
-      );
+      expect(result.current.data?.items[0].name).toBe('string');
+      expect(result.current.data?.items[10].name).toBe('string');
       expect(result.current.isFetchingNextPage).toBe(false);
     });
 
@@ -174,24 +164,20 @@ describe('useFetchInfiniteFilteredSchemaDetailColumns', () => {
         expect(result.current.isLoading).toBe(false);
       });
 
-      expect(result.current.data?.version.columns.items).toHaveLength(10);
+      expect(result.current.data?.items).toHaveLength(10);
 
       await result.current.fetchNextPage();
       await waitFor(
         () => {
-          expect(result.current.data?.version.columns.items.length).toBe(20);
+          expect(result.current.data?.items.length).toBe(20);
         },
         { timeout: 3000 },
       );
 
-      expect(result.current.data?.version.columns.items).toHaveLength(20);
-      expect(result.current.data?.version.columns.items[0].name).toBe('string');
-      expect(result.current.data?.version.columns.items[10].name).toBe(
-        'string',
-      );
-      expect(result.current.data?.version.columns.items[19].name).toBe(
-        'string',
-      );
+      expect(result.current.data?.items).toHaveLength(20);
+      expect(result.current.data?.items[0].name).toBe('string');
+      expect(result.current.data?.items[10].name).toBe('string');
+      expect(result.current.data?.items[19].name).toBe('string');
     });
 
     it('should not have next page when all data is loaded', async () => {
@@ -199,7 +185,7 @@ describe('useFetchInfiniteFilteredSchemaDetailColumns', () => {
         () =>
           useFetchInfiniteFilteredSchemaDetailColumns({
             ...DEFAULT_HOOK_PROPS,
-            per_page: 10,
+            page_size: 10,
           }),
         {
           wrapper,
@@ -213,9 +199,7 @@ describe('useFetchInfiniteFilteredSchemaDetailColumns', () => {
       void result.current.fetchNextPage();
       await waitFor(
         () => {
-          expect(
-            result.current.data?.version.columns.items.length,
-          ).toBeGreaterThanOrEqual(20);
+          expect(result.current.data?.items.length).toBeGreaterThanOrEqual(20);
         },
         { timeout: 3000 },
       );
@@ -223,22 +207,22 @@ describe('useFetchInfiniteFilteredSchemaDetailColumns', () => {
       void result.current.fetchNextPage();
       await waitFor(
         () => {
-          expect(result.current.data?.version.columns.items).toHaveLength(25);
+          expect(result.current.data?.items).toHaveLength(25);
         },
         { timeout: 3000 },
       );
 
-      expect(result.current.data?.version.columns.items).toHaveLength(25);
+      expect(result.current.data?.items).toHaveLength(25);
     });
   });
 
   describe('custom page size', () => {
-    it('should respect per_page parameter', async () => {
+    it('should respect page_size parameter', async () => {
       const { result } = renderHook(
         () =>
           useFetchInfiniteFilteredSchemaDetailColumns({
             ...DEFAULT_HOOK_PROPS,
-            per_page: 5,
+            page_size: 5,
           }),
         {
           wrapper,
@@ -249,15 +233,15 @@ describe('useFetchInfiniteFilteredSchemaDetailColumns', () => {
         expect(result.current.isLoading).toBe(false);
       });
 
-      expect(result.current.data?.version.columns.items).toHaveLength(5);
+      expect(result.current.data?.items).toHaveLength(5);
     });
 
-    it('should handle per_page larger than available data', async () => {
+    it('should handle page_size larger than available data', async () => {
       const { result } = renderHook(
         () =>
           useFetchInfiniteFilteredSchemaDetailColumns({
             ...DEFAULT_HOOK_PROPS,
-            per_page: 100,
+            page_size: 100,
           }),
         {
           wrapper,
@@ -268,7 +252,7 @@ describe('useFetchInfiniteFilteredSchemaDetailColumns', () => {
         expect(result.current.isLoading).toBe(false);
       });
 
-      expect(result.current.data?.version.columns.items).toHaveLength(25);
+      expect(result.current.data?.items).toHaveLength(25);
     });
   });
 
@@ -314,7 +298,7 @@ describe('useFetchInfiniteFilteredSchemaDetailColumns', () => {
         expect(result.current.isLoading).toBe(false);
       });
 
-      expect(result.current.data?.version.columns.items).toBeDefined();
+      expect(result.current.data?.items).toBeDefined();
     });
 
     it('should include name filter in query', async () => {
@@ -333,7 +317,7 @@ describe('useFetchInfiniteFilteredSchemaDetailColumns', () => {
         expect(result.current.isLoading).toBe(false);
       });
 
-      expect(result.current.data?.version.columns.items).toBeDefined();
+      expect(result.current.data?.items).toBeDefined();
     });
 
     it('should include type filter in query', async () => {
@@ -352,7 +336,7 @@ describe('useFetchInfiniteFilteredSchemaDetailColumns', () => {
         expect(result.current.isLoading).toBe(false);
       });
 
-      expect(result.current.data?.version.columns.items).toBeDefined();
+      expect(result.current.data?.items).toBeDefined();
     });
 
     it('should include use_case filter in query', async () => {
@@ -371,7 +355,7 @@ describe('useFetchInfiniteFilteredSchemaDetailColumns', () => {
         expect(result.current.isLoading).toBe(false);
       });
 
-      expect(result.current.data?.version.columns.items).toBeDefined();
+      expect(result.current.data?.items).toBeDefined();
     });
 
     it('should handle multiple filters simultaneously', async () => {
@@ -383,7 +367,7 @@ describe('useFetchInfiniteFilteredSchemaDetailColumns', () => {
             name: 'test',
             type: 'string',
             use_case: 'dimension',
-            per_page: 20,
+            page_size: 20,
           }),
         {
           wrapper,
@@ -394,7 +378,7 @@ describe('useFetchInfiniteFilteredSchemaDetailColumns', () => {
         expect(result.current.isLoading).toBe(false);
       });
 
-      expect(result.current.data?.version.columns.items).toBeDefined();
+      expect(result.current.data?.items).toBeDefined();
     });
   });
 
@@ -430,16 +414,15 @@ describe('useFetchInfiniteFilteredSchemaDetailColumns', () => {
       });
 
       expect(result.current.isFetchingNextPage).toBe(false);
-      const initialLength =
-        result.current.data?.version.columns.items?.length ?? 0;
+      const initialLength = result.current.data?.items?.length ?? 0;
 
       void result.current.fetchNextPage();
 
       await waitFor(
         () => {
-          expect(
-            result.current.data?.version.columns.items?.length ?? 0,
-          ).toBeGreaterThan(initialLength);
+          expect(result.current.data?.items?.length ?? 0).toBeGreaterThan(
+            initialLength,
+          );
         },
         { timeout: 3000 },
       );
@@ -478,16 +461,10 @@ describe('useFetchInfiniteFilteredSchemaDetailColumns', () => {
               date: 'string',
               type: 'string',
               summary: 'string',
-              columns: {
-                items: [],
-                total: 0,
-                page: 0,
-                per_page: 0,
-                total_pages: 0,
-                next_page: null,
-                prev_page: null,
-              },
             },
+            items: [],
+            total_size: 0,
+            next_page_token: null,
           },
         }),
       );
@@ -503,7 +480,7 @@ describe('useFetchInfiniteFilteredSchemaDetailColumns', () => {
         expect(result.current.isLoading).toBe(false);
       });
 
-      expect(result.current.data?.version.columns.items).toHaveLength(0);
+      expect(result.current.data?.items).toHaveLength(0);
       expect(result.current.isError).toBe(false);
     });
   });
@@ -529,8 +506,137 @@ describe('useFetchInfiniteFilteredSchemaDetailColumns', () => {
       rerender({ search: 'new search' });
 
       await waitFor(() => {
-        expect(result.current.data?.version.columns.items).toBeDefined();
+        expect(result.current.data?.items).toBeDefined();
       });
+    });
+  });
+
+  describe('fetch_all', () => {
+    const columnsUrl = API_CONFIG_MOCKS.schemas.schemaDetail.mockedUrl.replace(
+      '{schema_path}',
+      MOCK_SCHEMA_PATH,
+    );
+    const columnsPage = (names: string[], next: string | null) =>
+      HttpResponse.json({
+        path: MOCK_SCHEMA_PATH,
+        resource_type: 'custom',
+        current: '1.0.0',
+        selected: '1.0.0',
+        versions: ['1.0.0'],
+        version: { date: 'd', type: 'model', summary: 's' },
+        items: names.map((name) => ({ name, type: 'string' })),
+        next_page_token: next,
+        total_size: 3,
+      });
+
+    it('holds the columns back until the last page has landed', async () => {
+      const tokens: (string | null)[] = [];
+      server.use(
+        http.get(columnsUrl, ({ request }) => {
+          const token = new URL(request.url).searchParams.get('page_token');
+          tokens.push(token);
+          return token
+            ? columnsPage(['c'], null)
+            : columnsPage(['a', 'b'], 'next');
+        }),
+      );
+
+      const { result } = renderHook(
+        () =>
+          useFetchInfiniteFilteredSchemaDetailColumns({
+            ...DEFAULT_HOOK_PROPS,
+            fetch_all: true,
+          }),
+        { wrapper },
+      );
+
+      await waitFor(() => {
+        expect(result.current.data?.items).toHaveLength(3);
+      });
+      expect(result.current.data?.items.map((item) => item.name)).toEqual([
+        'a',
+        'b',
+        'c',
+      ]);
+      expect(result.current.isLoading).toBe(false);
+      expect(tokens).toEqual([null, 'next']);
+    });
+
+    it('shows no columns while another version loads', async () => {
+      let releaseB: () => void = () => {};
+      const versionB = new Promise<void>((resolve) => {
+        releaseB = resolve;
+      });
+      server.use(
+        http.get(columnsUrl, async ({ request }) => {
+          const version = new URL(request.url).searchParams.get('version');
+          if (version === '2.0.0') {
+            await versionB;
+            return columnsPage(['b-column'], null);
+          }
+          return columnsPage(['a-column'], null);
+        }),
+      );
+
+      const { result, rerender } = renderHook(
+        ({ version }) =>
+          useFetchInfiniteFilteredSchemaDetailColumns({
+            ...DEFAULT_HOOK_PROPS,
+            version,
+            fetch_all: true,
+          }),
+        { wrapper, initialProps: { version: '1.0.0' } },
+      );
+
+      await waitFor(() => {
+        expect(result.current.data?.items[0]?.name).toBe('a-column');
+      });
+
+      rerender({ version: '2.0.0' });
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(true);
+      });
+      expect(result.current.data).toBeNull();
+
+      releaseB();
+      await waitFor(() => {
+        expect(result.current.data?.items[0]?.name).toBe('b-column');
+      });
+    });
+
+    it('reports a failed page as an error, with no columns and no retry loop', async () => {
+      let continuations = 0;
+      server.use(
+        http.get(columnsUrl, ({ request }) => {
+          if (!new URL(request.url).searchParams.get('page_token')) {
+            return columnsPage(['a', 'b'], 'next');
+          }
+          continuations += 1;
+          return HttpResponse.json(
+            problem(500, 'internal_error', 'engine down'),
+            { status: 500 },
+          );
+        }),
+      );
+
+      const { result } = renderHook(
+        () =>
+          useFetchInfiniteFilteredSchemaDetailColumns({
+            ...DEFAULT_HOOK_PROPS,
+            fetch_all: true,
+          }),
+        { wrapper },
+      );
+
+      await waitFor(() => {
+        expect(result.current.isError).toBe(true);
+      });
+      await new Promise((resolve) => setTimeout(resolve, 200));
+
+      expect(result.current.data).toBeNull();
+      expect(result.current.isLoading).toBe(false);
+      expect(continuations).toBe(1);
     });
   });
 });

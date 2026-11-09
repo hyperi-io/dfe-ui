@@ -1,3 +1,4 @@
+import { getNextPageToken, toOrderBy } from '@/core/config/api/pagination';
 import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
 import { useDebounce } from '@/core/hooks/useDebounce';
 import { keepPreviousData, useInfiniteQuery } from '@tanstack/react-query';
@@ -12,8 +13,7 @@ const SEARCH_DEBOUNCE_MS = 300;
  * @param search - The search query to filter the api keys.
  * @param sort_by - The field to sort the api keys by.
  * @param sort_order - The order to sort the api keys by.
- * @param page - The page number to fetch.
- * @param per_page - The number of api keys to fetch per page.
+ * @param page_size - The number of api keys to fetch per page.
  */
 /**
  * @returns A list of api keys.
@@ -22,8 +22,7 @@ export const useFetchInfiniteFilteredApiKeys = ({
   search,
   sort_by,
   sort_order,
-  page,
-  per_page,
+  page_size,
 }: useFetchInfiniteFilteredApiKeysProps = {}) => {
   const debouncedSearch = useDebounce(search ?? '', SEARCH_DEBOUNCE_MS);
 
@@ -40,27 +39,20 @@ export const useFetchInfiniteFilteredApiKeys = ({
       search: debouncedSearch,
       sort_by,
       sort_order,
-      page,
-      per_page,
+      page_size,
     }),
-    queryFn: async ({ pageParam = 1, signal }) =>
+    queryFn: async ({ pageParam, signal }) =>
       fetchApiKeys({
         queryParams: {
           search: debouncedSearch || undefined,
-          sort_by: sort_by || undefined,
-          sort_order: sort_order || undefined,
-          page: pageParam,
-          per_page,
+          order_by: toOrderBy(sort_by, sort_order),
+          page_token: pageParam,
+          page_size,
         },
         signal,
       }),
-    getNextPageParam: (lastPage, allPages) => {
-      const pageSize = per_page ?? lastPage.per_page;
-      const hasMore =
-        lastPage.items && pageSize > 0 && lastPage.items.length >= pageSize;
-      return hasMore ? allPages.length + 1 : undefined;
-    },
-    initialPageParam: 1,
+    getNextPageParam: getNextPageToken,
+    initialPageParam: undefined as string | undefined,
     placeholderData: keepPreviousData,
   });
 
@@ -68,12 +60,8 @@ export const useFetchInfiniteFilteredApiKeys = ({
     if (!data?.pages?.length) {
       return {
         items: [],
-        total: 0,
-        page: 1,
-        per_page: per_page ?? 10,
-        total_pages: 0,
-        next_page: null as number | null,
-        prev_page: null as number | null,
+        total_size: 0,
+        next_page_token: null,
       };
     }
 
@@ -82,7 +70,7 @@ export const useFetchInfiniteFilteredApiKeys = ({
       ...data.pages[0],
       items: allItems,
     };
-  }, [data, per_page]);
+  }, [data]);
 
   const loadMoreRef = useRef<HTMLDivElement>(null);
   useEffect(() => {

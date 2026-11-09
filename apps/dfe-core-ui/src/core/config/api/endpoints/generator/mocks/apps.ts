@@ -1,3 +1,4 @@
+import { problem } from '@/core/utils/test-utils/problem';
 import { TAppConfigResponse } from '@/core/hooks/apps/config/useFetchAppConfig/types';
 import { TUpdateAppConfigResponse } from '@/core/hooks/apps/config/useUpdateAppConfig/types';
 import { TDeleteAppFileResponse } from '@/core/hooks/apps/files/useDeleteAppFile/types';
@@ -37,7 +38,7 @@ import {
  * engine reports for them, so a surface reading either against these mocks
  * reads what it will read against a deployment.
  */
-const DEFAULT_APPS: TAppsResponse = [
+const DEFAULT_APPS: TAppsResponse['items'] = [
   {
     service: 'dfe-receiver',
     scale_deployed: true,
@@ -297,9 +298,9 @@ export const apps = {
     get: {
       success: ({
         mockedResponse = DEFAULT_APPS,
-      }: { mockedResponse?: TAppsResponse } = {}) =>
+      }: { mockedResponse?: TAppsResponse['items'] } = {}) =>
         http.get(apps.default.mockedUrl, () =>
-          HttpResponse.json(mockedResponse),
+          HttpResponse.json({ items: mockedResponse }),
         ),
       error: ({
         mockedResponse = DEFAULT_VALIDATION_ERROR,
@@ -418,10 +419,9 @@ export const apps = {
         instance?: string;
       } = {}) =>
         http.put(withInstance(apps.config.mockedUrl, service, instance), () =>
-          HttpResponse.json(
-            { code: 'chart_derived', message, errors: [], context: { path } },
-            { status: 409 },
-          ),
+          HttpResponse.json(problem(409, 'chart_derived', message, { path }), {
+            status: 409,
+          }),
         ),
       chartSetEnv: ({
         path = 'extraEnv.DFE_LOG_LEVEL',
@@ -435,10 +435,9 @@ export const apps = {
         instance?: string;
       } = {}) =>
         http.put(withInstance(apps.config.mockedUrl, service, instance), () =>
-          HttpResponse.json(
-            { code: 'chart_set_env', message, errors: [], context: { path } },
-            { status: 409 },
-          ),
+          HttpResponse.json(problem(409, 'chart_set_env', message, { path }), {
+            status: 409,
+          }),
         ),
       error: ({
         mockedResponse = DEFAULT_VALIDATION_ERROR,
@@ -556,7 +555,7 @@ export const apps = {
         http.put(withInstance(apps.scaling.mockedUrl, service, instance), () =>
           HttpResponse.json(mockedResponse, { status }),
         ),
-      // The engine's stale-If-Match refusal: a 409 whose context carries the
+      // The engine's stale-If-Match refusal: a 409 whose `head` member carries the
       // revision to re-read against. Distinct from the review_required 409.
       staleRevision: ({
         message = 'base revision aaaaaaa1111 is stale',
@@ -573,12 +572,7 @@ export const apps = {
       } = {}) =>
         http.put(withInstance(apps.scaling.mockedUrl, service, instance), () =>
           HttpResponse.json(
-            {
-              code: 'conflict',
-              message,
-              errors: [],
-              context: { current, head },
-            },
+            problem(409, 'conflict', message, { current, head }),
             { status: 409 },
           ),
         ),
@@ -612,8 +606,9 @@ export const apps = {
         http.get(withInstance(apps.status.mockedUrl, service, instance), () =>
           HttpResponse.json(
             {
+              title: 'Error',
               code: 'metrics_unavailable',
-              message: 'the telemetry store is not reachable',
+              detail: 'the telemetry store is not reachable',
             },
             { status: 503 },
           ),
@@ -681,12 +676,12 @@ export const apps = {
         service = 'service',
         instance = 'instance',
       }: {
-        mockedResponse?: TAppHistoryResponse;
+        mockedResponse?: TAppHistoryResponse['items'];
         service?: string;
         instance?: string;
       } = {}) =>
         http.get(withInstance(apps.history.mockedUrl, service, instance), () =>
-          HttpResponse.json(mockedResponse),
+          HttpResponse.json({ items: mockedResponse }),
         ),
     },
   },
@@ -749,14 +744,14 @@ export const apps = {
         instance = 'instance',
         setName = 'set_name',
       }: {
-        mockedResponse?: TAppFilesResponse;
+        mockedResponse?: TAppFilesResponse['items'];
         service?: string;
         instance?: string;
         setName?: string;
       } = {}) =>
         http.get(
           withFileSet(apps.files.mockedUrl, service, instance, setName),
-          () => HttpResponse.json(mockedResponse),
+          () => HttpResponse.json({ items: mockedResponse }),
         ),
     },
   },
@@ -963,14 +958,14 @@ export const apps = {
         instance = 'instance',
         setName = 'set_name',
       }: {
-        mockedResponse?: TAppFileLinksResponse;
+        mockedResponse?: TAppFileLinksResponse['items'];
         service?: string;
         instance?: string;
         setName?: string;
       } = {}) =>
         http.get(
           withFileSet(apps.fileLinks.mockedUrl, service, instance, setName),
-          () => HttpResponse.json(mockedResponse),
+          () => HttpResponse.json({ items: mockedResponse }),
         ),
     },
   },

@@ -91,7 +91,7 @@ export const ArtifactLabels = ({
     });
   }, [artifact, form]);
 
-  const message = getApiErrorResponseBody(error)?.message ?? error?.message;
+  const message = getApiErrorResponseBody(error)?.detail ?? error?.message;
 
   return (
     <div className="flex flex-col gap-3">

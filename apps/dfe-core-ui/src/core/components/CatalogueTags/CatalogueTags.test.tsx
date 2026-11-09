@@ -14,12 +14,8 @@ vi.mock('@/core/hooks/useFetchInfiniteFilteredSourceCatalogueTags', () => ({
   useFetchInfiniteFilteredSourceCatalogueTags: () => ({
     data: {
       items: TAGS,
-      total: TAGS.length,
-      page: 1,
-      per_page: 50,
-      total_pages: 1,
-      next_page: null,
-      prev_page: null,
+      total_size: TAGS.length,
+      next_page_token: null,
     },
     isLoading: false,
     error: null,

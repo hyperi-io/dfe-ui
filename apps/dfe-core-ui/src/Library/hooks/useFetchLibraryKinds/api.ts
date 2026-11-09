@@ -6,4 +6,4 @@ export const libraryKindsPath = API_CONFIG.library.kinds;
 
 export const fetchLibraryKindsApi = (
   options?: DfeClientRequestOptions<typeof libraryKindsPath, 'get'>,
-) => apiClient.get(libraryKindsPath, options);
+) => apiClient.getAll(libraryKindsPath, options);

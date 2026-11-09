@@ -54,7 +54,7 @@ describe('.useBulkActionSources', () => {
           {
             source: 'string',
             version: 'string',
-            task_id: 'string',
+            operation: 'operations/string',
             kind: 'string',
           },
         ],

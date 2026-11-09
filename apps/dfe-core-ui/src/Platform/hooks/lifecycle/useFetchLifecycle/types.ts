@@ -1,5 +1,6 @@
 import {
   DfeClientOperationFor,
+  DfeClientPageItem,
   DfeClientSuccessResponseBody,
 } from '@/core/config/api/client.types';
 import { lifecyclePath } from './api';
@@ -7,3 +8,5 @@ import { lifecyclePath } from './api';
 export type TLifecycleResponse = DfeClientSuccessResponseBody<
   DfeClientOperationFor<typeof lifecyclePath, 'get'>
 >;
+
+export type TLifecycleItem = DfeClientPageItem<TLifecycleResponse>;

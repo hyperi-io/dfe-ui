@@ -235,7 +235,7 @@ test.describe('', { tag: [TAGS.core, TAGS.schema] }, () => {
         response.request().method() === 'GET' &&
         response.url().includes('clonemeta') &&
         response.url().includes('/versions/columns') &&
-        response.url().includes('per_page=-1') &&
+        response.url().includes('page_size=1000') &&
         response.ok(),
     );
     await page.getByText('clonemeta', { exact: true }).hover();

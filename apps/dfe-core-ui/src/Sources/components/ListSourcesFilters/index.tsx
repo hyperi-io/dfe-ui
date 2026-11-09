@@ -11,7 +11,7 @@ export const ListSourcesFilters = ({
   onCollapseChange?: (open: boolean) => void;
 }) => {
   const {
-    data: { items: sources, total },
+    data: { items: sources, total_size: total },
     hasFilters,
     filters,
   } = useListSourcesContext();

@@ -1,5 +1,6 @@
 import {
   DfeClientOperationFor,
+  DfeClientPageItem,
   DfeClientSuccessResponseBody,
 } from '@/core/config/api/client.types';
 
@@ -9,4 +10,4 @@ export type TLibraryUsageResponse = DfeClientSuccessResponseBody<
   DfeClientOperationFor<typeof libraryUsagePath, 'get'>
 >;
 
-export type TLibraryUsage = TLibraryUsageResponse[number];
+export type TLibraryUsage = DfeClientPageItem<TLibraryUsageResponse>;

@@ -21,7 +21,7 @@ export const OrganisationManagement = () => {
     loadMoreRef,
     isLoading,
     error,
-  } = useFetchInfiniteFilteredOrganisations({ search, per_page: 12 });
+  } = useFetchInfiniteFilteredOrganisations({ search, page_size: 12 });
   const { componentHeight: outerComponentHeight } = useSetComponentHeight({
     offset: 100,
   });

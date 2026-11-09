@@ -159,9 +159,9 @@ export const FileSetPanel = ({
     getApiWriteConflict(writeError) ?? getApiWriteConflict(deleteError);
   const writeMessage = conflict
     ? undefined
-    : (getApiErrorResponseBody(writeError)?.message ?? writeError?.message);
+    : (getApiErrorResponseBody(writeError)?.detail ?? writeError?.message);
   const dryRunMessage =
-    getApiErrorResponseBody(dryRunError)?.message ?? dryRunError?.message;
+    getApiErrorResponseBody(dryRunError)?.detail ?? dryRunError?.message;
 
   if (isLoading) return <Spin size="small" />;
 

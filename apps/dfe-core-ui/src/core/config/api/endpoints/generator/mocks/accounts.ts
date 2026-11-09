@@ -37,12 +37,8 @@ export const accounts = {
               org: '',
             },
           ],
-          total: 1,
-          page: 1,
-          per_page: 10,
-          total_pages: 1,
-          next_page: 1,
-          prev_page: 1,
+          total_size: 1,
+          next_page_token: null,
         },
       }: {
         mockedResponse?: TAccountsResponse;

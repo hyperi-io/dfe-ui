@@ -52,7 +52,7 @@ export const ArtifactVersions = ({
   } = useRollbackLibraryArtifact({ artifact: artifact.name });
 
   const publishMessage =
-    getApiErrorResponseBody(publishError)?.message ?? publishError?.message;
+    getApiErrorResponseBody(publishError)?.detail ?? publishError?.message;
 
   const columns = [
     {

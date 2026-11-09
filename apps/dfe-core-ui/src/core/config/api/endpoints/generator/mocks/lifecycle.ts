@@ -19,10 +19,10 @@ export const lifecycle = {
           },
         ],
       }: {
-        mockedResponse?: TLifecycleResponse;
+        mockedResponse?: TLifecycleResponse['items'];
       } = {}) => {
         return http.get(lifecycle.default.mockedUrl, () => {
-          return HttpResponse.json(mockedResponse);
+          return HttpResponse.json({ items: mockedResponse });
         });
       },
     },

@@ -6,15 +6,23 @@ import { OidcProviderCard } from '@/Settings/components/OidcProviderManagement/O
 import { useFetchInfiniteFilteredOidcProviders } from '@/Settings/hooks/oidcProviders/useFetchInfiniteFilteredOidcProviders';
 import { IconInfoCircle } from '@repo/dfe-icons';
 import { Spin } from 'antd';
+import { useSearchParams } from 'next/navigation';
 
 export const OidcProviderList = ({ search = '' }: { search?: string }) => {
+  const pageSizeParam = useSearchParams().get('page_size');
+  const parsedPageSize = pageSizeParam
+    ? Number.parseInt(pageSizeParam, 10)
+    : undefined;
+  const page_size = Number.isInteger(parsedPageSize)
+    ? parsedPageSize
+    : undefined;
   const {
     data: { items: oidcProviders },
     isFetchingNextPage,
     loadMoreRef,
     isLoading,
     error,
-  } = useFetchInfiniteFilteredOidcProviders({ search });
+  } = useFetchInfiniteFilteredOidcProviders({ search, page_size });
 
   const { componentHeight } = useSetComponentHeight({
     offset: 295,
