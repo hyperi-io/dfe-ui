@@ -101,7 +101,12 @@ export const ListHuntsProvider = ({
 
   const filters = useMemo<UseFetchInfiniteFilteredHuntsProps>(() => {
     const urlFilters = parseFiltersFromParams(searchParams);
-    return hasAnyFilters(urlFilters) ? urlFilters : defaultFilters;
+    // page_size is not a search filter, and it still has to reach the list
+    // when it is the only query parameter.
+    if (hasAnyFilters(urlFilters) || urlFilters.page_size !== undefined) {
+      return urlFilters;
+    }
+    return defaultFilters;
   }, [searchParams, defaultFilters]);
 
   useEffect(() => {
