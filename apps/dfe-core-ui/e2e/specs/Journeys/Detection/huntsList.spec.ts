@@ -2,11 +2,17 @@ import { Page, expect as baseExpect, test } from '@playwright/test';
 
 import { BASE_URL } from '@e2e/config/e2e.client';
 import { engineToken } from '@e2e/config/engineApi.helpers';
-import { JOURNEY_USER, shot } from '@e2e/config/journey.helpers';
+import {
+  JOURNEY_USER,
+  prepareJourneyStack,
+  shot,
+} from '@e2e/config/journey.helpers';
 import { loginAs } from '@e2e/config/login.helpers';
 import { TAGS } from '@e2e/config/tags.constants';
 
 import { apiCreateRule, engineClient } from './detection.helpers';
+
+prepareJourneyStack();
 
 /**
  * The hunts list: search, sort, scroll to load, and the URL query keeps the view

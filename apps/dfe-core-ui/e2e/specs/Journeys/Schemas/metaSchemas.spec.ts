@@ -3,7 +3,7 @@ import path from 'node:path';
 import { expect, test } from '@playwright/test';
 
 import { BASE_URL } from '@e2e/config/e2e.client';
-import { shot } from '@e2e/config/journey.helpers';
+import { prepareJourneyStack, shot } from '@e2e/config/journey.helpers';
 import { TAGS } from '@e2e/config/tags.constants';
 
 import {
@@ -19,6 +19,8 @@ import {
   shownColumnCount,
   signIn,
 } from './schemas.helpers';
+
+prepareJourneyStack();
 
 /**
  * A meta schema read from an Elastic index template: what the console shows,

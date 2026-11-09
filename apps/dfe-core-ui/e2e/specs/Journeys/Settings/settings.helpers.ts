@@ -83,6 +83,21 @@ export const adminPage = async (page: Page) => {
   await loginAs(page, JOURNEY_USER);
 };
 
+/** Pick an option in a select named by its form label, where the placeholder says something else. */
+export const chooseByLabel = async (
+  page: Page,
+  dialog: Locator,
+  label: string,
+  option: string,
+) => {
+  await dialog.getByRole('combobox', { name: label, exact: true }).click();
+  await page.keyboard.type(option);
+  await page
+    .locator('.ant-select-dropdown .ant-select-item-option-content')
+    .getByText(option, { exact: true })
+    .click({ timeout: 5_000 });
+};
+
 export const choose = async (
   page: Page,
   dialog: Locator,

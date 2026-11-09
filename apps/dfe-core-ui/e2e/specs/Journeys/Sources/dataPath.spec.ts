@@ -7,12 +7,18 @@ import {
   qualifiedTable,
 } from '@e2e/config/engineApi.helpers';
 import { pushEnvelopes } from '@e2e/config/filebeatCorpus.helpers';
-import { JOURNEY_USER, shot } from '@e2e/config/journey.helpers';
+import {
+  JOURNEY_USER,
+  prepareJourneyStack,
+  shot,
+} from '@e2e/config/journey.helpers';
 import { loginAs } from '@e2e/config/login.helpers';
 import { TAGS } from '@e2e/config/tags.constants';
 
 import { deleteIfPresent, envelope } from './sources.helpers';
 import { addSourceInUi, buildAndDeployInUi, submitDrawer } from './ui.helpers';
+
+prepareJourneyStack();
 
 // UI create -> API stored -> build + deploy -> receiver POST -> ClickHouse row
 // -> console Sample Events and Columns tabs.

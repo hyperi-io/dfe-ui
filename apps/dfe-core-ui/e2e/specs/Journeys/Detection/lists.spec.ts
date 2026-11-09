@@ -2,7 +2,11 @@ import { Page, expect as baseExpect, test } from '@playwright/test';
 
 import { BASE_URL } from '@e2e/config/e2e.client';
 import { engineToken } from '@e2e/config/engineApi.helpers';
-import { JOURNEY_USER, shot } from '@e2e/config/journey.helpers';
+import {
+  JOURNEY_USER,
+  prepareJourneyStack,
+  shot,
+} from '@e2e/config/journey.helpers';
 import { loginAs } from '@e2e/config/login.helpers';
 import { TAGS } from '@e2e/config/tags.constants';
 
@@ -12,6 +16,8 @@ import {
   engineClient,
   ensureSource,
 } from './detection.helpers';
+
+prepareJourneyStack();
 
 /**
  * The rules list as a user works it: search, filter, sort, scroll to load more,
@@ -32,6 +38,9 @@ test.use({ actionTimeout: 15_000 });
 type Api = ReturnType<typeof engineClient>;
 let api: Api;
 let madeSource = false;
+// The rows the engine returns for a list asked with no page_size, which is what the console shows first.
+let enginePage = 0;
+const firstPage = (matching: number) => Math.min(enginePage, matching);
 
 test.beforeAll(async ({ playwright }) => {
   test.setTimeout(420_000);
@@ -41,16 +50,18 @@ test.beforeAll(async ({ playwright }) => {
   const have = await (
     await api.get(`/rules?search=${PREFIX}&page_size=1`)
   ).json();
-  if (have.total_size === COUNT) return;
-  for (let i = 0; i < COUNT; i += 1) {
-    await api.del(`/rules/${nameOf(i)}`);
-    await apiCreateRule(api, nameOf(i), {
-      display_name: displayOf(i),
-      severity: SEVERITIES[i % 4],
-      // Even rules carry a source label, so the Source filter has half of them.
-      ...(i % 2 === 0 ? { source: 'jdet-src' } : {}),
-    });
+  if (have.total_size !== COUNT) {
+    for (let i = 0; i < COUNT; i += 1) {
+      await api.del(`/rules/${nameOf(i)}`);
+      await apiCreateRule(api, nameOf(i), {
+        display_name: displayOf(i),
+        severity: SEVERITIES[i % 4],
+        // Even rules carry a source label, so the Source filter has half of them.
+        ...(i % 2 === 0 ? { source: 'jdet-src' } : {}),
+      });
+    }
   }
+  enginePage = (await (await api.get('/rules')).json()).items.length;
 });
 
 test.afterAll(async () => {
@@ -86,7 +97,7 @@ test(
     // M comes from the engine: the unfiltered total
     const all = await total('');
     await expect(
-      page.getByText(new RegExp(`^25 of ${all} results$`)),
+      page.getByText(`${firstPage(all)} of ${all} results`, { exact: true }),
     ).toBeVisible();
 
     // SEARCH narrows to the seeded rules, and the count is the API's total_size
@@ -97,10 +108,12 @@ test(
       (u) => u.searchParams.get('search') === PREFIX,
     );
     expect(await total(`search=${PREFIX}`)).toBe(COUNT);
-    await expect(page.getByText(`25 of ${COUNT} results`)).toBeVisible();
+    await expect(
+      page.getByText(`${firstPage(COUNT)} of ${COUNT} results`),
+    ).toBeVisible();
     await shot(page, 'lists-rules-search');
 
-    // SCROLL loads the next page: 25 -> 50 -> 60
+    // SCROLL loads the next page until every seeded rule is in
     const scroll = async () => {
       const list = page
         .getByRole('list')
@@ -110,14 +123,12 @@ test(
         if (s) s.scrollTop = s.scrollHeight;
       });
     };
-    for (const n of [50, COUNT]) {
-      await expect(async () => {
-        await scroll();
-        await expect(page.getByText(`${n} of ${COUNT} results`)).toBeVisible({
-          timeout: 3_000,
-        });
-      }).toPass({ timeout: 30_000 });
-    }
+    await expect(async () => {
+      await scroll();
+      await expect(page.getByText(`${COUNT} of ${COUNT} results`)).toBeVisible({
+        timeout: 3_000,
+      });
+    }).toPass({ timeout: 30_000 });
     expect((await rowNames(page)).length).toBe(COUNT);
 
     // SEVERITY filter: a quarter of the seeded rules, same as the API says
@@ -158,7 +169,9 @@ test(
     await expect(page).toHaveURL(
       (u) => !u.searchParams.has('severity') && !u.searchParams.has('source'),
     );
-    await expect(page.getByText(/^25 of \d+ results$/)).toBeVisible();
+    await expect(
+      page.getByText(new RegExp(`^${firstPage(all)} of \\d+ results$`)),
+    ).toBeVisible();
   },
 );
 
@@ -177,7 +190,9 @@ test(
   async ({ page }) => {
     await loginAs(page, JOURNEY_USER);
     await page.goto(`${BASE_URL}/rules?search=${PREFIX}`);
-    await expect(page.getByText(`25 of ${COUNT} results`)).toBeVisible();
+    await expect(
+      page.getByText(`${firstPage(COUNT)} of ${COUNT} results`),
+    ).toBeVisible();
 
     // SORT through the console: Name, descending
     await openFilters(page);

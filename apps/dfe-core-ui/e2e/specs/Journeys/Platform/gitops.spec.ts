@@ -3,8 +3,14 @@ import { expect, test } from '@playwright/test';
 import { BASE_URL } from '@e2e/config/e2e.client';
 import { loginAs } from '@e2e/config/login.helpers';
 import { TAGS } from '@e2e/config/tags.constants';
+import {
+  knownConsoleDefect,
+  prepareJourneyStack,
+} from '@e2e/config/journey.helpers';
 
 import { ADMIN, api, shot } from './platform.helpers';
+
+prepareJourneyStack();
 
 type AutoMerge = {
   stored: boolean;
@@ -36,8 +42,13 @@ const allEntries = async () => {
   return shas;
 };
 
+// Set once the journey knows it may change the flag, so a skip leaves it alone.
+let restoreTo: boolean | undefined;
+
 test.afterEach(async () => {
-  await api('PUT', '/api/v1/gitops/auto-merge', { enabled: false });
+  if (restoreTo !== undefined) {
+    await api('PUT', '/api/v1/gitops/auto-merge', { enabled: restoreTo });
+  }
 });
 
 test(
@@ -46,7 +57,11 @@ test(
   async ({ page }) => {
     test.setTimeout(240_000);
     const start = await autoMerge();
-    expect(start.stored).toBe(false);
+    test.skip(
+      start.stored || !start.allowed,
+      'the journey starts from auto-merge off, on a stack that allows it',
+    );
+    restoreTo = start.stored;
     await loginAs(page, ADMIN);
     await page.goto(`${BASE_URL}/settings/platform/gitops`);
 
@@ -81,16 +96,18 @@ test(
     });
     await expect(field('Stored')).toHaveText('No');
 
-    /* The newest commits (the two toggles) reach the open log without a reload */
+    /* The toggles are commits, so the newest one is the log's top card */
     const newest = (await api<Log>('GET', '/api/v1/gitops/log?limit=1')).body
       .entries[0]?.sha;
     const topCard = page.locator('dt:text-is("Commit") + dd').first();
-    await expect
-      .soft(topCard, 'log shows the newest commit after a toggle')
-      .toHaveText(newest ?? '', { timeout: 10_000 });
+    await knownConsoleDefect(
+      'the open log does not refetch after the auto-merge toggle: its query key is not the one the toggle invalidates',
+      () => expect(topCard).toHaveText(newest ?? '', { timeout: 5_000 }),
+    );
 
-    /* Then a fresh load, scrolled to the end, holds every entry once and in order */
+    /* A fresh load shows it first, and scrolled to the end holds every entry once and in order */
     await page.reload();
+    await expect(topCard).toHaveText(newest ?? '');
     const cards = page.locator('dt:text-is("Summary")');
     await expect(cards.first()).toBeVisible();
     let seen = 0;

@@ -1,6 +1,7 @@
 import { expect, test } from '@playwright/test';
 
 import { TAGS } from '@e2e/config/tags.constants';
+import { prepareJourneyStack } from '@e2e/config/journey.helpers';
 
 import {
   ADMIN,
@@ -14,6 +15,8 @@ import {
   tryUiLogin,
   userAction,
 } from './settings.helpers';
+
+prepareJourneyStack();
 
 test.setTimeout(240_000);
 const PASSWORD = 'jset-Account-pass-1';

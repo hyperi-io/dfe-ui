@@ -1,8 +1,11 @@
 import { expect, test } from '@playwright/test';
 
 import { TAGS } from '@e2e/config/tags.constants';
+import { prepareJourneyStack } from '@e2e/config/journey.helpers';
 
 import { adminApi, call, stamp, tokenFor } from './settings.helpers';
+
+prepareJourneyStack();
 
 test.describe('jset: live tokens', { tag: [TAGS.core, TAGS.settings] }, () => {
   test('blocking or deactivating an account ends a token it already holds', async () => {

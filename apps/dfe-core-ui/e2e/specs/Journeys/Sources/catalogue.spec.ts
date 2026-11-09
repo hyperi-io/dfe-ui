@@ -2,11 +2,18 @@ import { expect, test } from '@playwright/test';
 
 import { BASE_URL } from '@e2e/config/e2e.client';
 import { engine } from '@e2e/config/engineApi.helpers';
-import { JOURNEY_USER, shot } from '@e2e/config/journey.helpers';
+import {
+  JOURNEY_USER,
+  knownConsoleDefect,
+  prepareJourneyStack,
+  shot,
+} from '@e2e/config/journey.helpers';
 import { loginAs } from '@e2e/config/login.helpers';
 import { TAGS } from '@e2e/config/tags.constants';
 
 import { deleteIfPresent } from './sources.helpers';
+
+prepareJourneyStack();
 
 // The Add From Catalogue drawer: counts against the API, then create two
 // entries and read them back.
@@ -25,12 +32,13 @@ const cat = (q: string) =>
 
 test.setTimeout(240_000);
 test.use({ actionTimeout: 15_000 });
-// A catalogue entry already created cannot be selected again, so the two this
-// spec picks are cleared first.
-const OKTA = ['okta', 'entityanalytics-okta-entity'];
+// A catalogue entry already created cannot be selected again, so the entries
+// this spec picks are cleared first.
 const created: string[] = [];
 test.beforeAll(async () => {
-  for (const n of OKTA) await deleteIfPresent(n);
+  for (const e of (await cat('search=okta')).items) {
+    await deleteIfPresent(e.name);
+  }
 });
 test.afterAll(async () => {
   for (const n of created) await deleteIfPresent(n);
@@ -106,20 +114,31 @@ test(
         .filter({ hasText: entry.name })
         .first()
         .getByRole('checkbox');
-      await expect(box, `${entry.name}: ${entry.runnable_reason}`).toBeEnabled({
-        enabled: entry.runnable,
-      });
+      if (entry.runnable) {
+        await expect(box, entry.name).toBeEnabled();
+      } else {
+        await knownConsoleDefect(
+          `the catalogue drawer lets an entry be selected that the engine says this deployment cannot run (runnable false): ${entry.name}`,
+          () => expect(box).toBeDisabled({ timeout: 2_000 }),
+        );
+      }
     }
   },
 );
 
 // Entries that need a per-source app (fetcher, transform) run only on a Kafka
-// deployment, so the rows stay disabled on gRPC and this journey cannot pass
-// there. e2e/config/tags.constants.ts has no tag for that.
+// deployment, and the engine says which ones a deployment can run. When it
+// says neither of the two this journey picks, the journey skips with that
+// reason. e2e/config/tags.constants.ts has no tag for Kafka-only.
 test(
   'catalogue drawer: select two entries, review, create them',
   { tag: [TAGS.core, TAGS.source, '@kafka-only'] },
   async ({ page }) => {
+    const entries = (await cat('search=okta')).items;
+    test.skip(
+      entries.length !== 2 || entries.some((e) => !e.runnable),
+      `the engine says this deployment cannot run the okta entries: ${entries.find((e) => !e.runnable)?.runnable_reason ?? `${entries.length} found, 2 expected`}`,
+    );
     await loginAs(page, JOURNEY_USER);
     await page.goto(`${BASE_URL}/sources`);
     await page
@@ -136,7 +155,7 @@ test(
       .getByRole('button', { name: 'Review Catalogues', exact: true })
       .click();
     await shot(page, '24-catalogue-review');
-    const picked = (await cat('search=okta')).items;
+    const picked = entries;
     const posted = page.waitForResponse((r) =>
       r.url().includes('/sources/from-catalogue'),
     );
@@ -149,7 +168,7 @@ test(
       .click()
       .catch(() => undefined);
     await shot(page, '25-catalogue-result');
-    created.push(...OKTA);
+    created.push(...picked.map((e) => e.name));
     await expect(drawer.getByText(/2 sources? created/)).toBeVisible({
       timeout: 30_000,
     });

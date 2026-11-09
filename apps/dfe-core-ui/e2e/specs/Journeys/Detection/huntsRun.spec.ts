@@ -2,7 +2,11 @@ import { expect as baseExpect, test } from '@playwright/test';
 
 import { BASE_URL } from '@e2e/config/e2e.client';
 import { clickhouse, engineToken } from '@e2e/config/engineApi.helpers';
-import { JOURNEY_USER, shot } from '@e2e/config/journey.helpers';
+import {
+  JOURNEY_USER,
+  prepareJourneyStack,
+  shot,
+} from '@e2e/config/journey.helpers';
 import { RECEIVER_URL } from '@e2e/config/filebeatCorpus.helpers';
 import { loginAs } from '@e2e/config/login.helpers';
 import { TAGS } from '@e2e/config/tags.constants';
@@ -13,6 +17,8 @@ import {
   ensureSource,
   engineClient,
 } from './detection.helpers';
+
+prepareJourneyStack();
 
 /**
  * A user creates a hunt over a rule, runs it on demand, and the detections land

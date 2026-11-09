@@ -2,10 +2,12 @@ import { test } from '@playwright/test';
 
 import { BASE_URL } from '@e2e/config/e2e.client';
 
-import { shot } from '@e2e/config/journey.helpers';
+import { prepareJourneyStack, shot } from '@e2e/config/journey.helpers';
 import { TAGS } from '@e2e/config/tags.constants';
 
 import { engineGet, signIn } from './schemas.helpers';
+
+prepareJourneyStack();
 
 // The meta schema sort menu against what the engine sorts. Count, search and
 // scroll are in e2e/specs/SearchPagination/schemas.spec.ts.

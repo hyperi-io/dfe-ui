@@ -4,8 +4,11 @@ import { BASE_URL } from '@e2e/config/e2e.client';
 import { clickhouse } from '@e2e/config/engineApi.helpers';
 import { loginAs } from '@e2e/config/login.helpers';
 import { TAGS } from '@e2e/config/tags.constants';
+import { prepareJourneyStack } from '@e2e/config/journey.helpers';
 
 import { ADMIN, api, shot } from './platform.helpers';
+
+prepareJourneyStack();
 
 /* The console has no synthetic-data screen, so this drives the engine API. */
 type Op = {

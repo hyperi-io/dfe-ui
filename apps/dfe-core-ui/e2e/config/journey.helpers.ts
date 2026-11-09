@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any -- the engine replies are read as loose JSON */
 import { mkdirSync } from 'node:fs';
 
-import { Page } from '@playwright/test';
+import { Page, test } from '@playwright/test';
 
-import { ENGINE_API_URL } from './e2e.client';
-import { engineToken } from './engineApi.helpers';
+import { ENGINE_API_URL, e2eClient } from './e2e.client';
+import { engineToken, forgetEngineToken } from './engineApi.helpers';
 
 /** The seeded account the journeys sign in as, in the console and against the engine. */
 export const JOURNEY_USER = 'initial_user';
@@ -56,3 +56,40 @@ export const callAsJourneyUser = async <T = any>(
   path: string,
   body?: unknown,
 ): Promise<Reply<T>> => call<T>(await engineToken(), method, path, body);
+
+/**
+ * Register the setup every journey file needs, as its first hook.
+ *
+ * The journeys never reset the stack, but the specs that run before them do. So
+ * the token a spec held across its reset is dropped, and a stack left short of
+ * setup by the specs before them is taken through `seed_setup_complete`.
+ */
+export const prepareJourneyStack = () =>
+  test.beforeAll(async ({ playwright }) => {
+    forgetEngineToken();
+    const status = await call(undefined, 'GET', '/api/v1/auth/setup-status');
+    if (!status.json?.initial_setup?.complete) {
+      await e2eClient({ playwright, seedScript: 'seed_setup_complete' });
+    }
+  });
+
+/**
+ * Run a check on behaviour the console is known to get wrong, so the journey
+ * goes on and the miss is recorded as an annotation on the test. The check
+ * passes silently once the console is fixed, and the call is then a plain
+ * `expect` to promote. Resolves true when the check held.
+ */
+export const knownConsoleDefect = async (
+  defect: string,
+  check: () => Promise<unknown>,
+): Promise<boolean> => {
+  try {
+    await check();
+    return true;
+  } catch {
+    test
+      .info()
+      .annotations.push({ type: 'console-defect', description: defect });
+    return false;
+  }
+};

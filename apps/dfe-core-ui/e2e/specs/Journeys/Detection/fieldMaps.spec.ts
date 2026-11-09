@@ -2,11 +2,17 @@ import { expect as baseExpect, test } from '@playwright/test';
 
 import { BASE_URL } from '@e2e/config/e2e.client';
 import { engineToken } from '@e2e/config/engineApi.helpers';
-import { JOURNEY_USER, shot } from '@e2e/config/journey.helpers';
+import {
+  JOURNEY_USER,
+  prepareJourneyStack,
+  shot,
+} from '@e2e/config/journey.helpers';
 import { loginAs, textbox } from '@e2e/config/login.helpers';
 import { TAGS } from '@e2e/config/tags.constants';
 
 import { dropSource, engineClient, ensureSource } from './detection.helpers';
+
+prepareJourneyStack();
 
 /**
  * A user adds a field map, finds it in the list and reads its mappings, and the

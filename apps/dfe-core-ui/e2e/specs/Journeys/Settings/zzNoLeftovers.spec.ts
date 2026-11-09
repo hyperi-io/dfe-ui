@@ -1,8 +1,11 @@
 import { expect, test } from '@playwright/test';
 
 import { TAGS } from '@e2e/config/tags.constants';
+import { prepareJourneyStack } from '@e2e/config/journey.helpers';
 
 import { adminApi } from './settings.helpers';
+
+prepareJourneyStack();
 
 // Runs after the other settings journeys (the zz prefix). Each names what it
 // creates jset-... and deletes it again.

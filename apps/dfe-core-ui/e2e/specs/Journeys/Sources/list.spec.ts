@@ -2,9 +2,15 @@ import { expect, test } from '@playwright/test';
 
 import { BASE_URL } from '@e2e/config/e2e.client';
 import { engine } from '@e2e/config/engineApi.helpers';
-import { JOURNEY_USER, shot } from '@e2e/config/journey.helpers';
+import {
+  JOURNEY_USER,
+  prepareJourneyStack,
+  shot,
+} from '@e2e/config/journey.helpers';
 import { loginAs } from '@e2e/config/login.helpers';
 import { TAGS } from '@e2e/config/tags.constants';
+
+prepareJourneyStack();
 
 // 30 throwaway sources so the list has a second page. The UI's "N of M" count
 // must follow the API's total_size, and the tree order must follow order_by.
