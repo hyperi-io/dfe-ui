@@ -1578,9 +1578,9 @@ export interface paths {
          * @description Import a source bundle exported from another deployment.
          *
          *     The bundle's meta-schema definitions are written first, then the source, both
-         *     through the registries that commit to git. A definition marked
-         *     ``resource_type: core`` is resolved against what dfe-schemas already put here
-         *     and never written, so the read-only schema is not forked.
+         *     through their registries. A definition marked ``resource_type: core`` is
+         *     resolved against what dfe-schemas already put here and never written, so the
+         *     read-only schema is not forked.
          *
          *     Every check runs before the first write: a bundle applied halfway would leave
          *     the source's schema pins with no definitions behind them. A schema pin, or a
@@ -1877,26 +1877,6 @@ export interface paths {
          * @description Dry-run validate a service config without saving.
          */
         post: operations["services.validate"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/services/{service}/{instance}/history": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Get Service Config History
-         * @description Get git history for a service config (git-backed registries only).
-         */
-        get: operations["services.history.list"];
-        put?: never;
-        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -3403,10 +3383,10 @@ export interface paths {
          * Import Meta Schema
          * @description Import a meta-schema document exported from another deployment.
          *
-         *     A custom document is written through the schema registry, which commits it to
-         *     git. A core document names a schema dfe-schemas already put here: it is
-         *     RESOLVED against the local registry at its pinned version and nothing is
-         *     written, so the read-only definition is never forked.
+         *     A custom document is written through the schema registry. A core document
+         *     names a schema dfe-schemas already put here: it is RESOLVED against the local
+         *     registry at its pinned version and nothing is written, so the read-only
+         *     definition is never forked.
          */
         post: operations["schemas.import"];
         delete?: never;
@@ -3588,7 +3568,7 @@ export interface paths {
         };
         /**
          * List Users
-         * @description List users (SCIM ListResponse). Supports ``userName eq`` filter + paging.
+         * @description List users (SCIM ListResponse). Supports ``userName eq``, ``externalId eq`` + paging.
          */
         get: operations["scim.v2.users.list"];
         put?: never;
@@ -3647,7 +3627,9 @@ export interface paths {
         };
         /**
          * List Groups
-         * @description List groups (SCIM ListResponse). Supports ``displayName eq`` filter + paging.
+         * @description List groups (SCIM ListResponse). Supports ``displayName eq``, ``id eq`` + paging.
+         *
+         *     ``id eq`` may add ``and members[value eq]``, which lists the group only for a member.
          */
         get: operations["scim.v2.groups.list"];
         put?: never;
@@ -7812,20 +7794,6 @@ export interface components {
             set: boolean;
         };
         /**
-         * ConfigHistoryEntry
-         * @description One commit that changed a service config.
-         */
-        ConfigHistoryEntry: {
-            /** Commit */
-            commit: string;
-            /** Message */
-            message: string;
-            /** Author */
-            author: string;
-            /** Date */
-            date: string;
-        };
-        /**
          * ConfigWriteRequest
          * @description Changes to one instance's config, each keyed by the path the GET reports.
          */
@@ -11376,15 +11344,6 @@ export interface components {
         Page_CompatProfileSummary_: {
             /** Items */
             items: components["schemas"]["CompatProfileSummary"][];
-            /** Next Page Token */
-            next_page_token?: string | null;
-            /** Total Size */
-            total_size?: number | null;
-        };
-        /** Page[ConfigHistoryEntry] */
-        Page_ConfigHistoryEntry_: {
-            /** Items */
-            items: components["schemas"]["ConfigHistoryEntry"][];
             /** Next Page Token */
             next_page_token?: string | null;
             /** Total Size */
@@ -23526,73 +23485,6 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ValidationResult"];
-                };
-            };
-            /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["Problem"];
-                };
-            };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["Problem"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["Problem"];
-                };
-            };
-            /** @description Problem details (RFC 9457) */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["Problem"];
-                };
-            };
-        };
-    };
-    "services.history.list": {
-        parameters: {
-            query?: {
-                limit?: number;
-                /** @description Items per page: 0 means 50, above 1000 is cut to it */
-                page_size?: number;
-                /** @description The next_page_token of the previous page */
-                page_token?: string | null;
-                /** @description Items to skip, after page_token */
-                skip?: number;
-            };
-            header?: never;
-            path: {
-                service: string;
-                instance: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Page_ConfigHistoryEntry_"];
                 };
             };
             /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */
