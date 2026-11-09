@@ -72,24 +72,3 @@ export const prepareJourneyStack = () =>
       await e2eClient({ playwright, seedScript: 'seed_setup_complete' });
     }
   });
-
-/**
- * Run a check on behaviour the console is known to get wrong, so the journey
- * goes on and the miss is recorded as an annotation on the test. The check
- * passes silently once the console is fixed, and the call is then a plain
- * `expect` to promote. Resolves true when the check held.
- */
-export const knownConsoleDefect = async (
-  defect: string,
-  check: () => Promise<unknown>,
-): Promise<boolean> => {
-  try {
-    await check();
-    return true;
-  } catch {
-    test
-      .info()
-      .annotations.push({ type: 'console-defect', description: defect });
-    return false;
-  }
-};

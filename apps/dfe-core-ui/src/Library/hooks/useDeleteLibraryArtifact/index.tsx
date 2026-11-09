@@ -20,8 +20,14 @@ export const useDeleteLibraryArtifact = ({
   const { data, mutate, isPending, error } = useMutation({
     mutationFn: () => deleteLibraryArtifactApi({ pathParams: { artifact } }),
     onSuccess: (values) => {
-      queryClient.invalidateQueries({
+      // The deleted artefact's own detail, versions and usage calls would
+      // 404, so drop them and refetch only the list.
+      queryClient.removeQueries({
         queryKey: QUERY_KEYS.library.artifact(),
+        predicate: (query) => query.queryKey.includes(artifact),
+      });
+      queryClient.invalidateQueries({
+        queryKey: QUERY_KEYS.library.default(),
       });
       onSuccess?.(values);
     },

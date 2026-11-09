@@ -10,7 +10,7 @@ import { RbacProtected } from '@/core/components/RbacProtected';
 import { getApiErrorResponseBody } from '@/core/config/api/client';
 import { LIBRARY_TOKEN_VALIDATOR } from '@/core/validationSchemas/utils';
 import { Button, FormRule, Input, Select } from 'antd';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 
 type LabelsFormData = {
   description?: string;
@@ -70,13 +70,22 @@ export const ArtifactLabels = ({
   artifact: TLibraryArtifactDetail;
 }) => {
   const [form] = Form.useForm<LabelsFormData>();
+  // Refetches (a state change, a save) hand over a new `artifact` object, and
+  // must not overwrite what the user is typing.
+  const edited = useRef(false);
+  const seededFor = useRef<string | null>(null);
   const {
     data: patchResult,
     mutate: patchArtifact,
     isPending,
     error,
     reset,
-  } = usePatchLibraryArtifact({ artifact: artifact.name });
+  } = usePatchLibraryArtifact({
+    artifact: artifact.name,
+    onSuccess: () => {
+      edited.current = false;
+    },
+  });
   const {
     data: stateResult,
     mutate: setState,
@@ -84,6 +93,9 @@ export const ArtifactLabels = ({
   } = useSetLibraryArtifactState({ artifact: artifact.name });
 
   useEffect(() => {
+    if (seededFor.current === artifact.name && edited.current) return;
+    seededFor.current = artifact.name;
+    edited.current = false;
     form.setFieldsValue({
       description: artifact.description,
       group: artifact.group,
@@ -113,6 +125,9 @@ export const ArtifactLabels = ({
 
           <Form
             form={form}
+            onValuesChange={() => {
+              edited.current = true;
+            }}
             onFinish={(values: LabelsFormData) => {
               reset();
               patchArtifact({
