@@ -7,7 +7,7 @@ import { TMetaSchemaDetailColumnItem } from '@/Schemas/hooks/useFetchInfiniteSch
 import { IconInfoCircle } from '@repo/dfe-icons';
 import { Alert, Input, Select, Tag } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import {
   baseColumnFrom,
   chosenIndexFor,
@@ -17,9 +17,6 @@ import {
   rebuildSelection,
   withIndexUseCase,
 } from './DerivedSchemaFieldPicker.helpers';
-
-/** The engine accepts -1 as every column, and refuses a page larger than 100. */
-const BASE_COLUMNS_PER_PAGE = -1;
 
 const EMPTY_SELECTION: DerivedSelectEntry[] = [];
 
@@ -59,26 +56,13 @@ export const DerivedSchemaFieldPicker = ({
 }: DerivedSchemaFieldPickerProps) => {
   const [search, setSearch] = useState('');
 
-  const {
-    data,
-    isLoading,
-    isError,
-    fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage,
-  } = useFetchInfiniteFilteredSchemaDetailColumns({
-    schema_path: basePath,
-    version: baseVersion,
-    page_size: BASE_COLUMNS_PER_PAGE,
-  });
-
-  // The whole base has to be pickable, so the filter never misses a column
-  // that has not been scrolled to yet.
-  useEffect(() => {
-    if (hasNextPage && !isFetchingNextPage) {
-      void fetchNextPage();
-    }
-  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+  const { data, isLoading, isError, isFetchingNextPage } =
+    useFetchInfiniteFilteredSchemaDetailColumns({
+      schema_path: basePath,
+      version: baseVersion,
+      // The whole base has to be pickable, so the table waits until every page is in.
+      fetch_all: true,
+    });
 
   const columnItems = useMemo(() => data?.items ?? [], [data]);
 
