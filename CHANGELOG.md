@@ -3,6 +3,13 @@
 Rendered by CI and committed back at the end of a release -- do not edit by
 hand. Release notes also appear on the GitHub Releases page, one per tag.
 
+## [1.7.38](https://github.com/hyperi-io/dfe-ui/compare/v1.7.37...v1.7.38) (2026-11-09)
+
+### Bug Fixes
+
+* **console:** support the engine 2.2.2 API ([#688](https://github.com/hyperi-io/dfe-ui/issues/688)) ([55f9fe4](https://github.com/hyperi-io/dfe-ui/commit/55f9fe49e8cd547c36ab43ea978122f9df01053a))
+* **e2e:** cover the setup wizard's source step ([fe6a024](https://github.com/hyperi-io/dfe-ui/commit/fe6a0249331fab595356fe194920397be9df09b9))
+
 ## [1.7.37](https://github.com/hyperi-io/dfe-ui/compare/v1.7.36...v1.7.37) (2026-11-03)
 
 ### Bug Fixes
