@@ -68,7 +68,7 @@ const BlockRow = ({ block, title }: { block: TRuleBlock; title: string }) => {
         <span className="truncate font-medium">{title}</span>
       )}
       {block.kind !== 'default' && (
-        <Tag className="m-0" bordered={false}>
+        <Tag className="m-0" variant="filled">
           {KIND_LABEL[block.kind]}
         </Tag>
       )}

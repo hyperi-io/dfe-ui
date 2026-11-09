@@ -91,7 +91,7 @@ export const CompatBindingsInput = ({
             </Tooltip>
             <span className="flex flex-wrap gap-1">
               {profile.covers.map((cover) => (
-                <Tag key={coverText(cover)} className="m-0" bordered={false}>
+                <Tag key={coverText(cover)} className="m-0" variant="filled">
                   {coverText(cover)}
                 </Tag>
               ))}
