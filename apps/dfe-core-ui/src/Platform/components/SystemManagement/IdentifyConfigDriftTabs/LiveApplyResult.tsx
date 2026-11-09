@@ -1,7 +1,7 @@
 import { Table } from '@/core/components/Table';
 import { TApplyDefaultsResponse } from '@/Platform/hooks/system/useApplyDefaults/types';
 import { Tag } from 'antd';
-import { ValueMove } from './ValueMove';
+import { ValueMove } from '@/core/components/ValueMove';
 
 export type TLiveApply = TApplyDefaultsResponse['live'][number];
 

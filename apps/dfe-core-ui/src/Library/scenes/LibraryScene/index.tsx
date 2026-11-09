@@ -8,6 +8,7 @@ import { MainContentCard } from '@/core/components/ContentCard';
 import { NotificationCard } from '@/core/components/NotificationCard';
 import { RbacProtected } from '@/core/components/RbacProtected';
 import { Table } from '@/core/components/Table';
+import { ValueMove } from '@/core/components/ValueMove';
 import { Button, Input, Select, Spin, Tag } from 'antd';
 import { useState } from 'react';
 
@@ -65,7 +66,13 @@ export const LibraryScene = () => {
       render: (tags: Record<string, number>) => (
         <span className="flex flex-wrap gap-1">
           {Object.entries(tags ?? {}).map(([tag, version]) => (
-            <Tag key={tag} color="blue">{`${tag} -> ${version}`}</Tag>
+            <Tag key={tag} color="blue">
+              <ValueMove
+                from={tag}
+                to={String(version)}
+                label={`${tag} points to version ${version}`}
+              />
+            </Tag>
           ))}
         </span>
       ),
