@@ -1,3 +1,4 @@
+import { getNextPageToken, toOrderBy } from '@/core/config/api/pagination';
 import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
 import { useDebounce } from '@/core/hooks/useDebounce';
 import { useInfiniteQuery } from '@tanstack/react-query';
@@ -11,7 +12,7 @@ const SEARCH_DEBOUNCE_MS = 300;
  * @param search - The search query to filter the oidc providers by name and description.
  * @param sort_by - The field to sort the oidc providers by.
  * @param sort_order - The order to sort the oidc providers by.
- * @param per_page - The number of oidc providers to fetch per page.
+ * @param page_size - The number of oidc providers to fetch per page.
  * @param enabled - Whether to fetch at all, for a caller whose user may not read providers.
  */
 /**
@@ -21,8 +22,7 @@ export const useFetchInfiniteFilteredOidcProviders = ({
   search,
   sort_by,
   sort_order,
-  page,
-  per_page,
+  page_size,
   enabled = true,
 }: UseFetchInfiniteFilteredOidcProvidersProps = {}) => {
   const debouncedSearch = useDebounce(search ?? '', SEARCH_DEBOUNCE_MS);
@@ -40,28 +40,21 @@ export const useFetchInfiniteFilteredOidcProviders = ({
       search: debouncedSearch || undefined,
       sort_by: sort_by as 'name' | 'type' | 'created_at',
       sort_order: sort_order as 'asc' | 'desc',
-      page: page,
-      per_page,
+      page_size,
     }),
 
-    queryFn: async ({ pageParam = 1, signal }) =>
+    queryFn: async ({ pageParam, signal }) =>
       fetchInfiniteFilteredOidcProvidersApi({
         queryParams: {
           search: debouncedSearch || undefined,
-          sort_by: sort_by as 'name' | 'type' | 'created_at',
-          sort_order: sort_order as 'asc' | 'desc',
-          page: pageParam,
-          per_page,
+          order_by: toOrderBy(sort_by, sort_order),
+          page_token: pageParam,
+          page_size,
         },
         signal,
       }),
-    getNextPageParam: (lastPage, allPages) => {
-      const pageSize = per_page ?? lastPage.per_page;
-      const hasMore =
-        lastPage.items && pageSize > 0 && lastPage.items.length >= pageSize;
-      return hasMore ? allPages.length + 1 : undefined;
-    },
-    initialPageParam: 1,
+    getNextPageParam: getNextPageToken,
+    initialPageParam: undefined as string | undefined,
     enabled,
   });
 
@@ -69,12 +62,8 @@ export const useFetchInfiniteFilteredOidcProviders = ({
     if (!data?.pages?.length) {
       return {
         items: [],
-        total: 0,
-        page: 1,
-        per_page: per_page ?? 10,
-        total_pages: 0,
-        next_page: null as number | null,
-        prev_page: null as number | null,
+        total_size: 0,
+        next_page_token: null,
       };
     }
 
@@ -83,7 +72,7 @@ export const useFetchInfiniteFilteredOidcProviders = ({
       ...data.pages[0],
       items: allItems,
     };
-  }, [data, per_page]);
+  }, [data]);
 
   const loadMoreRef = useRef<HTMLDivElement>(null);
   useEffect(() => {

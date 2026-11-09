@@ -120,12 +120,8 @@ export interface ListSourcesContextValue {
 const DEFAULT_SOURCE_LIST_RESPONSE: TSourceListResponse = {
   items: [] as TSourceListResponse['items'],
   objects: {},
-  total: 0,
-  page: 1,
-  per_page: 10,
-  total_pages: 0,
-  next_page: null,
-  prev_page: null,
+  total_size: 0,
+  next_page_token: null,
 };
 
 /** The version every source is created at. Used only when the list does not carry the selected source. */

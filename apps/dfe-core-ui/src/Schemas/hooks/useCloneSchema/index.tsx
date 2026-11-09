@@ -29,7 +29,7 @@ const cloneSchemaError = ({
 }) => {
   if (isFetchingSchemaDetail) return;
   if (!version) return;
-  if (schemaDetailData?.version?.columns?.items) return;
+  if (schemaDetailData?.items) return;
   return { message: 'Unable to clone schema' };
 };
 export const useCloneSchema = ({
@@ -45,7 +45,7 @@ export const useCloneSchema = ({
     useFetchInfiniteFilteredSchemaDetailColumns({
       schema_path: schema_path,
       version,
-      per_page: -1,
+      fetch_all: true,
     });
 
   const {
@@ -68,7 +68,7 @@ export const useCloneSchema = ({
       'path' | 'name' | 'version' | 'description'
     >,
   ) => {
-    if (!schemaDetailData?.version?.columns?.items) {
+    if (!schemaDetailData?.items) {
       const errMessage = 'Unable to clone schema - no available columns';
       setErrorMessage(errMessage);
       onError?.(new Error(errMessage));
@@ -82,7 +82,7 @@ export const useCloneSchema = ({
           date: new Date().toISOString(),
           type: 'model',
           summary: values.description ?? '',
-          columns: schemaDetailData.version.columns.items.map((column) => ({
+          columns: schemaDetailData.items.map((column) => ({
             ...column,
             _field_type: column._field_type ?? SCHEMA_FIELD_TYPES.USER_DEFINED,
           })),
@@ -97,5 +97,10 @@ export const useCloneSchema = ({
     (errorMessage ? new Error(errorMessage) : null) ??
     cloneSchemaError({ version, isFetchingSchemaDetail, schemaDetailData });
 
-  return { mutate: handleMutate, isPending, error };
+  return {
+    mutate: handleMutate,
+    isPending,
+    isReadingColumns: isFetchingSchemaDetail,
+    error,
+  };
 };

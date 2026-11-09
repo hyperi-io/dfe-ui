@@ -268,12 +268,8 @@ export const system = {
               engine: { stored: 'string', default: 'string' },
             },
           ],
-          total: 10,
-          page: 1,
-          per_page: 10,
-          total_pages: 1,
-          next_page: 2,
-          prev_page: 0,
+          total_size: 10,
+          next_page_token: null,
         },
       }: {
         mockedResponse?: TDefaultsDriftSourcesResponse;

@@ -123,9 +123,10 @@ describe('RuleOrder', () => {
       API_CONFIG_MOCKS.ingest.rulesOrder.post.error({
         status: 412,
         body: {
+          title: 'Error',
           code: 'etag_mismatch',
-          message: 'If-Match does not match the current ETag',
-          context: { etag: '"order-2"' },
+          detail: 'If-Match does not match the current ETag',
+          etag: '"order-2"',
         },
       }),
     );

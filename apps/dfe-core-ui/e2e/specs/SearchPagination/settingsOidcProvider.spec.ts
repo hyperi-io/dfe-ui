@@ -5,9 +5,11 @@ import { loginAs } from '@e2e/config/login.helpers';
 import { TAGS } from '@e2e/config/tags.constants';
 
 /**
- * Provider names sort alphabetically and the grid asks for 25 at a time.
- * `Searchable Provider 0` is on the first page. `Searchable Provider 49` is not.
- * Users of `searchable-oidc-0` are the seeded accounts, also 25 to a page.
+ * Provider names sort alphabetically. The engine's own page is 50, which is
+ * this whole seed, so the search and scroll tests ask for 25.
+ * `Searchable Provider 0` stays on the first page. `Searchable Provider 49`
+ * then lands on the next one. Users of `searchable-oidc-0` are the seeded
+ * accounts, and those tests ask for the same page of 25.
  */
 const PROVIDER_PAGE = 25;
 const USER_PAGE = 25;
@@ -26,11 +28,12 @@ test.beforeEach(async ({ playwright, page }) => {
   await loginAs(page, 'dfe_admin');
 });
 
-const openProviders = async (page: Page) => {
-  await page.goto(`${BASE_URL}/settings/admin/oidc-provider-management`);
-  await expect(page).toHaveURL(
-    `${BASE_URL}/settings/admin/oidc-provider-management`,
-  );
+const openProviders = async (page: Page, pageSize?: number) => {
+  const path = pageSize
+    ? `/settings/admin/oidc-provider-management?page_size=${pageSize}`
+    : '/settings/admin/oidc-provider-management';
+  await page.goto(`${BASE_URL}${path}`);
+  await expect(page).toHaveURL(`${BASE_URL}${path}`);
 };
 
 /** The card. The header holds the search box; its parent holds the grid. */
@@ -104,7 +107,7 @@ test.describe('', { tag: [TAGS.core, TAGS.search, TAGS.pagination] }, () => {
     });
 
     test('A search keeps the provider whose name matches', async ({ page }) => {
-      await openProviders(page);
+      await openProviders(page, PROVIDER_PAGE);
       const section = providersSection(page);
 
       await expect(providerName(section, PROVIDER_OTHER)).toBeVisible();
@@ -122,7 +125,7 @@ test.describe('', { tag: [TAGS.core, TAGS.search, TAGS.pagination] }, () => {
     });
 
     test('Scrolling the list loads the next page', async ({ page }) => {
-      await openProviders(page);
+      await openProviders(page, PROVIDER_PAGE);
       const section = providersSection(page);
 
       await expect(providerCards(section)).toHaveCount(PROVIDER_PAGE);
@@ -162,7 +165,7 @@ test.describe('', { tag: [TAGS.core, TAGS.search, TAGS.pagination] }, () => {
     });
 
     test('A search keeps the user whose name matches', async ({ page }) => {
-      await openProviders(page);
+      await openProviders(page, USER_PAGE);
       const drawer = await openProviderUsers(page, providersSection(page));
 
       await expect(drawer.getByText(USER_OTHER, { exact: true })).toBeVisible();
@@ -184,7 +187,7 @@ test.describe('', { tag: [TAGS.core, TAGS.search, TAGS.pagination] }, () => {
     });
 
     test('Scrolling the list loads the next page', async ({ page }) => {
-      await openProviders(page);
+      await openProviders(page, USER_PAGE);
       const drawer = await openProviderUsers(page, providersSection(page));
 
       await expect(userRows(drawer)).toHaveCount(USER_PAGE);

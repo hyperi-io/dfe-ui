@@ -6,4 +6,4 @@ export const libraryUsagePath = API_CONFIG.library.usage;
 
 export const fetchLibraryUsageApi = (
   options: DfeClientRequestOptions<typeof libraryUsagePath, 'get'>,
-) => apiClient.get(libraryUsagePath, options);
+) => apiClient.getAll(libraryUsagePath, options);

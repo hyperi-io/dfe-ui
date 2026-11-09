@@ -46,12 +46,8 @@ describe('useFetchInfiniteFilteredSchemas', () => {
       const expectedResponse: TSchemaListResponse = {
         items: [],
         objects: {},
-        total: 0,
-        page: 1,
-        per_page: 10,
-        total_pages: 0,
-        next_page: null,
-        prev_page: null,
+        total_size: 0,
+        next_page_token: null,
       };
       expect(result.current.data).toEqual(expectedResponse);
       expect(result.current.isError).toBe(false);
@@ -94,12 +90,8 @@ describe('useFetchInfiniteFilteredSchemas', () => {
 
       const expectedResponse = {
         items: expect.any(Array),
-        total: 25,
-        page: 1,
-        per_page: 10,
-        total_pages: 3,
-        next_page: 2,
-        prev_page: 0,
+        total_size: 25,
+        next_page_token: '10',
       };
 
       expect(result.current).toMatchObject({
@@ -177,7 +169,7 @@ describe('useFetchInfiniteFilteredSchemas', () => {
 
     it('should not have next page when all data is loaded', async () => {
       const { result } = renderHook(
-        () => useFetchInfiniteFilteredSchemas({ per_page: 10 }),
+        () => useFetchInfiniteFilteredSchemas({ page_size: 10 }),
         {
           wrapper,
         },
@@ -211,9 +203,9 @@ describe('useFetchInfiniteFilteredSchemas', () => {
   });
 
   describe('custom page size', () => {
-    it('should respect per_page parameter', async () => {
+    it('should respect page_size parameter', async () => {
       const { result } = renderHook(
-        () => useFetchInfiniteFilteredSchemas({ per_page: 5 }),
+        () => useFetchInfiniteFilteredSchemas({ page_size: 5 }),
         {
           wrapper,
         },
@@ -226,9 +218,9 @@ describe('useFetchInfiniteFilteredSchemas', () => {
       expect(result.current.data.items).toHaveLength(5);
     });
 
-    it('should handle per_page larger than available data', async () => {
+    it('should handle page_size larger than available data', async () => {
       const { result } = renderHook(
-        () => useFetchInfiniteFilteredSchemas({ per_page: 100 }),
+        () => useFetchInfiniteFilteredSchemas({ page_size: 100 }),
         {
           wrapper,
         },
@@ -262,12 +254,8 @@ describe('useFetchInfiniteFilteredSchemas', () => {
       const expectedResponse: TSchemaListResponse = {
         items: [],
         objects: {},
-        total: 0,
-        page: 1,
-        per_page: 10,
-        total_pages: 0,
-        next_page: null,
-        prev_page: null,
+        total_size: 0,
+        next_page_token: null,
       };
       expect(result.current.data).toEqual(expectedResponse);
     });
@@ -345,7 +333,7 @@ describe('useFetchInfiniteFilteredSchemas', () => {
             sort_by: 'path',
             sort_order: 'asc',
 
-            per_page: 20,
+            page_size: 20,
           }),
         {
           wrapper,
@@ -428,12 +416,8 @@ describe('useFetchInfiniteFilteredSchemas', () => {
               items: [],
               children: {},
             },
-            total: 0,
-            page: 0,
-            per_page: 0,
-            total_pages: 0,
-            next_page: 0,
-            prev_page: 0,
+            total_size: 0,
+            next_page_token: null,
           },
         }),
       );

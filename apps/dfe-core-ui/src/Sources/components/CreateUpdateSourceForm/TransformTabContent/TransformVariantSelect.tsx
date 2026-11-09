@@ -55,7 +55,7 @@ export const useEngineOffersVariants = (engine?: string | null) => {
   const queryParams = {
     engine: engine ?? '',
     include_stored: true,
-    per_page: 1,
+    page_size: 1,
   };
   const { data, isLoading, isError, error } = useQuery({
     queryKey: [...QUERY_KEYS.sources.catalogue(queryParams), 'count'],
@@ -115,7 +115,7 @@ export const TransformVariantSelect = ({
     search: debouncedSearch || undefined,
     engine,
     include_stored: true,
-    per_page: PAGE_SIZE,
+    page_size: PAGE_SIZE,
   });
 
   const options = useMemo(

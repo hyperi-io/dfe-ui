@@ -1,5 +1,6 @@
 import {
   DfeClientOperationFor,
+  DfeClientPageItem,
   DfeClientSuccessResponseBody,
 } from '@/core/config/api/client.types';
 
@@ -10,7 +11,7 @@ export type TAppsResponse = DfeClientSuccessResponseBody<
 >;
 
 /** One app in the catalogue, with the instances currently deployed. */
-export type TAppCatalogueEntry = TAppsResponse[number];
+export type TAppCatalogueEntry = DfeClientPageItem<TAppsResponse>;
 
 /** A family of files an app reads off disk. Empty for an app that reads none. */
 export type TAppFileSet = TAppCatalogueEntry['file_sets'][number];

@@ -1,5 +1,6 @@
 import {
   DfeClientOperationFor,
+  DfeClientPageItem,
   DfeClientSuccessResponseBody,
 } from '@/core/config/api/client.types';
 
@@ -10,7 +11,7 @@ export type TBackingServicesResponse = DfeClientSuccessResponseBody<
 >;
 
 /** One backing service's deploy configuration as the deploy repo declares it. */
-export type TBackingService = TBackingServicesResponse[number];
+export type TBackingService = DfeClientPageItem<TBackingServicesResponse>;
 
 /**
  * One declared value. A null `source` means nothing declared it, so the chart

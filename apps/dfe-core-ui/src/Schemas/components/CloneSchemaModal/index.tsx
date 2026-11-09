@@ -4,6 +4,7 @@ import { FormNotification } from '@/core/components/FormNotification';
 import { Modal } from '@/core/components/Modal';
 import { RbacProtected } from '@/core/components/RbacProtected';
 import { Tooltip } from '@/core/components/Tooltip';
+import { useListSchemasContext } from '@/core/contexts/ListSchemasContext';
 import { TCreateSchemaResponse } from '@/core/hooks/useCreateSchema/types';
 import { TSchemaListResponse } from '@/core/hooks/useFetchInfiniteFilteredSchemas/types';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
@@ -45,6 +46,8 @@ export const CloneSchemaModal = ({
   const formValidation = useAntdZodResolver<FormData>(formSchema);
   const [open, setOpen] = useState(false);
 
+  const { setSelectedSchema } = useListSchemasContext();
+
   const version = Form.useWatch('version', form);
 
   const onSuccess = (data: TCreateSchemaResponse) => {
@@ -56,11 +59,19 @@ export const CloneSchemaModal = ({
   const {
     mutate: cloneSchemaMutation,
     isPending,
+    isReadingColumns,
     error,
   } = useCloneSchema({
     schema_path: schemaFullName,
     version,
-    onSuccess,
+    onSuccess: (response) => {
+      setSelectedSchema({
+        schema_path: response.path ?? '',
+        schema_version: response.current,
+      });
+      setOpen(false);
+      onSuccess?.(response);
+    },
     onError,
   });
   const handleCloneSchema = (values: FormData) => {
@@ -182,7 +193,7 @@ export const CloneSchemaModal = ({
             </Button>
             <Button
               loading={isPending}
-              disabled={isPending}
+              disabled={isPending || isReadingColumns}
               htmlType="submit"
               type="primary"
             >

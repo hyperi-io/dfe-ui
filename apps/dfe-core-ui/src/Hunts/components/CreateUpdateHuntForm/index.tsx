@@ -97,7 +97,9 @@ export const CreateUpdateHuntForm = ({
   useEffect(() => {
     const refusal = getApiErrorResponseBody(error);
     if (refusal?.code === UNKNOWN_ORG_CODE) {
-      form.setFields([{ name: 'customers', errors: [refusal.message] }]);
+      form.setFields([
+        { name: 'customers', errors: [refusal.detail ?? refusal.title] },
+      ]);
     }
   }, [error, form]);
 

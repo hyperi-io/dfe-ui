@@ -4,7 +4,7 @@ import { Table } from '@/core/components/Table';
 import { Tooltip } from '@/core/components/Tooltip';
 import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
 import { useFetchLifecycle } from '@/Platform/hooks/lifecycle/useFetchLifecycle';
-import { TLifecycleResponse } from '@/Platform/hooks/lifecycle/useFetchLifecycle/types';
+import { TLifecycleItem } from '@/Platform/hooks/lifecycle/useFetchLifecycle/types';
 import { useUpdateLifecycle } from '@/Platform/hooks/lifecycle/useUpdateLifecycle';
 import { TActionTypeOption } from '@/Platform/hooks/lifecycle/useUpdateLifecycle/types';
 import {
@@ -86,7 +86,7 @@ export const Lifecycle = () => {
       title: 'State',
       dataIndex: 'state',
       key: 'state',
-      render: (state: string, record: TLifecycleResponse[number]) => {
+      render: (state: string, record: TLifecycleItem) => {
         const pinned = state === 'pinned';
         const running = state === 'running';
         const paused = state === 'paused';

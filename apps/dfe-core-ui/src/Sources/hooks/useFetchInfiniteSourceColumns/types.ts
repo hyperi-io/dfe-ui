@@ -13,5 +13,5 @@ export type TSourceColumnItem = TSourceColumnsResponse['items'][number];
 export interface UseFetchInfiniteSourceColumnsProps {
   source_name?: string;
   version?: string;
-  per_page?: number;
+  page_size?: number;
 }

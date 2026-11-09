@@ -5,8 +5,9 @@ import { loginAs } from '@e2e/config/login.helpers';
 import { TAGS } from '@e2e/config/tags.constants';
 
 /**
- * Names sort alphabetically and the list asks for 25 at a time.
- * `searchable-api-key-49` lands on the second page. `searchable-api-key-0` is on the first.
+ * Names sort alphabetically. The engine's own page is 50, which is this whole
+ * seed, so the search and scroll tests ask for 25. `searchable-api-key-49`
+ * then lands on the second page. `searchable-api-key-0` is on the first.
  * Search matches the name or the description.
  */
 const FIRST_PAGE = 25;
@@ -23,9 +24,12 @@ test.beforeEach(async ({ playwright, page }) => {
   await loginAs(page, 'dfe_admin');
 });
 
-const openApiKeys = async (page: Page) => {
-  await page.goto(`${BASE_URL}/settings/admin/api-key-management`);
-  await expect(page).toHaveURL(`${BASE_URL}/settings/admin/api-key-management`);
+const openApiKeys = async (page: Page, pageSize?: number) => {
+  const path = pageSize
+    ? `/settings/admin/api-key-management?page_size=${pageSize}`
+    : '/settings/admin/api-key-management';
+  await page.goto(`${BASE_URL}${path}`);
+  await expect(page).toHaveURL(`${BASE_URL}${path}`);
 };
 
 /** The API keys card. The header holds the search box and not the table. */
@@ -57,7 +61,7 @@ const scrollRows = async (section: Locator) => {
 
 test.describe('', { tag: [TAGS.core, TAGS.search, TAGS.pagination] }, () => {
   test('A search keeps the key whose name matches', async ({ page }) => {
-    await openApiKeys(page);
+    await openApiKeys(page, FIRST_PAGE);
     const section = apiKeysSection(page);
 
     await expect(section.getByText(OTHER, { exact: true })).toBeVisible();
@@ -75,7 +79,7 @@ test.describe('', { tag: [TAGS.core, TAGS.search, TAGS.pagination] }, () => {
   });
 
   test('Scrolling the list loads the next page', async ({ page }) => {
-    await openApiKeys(page);
+    await openApiKeys(page, FIRST_PAGE);
     const section = apiKeysSection(page);
 
     await expect(dataRows(section)).toHaveCount(FIRST_PAGE);

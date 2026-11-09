@@ -22,7 +22,7 @@ describe('.useFetchHelmFileVariables', () => {
       { wrapper },
     );
 
-    const response: THelmFileVariablesResponse = [
+    const response: THelmFileVariablesResponse['items'] = [
       {
         test: ['test'],
       },

@@ -24,7 +24,7 @@ export const ApiErrorNotification = ({
   if (error == null) return null;
 
   const summary =
-    getApiErrorResponseBody(error)?.message ||
+    getApiErrorResponseBody(error)?.detail ||
     (error instanceof Error ? error.message : '') ||
     fallback;
   const details = getApiErrorFieldMessages(error);

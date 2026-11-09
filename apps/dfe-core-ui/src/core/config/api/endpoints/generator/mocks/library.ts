@@ -47,9 +47,9 @@ export const library = {
     get: {
       success: ({
         mockedResponse = [DEFAULT_ARTIFACT],
-      }: { mockedResponse?: TLibraryArtifactsResponse } = {}) =>
+      }: { mockedResponse?: TLibraryArtifactsResponse['items'] } = {}) =>
         http.get(library.default.mockedUrl, () =>
-          HttpResponse.json(mockedResponse),
+          HttpResponse.json({ items: mockedResponse }),
         ),
       error: ({
         mockedResponse = DEFAULT_VALIDATION_ERROR,
@@ -87,9 +87,9 @@ export const library = {
             encoding: 'text',
           },
         ],
-      }: { mockedResponse?: TLibraryKindsResponse } = {}) =>
+      }: { mockedResponse?: TLibraryKindsResponse['items'] } = {}) =>
         http.get(library.kinds.mockedUrl, () =>
-          HttpResponse.json(mockedResponse),
+          HttpResponse.json({ items: mockedResponse }),
         ),
     },
   },
@@ -232,11 +232,11 @@ export const library = {
         ],
         artifact = 'artifact',
       }: {
-        mockedResponse?: TLibraryUsageResponse;
+        mockedResponse?: TLibraryUsageResponse['items'];
         artifact?: string;
       } = {}) =>
         http.get(library.usage.mockedUrl.replace('{artifact}', artifact), () =>
-          HttpResponse.json(mockedResponse),
+          HttpResponse.json({ items: mockedResponse }),
         ),
     },
   },
@@ -257,12 +257,12 @@ export const library = {
         ],
         artifact = 'artifact',
       }: {
-        mockedResponse?: TLibraryVersionsResponse;
+        mockedResponse?: TLibraryVersionsResponse['items'];
         artifact?: string;
       } = {}) =>
         http.get(
           library.versions.mockedUrl.replace('{artifact}', artifact),
-          () => HttpResponse.json(mockedResponse),
+          () => HttpResponse.json({ items: mockedResponse }),
         ),
     },
     post: {

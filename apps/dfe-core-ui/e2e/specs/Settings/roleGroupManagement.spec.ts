@@ -230,7 +230,17 @@ test.describe(
       await expect(
         page.getByText(`Role ${CORE_ROLE} cloned successfully`),
       ).toBeVisible();
+      // The box waits before it asks, and the card already on the page is
+      // replaced when the answer arrives.
+      const listed = page.waitForResponse(
+        (response) =>
+          response.request().method() === 'GET' &&
+          response.url().includes('/api/v1/auth/roles') &&
+          response.url().includes(`search=${CORE_ROLE_CLONE}`) &&
+          response.ok(),
+      );
       await page.getByPlaceholder('Search custom roles').fill(CORE_ROLE_CLONE);
+      await listed;
       await expect(roleCard(page, CORE_ROLE_CLONE)).toBeVisible();
       await expect(roleCard(page, CORE_ROLE)).toBeVisible();
       await deleteRole(page, CORE_ROLE_CLONE);

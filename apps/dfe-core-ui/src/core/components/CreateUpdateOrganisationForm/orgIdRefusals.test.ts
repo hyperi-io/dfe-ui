@@ -12,22 +12,22 @@ const refusal = (status: number, body: unknown) =>
 
 const validation = (errors: { field: string; code?: string }[]) =>
   refusal(422, {
+    title: 'Error',
     code: 'validation_error',
-    message: `${errors.length} validation error(s)`,
-    errors: errors.map((e) => ({ message: 'engine words', ...e })),
+    detail: `${errors.length} validation error(s)`,
+    errors: errors.map((e) => ({ detail: 'engine words', ...e })),
   });
 
 describe('getHeldOrgIds', () => {
   test('reads every held entry, a null branch as main', () => {
     const error = refusal(409, {
+      title: 'Error',
       code: TENANT_ID_HELD_CODE,
-      message: 'held',
-      context: {
-        held: [
-          { hunt: 'a', org: 'x', tenant_ids: ['t1'], branch: null },
-          { hunt: 'b', org: 'y', tenant_ids: ['t2', 't3'], branch: 'review/b' },
-        ],
-      },
+      detail: 'held',
+      held: [
+        { hunt: 'a', org: 'x', tenant_ids: ['t1'], branch: null },
+        { hunt: 'b', org: 'y', tenant_ids: ['t2', 't3'], branch: 'review/b' },
+      ],
     });
 
     expect(getHeldOrgIds(error)).toEqual([
@@ -38,26 +38,32 @@ describe('getHeldOrgIds', () => {
 
   test('drops an entry missing what the console shows', () => {
     const error = refusal(409, {
+      title: 'Error',
       code: TENANT_ID_HELD_CODE,
-      message: 'held',
-      context: {
-        held: [
-          { hunt: 'a', org: 'x', tenant_ids: 't1' },
-          { org: 'x', tenant_ids: ['t1'] },
-          null,
-          'a',
-        ],
-      },
+      detail: 'held',
+      held: [
+        { hunt: 'a', org: 'x', tenant_ids: 't1' },
+        { org: 'x', tenant_ids: ['t1'] },
+        null,
+        'a',
+      ],
     });
 
     expect(getHeldOrgIds(error)).toEqual([]);
   });
 
   test.each([
-    ['another code', refusal(409, { code: 'conflict', message: 'taken' })],
+    [
+      'another code',
+      refusal(409, { title: 'Error', code: 'conflict', detail: 'taken' }),
+    ],
     [
       'no context',
-      refusal(409, { code: TENANT_ID_HELD_CODE, message: 'held' }),
+      refusal(409, {
+        title: 'Error',
+        code: TENANT_ID_HELD_CODE,
+        detail: 'held',
+      }),
     ],
     ['a plain error', new Error('offline')],
     ['no error', null],
@@ -80,7 +86,10 @@ describe('isOrgIdsRefusal', () => {
       'another field too',
       validation([{ field: 'org_ids.0' }, { field: 'name' }]),
     ],
-    ['no field detail', refusal(422, { code: 'unknown_org', message: 'gone' })],
+    [
+      'no field detail',
+      refusal(422, { title: 'Error', code: 'unknown_org', detail: 'gone' }),
+    ],
     ['a lookalike field', validation([{ field: 'org_ids_extra' }])],
     ['no error', null],
   ])('does not hold with %s', (_, error) => {
