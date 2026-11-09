@@ -5,8 +5,9 @@ import { loginAs } from '@e2e/config/login.helpers';
 import { TAGS } from '@e2e/config/tags.constants';
 
 /**
- * Usernames sort alphabetically and the list asks for 25 at a time.
- * `searchable-account-49` / `searchable-blocked-49` land on the second page.
+ * Usernames sort alphabetically. The engine's own page is 50, which is this
+ * whole seed, so the search and scroll tests ask for 25.
+ * `searchable-account-49` / `searchable-blocked-49` then land on the second page.
  * The open list also contains dfe_admin. Core accounts stay out of both lists.
  */
 const FIRST_PAGE = 25;
@@ -24,9 +25,12 @@ test.beforeEach(async ({ playwright, page }) => {
   await loginAs(page, 'dfe_admin');
 });
 
-const openAccounts = async (page: Page) => {
-  await page.goto(`${BASE_URL}/settings/admin/account-management`);
-  await expect(page).toHaveURL(`${BASE_URL}/settings/admin/account-management`);
+const openAccounts = async (page: Page, pageSize?: number) => {
+  const path = pageSize
+    ? `/settings/admin/account-management?page_size=${pageSize}`
+    : '/settings/admin/account-management';
+  await page.goto(`${BASE_URL}${path}`);
+  await expect(page).toHaveURL(`${BASE_URL}${path}`);
 };
 
 /** The section card. Ancestors hold both lists, so the other title is excluded. */
@@ -66,7 +70,7 @@ test.describe('', { tag: [TAGS.core, TAGS.search, TAGS.pagination] }, () => {
     });
 
     test('A search keeps the account whose name matches', async ({ page }) => {
-      await openAccounts(page);
+      await openAccounts(page, FIRST_PAGE);
       const section = listSection(
         page,
         'Manage existing accounts',
@@ -100,7 +104,7 @@ test.describe('', { tag: [TAGS.core, TAGS.search, TAGS.pagination] }, () => {
     });
 
     test('Scrolling the list loads the next page', async ({ page }) => {
-      await openAccounts(page);
+      await openAccounts(page, FIRST_PAGE);
       const section = listSection(
         page,
         'Manage existing accounts',
@@ -156,7 +160,7 @@ test.describe('', { tag: [TAGS.core, TAGS.search, TAGS.pagination] }, () => {
     test('A search keeps the blocked account whose name matches', async ({
       page,
     }) => {
-      await openAccounts(page);
+      await openAccounts(page, FIRST_PAGE);
       const section = listSection(
         page,
         'Blocked accounts',
@@ -191,7 +195,7 @@ test.describe('', { tag: [TAGS.core, TAGS.search, TAGS.pagination] }, () => {
     });
 
     test('Scrolling the list loads the next page', async ({ page }) => {
-      await openAccounts(page);
+      await openAccounts(page, FIRST_PAGE);
       const section = listSection(
         page,
         'Blocked accounts',
