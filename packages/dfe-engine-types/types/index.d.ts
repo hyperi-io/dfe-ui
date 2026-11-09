@@ -4869,7 +4869,7 @@ export interface paths {
         };
         /**
          * Get Status
-         * @description Whether the instance is reporting telemetry, and since when.
+         * @description Whether the instance, or a process deployed from its image, is reporting, and since when.
          */
         get: operations["apps.status.list"];
         put?: never;
@@ -4889,9 +4889,31 @@ export interface paths {
         };
         /**
          * Get Metrics
-         * @description Throughput, CPU, memory and saturation for the instance.
+         * @description Throughput, CPU, memory and saturation for the instance or a process deployed from its image.
          */
         get: operations["apps.metrics.list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/apps/{service}/{instance}/metrics/totals": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Totals
+         * @description Counter, request and CPU totals over the window, across every run of every pod.
+         *
+         *     A window of 0 counts everything the metrics tables still keep.
+         */
+        get: operations["apps.metrics.totals"];
         put?: never;
         post?: never;
         delete?: never;
@@ -4911,9 +4933,11 @@ export interface paths {
          * Get Resource Series
          * @description CPU and memory over time as min, max, average and p95 per bucket.
          *
-         *     Each bucket aggregates across every pod reporting for this instance. A
-         *     per-config app deploys each config under its own service name, so one instance
-         *     is already one config.
+         *     Each bucket aggregates across every pod reporting for this instance, or for
+         *     the named process. A per-config app deploys each config under its own
+         *     service name, so one instance is already one config.
+         *
+         *     A ``bucket_seconds`` of 0 reads the window as one bucket and may reach back over the gauge table's whole retention, which a ``window_seconds`` of 0 asks for. A bucketed read stops at a week.
          */
         get: operations["apps.metrics.series"];
         put?: never;
@@ -7015,6 +7039,11 @@ export interface components {
             file_sets: components["schemas"]["FileSetSummary"][];
             /** Instances */
             instances: string[];
+            /**
+             * Processes
+             * @description The processes deployed on their own from the engine's image, by the OTel name each reports under. Pass one as process= to the status, metrics, series and totals routes. Empty for every other app.
+             */
+            processes?: string[];
         };
         /**
          * CatalogueEntryObject
@@ -10040,7 +10069,7 @@ export interface components {
         InitialSetupState: {
             /**
              * Complete
-             * @description True when every required step is satisfied.
+             * @description True when every required step is satisfied, or setup has already finished once.
              */
             complete: boolean;
             /**
@@ -10827,7 +10856,7 @@ export interface components {
         };
         /**
          * MetricsResponse
-         * @description An instance's current gauges and rates over a window.
+         * @description An instance's current gauges and its rates over a window.
          */
         MetricsResponse: {
             /** Telemetry Name */
@@ -12467,8 +12496,16 @@ export interface components {
             telemetry_name: string;
             /** Window Seconds */
             window_seconds: number;
-            /** Bucket Seconds */
+            /**
+             * Bucket Seconds
+             * @description 0 when the whole window is one bucket, starting at its first second.
+             */
             bucket_seconds: number;
+            /**
+             * Retention Seconds
+             * @description How long the gauge table keeps a reading, so the longest window a whole-window read reaches; null when its TTL is unset.
+             */
+            retention_seconds?: number | null;
             /**
              * Buckets
              * @description One entry per metric per time bucket, aggregated across every pod reporting for this instance.
@@ -16126,6 +16163,20 @@ export interface components {
              * @default false
              */
             dry_run: boolean;
+        };
+        /**
+         * TotalsResponse
+         * @description How much an instance did over a window, counted across every run of every pod.
+         */
+        TotalsResponse: {
+            /** Telemetry Name */
+            telemetry_name: string;
+            /** Window Seconds */
+            window_seconds: number;
+            /** Totals */
+            totals: {
+                [key: string]: number;
+            };
         };
         /**
          * TransformDetect
@@ -33500,7 +33551,9 @@ export interface operations {
     };
     "apps.status.list": {
         parameters: {
-            query?: never;
+            query?: {
+                process?: string | null;
+            };
             header?: never;
             path: {
                 service: string;
@@ -33559,7 +33612,9 @@ export interface operations {
     };
     "apps.metrics.list": {
         parameters: {
-            query?: never;
+            query?: {
+                process?: string | null;
+            };
             header?: never;
             path: {
                 service: string;
@@ -33616,11 +33671,74 @@ export interface operations {
             };
         };
     };
+    "apps.metrics.totals": {
+        parameters: {
+            query?: {
+                window_seconds?: number;
+                process?: string | null;
+            };
+            header?: never;
+            path: {
+                service: string;
+                instance: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TotalsResponse"];
+                };
+            };
+            /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+        };
+    };
     "apps.metrics.series": {
         parameters: {
             query?: {
                 window_seconds?: number;
                 bucket_seconds?: number;
+                process?: string | null;
             };
             header?: never;
             path: {

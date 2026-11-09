@@ -8,7 +8,8 @@ import { http, HttpResponse } from 'msw';
 import { setupServer } from 'msw/node';
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
 import { UsageOverviewStrip, UsageOverviewTiles } from '.';
-import { formatBytes, formatUsageValue } from './format';
+import { formatBytes } from '@/core/helpers/format.helpers';
+import { formatUsageValue } from './format';
 
 const server = setupServer(
   API_CONFIG_MOCKS.auth.me.get.success({

@@ -16,6 +16,7 @@ import { TAppsResponse } from '@/core/hooks/apps/instances/useFetchApps/types';
 import { TAppMetricsResponse } from '@/core/hooks/apps/operations/useFetchAppMetrics/types';
 import { TAppResourceSeriesResponse } from '@/core/hooks/apps/operations/useFetchAppResourceSeries/types';
 import { TAppStatusResponse } from '@/core/hooks/apps/operations/useFetchAppStatus/types';
+import { TAppTotalsResponse } from '@/core/hooks/apps/operations/useFetchAppTotals/types';
 import { TAppRoutingResponse } from '@/core/hooks/apps/routing/useFetchAppRouting/types';
 import { TSyncAppRoutingResponse } from '@/core/hooks/apps/routing/useSyncAppRouting/types';
 import { TAppScalingResponse } from '@/core/hooks/apps/scaling/useFetchAppScaling/types';
@@ -656,6 +657,28 @@ export const apps = {
       } = {}) =>
         http.get(
           withInstance(apps.metricsSeries.mockedUrl, service, instance),
+          () => HttpResponse.json(mockedResponse),
+        ),
+    },
+  },
+  metricsTotals: {
+    mockedUrl: '/api/v1/apps/{service}/{instance}/metrics/totals',
+    get: {
+      success: ({
+        mockedResponse = {
+          telemetry_name: 'dfe-transform-vrl-syslog',
+          window_seconds: 3600,
+          totals: { records_processed_total: 45000 },
+        },
+        service = 'service',
+        instance = 'instance',
+      }: {
+        mockedResponse?: TAppTotalsResponse;
+        service?: string;
+        instance?: string;
+      } = {}) =>
+        http.get(
+          withInstance(apps.metricsTotals.mockedUrl, service, instance),
           () => HttpResponse.json(mockedResponse),
         ),
     },
