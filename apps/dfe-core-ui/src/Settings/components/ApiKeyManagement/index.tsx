@@ -8,6 +8,7 @@ import { useFetchInfiniteFilteredApiKeys } from '@/Settings/hooks/apiKeys/useFet
 import { TApiKeysItemSummary } from '@/Settings/hooks/apiKeys/useFetchInfiniteFilteredApiKeys/types';
 import { IconCheck, IconX } from '@repo/dfe-icons';
 import { Input } from 'antd';
+import { useSearchParams } from 'next/navigation';
 import { useCallback, useState } from 'react';
 import { CloneApiKeyDrawer } from './CloneApiKeyDrawer';
 import { CreateApiKeyDrawer } from './CreateApiKeyDrawer';
@@ -20,6 +21,13 @@ const EmptyText = () => (
 );
 export const ApiKeyManagement = () => {
   const [search, setSearch] = useState('');
+  const pageSizeParam = useSearchParams().get('page_size');
+  const parsedPageSize = pageSizeParam
+    ? Number.parseInt(pageSizeParam, 10)
+    : undefined;
+  const page_size = Number.isInteger(parsedPageSize)
+    ? parsedPageSize
+    : undefined;
   const {
     data: { items: apiKeys },
     hasNextPage,
@@ -29,6 +37,7 @@ export const ApiKeyManagement = () => {
     error,
   } = useFetchInfiniteFilteredApiKeys({
     search,
+    page_size,
   });
 
   const columns = [
