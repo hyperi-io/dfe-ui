@@ -116,3 +116,6 @@ playwright-report/
 .yarn/cache
 .yarn/install-state.gz
 .pnp.*
+
+# macOS dev smoke log and Playwright results (scripts/macos-dev-smoke.sh).
+.macos-smoke/
