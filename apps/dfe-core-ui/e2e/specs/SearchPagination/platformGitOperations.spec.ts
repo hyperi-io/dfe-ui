@@ -5,10 +5,10 @@ import { loginAs } from '@e2e/config/login.helpers';
 import { TAGS } from '@e2e/config/tags.constants';
 
 /**
- * The log pages fifty at a time, newest first. Reset commits land above the
- * seeded operations, so the next page is whichever commits those fifty push down.
+ * The log pages fifty at a time, newest first. The seeded operations are
+ * written once, so later resets sit above them and the first page is whichever
+ * fifty commits are newest. Scrolling loads the page those fifty push down.
  */
-const NEWEST = 'searchable-49';
 const FIRST_PAGE = 50;
 
 test.setTimeout(120_000);
@@ -50,7 +50,6 @@ test.describe('', { tag: [TAGS.core, TAGS.pagination] }, () => {
     await openGitOperations(page);
 
     const cards = page.getByText('Summary', { exact: true });
-    await expect(page.getByText(NEWEST, { exact: true })).toBeVisible();
     await expect(cards).toHaveCount(FIRST_PAGE);
 
     await expect(async () => {
