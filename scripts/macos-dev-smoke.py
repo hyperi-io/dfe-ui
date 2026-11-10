@@ -213,7 +213,7 @@ class Smoke:
                 timeout=20,
                 check=False,
             )
-        except OSError, subprocess.TimeoutExpired:
+        except (OSError, subprocess.TimeoutExpired):
             return False
         return done.returncode == 0
 
@@ -504,7 +504,7 @@ def main() -> int:
     passed = False
     try:
         passed = smoke.run()
-    except KeyboardInterrupt, SystemExit:
+    except (KeyboardInterrupt, SystemExit):
         smoke.quiet(f"interrupted during: {smoke.step_name}")
     finally:
         # A second Ctrl-C while the teardown runs must not skip the rest of it.
