@@ -3,10 +3,7 @@ import { expect, test } from '@playwright/test';
 import { BASE_URL } from '@e2e/config/e2e.client';
 import { loginAs } from '@e2e/config/login.helpers';
 import { TAGS } from '@e2e/config/tags.constants';
-import {
-  knownConsoleDefect,
-  prepareJourneyStack,
-} from '@e2e/config/journey.helpers';
+import { prepareJourneyStack } from '@e2e/config/journey.helpers';
 
 import { ADMIN, api, shot } from './platform.helpers';
 
@@ -100,10 +97,7 @@ test(
     const newest = (await api<Log>('GET', '/api/v1/gitops/log?limit=1')).body
       .entries[0]?.sha;
     const topCard = page.locator('dt:text-is("Commit") + dd').first();
-    await knownConsoleDefect(
-      'the open log does not refetch after the auto-merge toggle: its query key is not the one the toggle invalidates',
-      () => expect(topCard).toHaveText(newest ?? '', { timeout: 5_000 }),
-    );
+    await expect(topCard).toHaveText(newest ?? '', { timeout: 5_000 });
 
     /* A fresh load shows it first, and scrolled to the end holds every entry once and in order */
     await page.reload();
