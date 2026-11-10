@@ -1,7 +1,7 @@
 # dfe-ui architecture
 
 dfe-ui is the operator surface of the DFE suite: a Next.js app that talks to
-exactly one backend - the dfe-engine API - and embeds the DFE HyperDX fork
+exactly one backend - the dfe-engine API - and embeds dfe-hyperdx
 for data exploration. It holds no state of its own beyond the browser
 session; everything it shows and changes goes through engine endpoints.
 
@@ -47,8 +47,8 @@ The packages are build-time dependencies.
 - Route groups: `(auth)` for the signed-in app, `(no-auth)` for login.
 - Feature directories per domain (Hunts, Schemas, Settings, ...) with
   TanStack Query hooks per endpoint.
-- The engine seam is one typed client
+- Every engine call goes through one typed client
   ([engine-api-client.md](engine-api-client.md)) - no raw fetch in feature
   code (the only raw fetch sites are the NextAuth server-side callbacks).
-- `/observe` iframes the HyperDX fork ([observe-embed.md](observe-embed.md)).
+- `/observe` iframes dfe-hyperdx ([observe-embed.md](observe-embed.md)).
 - Auth is NextAuth over local accounts and the engine's OIDC hand-back ([authentication.md](authentication.md)).

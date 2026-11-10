@@ -33,7 +33,7 @@ The form asks for the current password as well as the new one; on the forced fir
 
 ## The dfe_token cookie
 
-`src/proxy.ts` mirrors the session's engine token into a `dfe_token` cookie scoped to `DFE_COOKIE_DOMAIN`, so the embedded HyperDX signs in as the same user. Signing out expires it with the same Domain and Path, along with the host-only copy the engine's OIDC callback sets.
+`src/proxy.ts` mirrors the session's engine token into a `dfe_token` cookie scoped to `DFE_COOKIE_DOMAIN`, so the embedded dfe-hyperdx signs in as the same user. Signing out expires it with the same Domain and Path, along with the host-only copy the engine's OIDC callback sets.
 
 ## Redirects
 
@@ -41,4 +41,4 @@ Every post-login redirect goes through `safeRedirectPath` (`src/core/config/logi
 
 Key files: `src/proxy.ts`, `src/core/config/auth.ts`, `src/core/auth/renewEngineSession.ts`, `src/core/auth/oidcLoginNonce.ts`, the `(no-auth)` login scene.
 
-The suite-wide auth model (one PDP = dfe-engine, `X-Oidc-*` edge seam) is documented engine-side: `docs/control-plane/` in dfe-engine.
+The suite-wide auth model (one PDP = dfe-engine, and the `X-Oidc-*` headers the edge sets) is documented engine-side: `docs/control-plane/` in dfe-engine.

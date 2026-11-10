@@ -30,7 +30,7 @@ destination under it is the signed-in user's.
 | Stack     | Components, Platform, Admin Tools                                | see and tune what is running                           | `deployment_*`, `service_*`, `helmvars_*`, `lifecycle_*`, `config_write`, `governance_*` |
 | Access    | Settings                                                         | who may do what                                        | `org_*`, `account_*`, `role_*`, `group_*`, `oidc_*`, `api_key_*`                         |
 
-The Observe destinations are HyperDX embeds and appear only once a HyperDX URL
+The Observe destinations are dfe-hyperdx embeds and appear only once a dfe-hyperdx URL
 is configured.
 
 ## Old menu to new

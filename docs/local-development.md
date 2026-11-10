@@ -43,7 +43,7 @@ The browser fetches the engine cross-origin (CORS), the Next server calls it
 server-side, and NextAuth mints the session from the engine's login endpoint
 (`POST /api/v1/auth/login`, then `GET /api/v1/auth/me` for roles). The engine
 is also the OIDC issuer (`https://dfe.local/api`) whose ES384 keys are
-published at `/.well-known/jwks.json` -- the embedded HyperDX fork trusts
+published at `/.well-known/jwks.json` -- the embedded dfe-hyperdx trusts
 those same keys, riding the `dfe_token` cookie the middleware plants.
 
 ```mermaid
