@@ -1,0 +1,49 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Console: install",
+      "type": "shell",
+      "command": "corepack yarn install --immutable",
+      "problemMatcher": []
+    },
+    {
+      "label": "Console: Playwright browser (chromium)",
+      "type": "shell",
+      "command": "corepack yarn workspace dfe-core-ui exec playwright install chromium",
+      "problemMatcher": []
+    },
+    {
+      "label": "Engine: local ClickHouse (docker)",
+      "type": "shell",
+      "command": "cd \"${input:dfeEngineDir}\" && docker compose -f docker-compose.dev.yaml up -d --wait clickhouse",
+      "problemMatcher": []
+    },
+    {
+      "label": "Engine: e2e seed (setup complete)",
+      "type": "shell",
+      "command": "curl -fsS -X POST http://127.0.0.1:8003/api/e2e/seed-static -H 'Content-Type: application/json' -d '{\"script\":\"seed_setup_complete\"}'",
+      "problemMatcher": []
+    },
+    {
+      "label": "Console: types, lint, unit tests",
+      "type": "shell",
+      "command": "corepack yarn workspace dfe-core-ui check-types && corepack yarn workspace dfe-core-ui lint && corepack yarn workspace dfe-core-ui test",
+      "problemMatcher": []
+    },
+    {
+      "label": "macOS dev smoke",
+      "type": "shell",
+      "command": "DFE_ENGINE_DIR=\"${input:dfeEngineDir}\" python3 scripts/macos-dev-smoke.py",
+      "problemMatcher": []
+    }
+  ],
+  "inputs": [
+    {
+      "id": "dfeEngineDir",
+      "type": "promptString",
+      "description": "dfe-engine checkout, relative to this repo or absolute",
+      "default": "../dfe-engine"
+    }
+  ]
+}

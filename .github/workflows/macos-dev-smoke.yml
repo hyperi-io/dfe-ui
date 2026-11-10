@@ -1,0 +1,168 @@
+# Project:   dfe-ui
+# File:      .github/workflows/macos-dev-smoke.yml
+# Purpose:   Prove dfe-engine and the console run natively on a macOS arm64 runner
+#
+# License:   BUSL-1.1
+# Copyright: (c) 2026 HYPERI PTY LIMITED
+#
+# Runs scripts/macos-dev-smoke.py, the same file a developer runs on a Mac. The
+# GitHub macOS runner has no docker, so the engine runs with no ClickHouse. A Linux
+# leg runs the script's docker mode, the one a Mac with OrbStack or Docker Desktop picks.
+# Dispatch it with an engine tag and a ui tag to gate a release candidate.
+
+name: macOS dev smoke
+
+'on':
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/workflows/macos-dev-smoke.yml'
+      - 'scripts/macos-dev-smoke.py'
+      - 'apps/dfe-core-ui/smoke/**'
+      - 'apps/dfe-core-ui/package.json'
+      - 'apps/dfe-core-ui/next.config.ts'
+      - 'apps/dfe-core-ui/src/proxy.ts'
+      - 'package.json'
+      - 'yarn.lock'
+      - '.yarnrc.yml'
+  workflow_dispatch:
+    inputs:
+      engine-ref:
+        type: string
+        required: false
+        default: 'main'
+        description: 'dfe-engine release tag (vX.Y.Z or vX.Y.Z-rc.N) or main.'
+      ui-ref:
+        type: string
+        required: false
+        default: ''
+        description: 'dfe-ui release tag (vX.Y.Z or vX.Y.Z-rc.N) or main for the console. Empty takes the commit the run was dispatched on.'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: macos-dev-smoke-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  smoke:
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: macOS arm64 smoke
+            os: macos-15
+            clickhouse: none
+          - name: Linux smoke with local ClickHouse
+            os: ubuntu-24.04
+            clickhouse: docker
+    steps:
+      # A dispatch runs with the default branch's cache scope, so it only checks out
+      # a release tag or main, resolved to a commit before any code is fetched.
+      - name: Pin the engine and console refs
+        id: pin
+        env:
+          ENGINE_WANTED: ${{ inputs.engine-ref }}
+          UI_WANTED: ${{ inputs.ui-ref }}
+          ENGINE_REPO: hyperi-io/dfe-engine
+          UI_REPO: ${{ github.repository }}
+          RUN_COMMIT: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          pin() {
+              local repo="$1" wanted="$2" sha=""
+              if [[ "${wanted}" == "main" ]]; then
+                  sha="$(git ls-remote "https://github.com/${repo}.git" refs/heads/main | cut -f1)"
+              elif [[ "${wanted}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-rc\.[0-9]+)?$ ]]; then
+                  sha="$(git ls-remote "https://github.com/${repo}.git" "refs/tags/${wanted}" "refs/tags/${wanted}^{}" | tail -n 1 | cut -f1)"
+              else
+                  echo "::error::'${wanted}' is not a release tag or main" >&2
+                  exit 1
+              fi
+              if [[ ! "${sha}" =~ ^[0-9a-f]{40}$ ]]; then
+                  echo "::error::${repo} has no ${wanted}" >&2
+                  exit 1
+              fi
+              printf '%s' "${sha}"
+          }
+          ui="${RUN_COMMIT}"
+          if [[ -n "${UI_WANTED}" ]]; then
+              ui="$(pin "${UI_REPO}" "${UI_WANTED}")"
+          fi
+          engine="$(pin "${ENGINE_REPO}" "${ENGINE_WANTED:-main}")"
+          echo "ui=${ui}" >> "${GITHUB_OUTPUT}"
+          echo "engine=${engine}" >> "${GITHUB_OUTPUT}"
+
+      - name: Check out the smoke harness
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          path: harness
+          ref: ${{ github.sha }}
+          persist-credentials: false
+
+      - name: Check out dfe-ui
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          path: dfe-ui
+          ref: ${{ steps.pin.outputs.ui }}
+          persist-credentials: false
+
+      # A release tag predates the harness, so the script and spec come from the
+      # ref this workflow runs on and the console under test from ui-ref.
+      - name: Lay the harness over dfe-ui
+        run: |
+          mkdir -p dfe-ui/scripts dfe-ui/apps/dfe-core-ui/smoke
+          cp harness/scripts/macos-dev-smoke.py dfe-ui/scripts/
+          cp harness/apps/dfe-core-ui/smoke/* dfe-ui/apps/dfe-core-ui/smoke/
+
+      - name: Check out dfe-engine
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: hyperi-io/dfe-engine
+          path: dfe-engine
+          ref: ${{ steps.pin.outputs.engine }}
+          persist-credentials: false
+
+      - name: Set up Node
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '24'
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+        with:
+          version: '0.13.7'
+          enable-cache: false
+
+      - name: Run the smoke
+        working-directory: dfe-ui
+        env:
+          CLICKHOUSE: ${{ matrix.clickhouse }}
+        run: python3 scripts/macos-dev-smoke.py
+
+      - name: Summary
+        if: always()
+        working-directory: dfe-ui
+        run: |
+          {
+            echo '### macOS dev smoke'
+            echo '```'
+            sed -n '/===== versions/,/===== console install/p' .macos-smoke/smoke.log
+            echo '...'
+            tail -n 40 .macos-smoke/smoke.log
+            echo '```'
+          } >> "${GITHUB_STEP_SUMMARY}"
+
+      - name: Upload the log and traces
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: macos-dev-smoke-${{ matrix.clickhouse }}
+          path: dfe-ui/.macos-smoke/
+          include-hidden-files: true
+          if-no-files-found: warn
+          retention-days: 7

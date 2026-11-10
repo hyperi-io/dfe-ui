@@ -109,6 +109,37 @@ make check                           # hyperi-ci check, what CI runs
 yarn workspace dfe-core-ui test:e2e  # Playwright, needs a console and an engine up
 ```
 
+### Running natively on a Mac, in VS Code
+
+The console and the engine run as plain processes. The Rust apps stay in docker
+or kind. To prove a machine, one command, one PASS or FAIL line and one log file
+to paste back:
+
+```bash
+python3 scripts/macos-dev-smoke.py   # engine from ../dfe-engine, or DFE_ENGINE_DIR=<path>
+uv run --no-project python scripts/macos-dev-smoke.py   # the same, under uv's Python
+```
+
+It wants `uv`, node 24 and a dfe-engine checkout beside this repo, and prints
+what is missing with the install line. Docker (OrbStack or Docker Desktop) is
+optional. With it the engine gets a local ClickHouse. Without it the pages that
+read ClickHouse answer 503 and the rest work.
+
+In VS Code, Run and Debug has an `Engine + Console` compound (`Engine + Console
+(local ClickHouse)` when docker is up). It asks once for the engine checkout,
+`../dfe-engine` by default. Run the `Engine: e2e seed (setup complete)` task,
+then sign in at <http://localhost:3000> as `initial_user`. The password is the
+engine's well-known e2e one (`_WELL_KNOWN_E2E_PASSWORD` in its
+`api/e2e/seed/accounts.py`).
+
+Two Mac traps. Point the console at `127.0.0.1:8003`, not `localhost`, because
+Node resolves `localhost` to `::1` first and the engine listens on IPv4 only.
+And leave ports 5000 and 7000 alone, macOS holds them for AirPlay Receiver.
+
+The `macOS dev smoke` workflow runs the same script on a GitHub macOS arm64
+runner. Dispatch it with an engine tag and a ui tag (or `main`) to gate a release
+candidate. Any other ref is refused before a checkout.
+
 ### Running the e2e suite locally
 
 Playwright drives a console that is already up, against an engine that is
