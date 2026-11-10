@@ -26,7 +26,9 @@ const COLUMNS = [
     dataIndex: 'sha',
     key: 'sha',
     render: (value: string) => (
-      <span className="font-mono text-xs">{value.slice(0, 7)}</span>
+      <span className="font-mono text-xs whitespace-nowrap">
+        {value.slice(0, 7)}
+      </span>
     ),
   },
   { title: 'Change', dataIndex: 'summary', key: 'summary' },
@@ -35,7 +37,11 @@ const COLUMNS = [
     title: 'When',
     dataIndex: 'timestamp',
     key: 'timestamp',
-    render: (value: number) => new Date(value * 1000).toLocaleString(),
+    render: (value: number) => (
+      <span className="whitespace-nowrap">
+        {new Date(value * 1000).toLocaleString()}
+      </span>
+    ),
   },
   {
     title: 'State',
@@ -111,10 +117,11 @@ export const AppHistoryCard = ({
         rowKey="sha"
         columns={COLUMNS}
         dataSource={data}
-        // Past five changes the table scrolls rather than growing the page
-        scroll={
-          data.length > SCROLL_AFTER_ROWS ? { y: SCROLL_HEIGHT_PX } : undefined
-        }
+        // Wider than its card it scrolls sideways, and past five changes it scrolls rather than growing the page
+        scroll={{
+          x: 'max-content',
+          y: data.length > SCROLL_AFTER_ROWS ? SCROLL_HEIGHT_PX : undefined,
+        }}
         onScroll={loadMoreNearTheEnd}
         footer={isFetchingNextPage ? () => <Spin size="small" /> : undefined}
       />
