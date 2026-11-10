@@ -1,0 +1,53 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Engine (no ClickHouse)",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "cd \"${input:dfeEngineDir}\" && { test -f .env.e2e || cp .env.e2e.example .env.e2e; } && make e2e-server E2E_NO_CLICKHOUSE=1",
+      "cwd": "${workspaceFolder}"
+    },
+    {
+      "name": "Engine (local ClickHouse)",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "cd \"${input:dfeEngineDir}\" && { test -f .env.e2e || cp .env.e2e.example .env.e2e; } && docker compose -f docker-compose.dev.yaml up -d --wait clickhouse && make e2e-server",
+      "cwd": "${workspaceFolder}"
+    },
+    {
+      "name": "Console (next dev)",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "env NEXT_PUBLIC_API_URL=http://127.0.0.1:8003 INTERNAL_API_URL=http://127.0.0.1:8003 NEXTAUTH_URL=http://localhost:3000 NEXTAUTH_SECRET=local-dev-value corepack yarn workspace dfe-core-ui dev --port 3000",
+      "cwd": "${workspaceFolder}"
+    },
+    {
+      "name": "macOS dev smoke",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "DFE_ENGINE_DIR=\"${input:dfeEngineDir}\" python3 scripts/macos-dev-smoke.py",
+      "cwd": "${workspaceFolder}"
+    }
+  ],
+  "compounds": [
+    {
+      "name": "Engine + Console",
+      "configurations": ["Engine (no ClickHouse)", "Console (next dev)"],
+      "stopAll": true
+    },
+    {
+      "name": "Engine + Console (local ClickHouse)",
+      "configurations": ["Engine (local ClickHouse)", "Console (next dev)"],
+      "stopAll": true
+    }
+  ],
+  "inputs": [
+    {
+      "id": "dfeEngineDir",
+      "type": "promptString",
+      "description": "dfe-engine checkout, relative to this repo or absolute",
+      "default": "../dfe-engine"
+    }
+  ]
+}

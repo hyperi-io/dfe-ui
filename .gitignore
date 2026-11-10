@@ -82,6 +82,8 @@ Thumbs.db
 .idea/
 .vscode/*
 !.vscode/settings.json
+!.vscode/launch.json
+!.vscode/tasks.json
 
 # Local environment files (never commit -- contain secrets)
 .env
@@ -116,3 +118,6 @@ playwright-report/
 .yarn/cache
 .yarn/install-state.gz
 .pnp.*
+
+# macOS dev smoke log and Playwright results (scripts/macos-dev-smoke.py).
+.macos-smoke/
