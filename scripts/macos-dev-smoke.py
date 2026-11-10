@@ -41,7 +41,6 @@ from pathlib import Path
 
 UI_ROOT = Path(__file__).resolve().parent.parent
 TEXT = {"encoding": "utf-8", "errors": "replace"}
-SECRET_WORDS = ("SECRET", "PASSWORD", "TOKEN", "KEY")
 PLAYWRIGHT_TEST = [
     "corepack",
     "yarn",
@@ -343,12 +342,19 @@ class Smoke:
 
     # -- setup and teardown -----------------------------------------------
 
+    def engine_secrets(self) -> dict[str, str]:
+        """The engine's secret settings, passed in the environment and never written down."""
+        password = f"ch-{self.run_secret}" if self.clickhouse == "docker" else ""
+        return {
+            "DFE_ENGINE_API_JWT_SECRET": self.run_secret,
+            "DFE_ENGINE_CLICKHOUSE_PASSWORD": password,
+        }
+
     def write_engine_env(self) -> None:
         values = {
             "DFE_ENGINE_ENV": "test",
             "DFE_ENGINE_API_HOST": "127.0.0.1",
             "DFE_ENGINE_API_PORT": str(self.engine_port),
-            "DFE_ENGINE_API_JWT_SECRET": self.run_secret,
             "DFE_ENGINE_API_CORS_ORIGINS": (
                 f"http://localhost:{self.ui_port},http://127.0.0.1:{self.ui_port}"
             ),
@@ -363,10 +369,8 @@ class Smoke:
             "DFE_ENGINE_CLICKHOUSE_VERIFY": "false",
         }
         if self.clickhouse == "docker":
-            values["DFE_ENGINE_CLICKHOUSE_PASSWORD"] = f"ch-{self.run_secret}"
             values["DFE_ENGINE_CLICKHOUSE_BOOTSTRAP_TABLES"] = "true"
         else:
-            values["DFE_ENGINE_CLICKHOUSE_PASSWORD"] = ""
             values["DFE_ENGINE_CLICKHOUSE_BOOTSTRAP_TABLES"] = "false"
             values["DFE_ENGINE_TENANT_ISOLATION_ENABLED"] = "false"
         values["OTEL_EXPORTER_OTLP_ENDPOINT"] = '" "'
@@ -376,8 +380,9 @@ class Smoke:
         self.env_file.write_text("\n".join(lines) + "\n", encoding="utf-8")
         self.section("engine env")
         for name, value in values.items():
-            hidden = any(word in name for word in SECRET_WORDS)
-            self.quiet(f"{name}={'<set>' if hidden else value}")
+            self.quiet(f"{name}={value}")
+        for name in self.engine_secrets():
+            self.quiet(f"{name}=<from the environment>")
 
         # A dfe-engine whose Makefile predates E2E_ENV_FILE reads ./.env.e2e, so the
         # file goes there for the run. A developer's own copy is put back afterwards.
@@ -428,6 +433,7 @@ class Smoke:
             "SMOKE_UI_PORT": str(self.ui_port),
             "SMOKE_RUN_SECRET": self.run_secret,
             "SMOKE_OUT_DIR": str(self.results_dir),
+            **self.engine_secrets(),
         }
         if self.clickhouse == "docker":
             extra["SMOKE_ENGINE_WAIT_READY"] = "yes"
