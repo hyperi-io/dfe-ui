@@ -112,8 +112,8 @@ describe('APP_FILENAME_VALIDATOR (appmgmt/files.py validate_filename)', () => {
 describe('DESTINATION_NAME_VALIDATOR (hunts/alert.py is_destination_name)', () => {
   check(
     DESTINATION_NAME_VALIDATOR,
-    ['slack-dfe-alerts', 'a b', '.hidden', '...', 'a.b', '-a'],
-    ['', '.', '..', 'a/b', 'a\\b', 'a\0b'],
+    ['slack-dfe-alerts', 'a.b', 'a_b', 'a-b', '9x', 'x'.repeat(128)],
+    ['', '.', '..', 'a b', '.hidden', '-a', 'a/b', 'a\\b', 'x'.repeat(129)],
   );
 });
 
