@@ -82,6 +82,8 @@ Thumbs.db
 .idea/
 .vscode/*
 !.vscode/settings.json
+!.vscode/launch.json
+!.vscode/tasks.json
 
 # Local environment files (never commit -- contain secrets)
 .env
