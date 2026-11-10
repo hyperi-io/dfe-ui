@@ -43,7 +43,10 @@ export const PLATFORM_TAB_DETAILS = Object.freeze({
   },
 });
 
-export const PLATFORM_TAB_KEYS = Object.keys(PLATFORM_TAB_DETAILS);
+// The URL segment and the tab's key are one value, so `backing-services` opens its tab
+export const PLATFORM_TAB_KEYS = Object.values(PLATFORM_TAB_DETAILS).map(
+  (tab) => tab.key,
+);
 
 export type PlatformTabKey = (typeof PLATFORM_TAB_KEYS)[number];
 
