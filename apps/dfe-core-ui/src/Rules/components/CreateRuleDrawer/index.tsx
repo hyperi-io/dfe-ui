@@ -3,6 +3,7 @@ import { RbacProtected } from '@/core/components/RbacProtected';
 import {
   CreateUpdateRuleForm,
   CreateUpdateRuleFormData,
+  DEFAULT_ESTIMATE_COST,
 } from '@/Rules/components/CreateUpdateRuleForm';
 import { ruleSaveNotice } from '@/Rules/components/RuleSaveNotice';
 import { useListRulesContext } from '@/Rules/contexts/ListRulesContext';
@@ -45,7 +46,7 @@ export const CreateRuleDrawer = ({
     createRuleMutation({
       ...values,
       source_type: 'raw',
-      estimate_cost: values.estimate_cost ?? false,
+      estimate_cost: values.estimate_cost ?? DEFAULT_ESTIMATE_COST,
       cost_window_minutes: values.cost_window_minutes
         ? Number(values.cost_window_minutes)
         : 0,

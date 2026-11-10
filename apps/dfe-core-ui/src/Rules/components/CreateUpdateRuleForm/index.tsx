@@ -14,6 +14,7 @@ import { Button, FormProps } from 'antd';
 import { useEffect, useMemo } from 'react';
 import z from 'zod';
 import { AdvancedSettings } from './AdvancedSettings';
+import { DEFAULT_ESTIMATE_COST } from './defaults';
 import { ResponseModal } from './ResponseModal';
 import { RuleSettings } from './RuleSettings';
 import { SqlValidationErrors } from './SqlValidationErrors';
@@ -40,6 +41,8 @@ const buildFormSchema = (nameIsNew: boolean) =>
     estimate_cost: z.boolean().optional(),
     cost_window_minutes: z.string().optional(),
   });
+export { DEFAULT_ESTIMATE_COST } from './defaults';
+
 export type CreateUpdateRuleFormData = z.infer<
   ReturnType<typeof buildFormSchema>
 >;
@@ -121,7 +124,7 @@ const CreateUpdateRuleFormBase = ({
     <Form
       form={form}
       onFinish={onFinish}
-      initialValues={initialValues}
+      initialValues={{ estimate_cost: DEFAULT_ESTIMATE_COST, ...initialValues }}
       {...props}
     >
       <RuleSettings

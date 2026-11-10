@@ -4,6 +4,7 @@ import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
 import {
   CreateUpdateRuleForm,
   CreateUpdateRuleFormData,
+  DEFAULT_ESTIMATE_COST,
 } from '@/Rules/components/CreateUpdateRuleForm';
 import { TRuleDetail } from '@/Rules/hooks/useFetchRuleDetail/types';
 import { useUpdateRule } from '@/Rules/hooks/useUpdateRule';
@@ -40,7 +41,7 @@ export const UpdateRuleForm = ({ rule, onSuccess }: UpdateRuleFormProps) => {
   const handleUpdateRule = (values: CreateUpdateRuleFormData) => {
     updateRule({
       ...values,
-      estimate_cost: values.estimate_cost ?? false,
+      estimate_cost: values.estimate_cost ?? DEFAULT_ESTIMATE_COST,
       cost_window_minutes: values.cost_window_minutes
         ? Number(values.cost_window_minutes)
         : 0,
