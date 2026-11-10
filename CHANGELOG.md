@@ -3,6 +3,17 @@
 Rendered by CI and committed back at the end of a release -- do not edit by
 hand. Release notes also appear on the GitHub Releases page, one per tag.
 
+## [1.7.40](https://github.com/hyperi-io/dfe-ui/compare/v1.7.39...v1.7.40) (2026-11-10)
+
+### Bug Fixes
+
+* **apps:** show Components totals/history and Platform settings ([#698](https://github.com/hyperi-io/dfe-ui/issues/698)) ([1e46b6d](https://github.com/hyperi-io/dfe-ui/commit/1e46b6d6a0f031802990d3c00723a9938863f6e7))
+* **apps:** show each change once when history pages shift ([6c8db37](https://github.com/hyperi-io/dfe-ui/commit/6c8db37987230cad870a24bea702e92814397dd0))
+* **components:** keep the discovery label under the dfe-hyperdx id ([03ceec9](https://github.com/hyperi-io/dfe-ui/commit/03ceec902df3f863e260d76d2bfdf1d40fdb8189))
+* **components:** label the hyperdx tab "discovery" ([#701](https://github.com/hyperi-io/dfe-ui/issues/701)) ([15b64d9](https://github.com/hyperi-io/dfe-ui/commit/15b64d9927f3107a24ab5f3f2f68e29f955ee979))
+* **dev:** keep the smoke run's secrets out of files and the log ([3144bc8](https://github.com/hyperi-io/dfe-ui/commit/3144bc87a9d067e3e80ec4da3af6d149b2660568)), closes [#7](https://github.com/hyperi-io/dfe-ui/issues/7) [#8](https://github.com/hyperi-io/dfe-ui/issues/8)
+* **docs:** correct console feature and fork names ([#700](https://github.com/hyperi-io/dfe-ui/issues/700)) ([9eb3b4d](https://github.com/hyperi-io/dfe-ui/commit/9eb3b4df4231bb8c8d03352e64a33bc599b0e93c))
+
 ## [1.7.39](https://github.com/hyperi-io/dfe-ui/compare/v1.7.38...v1.7.39) (2026-11-10)
 
 ### Bug Fixes
