@@ -20,8 +20,8 @@ describe('CreateUpdateAlertForm name', () => {
       await expectNameRule({
         input: screen.getByLabelText(/^Name/),
         message: DESTINATION_NAME_VALIDATOR.message('Name'),
-        accepts: ['slack dfe-alerts', '.hidden'],
-        refuses: ['..', 'a/b', 'a\\b'],
+        accepts: ['slack-dfe-alerts', 'a.b'],
+        refuses: ['slack dfe-alerts', '.hidden', 'a/b'],
         badBaseline: '/',
       });
     },

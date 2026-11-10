@@ -66,11 +66,10 @@ export const APP_FILENAME_VALIDATOR = {
     `${fieldName} must start with a letter or number and contain only letters, numbers, dots, underscores and hyphens, with no two dots in a row`,
 };
 
-/** The engine's alert destination name rule (dfe-engine hunts/alert.py is_destination_name). */
+/** The engine's alert destination name rule (dfe-engine hunts/alert.py is_destination_name), its store name rule. */
 export const DESTINATION_NAME_VALIDATOR = {
-  regex: /^(?!\.{1,2}$)[^/\\\0]+$/,
-  message: (fieldName: string = 'Name') =>
-    `${fieldName} must be one file name: not "." or "..", with no slashes or backslashes`,
+  regex: STORE_NAME_VALIDATOR.regex,
+  message: STORE_NAME_VALIDATOR.message,
 };
 
 /** The engine's field map standard rule, applied after it lowercases (dfe-engine fieldmap/models.py). */
