@@ -55,7 +55,7 @@ const poolTab = (page: Page, label: string) =>
   page.getByRole('tab').filter({ has: page.getByText(label, { exact: true }) });
 
 /* Tab labels for service ids the console keeps off the page */
-const POOL_LABELS: Record<string, string> = { hyperdx: 'discovery' };
+const POOL_LABELS: Record<string, string> = { 'dfe-hyperdx': 'discovery' };
 
 test('A pool carries its service id or console label, never its display name', async ({
   page,
