@@ -50,7 +50,7 @@ A Turborepo/yarn-workspaces monorepo with one shipped app and four packages:
 | [docs/console-and-the-flow.md](docs/console-and-the-flow.md) | the five menu groups, and how a source page draws the engine's flow resolver |
 | [docs/engine-api-client.md](docs/engine-api-client.md)       | the typed engine API client + spec re-vendor procedure                       |
 | [docs/authentication.md](docs/authentication.md)             | local and OIDC sign-in, session renewal, sign-out and redirects              |
-| [docs/observe-embed.md](docs/observe-embed.md)               | the embedded dfe-hyperdx explore surface                                         |
+| [docs/observe-embed.md](docs/observe-embed.md)               | the embedded dfe-hyperdx explore surface                                     |
 | [docs/build-and-deploy.md](docs/build-and-deploy.md)         | standalone build, container, publish                                         |
 | [docs/local-development.md](docs/local-development.md)       | toolchain, env vars, tests, storybook                                        |
 
@@ -82,17 +82,17 @@ severity. The exposure model is declared once, in dfe-infra:
 
 ### Where things live
 
-| Path                                                                                               | Holds                                                                                                                                              |
-| -------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `apps/dfe-core-ui`                                                                                 | the only workspace that ships -- Next standalone output                                                                                            |
-| `src/app`                                                                                          | route groups `(auth)`, `(no-auth)`, plus unauthenticated `livez`, `readyz`, `metrics`                                                              |
+| Path                                                                                               | Holds                                                                                                                                                  |
+| -------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `apps/dfe-core-ui`                                                                                 | the only workspace that ships -- Next standalone output                                                                                                |
+| `src/app`                                                                                          | route groups `(auth)`, `(no-auth)`, plus unauthenticated `livez`, `readyz`, `metrics`                                                                  |
 | `src/proxy.ts`                                                                                     | Next 16 middleware (renamed `middleware` -> `proxy`): auth guard, setup redirect, and the `dfe_token` cookie the dfe-hyperdx iframe authenticates with |
-| `src/core/config/api`                                                                              | the one typed engine client, and the endpoint map compile-checked against the generated `paths`                                                    |
-| `src/core/components/RbacProtected`                                                                | scope gating, for routes and for single buttons                                                                                                    |
-| `src/{Apps,Hunts,Library,Platform,Rules,Schemas,Services,Settings,Sources,_FieldMaps,_Transforms}` | one directory per console domain, each with its own query hooks                                                                                    |
-| `e2e/`                                                                                             | Playwright specs -- they drive a running console against a running engine                                                                          |
-| `packages/dfe-engine-types/`                                                                       | the vendored engine specs, and the scope constants generated from the engine                                                                       |
-| `packages/dfe-icons`                                                                               | SVG -> React codegen, `generate:check` is its drift gate                                                                                           |
+| `src/core/config/api`                                                                              | the one typed engine client, and the endpoint map compile-checked against the generated `paths`                                                        |
+| `src/core/components/RbacProtected`                                                                | scope gating, for routes and for single buttons                                                                                                        |
+| `src/{Apps,Hunts,Library,Platform,Rules,Schemas,Services,Settings,Sources,_FieldMaps,_Transforms}` | one directory per console domain, each with its own query hooks                                                                                        |
+| `e2e/`                                                                                             | Playwright specs -- they drive a running console against a running engine                                                                              |
+| `packages/dfe-engine-types/`                                                                       | the vendored engine specs, and the scope constants generated from the engine                                                                           |
+| `packages/dfe-icons`                                                                               | SVG -> React codegen, `generate:check` is its drift gate                                                                                               |
 
 Paths under `apps/dfe-core-ui/` are shown relative to it.
 
