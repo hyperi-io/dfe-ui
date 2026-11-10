@@ -6,7 +6,8 @@
 # Copyright: (c) 2026 HYPERI PTY LIMITED
 #
 # Runs scripts/macos-dev-smoke.sh, the same file a developer runs on a Mac. The
-# GitHub macOS runner has no docker, so the engine runs with no ClickHouse.
+# GitHub macOS runner has no docker, so the engine runs with no ClickHouse. A Linux
+# leg runs the script's docker mode, the one a Mac with OrbStack or Docker Desktop picks.
 # Dispatch it with an engine ref and a ui ref to gate a release candidate.
 
 name: macOS dev smoke
@@ -46,9 +47,19 @@ concurrency:
 
 jobs:
   smoke:
-    name: macOS arm64 smoke
-    runs-on: macos-15
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
     timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: macOS arm64 smoke
+            os: macos-15
+            clickhouse: none
+          - name: Linux smoke with local ClickHouse
+            os: ubuntu-24.04
+            clickhouse: docker
     steps:
       - name: Check out the smoke harness
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -94,7 +105,7 @@ jobs:
       - name: Run the smoke
         working-directory: dfe-ui
         env:
-          CLICKHOUSE: none
+          CLICKHOUSE: ${{ matrix.clickhouse }}
         run: scripts/macos-dev-smoke.sh
 
       - name: Summary
@@ -104,7 +115,9 @@ jobs:
           {
             echo '### macOS dev smoke'
             echo '```'
-            head -n 40 .macos-smoke/smoke.log
+            sed -n '/===== versions/,/===== console install/p' .macos-smoke/smoke.log
+            echo '...'
+            tail -n 40 .macos-smoke/smoke.log
             echo '```'
           } >> "${GITHUB_STEP_SUMMARY}"
 
@@ -112,7 +125,8 @@ jobs:
         if: always()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          name: macos-dev-smoke
+          name: macos-dev-smoke-${{ matrix.clickhouse }}
           path: dfe-ui/.macos-smoke/
+          include-hidden-files: true
           if-no-files-found: warn
           retention-days: 7
