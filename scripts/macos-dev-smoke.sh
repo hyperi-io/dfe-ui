@@ -22,7 +22,6 @@
 #   UI_PORT              default 3000 (the engine's CORS list allows 3000, 5173, 5174)
 #   ENGINE_METRICS_PORT  the engine's /livez listener, default 19090 (not 9090)
 #   CLICKHOUSE           auto | docker | none (default auto: docker when a daemon answers)
-#   CLICKHOUSE_IMAGE     override the pinned ClickHouse image
 #   SMOKE_LOG            the one log file (default .macos-smoke/smoke.log in this repo)
 
 set -euo pipefail
@@ -35,8 +34,6 @@ UI_PORT="${UI_PORT:-3000}"
 ENGINE_METRICS_PORT="${ENGINE_METRICS_PORT:-19090}"
 CH_PORT="${CLICKHOUSE_HTTP_PORT:-18123}"
 CLICKHOUSE="${CLICKHOUSE:-auto}"
-# dfe-infra versions.yaml services-digests.clickhouse-version, the 26.3 LTS line.
-CLICKHOUSE_IMAGE="${CLICKHOUSE_IMAGE:-clickhouse/clickhouse-server:26.3.17.56@sha256:422be85ae7344058369cdd366ac0efea9daa8428b55c9cf50258e83a7d12fcb3}"
 # Throwaway for this run: the engine wants a signing secret of 32 bytes or more.
 RUN_SECRET="smoke-$(date +%s)-$$-${RANDOM}${RANDOM}${RANDOM}${RANDOM}"
 
@@ -47,7 +44,7 @@ RUN_DIR=""
 ENGINE_URL="http://127.0.0.1:${ENGINE_PORT}"
 UI_URL="http://localhost:${UI_PORT}"
 
-CH_NAME=""
+CH_PROJECT=""
 LEGACY_ENV="no"
 STEP="start"
 RESULT="FAIL"
@@ -121,8 +118,9 @@ cleanup() {
     local leftover=""
     set +e
     trap '' INT TERM HUP
-    if [[ -n "${CH_NAME}" ]]; then
-        docker rm -f "${CH_NAME}" >>"${LOG}" 2>&1
+    if [[ -n "${CH_PROJECT}" ]]; then
+        env DFE_ENGINE_CLICKHOUSE_PORT="${CH_PORT}" docker compose -p "${CH_PROJECT}" \
+            -f "${ENGINE_DIR}/docker-compose.dev.yaml" down -v >>"${LOG}" 2>&1
     fi
     # Playwright stopped the servers when its run ended. Say so if a port still answers.
     for port in "${ENGINE_PORT}" "${UI_PORT}" "${ENGINE_METRICS_PORT}"; do
@@ -199,6 +197,11 @@ check_prerequisites() {
     if [[ -n "${MISSING}" ]]; then
         log "Missing prerequisites:${MISSING}"
         return 1
+    fi
+
+    if [[ "${CLICKHOUSE}" == "docker" ]] && ! grep -q '^  clickhouse:' "${ENGINE_DIR}/docker-compose.dev.yaml" 2>/dev/null; then
+        log "this dfe-engine has no clickhouse service in docker-compose.dev.yaml: running with no ClickHouse"
+        CLICKHOUSE="none"
     fi
 
     ports="${ENGINE_PORT} ${UI_PORT} ${ENGINE_METRICS_PORT}"
@@ -286,19 +289,15 @@ write_engine_env() {
     fi
 }
 
+# The engine repo owns the local ClickHouse: its compose service carries the
+# one-node Keeper config the engine's replicated tables need.
 start_clickhouse() {
-    local tries=0
-    section "clickhouse (docker)"
-    CH_NAME="dfe-macos-smoke-ch-$$"
-    docker run -d --name "${CH_NAME}" -p "127.0.0.1:${CH_PORT}:8123" \
-        -e "CLICKHOUSE_PASSWORD=ch-${RUN_SECRET}" "${CLICKHOUSE_IMAGE}" >>"${LOG}" 2>&1 \
-        || die "docker could not start ClickHouse (image ${CLICKHOUSE_IMAGE})"
-    until curl -fsS -o /dev/null --max-time 3 "http://127.0.0.1:${CH_PORT}/ping" 2>/dev/null; do
-        tries=$((tries + 1))
-        [[ "${tries}" -lt 60 ]] || die "ClickHouse did not answer /ping within 120s"
-        sleep 2
-    done
-    printf 'ClickHouse answered /ping\n' >>"${LOG}"
+    section "clickhouse (engine docker-compose.dev.yaml)"
+    CH_PROJECT="dfe-smoke-$$"
+    env DFE_ENGINE_CLICKHOUSE_PORT="${CH_PORT}" DFE_ENGINE_CLICKHOUSE_PASSWORD="ch-${RUN_SECRET}" \
+        docker compose -p "${CH_PROJECT}" -f "${ENGINE_DIR}/docker-compose.dev.yaml" \
+        up -d --wait clickhouse >>"${LOG}" 2>&1 \
+        || die "docker compose could not start the engine's clickhouse service"
 }
 
 main() {
@@ -332,6 +331,9 @@ main() {
     export SMOKE_UI_URL="${UI_URL}"
     export SMOKE_UI_PORT="${UI_PORT}"
     export SMOKE_RUN_SECRET="${RUN_SECRET}"
+    if [[ "${CLICKHOUSE}" == "docker" ]]; then
+        export SMOKE_ENGINE_WAIT_READY=yes
+    fi
     export SMOKE_OUT_DIR="${RESULTS_DIR}"
     run "smoke: engine, console, login and 3 pages (headless, 1 worker)" \
         in_dir "${UI_ROOT}" corepack yarn workspace dfe-core-ui exec playwright test \

@@ -42,7 +42,8 @@ const servers: Server[] | undefined = engineDir
         command: `make e2e-server ${makeArgs}`,
         cwd: engineDir,
         env: { UV_FROZEN: '1' },
-        url: `${engineUrl}/api/e2e/status`,
+        // /readyz answers once ClickHouse and the schema are up, which only a run with ClickHouse waits for.
+        url: `${engineUrl}/${process.env.SMOKE_ENGINE_WAIT_READY ? 'readyz' : 'api/e2e/status'}`,
         timeout: 240_000,
         reuseExistingServer: false,
         gracefulShutdown: shutdown,
