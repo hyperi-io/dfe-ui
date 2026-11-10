@@ -134,8 +134,8 @@ const rangeTitle = ({
   const options = rangeOptions(retentionSeconds);
   const shown = shownRange({ rangeSeconds, retentionSeconds }).value;
   return (
-    <span className="inline-flex items-center">
-      {`${heading} (`}
+    <span className="inline-flex items-center gap-2">
+      {heading}
       <Dropdown
         trigger={['click']}
         menu={{
@@ -151,13 +151,12 @@ const rangeTitle = ({
         <button
           type="button"
           aria-label={`${heading} range`}
-          className="inline-flex cursor-pointer items-center gap-0.5 hover:underline"
+          className="bg-foreground/10 dark:bg-dark-foreground/10 hover:bg-foreground/5 dark:hover:bg-dark-foreground/5 inline-flex cursor-pointer items-center gap-0.5 rounded-md px-2 py-1 text-xs font-normal"
         >
           {options.find((option) => option.value === shown)?.label}
           <IconChevronDown className="h-3.5 w-3.5" />
         </button>
       </Dropdown>
-      {')'}
     </span>
   );
 };
