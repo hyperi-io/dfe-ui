@@ -16,6 +16,7 @@ import { TAppsResponse } from '@/core/hooks/apps/instances/useFetchApps/types';
 import { TAppMetricsResponse } from '@/core/hooks/apps/operations/useFetchAppMetrics/types';
 import { TAppResourceSeriesResponse } from '@/core/hooks/apps/operations/useFetchAppResourceSeries/types';
 import { TAppStatusResponse } from '@/core/hooks/apps/operations/useFetchAppStatus/types';
+import { TAppTotalsResponse } from '@/core/hooks/apps/operations/useFetchAppTotals/types';
 import { TAppRoutingResponse } from '@/core/hooks/apps/routing/useFetchAppRouting/types';
 import { TSyncAppRoutingResponse } from '@/core/hooks/apps/routing/useSyncAppRouting/types';
 import { TAppScalingResponse } from '@/core/hooks/apps/scaling/useFetchAppScaling/types';
@@ -660,6 +661,28 @@ export const apps = {
         ),
     },
   },
+  metricsTotals: {
+    mockedUrl: '/api/v1/apps/{service}/{instance}/metrics/totals',
+    get: {
+      success: ({
+        mockedResponse = {
+          telemetry_name: 'dfe-transform-vrl-syslog',
+          window_seconds: 3600,
+          totals: { records_processed_total: 45000 },
+        },
+        service = 'service',
+        instance = 'instance',
+      }: {
+        mockedResponse?: TAppTotalsResponse;
+        service?: string;
+        instance?: string;
+      } = {}) =>
+        http.get(
+          withInstance(apps.metricsTotals.mockedUrl, service, instance),
+          () => HttpResponse.json(mockedResponse),
+        ),
+    },
+  },
   history: {
     mockedUrl: '/api/v1/apps/{service}/{instance}/history',
     get: {
@@ -673,15 +696,28 @@ export const apps = {
             state: 'committed',
           },
         ],
+        pages,
         service = 'service',
         instance = 'instance',
       }: {
         mockedResponse?: TAppHistoryResponse['items'];
+        /** One page each, served in turn: a `page_token` is the next page's index */
+        pages?: TAppHistoryResponse['items'][];
         service?: string;
         instance?: string;
       } = {}) =>
-        http.get(withInstance(apps.history.mockedUrl, service, instance), () =>
-          HttpResponse.json({ items: mockedResponse }),
+        http.get(
+          withInstance(apps.history.mockedUrl, service, instance),
+          ({ request }) => {
+            const served = pages ?? [mockedResponse];
+            const token = new URL(request.url).searchParams.get('page_token');
+            const index = token ? Number(token) : 0;
+            const next = index + 1 < served.length ? String(index + 1) : null;
+            return HttpResponse.json({
+              items: served[index] ?? [],
+              next_page_token: next,
+            });
+          },
         ),
     },
   },

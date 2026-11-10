@@ -15,6 +15,7 @@ describe('GET /metrics', () => {
     expect(body).toMatch(/^process_resident_memory_bytes \d/m);
     expect(body).toMatch(/^nodejs_eventloop_lag_seconds /m);
     expect(body).toMatch(/^info\{version="[^"]+",commit="[^"]+"\} 1$/m);
+    expect(body).toMatch(/^start_time_seconds \d/m);
   });
 
   test('a second scrape reuses the registry rather than registering the collectors again', async () => {

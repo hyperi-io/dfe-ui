@@ -25,6 +25,12 @@ const openComponents = async (page: Page) => {
   await expect(page).toHaveURL(`${BASE_URL}/components`);
 };
 
+/* Scaling, settings and the backing services live under Platform settings */
+const openPlatformTab = async (page: Page, tab: string) => {
+  await page.goto(`${BASE_URL}/settings/platform/${tab}`);
+  await expect(page).toHaveURL(`${BASE_URL}/settings/platform/${tab}`);
+};
+
 test('Pools', async ({ page }) => {
   await openComponents(page);
 
@@ -48,7 +54,7 @@ test('Pools', async ({ page }) => {
 const poolTab = (page: Page, label: string) =>
   page.getByRole('tab').filter({ has: page.getByText(label, { exact: true }) });
 
-test('A pool carries the name the engine gives it, else its id', async ({
+test('A pool carries its service id, never its display name', async ({
   page,
 }) => {
   await openComponents(page);
@@ -60,12 +66,10 @@ test('A pool carries the name the engine gives it, else its id', async ({
   expect(pools.length).toBeGreaterThan(0);
 
   for (const app of pools) {
-    await expect(poolTab(page, app.display_name || app.service)).toHaveCount(
-      app.instances.length,
-    );
-    /* A display name replaces the id in the label, never sits beside it */
+    await expect(poolTab(page, app.service)).toHaveCount(app.instances.length);
+    /* The id is the name its telemetry reports under */
     if (app.display_name) {
-      await expect(poolTab(page, app.service)).toHaveCount(0);
+      await expect(poolTab(page, app.display_name)).toHaveCount(0);
     }
   }
 });
@@ -79,9 +83,9 @@ test(
   'Scaling dials are refused off Kubernetes',
   { tag: [TAGS.docker] },
   async ({ page }) => {
-    await openComponents(page);
+    await openPlatformTab(page, 'components');
 
-    await expect(page.getByText('Scaling')).toBeVisible();
+    await expect(page.getByText('Scaling', { exact: true })).toBeVisible();
     const target = page.getByText(/^Deploy target: (docker|unknown)$/);
     await expect(target).toBeVisible();
     const deployTarget = (await target.innerText()).replace(
@@ -111,12 +115,9 @@ test(
 );
 
 test('Backing services', async ({ page }) => {
-  await openComponents(page);
+  await openPlatformTab(page, 'backing-services');
 
-  /* Scoped: the selected pool's config form also heads a block "kafka" */
-  const backing = page.locator('section').filter({
-    has: page.getByRole('heading', { name: 'Backing services', exact: true }),
-  });
+  const backing = page.getByRole('tabpanel');
   await expect(backing).toBeVisible();
   await expect(backing.getByText('clickhouse', { exact: true })).toBeVisible();
   await expect(backing.getByText('kafka', { exact: true })).toBeVisible();
@@ -132,7 +133,7 @@ test('Backing services', async ({ page }) => {
 });
 
 test('A node count may be raised and not lowered', async ({ page }) => {
-  await openComponents(page);
+  await openPlatformTab(page, 'backing-services');
 
   const replicas = page.getByLabel('clickhouse replicas');
   const raise = page
@@ -147,7 +148,7 @@ test('A node count may be raised and not lowered', async ({ page }) => {
 
   await replicas.fill(String(base + 1));
   await raise.click();
-  /* Exact: the history table below tags every commit 'committed' */
+  /* Exact: a write that is not applied on sync has a longer title */
   await expect(page.getByText('Committed', { exact: true })).toBeVisible();
 
   /* Declared at the raised count now, so lowering it is refused */

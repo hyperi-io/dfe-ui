@@ -3,14 +3,16 @@ import { EditOrganisationDrawer } from '@/Settings/components/OrganisationManage
 import { ViewOrganisationDrawer } from '@/Settings/components/OrganisationManagement/ViewOrganisationDrawer';
 import { PopoverMenu } from '@/core/components/PopoverMenu';
 import { TOrganisationListSummary } from '@/core/hooks/useFetchInfiniteFilteredOrganisations/types';
-import { IconLockFilled } from '@repo/dfe-icons';
+
+const DEFAULT_ORGANISATION_NAME = 'default';
+const DEFAULT_ORGANISATION_DELETE_REASON =
+  'This organisation is reserved: every record that names no organisation lands in it.';
 
 export const OrganisationCard = ({
   organisation,
 }: {
   organisation: TOrganisationListSummary;
 }) => {
-  const isParentOrganisation = (organisation.org_ids?.length ?? 0) > 0;
   const orgIcon =
     organisation.display_name?.charAt(0).toUpperCase() ??
     organisation.name.charAt(0).toUpperCase();
@@ -31,9 +33,13 @@ export const OrganisationCard = ({
           />,
           <DeleteOrganisationModal
             key="delete-organisation"
-            disabled={isParentOrganisation}
             org_name={organisation.name}
             display_name={organisation.display_name}
+            disabledReason={
+              organisation.name === DEFAULT_ORGANISATION_NAME
+                ? DEFAULT_ORGANISATION_DELETE_REASON
+                : undefined
+            }
           />,
         ]}
       />
@@ -44,11 +50,6 @@ export const OrganisationCard = ({
         </span>
         <h3 className="font-medium">{organisation.display_name}</h3>
       </div>
-      {isParentOrganisation && (
-        <span className="absolute bottom-1 right-1 bg-brand-primary dark:bg-secondary rounded-full p-1 text-white text-xs">
-          <IconLockFilled />
-        </span>
-      )}
     </div>
   );
 };

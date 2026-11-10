@@ -2,6 +2,7 @@ import { useDeleteOrganisation } from '@/Settings/hooks/organisations/useDeleteO
 
 import { Modal } from '@/core/components/Modal';
 import { RbacProtected } from '@/core/components/RbacProtected';
+import { Tooltip } from '@/core/components/Tooltip';
 import { IconTrash } from '@repo/dfe-icons';
 import { App, Button } from 'antd';
 import { useState } from 'react';
@@ -14,14 +15,14 @@ interface DeleteOrganisationModalProps {
   org_name: string;
   display_name: string;
   onSuccess?: () => void;
-  disabled?: boolean;
+  disabledReason?: string;
 }
 
 export const DeleteOrganisationModal = ({
   org_name,
   display_name,
   onSuccess,
-  disabled,
+  disabledReason,
 }: DeleteOrganisationModalProps) => {
   const [open, setOpen] = useState(false);
   const { notification } = App.useApp();
@@ -49,16 +50,18 @@ export const DeleteOrganisationModal = ({
     <>
       <RbacProtected action={RbacProtected.rbacActions.org_delete}>
         <RbacProtected.Unrestricted>
-          <Button
-            type="text"
-            className="hover:text-error hover:bg-error/5"
-            aria-label={`Delete ${display_name}`}
-            icon={<IconTrash />}
-            onClick={() => setOpen(true)}
-            disabled={disabled}
-          >
-            Delete Organisation
-          </Button>
+          <Tooltip title={disabledReason}>
+            <Button
+              type="text"
+              className="hover:text-error hover:bg-error/5"
+              aria-label={`Delete ${display_name}`}
+              icon={<IconTrash />}
+              onClick={() => setOpen(true)}
+              disabled={!!disabledReason}
+            >
+              Delete Organisation
+            </Button>
+          </Tooltip>
         </RbacProtected.Unrestricted>
         <RbacProtected.Restricted tooltip={{ show: true }}>
           <Button

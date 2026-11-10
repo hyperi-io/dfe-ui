@@ -1521,7 +1521,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@opentelemetry/exporter-metrics-otlp-http@npm:0.223.0":
+"@opentelemetry/exporter-metrics-otlp-http@npm:0.223.0, @opentelemetry/exporter-metrics-otlp-http@npm:^0.223.0":
   version: 0.223.0
   resolution: "@opentelemetry/exporter-metrics-otlp-http@npm:0.223.0"
   dependencies:
@@ -5655,6 +5655,7 @@ __metadata:
     "@opentelemetry/api": "npm:^1.9.1"
     "@opentelemetry/api-logs": "npm:^0.223.0"
     "@opentelemetry/exporter-metrics-otlp-grpc": "npm:^0.223.0"
+    "@opentelemetry/exporter-metrics-otlp-http": "npm:^0.223.0"
     "@opentelemetry/instrumentation": "npm:^0.223.0"
     "@opentelemetry/resources": "npm:^2.11.0"
     "@opentelemetry/sdk-logs": "npm:^0.223.0"

@@ -35,6 +35,13 @@ function buildRegistry(): Registry {
     1,
   );
 
+  // The name the engine's status page reads for uptime, and scalo-py's app group emits.
+  new Gauge({
+    name: 'start_time_seconds',
+    help: 'Start time of the process since unix epoch in seconds',
+    registers: [registry],
+  }).set(Date.now() / 1000 - process.uptime());
+
   return registry;
 }
 

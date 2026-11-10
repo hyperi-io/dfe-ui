@@ -17,13 +17,21 @@ import { createLogger } from '@/core/server/logger';
 // scrape-only). Metrics are still exported in that mode; Prometheus comes and gets
 // them from /metrics.
 
-export function register(): void {
+export async function register(): Promise<void> {
   const endpoint = process.env.OTEL_EXPORTER_OTLP_ENDPOINT;
   if (!endpoint) return;
 
-  registerOTel({
-    serviceName: process.env.OTEL_SERVICE_NAME ?? 'dfe-ui',
-  });
+  const serviceName = process.env.OTEL_SERVICE_NAME ?? 'dfe-ui';
+  // The registry reads process internals the edge runtime does not have.
+  if (process.env.NEXT_RUNTIME !== 'nodejs') {
+    registerOTel({ serviceName });
+    return;
+  }
+
+  const { createPushReader, startPushingMetrics } =
+    await import('@/core/server/pushMetrics');
+  registerOTel({ metricReaders: [createPushReader()], serviceName });
+  startPushingMetrics(serviceName);
 }
 
 const requestLogger = createLogger('dfe-ui.server');

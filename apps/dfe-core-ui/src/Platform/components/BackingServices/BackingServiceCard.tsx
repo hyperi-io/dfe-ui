@@ -1,9 +1,9 @@
 'use client';
 
-import { DeclaredValue } from '@/Apps/components/BackingServices/DeclaredValue';
-import { ReplicaField } from '@/Apps/components/BackingServices/ReplicaField';
-import { ResourceField } from '@/Apps/components/BackingServices/ResourceField';
-import { TBackingService } from '@/Apps/hooks/backingServices/useFetchBackingServices/types';
+import { DeclaredValue } from '@/Platform/components/BackingServices/DeclaredValue';
+import { ReplicaField } from '@/Platform/components/BackingServices/ReplicaField';
+import { ResourceField } from '@/Platform/components/BackingServices/ResourceField';
+import { TBackingService } from '@/Platform/hooks/backingServices/useFetchBackingServices/types';
 import { NotificationCard } from '@/core/components/NotificationCard';
 import { SectionCard } from '@/core/components/SectionCard';
 

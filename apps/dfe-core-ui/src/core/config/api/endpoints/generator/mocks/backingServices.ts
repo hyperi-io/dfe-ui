@@ -2,8 +2,8 @@ import { problem } from '@/core/utils/test-utils/problem';
 import {
   TBackingService,
   TBackingServicesResponse,
-} from '@/Apps/hooks/backingServices/useFetchBackingServices/types';
-import { TUpdateBackingServiceVarResponse } from '@/Apps/hooks/backingServices/useUpdateBackingServiceVar/types';
+} from '@/Platform/hooks/backingServices/useFetchBackingServices/types';
+import { TUpdateBackingServiceVarResponse } from '@/Platform/hooks/backingServices/useUpdateBackingServiceVar/types';
 import { http, HttpResponse } from 'msw';
 import {
   DEFAULT_VALIDATION_ERROR,

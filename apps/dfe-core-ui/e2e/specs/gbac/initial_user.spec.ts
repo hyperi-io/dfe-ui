@@ -210,7 +210,7 @@ test.describe('', { tag: [TAGS.core, TAGS.gbac] }, () => {
       ).toBeEnabled();
       await expect(
         page.getByRole('button', { name: 'Delete organisation', exact: true }),
-      ).toBeDisabled();
+      ).toBeEnabled();
     });
 
     test('Role Management', async ({ page }) => {

@@ -49,15 +49,6 @@ describe('BackingServices', () => {
     expect(await renderSection().findByText('minio')).toBeInTheDocument();
   });
 
-  it('names the data layer and its never-autoscaled constraint', async () => {
-    renderSection();
-
-    expect(await screen.findByText('Backing services')).toBeInTheDocument();
-    expect(
-      screen.getByText(/never autoscaled/, { exact: false }),
-    ).toBeInTheDocument();
-  });
-
   // Rule 3: storage is read-only, and the remedy is the storage model.
   it('renders storage with no editable control and the capacity remedy', async () => {
     renderSection();

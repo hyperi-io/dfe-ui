@@ -134,6 +134,7 @@ export const API_CONFIG = Object.freeze({
     status: '/api/v1/apps/{service}/{instance}/status',
     metrics: '/api/v1/apps/{service}/{instance}/metrics',
     metricsSeries: '/api/v1/apps/{service}/{instance}/metrics/series',
+    metricsTotals: '/api/v1/apps/{service}/{instance}/metrics/totals',
     history: '/api/v1/apps/{service}/{instance}/history',
     routing: '/api/v1/apps/{service}/{instance}/routing',
     routingSync: '/api/v1/apps/{service}/{instance}/routing/sync',

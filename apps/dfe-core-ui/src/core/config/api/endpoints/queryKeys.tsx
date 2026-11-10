@@ -559,34 +559,42 @@ export const QUERY_KEYS = Object.freeze({
     status: ({
       service,
       instance,
-    }: { service?: string; instance?: string } = {}) => [
+      process,
+    }: { service?: string; instance?: string; process?: string } = {}) => [
       'apps',
       '{service}',
       '{instance}',
       'status',
       ...(service ? [service] : []),
       ...(instance ? [instance] : []),
+      ...(process ? ['process', process] : []),
     ],
 
     metrics: ({
       service,
       instance,
-    }: { service?: string; instance?: string } = {}) => [
+      process,
+    }: { service?: string; instance?: string; process?: string } = {}) => [
       'apps',
       '{service}',
       '{instance}',
       'metrics',
       ...(service ? [service] : []),
       ...(instance ? [instance] : []),
+      ...(process ? ['process', process] : []),
     ],
     metricsSeries: ({
       service,
       instance,
       windowSeconds,
+      bucketSeconds,
+      process,
     }: {
       service?: string;
       instance?: string;
       windowSeconds?: number;
+      bucketSeconds?: number;
+      process?: string;
     } = {}) => [
       'apps',
       '{service}',
@@ -595,20 +603,43 @@ export const QUERY_KEYS = Object.freeze({
       'series',
       ...(service ? [service] : []),
       ...(instance ? [instance] : []),
-      ...(windowSeconds ? [String(windowSeconds)] : []),
+      ...(windowSeconds !== undefined ? [String(windowSeconds)] : []),
+      ...(bucketSeconds !== undefined ? [String(bucketSeconds)] : []),
+      ...(process ? ['process', process] : []),
+    ],
+    metricsTotals: ({
+      service,
+      instance,
+      windowSeconds,
+      process,
+    }: {
+      service?: string;
+      instance?: string;
+      windowSeconds?: number;
+      process?: string;
+    } = {}) => [
+      'apps',
+      '{service}',
+      '{instance}',
+      'metrics',
+      'totals',
+      ...(service ? [service] : []),
+      ...(instance ? [instance] : []),
+      ...(windowSeconds !== undefined ? [String(windowSeconds)] : []),
+      ...(process ? ['process', process] : []),
     ],
     history: ({
       service,
       instance,
-      limit,
-    }: { service?: string; instance?: string; limit?: number } = {}) => [
+      pageSize,
+    }: { service?: string; instance?: string; pageSize?: number } = {}) => [
       'apps',
       '{service}',
       '{instance}',
       'history',
       ...(service ? [service] : []),
       ...(instance ? [instance] : []),
-      ...(limit ? [String(limit)] : []),
+      ...(pageSize ? [String(pageSize)] : []),
     ],
     routing: ({
       service,

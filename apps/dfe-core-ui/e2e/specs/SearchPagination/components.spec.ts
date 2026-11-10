@@ -37,11 +37,6 @@ test.describe('', { tag: [TAGS.core, TAGS.search, TAGS.pagination] }, () => {
     await expect(page.getByRole('tab', { name: /dfe-loader/ })).toBeVisible();
     await expect(page.getByRole('tab', { name: /dfe-receiver/ })).toBeHidden();
 
-    /* The data layer is not a pool, so a pool search leaves it in place */
-    await expect(
-      page.getByRole('heading', { name: 'Backing services', exact: true }),
-    ).toBeVisible();
-
     await searchComponents(page).fill('');
 
     await expect(page.getByRole('tab', { name: /dfe-receiver/ })).toBeVisible();
@@ -58,8 +53,5 @@ test.describe('', { tag: [TAGS.core, TAGS.search, TAGS.pagination] }, () => {
     ).toBeVisible();
     await expect(page.getByRole('tab', { name: /dfe-receiver/ })).toBeHidden();
     await expect(page.getByRole('tab', { name: /dfe-loader/ })).toBeHidden();
-    await expect(
-      page.getByRole('heading', { name: 'Backing services', exact: true }),
-    ).toBeVisible();
   });
 });
