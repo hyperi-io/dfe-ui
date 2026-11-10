@@ -1,4 +1,4 @@
-# Engine API client - the typed seam
+# Engine API client - one typed client for every engine call
 
 Every engine call goes through one typed client generated from the engine's
 OpenAPI spec. The endpoint map is compile-time checked against the generated
