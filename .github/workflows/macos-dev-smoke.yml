@@ -8,7 +8,7 @@
 # Runs scripts/macos-dev-smoke.py, the same file a developer runs on a Mac. The
 # GitHub macOS runner has no docker, so the engine runs with no ClickHouse. A Linux
 # leg runs the script's docker mode, the one a Mac with OrbStack or Docker Desktop picks.
-# Dispatch it with an engine ref and a ui ref to gate a release candidate.
+# Dispatch it with an engine tag and a ui tag to gate a release candidate.
 
 name: macOS dev smoke
 
@@ -31,12 +31,12 @@ name: macOS dev smoke
         type: string
         required: false
         default: 'main'
-        description: 'dfe-engine tag, branch or sha to run the console against.'
+        description: 'dfe-engine release tag (vX.Y.Z or vX.Y.Z-rc.N) or main.'
       ui-ref:
         type: string
         required: false
         default: ''
-        description: 'dfe-ui tag, branch or sha for the console. Empty takes the ref the run was dispatched on.'
+        description: 'dfe-ui release tag (vX.Y.Z or vX.Y.Z-rc.N) or main for the console. Empty takes the commit the run was dispatched on.'
 
 permissions:
   contents: read
@@ -61,6 +61,42 @@ jobs:
             os: ubuntu-24.04
             clickhouse: docker
     steps:
+      # A dispatch runs with the default branch's cache scope, so it only checks out
+      # a release tag or main, resolved to a commit before any code is fetched.
+      - name: Pin the engine and console refs
+        id: pin
+        env:
+          ENGINE_WANTED: ${{ inputs.engine-ref }}
+          UI_WANTED: ${{ inputs.ui-ref }}
+          ENGINE_REPO: hyperi-io/dfe-engine
+          UI_REPO: ${{ github.repository }}
+          RUN_COMMIT: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          pin() {
+              local repo="$1" wanted="$2" sha=""
+              if [[ "${wanted}" == "main" ]]; then
+                  sha="$(git ls-remote "https://github.com/${repo}.git" refs/heads/main | cut -f1)"
+              elif [[ "${wanted}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-rc\.[0-9]+)?$ ]]; then
+                  sha="$(git ls-remote "https://github.com/${repo}.git" "refs/tags/${wanted}" "refs/tags/${wanted}^{}" | tail -n 1 | cut -f1)"
+              else
+                  echo "::error::'${wanted}' is not a release tag or main" >&2
+                  exit 1
+              fi
+              if [[ ! "${sha}" =~ ^[0-9a-f]{40}$ ]]; then
+                  echo "::error::${repo} has no ${wanted}" >&2
+                  exit 1
+              fi
+              printf '%s' "${sha}"
+          }
+          ui="${RUN_COMMIT}"
+          if [[ -n "${UI_WANTED}" ]]; then
+              ui="$(pin "${UI_REPO}" "${UI_WANTED}")"
+          fi
+          engine="$(pin "${ENGINE_REPO}" "${ENGINE_WANTED:-main}")"
+          echo "ui=${ui}" >> "${GITHUB_OUTPUT}"
+          echo "engine=${engine}" >> "${GITHUB_OUTPUT}"
+
       - name: Check out the smoke harness
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -72,7 +108,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           path: dfe-ui
-          ref: ${{ inputs.ui-ref || github.sha }}
+          ref: ${{ steps.pin.outputs.ui }}
           persist-credentials: false
 
       # A release tag predates the harness, so the script and spec come from the
@@ -88,7 +124,7 @@ jobs:
         with:
           repository: hyperi-io/dfe-engine
           path: dfe-engine
-          ref: ${{ inputs.engine-ref || 'main' }}
+          ref: ${{ steps.pin.outputs.engine }}
           persist-credentials: false
 
       - name: Set up Node

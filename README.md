@@ -137,7 +137,8 @@ Node resolves `localhost` to `::1` first and the engine listens on IPv4 only.
 And leave ports 5000 and 7000 alone, macOS holds them for AirPlay Receiver.
 
 The `macOS dev smoke` workflow runs the same script on a GitHub macOS arm64
-runner. Dispatch it with an engine ref and a ui ref to gate a release candidate.
+runner. Dispatch it with an engine tag and a ui tag (or `main`) to gate a release
+candidate. Any other ref is refused before a checkout.
 
 ### Running the e2e suite locally
 
