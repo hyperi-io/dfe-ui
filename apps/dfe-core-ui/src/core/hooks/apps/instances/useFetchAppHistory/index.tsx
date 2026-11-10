@@ -42,10 +42,16 @@ export const useFetchAppHistory = ({
     retry: false,
   });
 
-  const entries = useMemo(
-    () => data?.pages.flatMap((page) => page.items) ?? [],
-    [data],
-  );
+  // A commit landing between page loads shifts the next page down, which repeats its first change
+  const entries = useMemo(() => {
+    const seen = new Set<string>();
+    const items = data?.pages.flatMap((page) => page.items) ?? [];
+    return items.filter((entry) => {
+      if (seen.has(entry.sha)) return false;
+      seen.add(entry.sha);
+      return true;
+    });
+  }, [data]);
 
   return {
     data: entries,
