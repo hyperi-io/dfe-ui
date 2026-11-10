@@ -97,7 +97,7 @@ describe('ComponentsScene', () => {
     render(<ComponentsScene />, { wrapper });
 
     expect(
-      await screen.findByRole('tab', { name: /^hyperdx/, selected: true }),
+      await screen.findByRole('tab', { name: /^discovery/, selected: true }),
     ).toBeInTheDocument();
   });
 
@@ -108,7 +108,7 @@ describe('ComponentsScene', () => {
     const user = userEvent.setup();
 
     render(<ComponentsScene />, { wrapper });
-    await user.click(await screen.findByRole('tab', { name: /^hyperdx/ }));
+    await user.click(await screen.findByRole('tab', { name: /^discovery/ }));
 
     expect(replace).toHaveBeenCalledWith('/?component=hyperdx');
   });
@@ -127,13 +127,13 @@ describe('ComponentsScene', () => {
     ).not.toBeInTheDocument();
   });
 
-  it('labels each pool by its service id, never its display name', async () => {
+  it('labels each pool by its service id or console label, never its display name', async () => {
     server.use(twoPools());
 
     render(<ComponentsScene />, { wrapper });
 
     expect(
-      await screen.findByRole('tab', { name: /^hyperdx/ }),
+      await screen.findByRole('tab', { name: /^discovery/ }),
     ).toBeInTheDocument();
     expect(
       screen.queryByRole('tab', { name: /Search/ }),
@@ -267,7 +267,7 @@ describe('ComponentsScene', () => {
     expect(
       await screen.findByRole('tab', { name: /^dfe-receiver/ }),
     ).toBeInTheDocument();
-    expect(screen.getByRole('tab', { name: /^hyperdx/ })).toBeInTheDocument();
+    expect(screen.getByRole('tab', { name: /^discovery/ })).toBeInTheDocument();
 
     const search = screen.getByRole('searchbox', { name: 'Search components' });
     await user.type(search, 'receiver');
@@ -276,13 +276,13 @@ describe('ComponentsScene', () => {
       screen.getByRole('tab', { name: /^dfe-receiver/ }),
     ).toBeInTheDocument();
     expect(
-      screen.queryByRole('tab', { name: /^hyperdx/ }),
+      screen.queryByRole('tab', { name: /^discovery/ }),
     ).not.toBeInTheDocument();
 
     await user.clear(search);
     await user.type(search, 'HYPERDX');
 
-    expect(screen.getByRole('tab', { name: /^hyperdx/ })).toBeInTheDocument();
+    expect(screen.getByRole('tab', { name: /^discovery/ })).toBeInTheDocument();
     expect(
       screen.queryByRole('tab', { name: /^dfe-receiver/ }),
     ).not.toBeInTheDocument();
