@@ -55,6 +55,24 @@ describe('AppHistoryCard', () => {
     await waitFor(() => expect(tokens).toEqual(['', '1']));
   });
 
+  it('shows a change once when a new commit shifts the next page onto it', async () => {
+    server.use(
+      API_CONFIG_MOCKS.apps.history.get.success({
+        ...pool,
+        pages: [changes(0, 6), changes(5, 3)],
+      }),
+    );
+
+    const { container } = render(<AppHistoryCard {...pool} />, { wrapper });
+
+    expect(await screen.findByText('change 5')).toBeInTheDocument();
+    const body = container.querySelector('.ant-table-body') as HTMLElement;
+    fireEvent.scroll(body);
+    expect(await screen.findByText('change 7')).toBeInTheDocument();
+
+    expect(screen.getAllByText('change 5')).toHaveLength(1);
+  });
+
   it('says so when the history cannot be read', async () => {
     server.use(
       http.get(
