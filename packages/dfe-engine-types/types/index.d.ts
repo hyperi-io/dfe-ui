@@ -4524,7 +4524,7 @@ export interface paths {
         };
         /**
          * Get History
-         * @description Every change to this instance, newest first.
+         * @description Every change to this instance, newest first, a page at a time.
          *
          *     Supply the revision Argo has synced as ``applied_revision`` to see which
          *     commits have reached the cluster and which are still pending.
@@ -32393,7 +32393,6 @@ export interface operations {
         parameters: {
             query?: {
                 applied_revision?: string | null;
-                limit?: number;
                 /** @description Items per page: 0 means 50, above 1000 is cut to it */
                 page_size?: number;
                 /** @description The next_page_token of the previous page */

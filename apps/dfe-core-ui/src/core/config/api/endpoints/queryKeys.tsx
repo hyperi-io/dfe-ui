@@ -631,15 +631,15 @@ export const QUERY_KEYS = Object.freeze({
     history: ({
       service,
       instance,
-      limit,
-    }: { service?: string; instance?: string; limit?: number } = {}) => [
+      pageSize,
+    }: { service?: string; instance?: string; pageSize?: number } = {}) => [
       'apps',
       '{service}',
       '{instance}',
       'history',
       ...(service ? [service] : []),
       ...(instance ? [instance] : []),
-      ...(limit ? [String(limit)] : []),
+      ...(pageSize ? [String(pageSize)] : []),
     ],
     routing: ({
       service,

@@ -696,15 +696,28 @@ export const apps = {
             state: 'committed',
           },
         ],
+        pages,
         service = 'service',
         instance = 'instance',
       }: {
         mockedResponse?: TAppHistoryResponse['items'];
+        /** One page each, served in turn: a `page_token` is the next page's index */
+        pages?: TAppHistoryResponse['items'][];
         service?: string;
         instance?: string;
       } = {}) =>
-        http.get(withInstance(apps.history.mockedUrl, service, instance), () =>
-          HttpResponse.json({ items: mockedResponse }),
+        http.get(
+          withInstance(apps.history.mockedUrl, service, instance),
+          ({ request }) => {
+            const served = pages ?? [mockedResponse];
+            const token = new URL(request.url).searchParams.get('page_token');
+            const index = token ? Number(token) : 0;
+            const next = index + 1 < served.length ? String(index + 1) : null;
+            return HttpResponse.json({
+              items: served[index] ?? [],
+              next_page_token: next,
+            });
+          },
         ),
     },
   },
