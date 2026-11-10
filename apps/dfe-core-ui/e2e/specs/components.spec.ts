@@ -54,7 +54,10 @@ test('Pools', async ({ page }) => {
 const poolTab = (page: Page, label: string) =>
   page.getByRole('tab').filter({ has: page.getByText(label, { exact: true }) });
 
-test('A pool carries its service id, never its display name', async ({
+/* Tab labels for service ids the console keeps off the page */
+const POOL_LABELS: Record<string, string> = { hyperdx: 'discovery' };
+
+test('A pool carries its service id or console label, never its display name', async ({
   page,
 }) => {
   await openComponents(page);
@@ -66,7 +69,9 @@ test('A pool carries its service id, never its display name', async ({
   expect(pools.length).toBeGreaterThan(0);
 
   for (const app of pools) {
-    await expect(poolTab(page, app.service)).toHaveCount(app.instances.length);
+    await expect(
+      poolTab(page, POOL_LABELS[app.service] ?? app.service),
+    ).toHaveCount(app.instances.length);
     /* The id is the name its telemetry reports under */
     if (app.display_name) {
       await expect(poolTab(page, app.display_name)).toHaveCount(0);
