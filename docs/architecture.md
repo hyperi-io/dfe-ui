@@ -47,7 +47,7 @@ The packages are build-time dependencies.
 - Route groups: `(auth)` for the signed-in app, `(no-auth)` for login.
 - Feature directories per domain (Hunts, Schemas, Settings, ...) with
   TanStack Query hooks per endpoint.
-- The engine seam is one typed client
+- Every engine call goes through one typed client
   ([engine-api-client.md](engine-api-client.md)) - no raw fetch in feature
   code (the only raw fetch sites are the NextAuth server-side callbacks).
 - `/observe` iframes dfe-hyperdx ([observe-embed.md](observe-embed.md)).

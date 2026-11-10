@@ -41,4 +41,4 @@ Every post-login redirect goes through `safeRedirectPath` (`src/core/config/logi
 
 Key files: `src/proxy.ts`, `src/core/config/auth.ts`, `src/core/auth/renewEngineSession.ts`, `src/core/auth/oidcLoginNonce.ts`, the `(no-auth)` login scene.
 
-The suite-wide auth model (one PDP = dfe-engine, `X-Oidc-*` edge seam) is documented engine-side: `docs/control-plane/` in dfe-engine.
+The suite-wide auth model (one PDP = dfe-engine, and the `X-Oidc-*` headers the edge sets) is documented engine-side: `docs/control-plane/` in dfe-engine.
