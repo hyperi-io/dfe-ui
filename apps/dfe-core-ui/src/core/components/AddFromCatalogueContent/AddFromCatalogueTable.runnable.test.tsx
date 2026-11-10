@@ -50,7 +50,9 @@ describe('AddFromCatalogueTable runnable', () => {
     await userEvent.setup().hover(screen.getByText('cannot-run'));
     expect(await screen.findByText(REASON)).toBeInTheDocument();
     expect(
-      screen.queryByText('This deployment cannot run any of these entries'),
+      screen.queryByText(
+        'This deployment cannot run any of the entries on this page',
+      ),
     ).not.toBeInTheDocument();
   });
 
@@ -59,8 +61,11 @@ describe('AddFromCatalogueTable runnable', () => {
     render(<AddFromCatalogueTable selectedEntries={[]} />, { wrapper });
 
     expect(
-      screen.getByText('This deployment cannot run any of these entries'),
+      screen.getByText(
+        'This deployment cannot run any of the entries on this page',
+      ),
     ).toBeInTheDocument();
+    expect(screen.getByText(`For example: ${REASON}`)).toBeInTheDocument();
     expect(screen.getByLabelText('Select row 1')).toBeDisabled();
     expect(screen.getByLabelText('Select row 2')).toBeDisabled();
   });

@@ -22,9 +22,16 @@ export const useDeleteLibraryArtifact = ({
     onSuccess: (values) => {
       // The deleted artefact's own detail, versions and usage calls would
       // 404, so drop them and refetch only the list.
+      [
+        QUERY_KEYS.library.artifact({ artifact }),
+        QUERY_KEYS.library.usage({ artifact }),
+        QUERY_KEYS.library.versions({ artifact }),
+      ].forEach((queryKey) =>
+        queryClient.removeQueries({ queryKey, exact: true }),
+      );
       queryClient.removeQueries({
-        queryKey: QUERY_KEYS.library.artifact(),
-        predicate: (query) => query.queryKey.includes(artifact),
+        queryKey: QUERY_KEYS.library.version(),
+        predicate: ({ queryKey }) => queryKey[4] === artifact,
       });
       queryClient.invalidateQueries({
         queryKey: QUERY_KEYS.library.default(),

@@ -123,9 +123,7 @@ export const AddFromCatalogueTable = ({
             );
             return isBlocked(row) ? (
               <Tooltip title={row.runnable_reason}>
-                <span className="text-foreground/50 dark:text-dark-foreground/50">
-                  {entry}
-                </span>
+                <span className="opacity-50">{entry}</span>
               </Tooltip>
             ) : (
               entry
@@ -209,8 +207,8 @@ export const AddFromCatalogueTable = ({
       {nothingRunnable && (
         <NotificationCard
           type="info"
-          title="This deployment cannot run any of these entries"
-          description={rows[0].runnable_reason}
+          title="This deployment cannot run any of the entries on this page"
+          description={`For example: ${rows[0].runnable_reason}`}
         />
       )}
 
