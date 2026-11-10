@@ -1,6 +1,7 @@
 import { CatalogueTags } from '@/core/components/CatalogueTags';
 import { NotificationCard } from '@/core/components/NotificationCard';
 import { Table } from '@/core/components/Table';
+import { Tooltip } from '@/core/components/Tooltip';
 import { useFetchInfiniteSourceCatalogues } from '@/core/hooks/useFetchInfiniteSourceCatalogues';
 import {
   TSourceCatalogueIntake,
@@ -48,6 +49,9 @@ const toSelectedEntry = (
   intakeOptions: row.intakes,
 });
 
+/** An entry the engine says this deployment cannot run. Older engines send no flag, which reads as runnable. */
+const isBlocked = (row: TSourceCatalogueItem) => row.runnable === false;
+
 export const AddFromCatalogueTable = ({
   selectedEntries,
   onSelectedEntriesChange = () => {},
@@ -91,6 +95,7 @@ export const AddFromCatalogueTable = ({
   // pageSize, and Ant Design then slices it again.
   const rows = entries ?? [];
   const selectionExceedsLimit = selectedEntries.length > MAX_CATALOGUE_ENTRIES;
+  const nothingRunnable = rows.length > 0 && rows.every(isBlocked);
 
   const rowsSelectedOffset = selectedEntries?.length > 0 ? 60 : 0;
   const selectionExceedsLimitOffset = selectionExceedsLimit ? 45 : 0;
@@ -112,9 +117,18 @@ export const AddFromCatalogueTable = ({
           key: 'name',
           width: '40%',
           fixed: 'start',
-          render: (name) => (
-            <Highlighter searchWords={[search]} textToHighlight={name} />
-          ),
+          render: (name: string, row) => {
+            const entry = (
+              <Highlighter searchWords={[search]} textToHighlight={name} />
+            );
+            return isBlocked(row) ? (
+              <Tooltip title={row.runnable_reason}>
+                <span className="opacity-50">{entry}</span>
+              </Tooltip>
+            ) : (
+              entry
+            );
+          },
         },
         {
           title: 'Dataset',
@@ -190,6 +204,14 @@ export const AddFromCatalogueTable = ({
         />
       )}
 
+      {nothingRunnable && (
+        <NotificationCard
+          type="info"
+          title="This deployment cannot run any of the entries on this page"
+          description={`For example: ${rows[0].runnable_reason}`}
+        />
+      )}
+
       <CatalogueTags
         selected={searchTags}
         onChange={(tags) => {
@@ -212,6 +234,7 @@ export const AddFromCatalogueTable = ({
         rowSelection={{
           selectedRowKeys: selectedEntries.map((entry) => entry.entry),
           preserveSelectedRowKeys: true,
+          getCheckboxProps: (row) => ({ disabled: isBlocked(row) }),
           onChange: (selectedRowKeys, selectedRows) => {
             const previous = new Map(
               selectedEntries.map((entry) => [entry.entry, entry]),

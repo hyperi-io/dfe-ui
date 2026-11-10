@@ -82,4 +82,25 @@ describe('ArtifactLabels', () => {
       );
     },
   );
+
+  test('keeps what was typed when the artefact refetches, and reseeds for another artefact', async () => {
+    const { rerender } = render(<ArtifactLabels artifact={artifact} />, {
+      wrapper,
+    });
+    await typeLabels('team=platform');
+
+    rerender(<ArtifactLabels artifact={{ ...artifact, state: 'disabled' }} />);
+    expect(await screen.findByLabelText(/^Labels/)).toHaveValue(
+      'team=platform',
+    );
+
+    rerender(
+      <ArtifactLabels
+        artifact={{ ...artifact, name: 'other', labels: { env: 'dev' } }}
+      />,
+    );
+    await waitFor(() =>
+      expect(screen.getByLabelText(/^Labels/)).toHaveValue('env=dev'),
+    );
+  });
 });

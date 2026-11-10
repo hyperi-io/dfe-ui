@@ -3,10 +3,7 @@ import { expect, test } from '@playwright/test';
 import { BASE_URL } from '@e2e/config/e2e.client';
 import { loginAs } from '@e2e/config/login.helpers';
 import { TAGS } from '@e2e/config/tags.constants';
-import {
-  knownConsoleDefect,
-  prepareJourneyStack,
-} from '@e2e/config/journey.helpers';
+import { prepareJourneyStack } from '@e2e/config/journey.helpers';
 
 import { ADMIN, api, shot } from './platform.helpers';
 import { artefact, createViaDrawer, publishViaTab } from './library.helpers';
@@ -97,18 +94,13 @@ test(
     await shot(page, 'library-4-tagged');
 
     await detail.getByRole('tab', { name: 'Labels' }).click();
-    // The form re-seeds from the artefact on every refetch, so a refetch still
-    // in flight from the tag write can empty the box after the fill. Fill and
-    // save again until the engine holds the labels.
-    await expect(async () => {
-      await detail
-        .getByRole('textbox', { name: 'Labels' })
-        .fill('team=jplat\ntier=gold');
-      await detail.getByRole('button', { name: 'Save metadata' }).click();
-      await expect
-        .poll(async () => (await artefact(NAME)).labels, { timeout: 4_000 })
-        .toEqual({ team: 'jplat', tier: 'gold' });
-    }).toPass({ timeout: 20_000 });
+    await detail
+      .getByRole('textbox', { name: 'Labels' })
+      .fill('team=jplat\ntier=gold');
+    await detail.getByRole('button', { name: 'Save metadata' }).click();
+    await expect
+      .poll(async () => (await artefact(NAME)).labels)
+      .toEqual({ team: 'jplat', tier: 'gold' });
     await shot(page, 'library-5-labelled');
 
     await detail.getByRole('combobox').first().click();
@@ -118,20 +110,15 @@ test(
       .toBe('deprecated');
 
     /* The list behind the drawer should follow the writes without a reload */
-    const LIST_STALE =
-      'the library list is not refetched after a tag, label or state write: the mutations invalidate the literal key ["library","{artifact}"], which no list query uses';
-    await knownConsoleDefect(LIST_STALE, async () => {
-      const listRow = page.getByRole('row', { name: new RegExp(NAME) });
-      await expect(listRow).toContainText(TAG_AT_2, { timeout: 3_000 });
-      await expect(listRow).toContainText('team=jplat', { timeout: 3_000 });
-      await expect(listRow).toContainText('deprecated', { timeout: 3_000 });
-    });
+    const listRow = page.getByRole('row', { name: new RegExp(NAME) });
+    await expect(listRow).toContainText(TAG_AT_2, { timeout: 3_000 });
+    await expect(listRow).toContainText('team=jplat', { timeout: 3_000 });
+    await expect(listRow).toContainText('deprecated', { timeout: 3_000 });
 
     /* A fresh read of the list holds every one of them */
     await page.reload();
     await page.getByPlaceholder(/Search name/).fill(NAME);
     await page.getByPlaceholder(/Search name/).press('Enter');
-    const listRow = page.getByRole('row', { name: new RegExp(NAME) });
     await expect(listRow, 'list shows the tag').toContainText(TAG_AT_2);
     await expect(listRow, 'list shows the labels').toContainText('team=jplat');
     await expect(listRow, 'list shows the state').toContainText('deprecated');
@@ -157,13 +144,9 @@ test(
     await expect
       .poll(async () => (await api('GET', `/api/v1/library/${NAME}`)).status)
       .toBe(404);
-    await knownConsoleDefect(
-      'the library list keeps a deleted artefact until a reload, for the reason the other writes leave it stale',
-      () =>
-        expect(page.getByRole('row', { name: new RegExp(NAME) })).toHaveCount(
-          0,
-          { timeout: 3_000 },
-        ),
+    await expect(page.getByRole('row', { name: new RegExp(NAME) })).toHaveCount(
+      0,
+      { timeout: 3_000 },
     );
     await page.reload();
     await page.getByPlaceholder(/Search name/).fill(NAME);
@@ -172,9 +155,6 @@ test(
       0,
     );
     await shot(page, 'library-7-deleted');
-    await knownConsoleDefect(
-      "deleting an artefact refetches the open drawer's detail, versions and usage, and each answers 404",
-      async () => expect(errors()).toEqual([]),
-    );
+    expect(errors()).toEqual([]);
   },
 );

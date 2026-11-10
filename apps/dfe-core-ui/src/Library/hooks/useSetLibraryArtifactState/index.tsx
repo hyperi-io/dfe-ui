@@ -28,10 +28,7 @@ export const useSetLibraryArtifactState = ({
       setLibraryArtifactStateApi({ body, pathParams: { artifact } }),
     onSuccess: (values) => {
       queryClient.invalidateQueries({
-        queryKey: QUERY_KEYS.library.artifact(),
-      });
-      queryClient.invalidateQueries({
-        queryKey: QUERY_KEYS.library.artifact({ artifact }),
+        queryKey: QUERY_KEYS.library.default(),
       });
       onSuccess?.(values);
     },

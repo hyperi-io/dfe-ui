@@ -1,10 +1,10 @@
+import { AccountGroupSelect } from '@/core/components/AccountGroupSelect';
 import { AccountOrgFormItem } from '@/core/components/AccountOrgFormItem';
 import { Form } from '@/core/components/Form';
 import { FormNotification } from '@/core/components/FormNotification';
 import { NotificationCard } from '@/core/components/NotificationCard';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
 import { STORE_NAME_VALIDATOR } from '@/core/validationSchemas/utils';
-import { GroupRoleSelect } from '@/Settings/components/GroupManagement/GroupRoleSelect';
 import { useCreateApiKey } from '@/Settings/hooks/apiKeys/useCreateApiKey';
 import { TApiKeyCreateResponse } from '@/Settings/hooks/apiKeys/useCreateApiKey/types';
 import { Button, Card, DatePicker, Input, Tag } from 'antd';
@@ -163,7 +163,7 @@ export const CreateApiKeyForm = ({
             <Input.TextArea />
           </Form.Item>
           <Form.Item name="groups" label="Groups" rules={[formValidation]}>
-            <GroupRoleSelect />
+            <AccountGroupSelect />
           </Form.Item>
 
           <AccountOrgFormItem />

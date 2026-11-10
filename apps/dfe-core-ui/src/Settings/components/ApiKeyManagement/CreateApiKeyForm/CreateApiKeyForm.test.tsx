@@ -26,8 +26,8 @@ import {
 import { CreateApiKeyForm } from '.';
 
 // The group picker reads the groups list, and the name rule does not.
-vi.mock('@/Settings/components/GroupManagement/GroupRoleSelect', () => ({
-  GroupRoleSelect: () => null,
+vi.mock('@/core/components/AccountGroupSelect', () => ({
+  AccountGroupSelect: () => null,
 }));
 
 vi.stubGlobal('IntersectionObserver', MockIntersectionObserver);

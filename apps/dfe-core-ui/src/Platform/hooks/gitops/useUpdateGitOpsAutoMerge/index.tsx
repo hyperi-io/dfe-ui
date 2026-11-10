@@ -18,6 +18,10 @@ export const useUpdateGitOpsAutoMerge = ({
       queryClient.invalidateQueries({
         queryKey: QUERY_KEYS.gitops.autoMerge(),
       });
+      // The toggle commits to the deploy repo, so the log has a new entry.
+      queryClient.invalidateQueries({
+        queryKey: QUERY_KEYS.gitops.log(),
+      });
       onSuccess?.(values);
     },
     onError: (error) => {

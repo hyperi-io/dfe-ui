@@ -4,7 +4,6 @@ import { BASE_URL } from '@e2e/config/e2e.client';
 import { engine } from '@e2e/config/engineApi.helpers';
 import {
   JOURNEY_USER,
-  knownConsoleDefect,
   prepareJourneyStack,
   shot,
 } from '@e2e/config/journey.helpers';
@@ -117,10 +116,7 @@ test(
       if (entry.runnable) {
         await expect(box, entry.name).toBeEnabled();
       } else {
-        await knownConsoleDefect(
-          `the catalogue drawer lets an entry be selected that the engine says this deployment cannot run (runnable false): ${entry.name}`,
-          () => expect(box).toBeDisabled({ timeout: 2_000 }),
-        );
+        await expect(box, entry.name).toBeDisabled({ timeout: 2_000 });
       }
     }
   },

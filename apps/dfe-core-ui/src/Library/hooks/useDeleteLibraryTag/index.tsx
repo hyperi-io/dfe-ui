@@ -20,7 +20,7 @@ export const useDeleteLibraryTag = ({
       deleteLibraryTagApi({ pathParams: { artifact, tag } }),
     onSuccess: (values) => {
       queryClient.invalidateQueries({
-        queryKey: QUERY_KEYS.library.artifact({ artifact }),
+        queryKey: QUERY_KEYS.library.default(),
       });
       onSuccess?.(values);
     },
