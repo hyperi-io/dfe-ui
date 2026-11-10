@@ -5,6 +5,7 @@ import { Modal } from '@/core/components/Modal';
 import { RbacProtected } from '@/core/components/RbacProtected';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
 import { RULE_HUNT_NAME_VALIDATOR } from '@/core/validationSchemas/utils';
+import { DEFAULT_ESTIMATE_COST } from '@/Rules/components/CreateUpdateRuleForm/defaults';
 import { useCreateRule } from '@/Rules/hooks/useCreateRule';
 import { TRuleCreateResponse } from '@/Rules/hooks/useCreateRule/types';
 import { TRuleDetail } from '@/Rules/hooks/useFetchRuleDetail/types';
@@ -61,7 +62,7 @@ export const CloneRuleModal = ({
       cel_filter: rule.cel_filter,
       hunt_name: rule.hunt_name,
       source: rule.source,
-      estimate_cost: false,
+      estimate_cost: DEFAULT_ESTIMATE_COST,
       cost_window_minutes: 0,
       name: values.name,
     });
