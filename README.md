@@ -116,7 +116,8 @@ or kind. To prove a machine, one command, one PASS or FAIL line and one log file
 to paste back:
 
 ```bash
-scripts/macos-dev-smoke.sh    # engine from ../dfe-engine, or DFE_ENGINE_DIR=<path>
+python3 scripts/macos-dev-smoke.py   # engine from ../dfe-engine, or DFE_ENGINE_DIR=<path>
+uv run --no-project python scripts/macos-dev-smoke.py   # the same, under uv's Python
 ```
 
 It wants `uv`, node 24 and a dfe-engine checkout beside this repo, and prints

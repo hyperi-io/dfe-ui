@@ -5,7 +5,7 @@
 # License:   BUSL-1.1
 # Copyright: (c) 2026 HYPERI PTY LIMITED
 #
-# Runs scripts/macos-dev-smoke.sh, the same file a developer runs on a Mac. The
+# Runs scripts/macos-dev-smoke.py, the same file a developer runs on a Mac. The
 # GitHub macOS runner has no docker, so the engine runs with no ClickHouse. A Linux
 # leg runs the script's docker mode, the one a Mac with OrbStack or Docker Desktop picks.
 # Dispatch it with an engine ref and a ui ref to gate a release candidate.
@@ -17,7 +17,7 @@ name: macOS dev smoke
     branches: [main]
     paths:
       - '.github/workflows/macos-dev-smoke.yml'
-      - 'scripts/macos-dev-smoke.sh'
+      - 'scripts/macos-dev-smoke.py'
       - 'apps/dfe-core-ui/smoke/**'
       - 'apps/dfe-core-ui/package.json'
       - 'apps/dfe-core-ui/next.config.ts'
@@ -80,7 +80,7 @@ jobs:
       - name: Lay the harness over dfe-ui
         run: |
           mkdir -p dfe-ui/scripts dfe-ui/apps/dfe-core-ui/smoke
-          cp harness/scripts/macos-dev-smoke.sh dfe-ui/scripts/
+          cp harness/scripts/macos-dev-smoke.py dfe-ui/scripts/
           cp harness/apps/dfe-core-ui/smoke/* dfe-ui/apps/dfe-core-ui/smoke/
 
       - name: Check out dfe-engine
@@ -106,7 +106,7 @@ jobs:
         working-directory: dfe-ui
         env:
           CLICKHOUSE: ${{ matrix.clickhouse }}
-        run: scripts/macos-dev-smoke.sh
+        run: python3 scripts/macos-dev-smoke.py
 
       - name: Summary
         if: always()
