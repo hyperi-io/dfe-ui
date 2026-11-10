@@ -43,7 +43,7 @@ const twoPools = () =>
         instances: ['default'],
       },
       {
-        service: 'hyperdx',
+        service: 'dfe-hyperdx',
         display_name: 'Search',
         scale_deployed: false,
         multiplicity: 'single',
@@ -89,7 +89,7 @@ describe('ComponentsScene', () => {
   it('opens the component the URL names', async () => {
     server.use(twoPools());
     vi.mocked(useSearchParams).mockReturnValue(
-      new URLSearchParams('component=hyperdx') as ReturnType<
+      new URLSearchParams('component=dfe-hyperdx') as ReturnType<
         typeof useSearchParams
       >,
     );
@@ -97,7 +97,7 @@ describe('ComponentsScene', () => {
     render(<ComponentsScene />, { wrapper });
 
     expect(
-      await screen.findByRole('tab', { name: /^discovery/, selected: true }),
+      await screen.findByRole('tab', { name: /^dfe-hyperdx/, selected: true }),
     ).toBeInTheDocument();
   });
 
@@ -108,9 +108,9 @@ describe('ComponentsScene', () => {
     const user = userEvent.setup();
 
     render(<ComponentsScene />, { wrapper });
-    await user.click(await screen.findByRole('tab', { name: /^discovery/ }));
+    await user.click(await screen.findByRole('tab', { name: /^dfe-hyperdx/ }));
 
-    expect(replace).toHaveBeenCalledWith('/?component=hyperdx');
+    expect(replace).toHaveBeenCalledWith('/?component=dfe-hyperdx');
   });
 
   it('lists the fleet-wide pools and excludes the per-source apps', async () => {
@@ -133,7 +133,7 @@ describe('ComponentsScene', () => {
     render(<ComponentsScene />, { wrapper });
 
     expect(
-      await screen.findByRole('tab', { name: /^discovery/ }),
+      await screen.findByRole('tab', { name: /^dfe-hyperdx/ }),
     ).toBeInTheDocument();
     expect(
       screen.queryByRole('tab', { name: /Search/ }),
@@ -252,7 +252,7 @@ describe('ComponentsScene', () => {
 
   it('keeps the components whose name matches and says so when none do', async () => {
     const user = userEvent.setup();
-    const hyperdx = { service: 'hyperdx', instance: 'default' };
+    const hyperdx = { service: 'dfe-hyperdx', instance: 'default' };
     server.use(
       API_CONFIG_MOCKS.apps.status.get.success(hyperdx),
       API_CONFIG_MOCKS.apps.metrics.get.success(hyperdx),
@@ -267,7 +267,9 @@ describe('ComponentsScene', () => {
     expect(
       await screen.findByRole('tab', { name: /^dfe-receiver/ }),
     ).toBeInTheDocument();
-    expect(screen.getByRole('tab', { name: /^discovery/ })).toBeInTheDocument();
+    expect(
+      screen.getByRole('tab', { name: /^dfe-hyperdx/ }),
+    ).toBeInTheDocument();
 
     const search = screen.getByRole('searchbox', { name: 'Search components' });
     await user.type(search, 'receiver');
@@ -276,13 +278,15 @@ describe('ComponentsScene', () => {
       screen.getByRole('tab', { name: /^dfe-receiver/ }),
     ).toBeInTheDocument();
     expect(
-      screen.queryByRole('tab', { name: /^discovery/ }),
+      screen.queryByRole('tab', { name: /^dfe-hyperdx/ }),
     ).not.toBeInTheDocument();
 
     await user.clear(search);
     await user.type(search, 'HYPERDX');
 
-    expect(screen.getByRole('tab', { name: /^discovery/ })).toBeInTheDocument();
+    expect(
+      screen.getByRole('tab', { name: /^dfe-hyperdx/ }),
+    ).toBeInTheDocument();
     expect(
       screen.queryByRole('tab', { name: /^dfe-receiver/ }),
     ).not.toBeInTheDocument();

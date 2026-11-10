@@ -5,8 +5,6 @@ const COMPONENT_PARAM = 'component';
 const DEFAULT_INSTANCE = 'default';
 const INSTANCE_PARAM = 'instance';
 const PROCESS_PARAM = 'process';
-// Tab labels for service ids the console keeps off the page
-const POOL_LABELS: Record<string, string> = { hyperdx: 'discovery' };
 
 export type TComponentPool = {
   defaultInstance: boolean;
@@ -42,7 +40,7 @@ const componentQuery = (
  *
  * Which apps count is the manifest's `multiplicity`, not a list kept in the UI.
  * Each pool is labelled by its service id, the name it reports telemetry
- * under, or by its name in POOL_LABELS. With `includeProcesses`, each process deployed from an app's image
+ * under. With `includeProcesses`, each process deployed from an app's image
  * follows that app as a pool of its own. A missing or unknown `?component=`
  * opens the first pool.
  */
@@ -62,7 +60,7 @@ export const useComponentPools = (
           defaultInstance: instance === DEFAULT_INSTANCE,
           instance,
           key: poolKey(app.service, instance),
-          label: POOL_LABELS[app.service] ?? app.service,
+          label: app.service,
           query: componentQuery(app.service, instance),
           scaleDeployed: app.scale_deployed,
           service: app.service,
