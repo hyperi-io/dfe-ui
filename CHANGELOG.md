@@ -3,6 +3,15 @@
 Rendered by CI and committed back at the end of a release -- do not edit by
 hand. Release notes also appear on the GitHub Releases page, one per tag.
 
+## [1.7.39](https://github.com/hyperi-io/dfe-ui/compare/v1.7.38...v1.7.39) (2026-11-10)
+
+### Bug Fixes
+
+* **console:** fix five console defects ([ae80d48](https://github.com/hyperi-io/dfe-ui/commit/ae80d48ed5ed60fd66c3cd156893ade5d1c01069))
+* **console:** show the library tag arrow as an icon ([bffa761](https://github.com/hyperi-io/dfe-ui/commit/bffa76110c7c3fda3f8ad80d6c83419e88154261))
+* **dev:** smoke-test engine and console on macOS ([6991715](https://github.com/hyperi-io/dfe-ui/commit/6991715efce7ac638faf6016b855b1650f3c2a09))
+* **e2e:** add console journey specs ([0f22cb9](https://github.com/hyperi-io/dfe-ui/commit/0f22cb90f60f0c84e65a28ee8fa5221a36184f65))
+
 ## [1.7.38](https://github.com/hyperi-io/dfe-ui/compare/v1.7.37...v1.7.38) (2026-11-09)
 
 ### Bug Fixes
