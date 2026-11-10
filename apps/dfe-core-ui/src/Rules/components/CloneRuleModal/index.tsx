@@ -5,7 +5,7 @@ import { Modal } from '@/core/components/Modal';
 import { RbacProtected } from '@/core/components/RbacProtected';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
 import { RULE_HUNT_NAME_VALIDATOR } from '@/core/validationSchemas/utils';
-import { DEFAULT_ESTIMATE_COST } from '@/Rules/components/CreateUpdateRuleForm';
+import { DEFAULT_ESTIMATE_COST } from '@/Rules/components/CreateUpdateRuleForm/defaults';
 import { useCreateRule } from '@/Rules/hooks/useCreateRule';
 import { TRuleCreateResponse } from '@/Rules/hooks/useCreateRule/types';
 import { TRuleDetail } from '@/Rules/hooks/useFetchRuleDetail/types';

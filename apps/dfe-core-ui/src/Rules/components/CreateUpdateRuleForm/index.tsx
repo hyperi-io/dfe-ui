@@ -14,6 +14,7 @@ import { Button, FormProps } from 'antd';
 import { useEffect, useMemo } from 'react';
 import z from 'zod';
 import { AdvancedSettings } from './AdvancedSettings';
+import { DEFAULT_ESTIMATE_COST } from './defaults';
 import { ResponseModal } from './ResponseModal';
 import { RuleSettings } from './RuleSettings';
 import { SqlValidationErrors } from './SqlValidationErrors';
@@ -40,8 +41,7 @@ const buildFormSchema = (nameIsNew: boolean) =>
     estimate_cost: z.boolean().optional(),
     cost_window_minutes: z.string().optional(),
   });
-/** A save returns the rule's alert-volume measurement unless the user turns Estimate Cost off. */
-export const DEFAULT_ESTIMATE_COST = true;
+export { DEFAULT_ESTIMATE_COST } from './defaults';
 
 export type CreateUpdateRuleFormData = z.infer<
   ReturnType<typeof buildFormSchema>
