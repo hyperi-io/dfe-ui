@@ -40,6 +40,9 @@ const buildFormSchema = (nameIsNew: boolean) =>
     estimate_cost: z.boolean().optional(),
     cost_window_minutes: z.string().optional(),
   });
+/** A save returns the rule's alert-volume measurement unless the user turns Estimate Cost off. */
+export const DEFAULT_ESTIMATE_COST = true;
+
 export type CreateUpdateRuleFormData = z.infer<
   ReturnType<typeof buildFormSchema>
 >;
@@ -121,7 +124,7 @@ const CreateUpdateRuleFormBase = ({
     <Form
       form={form}
       onFinish={onFinish}
-      initialValues={initialValues}
+      initialValues={{ estimate_cost: DEFAULT_ESTIMATE_COST, ...initialValues }}
       {...props}
     >
       <RuleSettings
