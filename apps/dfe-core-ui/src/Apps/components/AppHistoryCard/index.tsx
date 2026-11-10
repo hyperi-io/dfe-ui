@@ -5,6 +5,14 @@ import { NotificationCard } from '@/core/components/NotificationCard';
 import { SectionCard } from '@/core/components/SectionCard';
 import { Table } from '@/core/components/Table';
 import { Spin, Tag } from 'antd';
+import { UIEvent } from 'react';
+
+const PAGE_SIZE = 20;
+// The next page loads once the table is scrolled this close to its end
+const LOAD_MORE_WITHIN_PX = 40;
+const SCROLL_AFTER_ROWS = 5;
+// About five small-table rows
+const SCROLL_HEIGHT_PX = 200;
 
 const STATE_COLOUR: Record<string, string> = {
   applied: 'green',
@@ -44,6 +52,8 @@ const COLUMNS = [
  * State reads 'committed' unless the caller supplies the revision Argo has
  * synced, which this surface does not have - so a commit here means written
  * to git, not confirmed on the cluster.
+ *
+ * It loads a page of changes at a time, the next as the table scrolls to its end.
  */
 export const AppHistoryCard = ({
   service,
@@ -52,11 +62,27 @@ export const AppHistoryCard = ({
   service: string;
   instance: string;
 }) => {
-  const { data, isLoading, error } = useFetchAppHistory({
+  const {
+    data,
+    isLoading,
+    error,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useFetchAppHistory({
     service,
     instance,
-    limit: 20,
+    pageSize: PAGE_SIZE,
   });
+
+  const loadMoreNearTheEnd = (event: UIEvent<HTMLDivElement>) => {
+    const { scrollTop, scrollHeight, clientHeight } = event.currentTarget;
+    const nearTheEnd =
+      scrollHeight - scrollTop - clientHeight < LOAD_MORE_WITHIN_PX;
+    if (nearTheEnd && hasNextPage && !isFetchingNextPage) {
+      void fetchNextPage();
+    }
+  };
 
   if (isLoading) {
     return (
@@ -81,7 +107,17 @@ export const AppHistoryCard = ({
 
   return (
     <SectionCard title="History">
-      <Table rowKey="sha" columns={COLUMNS} dataSource={data ?? []} />
+      <Table
+        rowKey="sha"
+        columns={COLUMNS}
+        dataSource={data}
+        // Past five changes the table scrolls rather than growing the page
+        scroll={
+          data.length > SCROLL_AFTER_ROWS ? { y: SCROLL_HEIGHT_PX } : undefined
+        }
+        onScroll={loadMoreNearTheEnd}
+        footer={isFetchingNextPage ? () => <Spin size="small" /> : undefined}
+      />
     </SectionCard>
   );
 };

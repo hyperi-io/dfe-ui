@@ -4,6 +4,8 @@ import { MainContentCard } from '@/core/components/ContentCard';
 import { CustomScrollbar } from '@/core/components/CustomScrollbar';
 import { NavigationTabLabel } from '@/core/components/NavigationTabLabel';
 import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
+import { BackingServices } from '@/Platform/components/BackingServices';
+import { ComponentSettings } from '@/Platform/components/ComponentSettings';
 import { GitOps } from '@/Platform/components/GitOps';
 import { Governance } from '@/Platform/components/Governance';
 import { Helm } from '@/Platform/components/Helm';
@@ -66,6 +68,26 @@ export const PlatformScene = () => {
                 />
               ),
               children: <SystemManagement />,
+            },
+            {
+              key: PLATFORM_TAB_DETAILS.components.key,
+              label: (
+                <NavigationTabLabel
+                  label={PLATFORM_TAB_DETAILS.components.label}
+                  description={PLATFORM_TAB_DETAILS.components.description}
+                />
+              ),
+              children: <ComponentSettings />,
+            },
+            {
+              key: PLATFORM_TAB_DETAILS.backingServices.key,
+              label: (
+                <NavigationTabLabel
+                  label={PLATFORM_TAB_DETAILS.backingServices.label}
+                  description={PLATFORM_TAB_DETAILS.backingServices.description}
+                />
+              ),
+              children: <BackingServices />,
             },
             {
               key: PLATFORM_TAB_DETAILS.gitops.key,

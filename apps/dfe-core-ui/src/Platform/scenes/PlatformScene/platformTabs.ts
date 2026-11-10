@@ -6,6 +6,16 @@ export const PLATFORM_TAB_DETAILS = Object.freeze({
     label: 'System Settings',
     description: 'View Platform configuration data and restart cloud services',
   },
+  components: {
+    key: 'components',
+    label: 'Components',
+    description: 'Configure the scaling and settings of each component',
+  },
+  backingServices: {
+    key: 'backing-services',
+    label: 'Backing Services',
+    description: 'Scale the data layer, which grows but never shrinks',
+  },
   gitops: {
     key: 'gitops',
     label: 'Git Operations',
@@ -33,7 +43,10 @@ export const PLATFORM_TAB_DETAILS = Object.freeze({
   },
 });
 
-export const PLATFORM_TAB_KEYS = Object.keys(PLATFORM_TAB_DETAILS);
+// The URL segment and the tab's key are one value, so `backing-services` opens its tab
+export const PLATFORM_TAB_KEYS = Object.values(PLATFORM_TAB_DETAILS).map(
+  (tab) => tab.key,
+);
 
 export type PlatformTabKey = (typeof PLATFORM_TAB_KEYS)[number];
 

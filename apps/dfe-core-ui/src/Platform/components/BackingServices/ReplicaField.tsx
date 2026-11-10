@@ -1,9 +1,9 @@
 'use client';
 
-import { DeclaredValue } from '@/Apps/components/BackingServices/DeclaredValue';
-import { checkReplicaChange } from '@/Apps/components/BackingServices/replicaGuard';
-import { TDeclaredValue } from '@/Apps/hooks/backingServices/useFetchBackingServices/types';
-import { useUpdateBackingServiceVar } from '@/Apps/hooks/backingServices/useUpdateBackingServiceVar';
+import { DeclaredValue } from '@/Platform/components/BackingServices/DeclaredValue';
+import { checkReplicaChange } from '@/Platform/components/BackingServices/replicaGuard';
+import { TDeclaredValue } from '@/Platform/hooks/backingServices/useFetchBackingServices/types';
+import { useUpdateBackingServiceVar } from '@/Platform/hooks/backingServices/useUpdateBackingServiceVar';
 import { NotificationCard } from '@/core/components/NotificationCard';
 import { RbacProtected } from '@/core/components/RbacProtected';
 import { WriteResultFeedback } from '@/core/components/WriteResultFeedback';
