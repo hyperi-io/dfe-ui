@@ -6,7 +6,7 @@ const DEFAULT_INSTANCE = 'default';
 const INSTANCE_PARAM = 'instance';
 const PROCESS_PARAM = 'process';
 // Tab labels for service ids the console keeps off the page
-const POOL_LABELS: Record<string, string> = { hyperdx: 'discovery' };
+const POOL_LABELS: Record<string, string> = { 'dfe-hyperdx': 'discovery' };
 
 export type TComponentPool = {
   defaultInstance: boolean;
