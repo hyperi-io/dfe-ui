@@ -1,3 +1,8 @@
+import {
+  CREDENTIAL_REFERENCE_PREFIXES,
+  MATCH_OPERATORS,
+} from '@repo/dfe-engine-types/limits';
+
 import { SOURCE_TRANSPORTS } from '@/core/constants/source.constants';
 import { sourceNameValidator } from '@/core/validationSchemas/source.validation';
 import { MAX_VIEWS } from '@/Sources/components/CreateUpdateSourceForm/ViewsTabContent/constants';
@@ -9,7 +14,6 @@ import {
   matchDepth,
   operatorTakesValue,
   TMatchFormNode,
-  TMatchOperator,
 } from '@/Sources/utils/sourceMatch';
 import {
   ENGINE_OWNED_FETCHER_KEYS,
@@ -21,15 +25,8 @@ import z from 'zod';
 
 type TSourceFetcher = NonNullable<TCreateSourceRequestBody['fetcher']>;
 
-/** `always` is the engine's own, reserved for the default source. */
-export const MATCH_OPERATORS: TMatchOperator[] = [
-  'equals',
-  'exists',
-  'includes',
-  'starts_with',
-  'ends_with',
-  'not_equals',
-];
+/** The engine publishes both, so the form components read them from here. */
+export { CREDENTIAL_REFERENCE_PREFIXES, MATCH_OPERATORS };
 
 /** How a receiver source picks its records: conditions, or one CEL Fast expression. */
 export const MATCH_MODES = ['conditions', 'expression'] as const;
@@ -59,15 +56,6 @@ export const RECEIVER_TABLE_LABELS: Record<
   own: 'Own table',
   main: 'Shared table',
 };
-
-/** The engine keeps a reference to the pipeline's credential, never the credential itself. */
-export const CREDENTIAL_REFERENCE_PREFIXES = [
-  'vault:',
-  'bao:',
-  'openbao:',
-  'env:',
-  'file:',
-] as const;
 
 /** What the customer's own pipeline is held to, as the origin or as the transform. */
 const externalPipelineSchema = {
