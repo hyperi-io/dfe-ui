@@ -3,6 +3,13 @@
 Rendered by CI and committed back at the end of a release -- do not edit by
 hand. Release notes also appear on the GitHub Releases page, one per tag.
 
+## [1.7.43](https://github.com/hyperi-io/dfe-ui/compare/v1.7.42...v1.7.43) (2026-11-11)
+
+### Bug Fixes
+
+* **console:** read the column vocabulary from the engine ([33df50e](https://github.com/hyperi-io/dfe-ui/commit/33df50e182d555477d735632f9a342a442e759b7))
+* **sources:** read engine limits from its OpenAPI ([72bb1a5](https://github.com/hyperi-io/dfe-ui/commit/72bb1a55992f4a9d71b25d8d07f51f5da356efe6)), closes [#1131](https://github.com/hyperi-io/dfe-ui/issues/1131)
+
 ## [1.7.42](https://github.com/hyperi-io/dfe-ui/compare/v1.7.41...v1.7.42) (2026-11-11)
 
 ### Bug Fixes
