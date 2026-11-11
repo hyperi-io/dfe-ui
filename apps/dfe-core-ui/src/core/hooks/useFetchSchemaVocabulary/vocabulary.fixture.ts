@@ -2,6 +2,12 @@ import type { TSchemaVocabularyResponse } from './types';
 
 /** A trimmed copy of what `GET /api/v1/schemas/vocabulary` answers, for tests and mocks. */
 export const SCHEMA_VOCABULARY_FIXTURE: TSchemaVocabularyResponse = {
+  cardinality: {
+    values: ['low', 'high', 'unknown'],
+    default: 'unknown',
+    labels: { low: 'Low', high: 'High', unknown: 'Unknown' },
+    retired_attributes: { lowcardinality: 'low' },
+  },
   primitives: [
     { name: 'string', label: 'String', ch_type: 'String' },
     { name: 'integer', label: 'Integer', ch_type: 'Int64' },

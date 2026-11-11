@@ -8,23 +8,41 @@ import { InlineEditInput } from '@/core/components/Table/InlineEditInput';
 import { InlineEditSelect } from '@/core/components/Table/InlineEditSelect';
 import { Tooltip } from '@/core/components/Tooltip';
 import { useFetchSchemaVocabulary } from '@/core/hooks/useFetchSchemaVocabulary';
+import {
+  attributeOptions,
+  cardinalityOptions,
+  indexOptionsFor,
+  primitiveOptions,
+} from '@/core/hooks/useFetchSchemaVocabulary/options';
 import { rowSchema } from '@/core/validationSchemas/CreateSchemaForm/AddSchemaTable.schema';
 import type { ValidatorRule } from '@rc-component/form/lib/interface';
 import { IconPlus, IconTrash } from '@repo/dfe-icons';
 import { Button, FormRule, Input } from 'antd';
 
 import type { FormListFieldData } from 'antd/es/form';
-import { useEffect, useLayoutEffect, useMemo } from 'react';
-import z from 'zod';
-import { listItemFromPartial } from './AddSchemaTable.helpers';
 import {
-  attributeOptions,
-  primitiveOptions,
-  selectableUseCaseOptions,
-} from './fieldOptions.constants';
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  type ComponentProps,
+} from 'react';
+import z from 'zod';
+import {
+  foldRetiredAttributes,
+  listItemFromPartial,
+} from './AddSchemaTable.helpers';
 import { TypeOverrideSelect } from './TypeOverrideSelect';
 
 export type RowSchema = z.infer<typeof rowSchema>;
+
+/** A column that declares no cardinality shows the one the engine reads it as. */
+const CardinalitySelect = ({
+  value,
+  fallbackValue,
+  ...props
+}: ComponentProps<typeof InlineEditSelect> & { fallbackValue?: string }) => (
+  <InlineEditSelect {...props} value={value || fallbackValue} />
+);
 
 /** Stable default so layout effect does not treat a new `[]` each render as an update. */
 const EMPTY_COLUMNS: UploadedSchemaRow[] = [];
@@ -135,16 +153,25 @@ export const AddSchemaTable = ({
     'name',
   ];
   const form = Form.useFormInstance();
-  const { data: vocabulary, error: vocabularyError } =
-    useFetchSchemaVocabulary();
+  const {
+    data: vocabulary,
+    error: vocabularyError,
+    isLoading: isLoadingVocabulary,
+  } = useFetchSchemaVocabulary();
+  // A select with no options yet says it is loading, not that there is no data.
+  const loadingSelect = {
+    loading: isLoadingVocabulary,
+    notFoundContent: isLoadingVocabulary ? 'Loading...' : undefined,
+  };
   const typeOptions = useMemo(
     () => (vocabulary ? primitiveOptions(vocabulary) : []),
     [vocabulary],
   );
-  const indexOptions = useMemo(
-    () => (vocabulary ? selectableUseCaseOptions(vocabulary) : []),
+  const cardinalitySelectOptions = useMemo(
+    () => (vocabulary ? cardinalityOptions(vocabulary) : []),
     [vocabulary],
   );
+  const retiredAttributes = vocabulary?.cardinality.retired_attributes;
   const columnAttributeOptions = useMemo(
     () => (vocabulary ? attributeOptions(vocabulary) : []),
     [vocabulary],
@@ -166,6 +193,27 @@ export const AddSchemaTable = ({
     // Omit `initialValues` from deps: parents often pass a new array each render (e.g. `.map()`); `initialValuesSignature` gates sync.
     // eslint-disable-next-line react-hooks/exhaustive-deps -- sync only when serialized content changes
   }, [form, name, initialValuesSignature, resetListWhenEmpty]);
+
+  // Once the engine says what a retired attribute means, a row that holds one reads as that
+  // cardinality. The rows are edited in place, because writing the whole list again would
+  // remount them and drop an edit in progress.
+  useEffect(() => {
+    if (!retiredAttributes) {
+      return;
+    }
+    const rows = (form.getFieldValue(name) ?? []) as RowSchema[];
+    rows.forEach((row, index) => {
+      const folded = foldRetiredAttributes(
+        row.cardinality,
+        row.attribute ?? [],
+        retiredAttributes,
+      );
+      if (folded.cardinality !== row.cardinality) {
+        form.setFieldValue([name, index, 'cardinality'], folded.cardinality);
+        form.setFieldValue([name, index, 'attribute'], folded.attribute);
+      }
+    });
+  }, [form, name, retiredAttributes, initialValuesSignature]);
 
   useEffect(() => {
     onMount?.();
@@ -285,6 +333,7 @@ export const AddSchemaTable = ({
                       }}
                     >
                       <InlineEditSelect
+                        {...loadingSelect}
                         options={typeOptions}
                         classNames={{
                           editContainer: 'w-full min-w-60',
@@ -319,18 +368,30 @@ export const AddSchemaTable = ({
               render: (_: unknown, record: SchemaColumnListRow) => {
                 const { key: _rowKey, name: rowIndex, ...restField } = record;
                 return (
-                  <Form.Item
-                    {...restField}
-                    name={[rowIndex, 'use_case']}
-                    rules={[formValidation]}
-                  >
-                    <InlineEditSelect
-                      options={indexOptions}
-                      defaultEditing={
-                        Array.isArray(config.defaultEditFields) &&
-                        config.defaultEditFields.includes('use_case')
-                      }
-                    />
+                  <Form.Item noStyle dependencies={[[name, rowIndex, 'type']]}>
+                    {() => (
+                      <Form.Item
+                        {...restField}
+                        name={[rowIndex, 'use_case']}
+                        rules={[formValidation]}
+                      >
+                        <InlineEditSelect
+                          {...loadingSelect}
+                          options={
+                            vocabulary
+                              ? indexOptionsFor(
+                                  vocabulary,
+                                  form.getFieldValue([name, rowIndex, 'type']),
+                                )
+                              : []
+                          }
+                          defaultEditing={
+                            Array.isArray(config.defaultEditFields) &&
+                            config.defaultEditFields.includes('use_case')
+                          }
+                        />
+                      </Form.Item>
+                    )}
                   </Form.Item>
                 );
               },
@@ -349,11 +410,38 @@ export const AddSchemaTable = ({
                     rules={[formValidation]}
                   >
                     <InlineEditSelect
+                      {...loadingSelect}
                       mode="multiple"
                       options={columnAttributeOptions}
                       defaultEditing={
                         Array.isArray(config.defaultEditFields) &&
                         config.defaultEditFields.includes('attribute')
+                      }
+                    />
+                  </Form.Item>
+                );
+              },
+            },
+            {
+              title: 'Cardinality',
+              dataIndex: 'cardinality',
+              key: 'cardinality',
+              width: 140,
+              render: (_: unknown, record: SchemaColumnListRow) => {
+                const { key: _rowKey, name: rowIndex, ...restField } = record;
+                return (
+                  <Form.Item
+                    {...restField}
+                    name={[rowIndex, 'cardinality']}
+                    rules={[formValidation]}
+                  >
+                    <CardinalitySelect
+                      {...loadingSelect}
+                      fallbackValue={vocabulary?.cardinality.default}
+                      options={cardinalitySelectOptions}
+                      defaultEditing={
+                        Array.isArray(config.defaultEditFields) &&
+                        config.defaultEditFields.includes('cardinality')
                       }
                     />
                   </Form.Item>

@@ -113,6 +113,7 @@ describe('UPLOADED_ROW_FIELD_KEYS', () => {
       'type',
       'use_case',
       'attribute',
+      'cardinality',
       'expr',
       'comment',
       'id',

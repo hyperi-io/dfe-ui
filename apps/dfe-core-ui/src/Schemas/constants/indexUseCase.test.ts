@@ -48,22 +48,24 @@ describe('indexUseCaseOptions', () => {
     ]);
   });
 
-  it('labels each with the question it answers, never a ClickHouse primitive', () => {
+  it('labels each by name and gives the question it answers as the hint, never a ClickHouse primitive', () => {
     const options = indexUseCaseOptions(vocabulary);
 
-    expect(
-      options.find((option) => option.value === 'word_search')?.label,
-    ).toBe('I search for whole words');
-    const labels = options
-      .map((option) => option.label)
+    expect(options.find((option) => option.value === 'word_search')).toEqual({
+      label: 'Word search',
+      value: 'word_search',
+      title: 'I search for whole words',
+    });
+    const text = options
+      .flatMap((option) => [option.label, option.title])
       .join(' ')
       .toLowerCase();
     for (const primitive of ['set(0)', 'minmax', 'bloom_filter', 'tokenbf']) {
-      expect(labels).not.toContain(primitive);
+      expect(text).not.toContain(primitive);
     }
   });
 
-  it('falls back to the label when a use case has no description', () => {
+  it('has no hint when a use case has no description', () => {
     const bare = {
       ...vocabulary,
       use_cases: [{ ...vocabulary.use_cases[0], description: '' }],
@@ -72,6 +74,7 @@ describe('indexUseCaseOptions', () => {
     expect(indexUseCaseOptions(bare)[0]).toEqual({
       label: 'Dimension',
       value: 'dimension',
+      title: undefined,
     });
   });
 });

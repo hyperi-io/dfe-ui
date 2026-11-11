@@ -1,6 +1,6 @@
 import { API_CONFIG_MOCKS } from '@/core/config/api/endpoints/generator';
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
 import { SystemDefaultsSettings } from '.';
 import { server } from './SystemDefaultSettings.mocks';
@@ -66,5 +66,23 @@ describe('SystemDefaultsSettings', () => {
     expect(
       await screen.findByText('none (kept forever)', {}, { timeout: 15000 }),
     ).toBeInTheDocument();
+  });
+
+  it('says the defaults cannot be edited when they failed to load', async () => {
+    server.use(API_CONFIG_MOCKS.system.defaults.get.error());
+    render(<SystemDefaultsSettings />, { wrapper });
+
+    fireEvent.click(
+      await screen.findByRole('button', { name: 'System defaults actions' }),
+    );
+    fireEvent.click(await screen.findByText('Edit Defaults'));
+
+    expect(
+      await screen.findByText(/could not be loaded, so they cannot be edited/),
+    ).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Close' }));
+    expect(
+      screen.queryByText(/so they cannot be edited/),
+    ).not.toBeInTheDocument();
   });
 });

@@ -7,6 +7,8 @@ import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
 import { rowSchema } from '@/core/validationSchemas/CreateSchemaForm/AddSchemaTable.schema';
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { delay, http, HttpResponse } from 'msw';
+import { SCHEMA_VOCABULARY_FIXTURE } from '@/core/hooks/useFetchSchemaVocabulary/vocabulary.fixture';
 import type { FormInstance, FormRule } from 'antd';
 import { useEffect } from 'react';
 import {
@@ -515,25 +517,99 @@ describe('AddSchemaTable', { timeout: 15_000 }, () => {
     });
   });
 
-  test('offers the primitives and index use cases the engine serves', async () => {
+  test('offers the primitives the engine serves', async () => {
+    const user = userEvent.setup();
+    renderAddSchemaTable({
+      initialValues: [validRow()],
+      visibleColumns: ['name', 'type', '__rowId'],
+      config: { defaultEditFields: ['type'] },
+    });
+
+    await user.click((await screen.findAllByRole('combobox'))[0]);
+
+    expect(await screen.findByText('Map')).toBeInTheDocument();
+    expect(screen.getByText('Vector')).toBeInTheDocument();
+  });
+
+  test.each([
+    ['string', ['Word search'], ['Key search', 'Range']],
+    ['map', ['Key search'], ['Word search', 'Dimension']],
+  ])(
+    'offers the use cases valid for a %s column, by label, never a retired name',
+    async (type, offered, absent) => {
+      const user = userEvent.setup();
+      renderAddSchemaTable({
+        initialValues: [validRow({ type })],
+        visibleColumns: ['name', 'type', 'use_case', '__rowId'],
+        config: { defaultEditFields: ['use_case'] },
+      });
+
+      await user.click(await screen.findByRole('combobox'));
+
+      for (const label of offered) {
+        expect(await screen.findByText(label)).toBeInTheDocument();
+      }
+      for (const label of [...absent, 'Fulltext', 'Bloom']) {
+        expect(screen.queryByText(label)).not.toBeInTheDocument();
+      }
+    },
+  );
+
+  test('a use case carries the question it answers as its hint', async () => {
     const user = userEvent.setup();
     renderAddSchemaTable({
       initialValues: [validRow()],
       visibleColumns: ['name', 'type', 'use_case', '__rowId'],
-      config: { defaultEditFields: ['type', 'use_case'] },
+      config: { defaultEditFields: ['use_case'] },
     });
 
-    const [typeSelect, useCaseSelect] = await screen.findAllByRole('combobox');
+    await user.click(await screen.findByRole('combobox'));
 
-    await user.click(typeSelect);
+    expect(await screen.findByTitle('I search for whole words')).toBeVisible();
+  });
+
+  test('a column with no cardinality shows the one the engine reads it as', async () => {
+    renderAddSchemaTable({
+      initialValues: [validRow()],
+      visibleColumns: ['name', 'cardinality', '__rowId'],
+    });
+
+    expect(await screen.findByText('unknown')).toBeInTheDocument();
+  });
+
+  test('a retired lowcardinality attribute shows as Cardinality Low', async () => {
+    const { onColumns } = renderAddSchemaTable({
+      initialValues: [validRow({ attribute: ['lowcardinality'] })],
+      visibleColumns: ['name', 'cardinality', 'attribute', '__rowId'],
+    });
+
+    expect(await screen.findByText('low')).toBeInTheDocument();
+    await waitFor(() =>
+      expect(onColumns).toHaveBeenLastCalledWith([
+        expect.objectContaining({ cardinality: 'low', attribute: [] }),
+      ]),
+    );
+  });
+
+  test('a select says it is loading, not that there is no data, while the vocabulary loads', async () => {
+    server.use(
+      http.get(API_CONFIG_MOCKS.schemas.vocabulary.mockedUrl, async () => {
+        await delay(300);
+        return HttpResponse.json(SCHEMA_VOCABULARY_FIXTURE);
+      }),
+    );
+    const user = userEvent.setup();
+    renderAddSchemaTable({
+      initialValues: [validRow()],
+      visibleColumns: ['name', 'type', '__rowId'],
+      config: { defaultEditFields: ['type'] },
+    });
+
+    await user.click((await screen.findAllByRole('combobox'))[0]);
+
+    expect(await screen.findByText('Loading...')).toBeInTheDocument();
+    expect(screen.queryByText('No data')).not.toBeInTheDocument();
     expect(await screen.findByText('Map')).toBeInTheDocument();
-    expect(screen.getByText('Vector')).toBeInTheDocument();
-
-    await user.click(useCaseSelect);
-    expect(await screen.findByText('Key search')).toBeInTheDocument();
-    expect(screen.getByText('Word search')).toBeInTheDocument();
-    expect(screen.queryByText('Fulltext')).not.toBeInTheDocument();
-    expect(screen.queryByText('Bloom')).not.toBeInTheDocument();
   });
 
   test('says so when the vocabulary cannot be loaded', async () => {

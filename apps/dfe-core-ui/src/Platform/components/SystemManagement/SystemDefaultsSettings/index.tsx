@@ -1,5 +1,7 @@
+import { FormNotification } from '@/core/components/FormNotification';
 import { SectionCard } from '@/core/components/SectionCard';
 import { useFetchDefaults } from '@/core/hooks/useFetchDefaults';
+import { Button } from 'antd';
 import { useState } from 'react';
 import { EditSystemDefaultsForm } from './EditSystemDefaultsForm';
 import { SystemDefaultsActionMenu } from './SystemDefaultsActionMenu';
@@ -22,7 +24,17 @@ export const SystemDefaultsSettings = () => {
         />
       }
     >
-      {isEditDefaultsOpen && defaults ? (
+      {isEditDefaultsOpen && !defaults && error ? (
+        <div className="flex flex-col gap-2">
+          <FormNotification
+            type="error"
+            text={`The defaults could not be loaded, so they cannot be edited: ${error.message}`}
+          />
+          <div className="flex justify-end">
+            <Button onClick={() => setIsEditDefaultsOpen(false)}>Close</Button>
+          </div>
+        </div>
+      ) : isEditDefaultsOpen && defaults ? (
         <EditSystemDefaultsForm
           onClose={() => setIsEditDefaultsOpen(false)}
           onSuccess={({ changed }) => {

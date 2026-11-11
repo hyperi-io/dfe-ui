@@ -1,8 +1,5 @@
 import { Tooltip } from '@/core/components/Tooltip';
-import type {
-  TSchemaVocabularyChOverride,
-  TSchemaVocabularyResponse,
-} from '@/core/hooks/useFetchSchemaVocabulary/types';
+import type { TSchemaVocabularyChOverride } from '@/core/hooks/useFetchSchemaVocabulary/types';
 import { IconInfoCircle } from '@repo/dfe-icons';
 
 /** The values a user typed for an override type's parameters, by parameter name. */
@@ -10,24 +7,6 @@ export type TransformFunctionParams = Record<
   string,
   number | string | undefined
 >;
-
-export const primitiveOptions = (vocabulary: TSchemaVocabularyResponse) =>
-  vocabulary.primitives.map(({ name, label }) => ({ label, value: name }));
-
-export const attributeOptions = (vocabulary: TSchemaVocabularyResponse) =>
-  vocabulary.attributes.map(({ name, label }) => ({ label, value: name }));
-
-/**
- * The use cases a column can take from a picker. One that needs an argument,
- * such as the dimension count of `similarity_search`, is left out: the picker
- * has nowhere to type it, and the engine refuses the bare name.
- */
-export const selectableUseCaseOptions = (
-  vocabulary: TSchemaVocabularyResponse,
-) =>
-  vocabulary.use_cases
-    .filter(({ parameters }) => parameters.length === 0)
-    .map(({ name, label }) => ({ label, value: name }));
 
 const LabelWithHintTooltip = ({
   label,

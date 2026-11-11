@@ -14027,6 +14027,7 @@ export interface components {
          * @description What a schema form may offer, read from the dfe-schemas registry the engine runs.
          */
         SchemaVocabulary: {
+            cardinality: components["schemas"]["VocabularyCardinality"];
             /** Primitives */
             primitives: components["schemas"]["VocabularyPrimitive"][];
             /** Use Cases */
@@ -17044,6 +17045,33 @@ export interface components {
             label: string;
             /** Valid Primitives */
             valid_primitives: string[];
+        };
+        /**
+         * VocabularyCardinality
+         * @description The cardinalities a column may declare.
+         */
+        VocabularyCardinality: {
+            /** Values */
+            values: string[];
+            /**
+             * Default
+             * @description What a column that declares none is read as.
+             */
+            default: string;
+            /**
+             * Labels
+             * @description The label to show for each value.
+             */
+            labels: {
+                [key: string]: string;
+            };
+            /**
+             * Retired Attributes
+             * @description A retired attribute and the cardinality a column holding it reads as.
+             */
+            retired_attributes: {
+                [key: string]: string;
+            };
         };
         /**
          * VocabularyChOverride

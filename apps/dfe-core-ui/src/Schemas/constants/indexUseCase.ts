@@ -1,3 +1,4 @@
+import { indexOptionsFor } from '@/core/hooks/useFetchSchemaVocabulary/options';
 import type { TSchemaVocabularyResponse } from '@/core/hooks/useFetchSchemaVocabulary/types';
 
 /**
@@ -14,20 +15,11 @@ export type IndexUseCase = string;
 /** Not a use case of the engine's: the choice to carry no index. */
 export const NO_INDEX = 'none';
 
-/**
- * What the picker offers: the question each use case answers, then no index.
- * A use case that needs an argument is left out, because the picker cannot
- * take one and the engine refuses the bare name.
- */
+/** What the picker offers: the engine's use cases, then no index. */
 export const indexUseCaseOptions = (
   vocabulary: TSchemaVocabularyResponse,
-): { label: string; value: IndexUseCase }[] => [
-  ...vocabulary.use_cases
-    .filter(({ parameters }) => parameters.length === 0)
-    .map(({ name, label, description }) => ({
-      label: description || label,
-      value: name,
-    })),
+): { label: string; value: IndexUseCase; title?: string }[] => [
+  ...indexOptionsFor(vocabulary),
   { label: 'No index', value: NO_INDEX },
 ];
 
