@@ -1,4 +1,49 @@
+import { readFileSync } from 'node:fs';
 import { collectDefaultMetrics, Gauge, Registry } from '@prometheus-io/client';
+
+// The cgroup v2 file first, then v1, as scalo reads them
+const MEMORY_USAGE_FILES = [
+  '/sys/fs/cgroup/memory.current',
+  '/sys/fs/cgroup/memory/memory.usage_in_bytes',
+];
+const MEMORY_LIMIT_FILES = [
+  '/sys/fs/cgroup/memory.max',
+  '/sys/fs/cgroup/memory/memory.limit_in_bytes',
+];
+
+/** The byte count in the first readable cgroup file, or undefined when none holds a number, as `max` does. */
+export function cgroupBytes(files: readonly string[]): number | undefined {
+  for (const file of files) {
+    let text: string;
+    try {
+      text = readFileSync(file, 'utf8').trim();
+    } catch {
+      continue;
+    }
+    const bytes = Number(text);
+    return text !== '' && Number.isFinite(bytes) ? bytes : undefined;
+  }
+  return undefined;
+}
+
+/** A gauge set from the cgroup at every read, left out when this host has no such file, as scalo does. */
+function cgroupGauge(
+  registry: Registry,
+  name: string,
+  help: string,
+  files: readonly string[],
+): void {
+  if (cgroupBytes(files) === undefined) return;
+  new Gauge({
+    name,
+    help,
+    registers: [registry],
+    collect() {
+      const bytes = cgroupBytes(files);
+      if (bytes !== undefined) this.set(bytes);
+    },
+  });
+}
 
 // Prometheus metrics for the Node side of the stack, deliberately shaped like the
 // Rust services' output so one dashboard and one scrape config cover everything.
@@ -41,6 +86,20 @@ function buildRegistry(): Registry {
     help: 'Start time of the process since unix epoch in seconds',
     registers: [registry],
   }).set(Date.now() / 1000 - process.uptime());
+
+  // The memory the engine's usage reads, as every scalo app reports it
+  cgroupGauge(
+    registry,
+    'container_memory_usage_bytes',
+    'Container memory usage in bytes',
+    MEMORY_USAGE_FILES,
+  );
+  cgroupGauge(
+    registry,
+    'container_memory_limit_bytes',
+    'Container memory limit in bytes',
+    MEMORY_LIMIT_FILES,
+  );
 
   return registry;
 }
