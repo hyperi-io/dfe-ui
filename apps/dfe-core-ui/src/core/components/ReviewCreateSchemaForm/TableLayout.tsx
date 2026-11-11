@@ -139,6 +139,19 @@ export const TableLayout = ({
       },
     },
     {
+      title: 'Cardinality',
+      dataIndex: 'cardinality',
+      key: 'cardinality',
+      render: (cardinality?: string | null) =>
+        cardinality ? (
+          cardinality
+        ) : (
+          <span className="text-foreground/40 dark:text-dark-foreground/40">
+            None
+          </span>
+        ),
+    },
+    {
       title: 'Index Type',
       dataIndex: 'use_case',
       key: 'use_case',
@@ -235,6 +248,7 @@ export const TableLayout = ({
           '_field_type',
           'name',
           'type',
+          'cardinality',
           'main_action',
           'expr',
           'comment',

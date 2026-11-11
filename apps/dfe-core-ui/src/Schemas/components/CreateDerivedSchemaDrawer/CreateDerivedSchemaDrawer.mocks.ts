@@ -60,6 +60,7 @@ export const server = setupServer(
   API_CONFIG_MOCKS.schemas.default.get.success({
     mockedResponse: SCHEMA_LIST_RESPONSE,
   }),
+  API_CONFIG_MOCKS.schemas.vocabulary.get.success(),
   API_CONFIG_MOCKS.schemas.schemaDetail.get.success({
     mockedResponse: BASE_COLUMNS_RESPONSE,
     schema_path: BASE_SCHEMA_PATH,

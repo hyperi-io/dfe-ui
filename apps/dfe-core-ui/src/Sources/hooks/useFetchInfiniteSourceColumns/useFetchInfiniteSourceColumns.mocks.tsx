@@ -11,6 +11,7 @@ const SOURCE_COLUMN_ITEM: TSourceColumnItem = {
   type: 'string',
   use_case: 'string',
   attribute: ['string'],
+  cardinality: 'low',
   description: 'string',
 };
 

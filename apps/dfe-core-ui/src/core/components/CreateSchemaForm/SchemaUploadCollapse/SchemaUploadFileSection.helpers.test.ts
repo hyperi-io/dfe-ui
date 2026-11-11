@@ -22,13 +22,37 @@ describe('transformDataToUploadedSchemaRow', () => {
     expect(result[1]).toMatchObject({
       name: 'source_table',
       type: 'string',
-      attribute: ['lowcardinality'],
+      cardinality: 'low',
     });
+    expect(result[1]?.attribute).toBeUndefined();
     expect(result[2]).toMatchObject({
       name: 'condidence_score',
       type: 'integer',
       ch_override: 'Int16',
     });
+  });
+
+  test.each([
+    [
+      'a cardinality column is kept',
+      { column: 'a', type: 'string', cardinality: 'high' },
+      'high',
+    ],
+    [
+      'a declared cardinality wins over the compound type',
+      { column: 'a', type: 'string_lowcardinality', cardinality: 'high' },
+      'high',
+    ],
+    [
+      'an unknown cardinality is dropped',
+      { column: 'a', type: 'string', cardinality: 'huge' },
+      undefined,
+    ],
+    ['none declared stays none', { column: 'a', type: 'string' }, undefined],
+  ])('CSV: %s', (_label, row, expected) => {
+    expect(transformDataToUploadedSchemaRow([row], 'csv')[0]?.cardinality).toBe(
+      expected,
+    );
   });
 
   test('maps CSV imports to csv_import field type', () => {

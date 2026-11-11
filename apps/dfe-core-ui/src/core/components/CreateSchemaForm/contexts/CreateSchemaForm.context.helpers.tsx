@@ -50,13 +50,14 @@ export const changedValuesMayAffectTabLists = (changed: unknown): boolean => {
  * Revalidate nested `uploadedColumns` paths after programmatic merge — clears stale `Form.Item` errors.
  * @returns The keys to revalidate.
  * @example
- * UPLOADED_ROW_FIELD_KEYS // ['name', 'type', 'use_case', 'attribute', 'expr', 'comment', 'id']
+ * UPLOADED_ROW_FIELD_KEYS // ['name', 'type', 'use_case', 'attribute', 'cardinality', 'expr', 'comment', 'id']
  */
 export const UPLOADED_ROW_FIELD_KEYS = [
   'name',
   'type',
   'use_case',
   'attribute',
+  'cardinality',
   'expr',
   'comment',
   'id',

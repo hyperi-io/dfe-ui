@@ -3,6 +3,7 @@ import { CreateSchemaFormData } from '@/core/validationSchemas/CreateSchemaForm/
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import {
   joinSchemaApiPath,
+  mapFormColumnToRequestColumn,
   transformFormDataToRequestBody,
 } from './useCreateSchema.helpers';
 
@@ -17,6 +18,25 @@ const baseFormData = (): CreateSchemaFormData => ({
   schemaColumns: [],
   description: 'description',
   _field_type: SCHEMA_FIELD_TYPES.USER_DEFINED,
+});
+
+describe('mapFormColumnToRequestColumn', () => {
+  const row = {
+    id: '1',
+    name: 'host',
+    type: 'string',
+    _field_type: SCHEMA_FIELD_TYPES.USER_DEFINED,
+  };
+
+  test('sends a declared cardinality', () => {
+    expect(
+      mapFormColumnToRequestColumn({ ...row, cardinality: 'low' }),
+    ).toMatchObject({ cardinality: 'low' });
+  });
+
+  test('sends none when the column declares none', () => {
+    expect(mapFormColumnToRequestColumn(row)).not.toHaveProperty('cardinality');
+  });
 });
 
 describe('transformFormDataToRequestBody', () => {

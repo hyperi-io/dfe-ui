@@ -3252,6 +3252,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/schemas/vocabulary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Schema Vocabulary
+         * @description The primitives, use cases, attributes and override types a column may use.
+         */
+        get: operations["schemas.vocabulary"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/schemas/definitions/{schema_path}/versions/columns": {
         parameters: {
             query?: never;
@@ -10117,6 +10137,11 @@ export interface components {
             origin: "override" | "deployment";
             /** Deployment Default */
             deployment_default: number;
+            /**
+             * Maximum
+             * @description The largest value a PATCH accepts, so a form can bound it.
+             */
+            maximum: number;
         };
         /**
          * InvokeRequest
@@ -13998,6 +14023,21 @@ export interface components {
             summary: string;
         };
         /**
+         * SchemaVocabulary
+         * @description What a schema form may offer, read from the dfe-schemas registry the engine runs.
+         */
+        SchemaVocabulary: {
+            cardinality: components["schemas"]["VocabularyCardinality"];
+            /** Primitives */
+            primitives: components["schemas"]["VocabularyPrimitive"][];
+            /** Use Cases */
+            use_cases: components["schemas"]["VocabularyUseCase"][];
+            /** Attributes */
+            attributes: components["schemas"]["VocabularyAttribute"][];
+            /** Ch Overrides */
+            ch_overrides: components["schemas"]["VocabularyChOverride"][];
+        };
+        /**
          * SelectionResponse
          * @description The curated selection list (rule ids).
          */
@@ -16995,6 +17035,132 @@ export interface components {
             enum?: unknown[] | null;
         };
         /**
+         * VocabularyAttribute
+         * @description An attribute a column may carry.
+         */
+        VocabularyAttribute: {
+            /** Name */
+            name: string;
+            /** Label */
+            label: string;
+            /** Valid Primitives */
+            valid_primitives: string[];
+        };
+        /**
+         * VocabularyCardinality
+         * @description The cardinalities a column may declare.
+         */
+        VocabularyCardinality: {
+            /** Values */
+            values: string[];
+            /**
+             * Default
+             * @description What a column that declares none is read as.
+             */
+            default: string;
+            /**
+             * Labels
+             * @description The label to show for each value.
+             */
+            labels: {
+                [key: string]: string;
+            };
+            /**
+             * Retired Attributes
+             * @description A retired attribute and the cardinality a column holding it reads as.
+             */
+            retired_attributes: {
+                [key: string]: string;
+            };
+        };
+        /**
+         * VocabularyChOverride
+         * @description A ClickHouse type offered as an override, and the primitive it refines.
+         */
+        VocabularyChOverride: {
+            /** Value */
+            value: string;
+            /** Label */
+            label: string;
+            /** Primitive */
+            primitive: string;
+            /**
+             * Parameters
+             * @description Inputs the type needs, in the order the type takes them.
+             */
+            parameters: components["schemas"]["VocabularyOverrideParameter"][];
+            /**
+             * Template
+             * @description The override text with each parameter in braces; null when it takes none.
+             */
+            template: string | null;
+            /**
+             * Hint
+             * @description A note to show beside the option, empty when there is none.
+             */
+            hint: string;
+        };
+        /**
+         * VocabularyOverrideParameter
+         * @description An argument an override type takes, and the input a form shows for it.
+         */
+        VocabularyOverrideParameter: {
+            /**
+             * Name
+             * @description The name the template wraps in braces.
+             */
+            name: string;
+            /** Label */
+            label: string;
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "integer" | "text";
+        };
+        /**
+         * VocabularyPrimitive
+         * @description A primitive a column may declare.
+         */
+        VocabularyPrimitive: {
+            /** Name */
+            name: string;
+            /** Label */
+            label: string;
+            /**
+             * Ch Type
+             * @description The ClickHouse type the primitive maps to.
+             */
+            ch_type: string;
+        };
+        /**
+         * VocabularyUseCase
+         * @description An index use case: the question the user asks of a column.
+         */
+        VocabularyUseCase: {
+            /** Name */
+            name: string;
+            /** Label */
+            label: string;
+            /**
+             * Description
+             * @description The question the use case answers, in plain words.
+             */
+            description: string;
+            /** Valid Primitives */
+            valid_primitives: string[];
+            /**
+             * Parameters
+             * @description Arguments the use case takes in brackets, such as dims for similarity_search.
+             */
+            parameters: string[];
+            /**
+             * Retired Names
+             * @description Names this use case replaced. A stored column may still carry one.
+             */
+            retired_names: string[];
+        };
+        /**
          * VolumeBand
          * @description How much a rule's projected alert volume asks of the people reviewing it.
          * @enum {string}
@@ -17276,6 +17442,11 @@ export interface components {
             use_case: string;
             /** Attribute */
             attribute?: string[] | null;
+            /**
+             * Cardinality
+             * @description How many distinct values the column holds, as declared. A column holding the retired lowcardinality attribute reads as low. Absent means unknown.
+             */
+            cardinality?: ("low" | "high" | "unknown") | null;
             /**
              * Description
              * @default
@@ -27912,6 +28083,53 @@ export interface operations {
             };
             /** @description Validation Error */
             422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+        };
+    };
+    "schemas.vocabulary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SchemaVocabulary"];
+                };
+            };
+            /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
+            403: {
                 headers: {
                     [name: string]: unknown;
                 };

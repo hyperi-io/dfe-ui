@@ -17,6 +17,7 @@ const TABLE_COLUMN_TITLE_DICT = {
   expr: 'Expression',
   comment: 'Comment',
   attribute: 'Attribute',
+  cardinality: 'Cardinality',
   use_case: 'Index Type',
 };
 interface SchemaTableProps<T extends object> extends TableProps<T> {
