@@ -3,6 +3,12 @@
 Rendered by CI and committed back at the end of a release -- do not edit by
 hand. Release notes also appear on the GitHub Releases page, one per tag.
 
+## [1.7.42](https://github.com/hyperi-io/dfe-ui/compare/v1.7.41...v1.7.42) (2026-11-11)
+
+### Bug Fixes
+
+* **components:** show the usage range as its own menu ([da15750](https://github.com/hyperi-io/dfe-ui/commit/da1575049c62ff93cb5c54a5d825de51d9c3a788))
+
 ## [1.7.41](https://github.com/hyperi-io/dfe-ui/compare/v1.7.40...v1.7.41) (2026-11-11)
 
 ### Bug Fixes
