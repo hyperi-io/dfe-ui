@@ -91,7 +91,7 @@ export interface paths {
          *
          *     ``hyperdx_role`` and ``hyperdx_identity`` are what dfe-hyperdx takes a
          *     session's dashboard role and team from; it caches this answer for 30 seconds,
-         *     so a group change reaches HyperDX in that window rather than at token expiry.
+         *     so a group change reaches dfe-hyperdx in that window rather than at token expiry.
          */
         get: operations["auth.me.list"];
         put?: never;
@@ -896,7 +896,7 @@ export interface paths {
          * Create Org
          * @description Create a new customer organisation (admin only).
          *
-         *     If HyperDX integration is enabled, the lifecycle manager handles
+         *     If the Search integration is enabled, the lifecycle manager handles
          *     team creation as part of org provisioning.  Failure is non-fatal.
          *
          *     A hunt already naming the org, such as one whose org was deleted, has the new
@@ -1373,7 +1373,7 @@ export interface paths {
          *
          *     A delete production+team sends to review answers ``review_required`` and
          *     touches nothing else: main still carries the source, so its topics, records and
-         *     HyperDX source stay until the branch is merged.
+         *     Search source stay until the branch is merged.
          */
         delete: operations["sources.delete"];
         options?: never;
@@ -1452,7 +1452,7 @@ export interface paths {
          *
          *     Reads the loader's per-table counter out of the otel tables over a bounded
          *     five-minute window, so the console can put a number beside a source without
-         *     the operator opening HyperDX. It answers 200 with nulls where the series is
+         *     the operator opening Search. It answers 200 with nulls where the series is
          *     absent: a source that was only just defined has nothing to report, and that
          *     is not an error.
          */
@@ -2058,8 +2058,8 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Create Rule From Hyperdx
-         * @description Create a hunt rule from the SQL a HyperDX view renders to.
+         * Create Rule From Search
+         * @description Create a hunt rule from the SQL a Search view renders to.
          *
          *     Wraps the create pipeline with ``source_type='hyperdx'`` and auto-derives a
          *     unique rule id from the saved-search name, so the caller need not supply one.
@@ -5584,8 +5584,8 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * From Hyperdx
-         * @description Strip a HyperDX query's time bounds -> {window}, ready to save as a rule.
+         * Strip Search Query Time Bounds
+         * @description Strip a Search query's time bounds -> {window}, ready to save as a rule.
          */
         post: operations["authoring.from-hyperdx"];
         delete?: never;
@@ -5705,7 +5705,7 @@ export interface paths {
          * Client Config
          * @description Runtime config for the web UI.
          *
-         *     Authenticated but ungated: every console pane may read it, and the HyperDX URL
+         *     Authenticated but ungated: every console pane may read it, and the Search URL
          *     it returns is internal to the deployment.
          */
         get: operations["config.client"];
@@ -5725,7 +5725,7 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Hyperdx Connection
+         * Get Search Connection
          * @description Return the caller's OWN org connection - never another org's.
          *
          *     A caller granted ``query:execute`` at system scope by a declared, unscoped role
@@ -5751,11 +5751,11 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Hyperdx Sources
-         * @description List every HyperDX team and the DFE sources on it.
+         * List Search Sources
+         * @description List every Search team and the DFE sources on it.
          *
          *     A deploy writes its source to every team, so this is the read that says where
-         *     it landed. 503 when HyperDX is not deployed or not answering -- an empty list
+         *     it landed. 503 when Search is not deployed or not answering -- an empty list
          *     would read as "the source is missing", which is a different fault.
          */
         get: operations["hyperdx.sources"];
@@ -9205,7 +9205,7 @@ export interface components {
         };
         /**
          * FromHyperdxRequest
-         * @description Body for turning a HyperDX query into rule SQL.
+         * @description Body for turning a Search query into rule SQL.
          */
         FromHyperdxRequest: {
             /** Query */
@@ -9862,7 +9862,7 @@ export interface components {
         };
         /**
          * HyperDXConfig
-         * @description Whether the UI links to HyperDX, and where.
+         * @description Whether the UI links to Search, and where.
          */
         HyperDXConfig: {
             /**
@@ -9892,7 +9892,7 @@ export interface components {
         };
         /**
          * HyperDXSourcesResponse
-         * @description Where every deployed DFE source actually landed in HyperDX.
+         * @description Where every deployed DFE source actually landed in Search.
          */
         HyperDXSourcesResponse: {
             /** Teams */
@@ -9900,17 +9900,17 @@ export interface components {
         };
         /**
          * HyperDXTeamSource
-         * @description One HyperDX source on one team, as the fork holds it.
+         * @description One Search source on one team, as dfe-hyperdx holds it.
          */
         HyperDXTeamSource: {
             /**
              * Id
-             * @description HyperDX source id on that team
+             * @description Search source id on that team
              */
             id: string;
             /**
              * Name
-             * @description DFE source name; the HyperDX source carries the same one
+             * @description DFE source name; the Search source carries the same one
              */
             name: string;
             /**
@@ -9923,17 +9923,17 @@ export interface components {
         };
         /**
          * HyperDXTeamSources
-         * @description One HyperDX team and the DFE sources it holds.
+         * @description One Search team and the DFE sources it holds.
          */
         HyperDXTeamSources: {
             /**
              * Team
-             * @description HyperDX team id
+             * @description Search team id
              */
             team: string;
             /**
              * Team Name
-             * @description HyperDX team name: the ClickHouse user its members read as
+             * @description Search team name: the ClickHouse user its members read as
              */
             team_name: string;
             /** Sources */
@@ -11149,8 +11149,8 @@ export interface components {
          *         display_name: Human-readable label for UI display.
          *         org_ids: Tenant IDs used for ClickHouse row-level security filters.
          *         enabled: Whether this org is active.
-         *         hyperdx_team_id: HyperDX team ID for this org's connection sync.
-         *         hyperdx_team_api_key_env: Environment variable name holding the org's HyperDX team API key.
+         *         hyperdx_team_id: dfe-hyperdx team ID for this org's connection sync.
+         *         hyperdx_team_api_key_env: Environment variable name holding the org's dfe-hyperdx team API key.
          *         ch_password_env: Environment variable name holding the ClickHouse password.
          *         created_at: ISO 8601 timestamp of creation.
          *         updated_at: ISO 8601 timestamp of last update.
@@ -12846,7 +12846,7 @@ export interface components {
             name: string;
             /**
              * Source Type
-             * @description 'raw' (plain SQL) or 'hyperdx' (HyperDX saved search format)
+             * @description 'raw' (plain SQL) or 'hyperdx' (Search saved search format)
              * @default raw
              * @enum {string}
              */
@@ -12880,23 +12880,23 @@ export interface components {
         };
         /**
          * RuleFromHyperdxRequest
-         * @description Create a hunt rule from the SQL a HyperDX view runs.
+         * @description Create a hunt rule from the SQL a Search view runs.
          *
-         *     HyperDX renders the view to ``raw_sql`` and sends it here. The create
+         *     Search renders the view to ``raw_sql`` and sends it here. The create
          *     pipeline strips the UI meta (time bounds, LIMIT, ``__hdx_time_bucket``,
-         *     SETTINGS) via the HyperDX sanitizer, and the engine derives a unique rule id
+         *     SETTINGS) via the dfe-hyperdx sanitizer, and the engine derives a unique rule id
          *     from the saved-search name. The caller gets that id back and opens
          *     ``/rules/{id}`` -- no id to invent, no IndexedDB round-trip.
          */
         RuleFromHyperdxRequest: {
             /**
              * Raw Sql
-             * @description The ClickHouse SELECT the HyperDX view renders to
+             * @description The ClickHouse SELECT the Search view renders to
              */
             raw_sql: string;
             /**
              * Saved Search Name
-             * @description HyperDX saved-search name; seeds the rule id and label
+             * @description Search saved-search name; seeds the rule id and label
              */
             saved_search_name?: string | null;
             /**
@@ -12918,7 +12918,7 @@ export interface components {
         };
         /**
          * RuleFromHyperdxResponse
-         * @description The rule created from a HyperDX query.
+         * @description The rule created from a Search query.
          */
         RuleFromHyperdxResponse: {
             /**
@@ -13666,12 +13666,12 @@ export interface components {
             apps_sync_error?: string | null;
             /**
              * Hyperdx Source Teams
-             * @description How many HyperDX teams now carry a source over this source's table
+             * @description How many Search teams now carry a source over this source's table
              */
             hyperdx_source_teams?: number | null;
             /**
              * Hyperdx Source Error
-             * @description Why HyperDX was not pointed at the table. Never fails the deploy - the schema is live and HyperDX may be down or not deployed at all.
+             * @description Why Search was not pointed at the table. Never fails the deploy - the schema is live and Search may be down or not deployed at all.
              */
             hyperdx_source_error?: string | null;
             /**
@@ -14218,8 +14218,7 @@ export interface components {
          *     A column maps a standard ``sigma_field`` (the alias the view exposes) to EITHER
          *     a real table column (``source_column``) OR a dotted path inside the source's
          *     ``_json`` column (``json_path``) - exactly one of the two. ``type`` is an
-         *     optional ClickHouse type the extracted value is CAST to (mainly for a
-         *     JSON-derived column, whose subcolumn is otherwise a ``Dynamic``). This is the
+         *     optional ClickHouse type for the value, read as RemapColumn reads it. This is the
          *     Sigma-named shape of :class:`~dfe_engine.fieldmap.remap_view.RemapColumn`.
          */
         SigmaViewColumn: {
@@ -14240,7 +14239,7 @@ export interface components {
             json_path?: string | null;
             /**
              * Type
-             * @description Optional ClickHouse type to CAST the value to (e.g. 'String', 'UInt32')
+             * @description Optional ClickHouse type for the value (e.g. 'String', 'UInt32')
              */
             type?: string | null;
         };
@@ -16604,7 +16603,7 @@ export interface components {
             groups?: string[];
             /**
              * Org Ids
-             * @description Orgs this user can browse in the data plane (HyperDX). Empty means no org-scoped data access.
+             * @description Orgs this user can browse in the data plane (Search). Empty means no org-scoped data access.
              */
             org_ids?: string[];
             /**
@@ -17421,7 +17420,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description The break-glass account is disabled in governance settings */
+            /** @description The break-glass password is right, but the account is disabled in governance settings */
             403: {
                 headers: {
                     [name: string]: unknown;
