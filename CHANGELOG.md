@@ -3,6 +3,14 @@
 Rendered by CI and committed back at the end of a release -- do not edit by
 hand. Release notes also appear on the GitHub Releases page, one per tag.
 
+## [1.7.41](https://github.com/hyperi-io/dfe-ui/compare/v1.7.40...v1.7.41) (2026-11-11)
+
+### Bug Fixes
+
+* **apps:** fit the History card's table to its card ([ac6f86c](https://github.com/hyperi-io/dfe-ui/commit/ac6f86cb9fe99dfcc7f3b566396780b591e3a496))
+* **hunts:** use the engine's store name rule for alert destinations ([62d4301](https://github.com/hyperi-io/dfe-ui/commit/62d43013a7cf0b6869df93922bcc9543547c3df2))
+* **rules:** show the alert volume preview when a rule is saved ([08e76a2](https://github.com/hyperi-io/dfe-ui/commit/08e76a29ea3e9c239e76329bdb6e8601ed379958))
+
 ## [1.7.40](https://github.com/hyperi-io/dfe-ui/compare/v1.7.39...v1.7.40) (2026-11-10)
 
 ### Bug Fixes
