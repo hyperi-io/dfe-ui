@@ -73,6 +73,35 @@ describe('AppHistoryCard', () => {
     expect(screen.getAllByText('change 5')).toHaveLength(1);
   });
 
+  it.each([
+    { actor: 'kaz', summary: 'short' },
+    {
+      actor: 'someone.with.a.long.name@example.com',
+      summary:
+        'a change whose summary runs far past the width of any card '.repeat(4),
+    },
+  ])(
+    'keeps the same column widths when the actor is $actor',
+    async ({ actor, summary }) => {
+      server.use(
+        API_CONFIG_MOCKS.apps.history.get.success({
+          ...pool,
+          pages: [
+            changes(0, 1).map((change) => ({ ...change, actor, summary })),
+          ],
+        }),
+      );
+
+      const { container } = render(<AppHistoryCard {...pool} />, { wrapper });
+
+      expect(await screen.findByText(actor)).toBeInTheDocument();
+      const widths = [...container.querySelectorAll('colgroup col')].map(
+        (col) => (col as HTMLElement).style.width,
+      );
+      expect(widths).toEqual(['96px', '', '140px', '200px', '120px']);
+    },
+  );
+
   it('says so when the history cannot be read', async () => {
     server.use(
       http.get(
