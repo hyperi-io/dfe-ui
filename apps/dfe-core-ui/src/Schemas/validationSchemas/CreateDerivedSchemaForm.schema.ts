@@ -3,12 +3,12 @@ import {
   schemaNameValidator,
   schemaVersionValidator,
 } from '@/core/validationSchemas/CreateSchemaForm/utils';
-import { INDEX_USE_CASES } from '@/Schemas/constants/indexUseCase';
 import z from 'zod';
 
 const selectEntrySchema = z.object({
   name: z.string().min(1, { message: 'Column name is required' }),
-  index: z.enum(INDEX_USE_CASES).optional(),
+  // The engine owns the use case names and refuses one it does not know.
+  index: z.string().min(1).optional(),
 });
 
 export const formSchema = z.object({

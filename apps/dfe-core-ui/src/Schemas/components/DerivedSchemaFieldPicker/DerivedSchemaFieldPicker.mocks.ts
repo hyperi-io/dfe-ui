@@ -49,6 +49,7 @@ export const BASE_COLUMNS_RESPONSE: TMetaSchemaDetailResponse = {
 };
 
 export const server = setupServer(
+  API_CONFIG_MOCKS.schemas.vocabulary.get.success(),
   API_CONFIG_MOCKS.schemas.schemaDetail.get.success({
     mockedResponse: BASE_COLUMNS_RESPONSE,
     schema_path: BASE_SCHEMA_PATH,

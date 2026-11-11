@@ -1,3 +1,4 @@
+import type { TSchemaVocabularyResponse } from '@/core/hooks/useFetchSchemaVocabulary/types';
 import {
   IndexUseCase,
   resolveIndexUseCase,
@@ -20,12 +21,15 @@ export type DerivedBaseColumn = {
   baseIndex: IndexUseCase;
 };
 
-export const baseColumnFrom = (column: {
-  name?: string | null;
-  use_case?: string | null;
-}): DerivedBaseColumn => ({
+export const baseColumnFrom = (
+  column: {
+    name?: string | null;
+    use_case?: string | null;
+  },
+  vocabulary: TSchemaVocabularyResponse,
+): DerivedBaseColumn => ({
   name: column.name ?? '',
-  baseIndex: resolveIndexUseCase(column.use_case),
+  baseIndex: resolveIndexUseCase(column.use_case, vocabulary),
 });
 
 /** An omitted `index` keeps the base column's, so only a change is written. */

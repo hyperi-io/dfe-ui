@@ -36,6 +36,7 @@ describe('SystemDefaultsSettings', () => {
             stored: null,
             origin: 'deployment',
             deployment_default: 0,
+            maximum: 36500,
           },
           common_header_type: {
             effective: 'common-header/timeseries',

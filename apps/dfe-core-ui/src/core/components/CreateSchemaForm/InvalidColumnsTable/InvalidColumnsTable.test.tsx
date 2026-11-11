@@ -5,13 +5,24 @@ import {
 import type { CreateSchemaFormContextValue } from '@/core/components/CreateSchemaForm/contexts/CreateSchemaForm.context.d';
 import { SCHEMA_FIELD_TYPES } from '@/core/components/CreateSchemaForm/fieldType.constants';
 import { Form } from '@/core/components/Form';
+import { server } from '@/core/hooks/useFetchSchemaVocabulary/useFetchSchemaVocabulary.mocks';
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
 import { render, screen } from '@testing-library/react';
-import { beforeEach, describe, expect, test, vi } from 'vitest';
+import {
+  afterAll,
+  afterEach,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  test,
+  vi,
+} from 'vitest';
 import z from 'zod';
 import { InvalidColumnsTable } from './index';
 
 const { wrapper } = buildTestWrapper()
+  .withReactQuery()
   .withContext<Partial<CreateSchemaFormContextValue>>({
     provider: CreateSchemaFormProvider,
     value: {
@@ -36,6 +47,10 @@ const { wrapper } = buildTestWrapper()
     const { form } = useCreateSchemaFormContext();
     return <Form form={form}>{children}</Form>;
   });
+
+beforeAll(() => server.listen({ onUnhandledRequest: 'error' }));
+afterEach(() => server.resetHandlers());
+afterAll(() => server.close());
 
 describe('InvalidColumnsTable', () => {
   beforeEach(() => {

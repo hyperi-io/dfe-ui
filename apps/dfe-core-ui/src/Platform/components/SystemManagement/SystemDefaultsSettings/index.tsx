@@ -22,19 +22,19 @@ export const SystemDefaultsSettings = () => {
         />
       }
     >
-      {isEditDefaultsOpen ? (
+      {isEditDefaultsOpen && defaults ? (
         <EditSystemDefaultsForm
           onClose={() => setIsEditDefaultsOpen(false)}
           onSuccess={({ changed }) => {
             setIsEditDefaultsOpen(false);
             setHasDefaultsChanged(changed);
           }}
+          maxTtlDays={defaults.ttl_days.maximum}
           initialValues={{
-            ttl_days: defaults?.ttl_days?.effective ?? 0,
-            engine: defaults?.engine?.effective ?? '',
-            common_header_version:
-              defaults?.common_header_version?.effective ?? '',
-            common_header_type: `common-header/${defaults?.common_header_type?.effective?.replace('common-header/', '')}`,
+            ttl_days: defaults.ttl_days.effective,
+            engine: defaults.engine.effective,
+            common_header_version: defaults.common_header_version.effective,
+            common_header_type: `common-header/${defaults.common_header_type.effective.replace('common-header/', '')}`,
           }}
         />
       ) : (

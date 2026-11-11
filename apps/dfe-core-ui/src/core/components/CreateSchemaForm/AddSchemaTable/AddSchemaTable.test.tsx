@@ -1,13 +1,24 @@
 import { SCHEMA_FIELD_TYPES } from '@/core/components/CreateSchemaForm/fieldType.constants';
 import { UploadedSchemaRow } from '@/core/components/CreateSchemaForm/types';
 import { Form as AntdForm, Form } from '@/core/components/Form';
+import { API_CONFIG_MOCKS } from '@/core/config/api/endpoints/generator';
+import { server } from '@/core/hooks/useFetchSchemaVocabulary/useFetchSchemaVocabulary.mocks';
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
 import { rowSchema } from '@/core/validationSchemas/CreateSchemaForm/AddSchemaTable.schema';
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { FormInstance, FormRule } from 'antd';
 import { useEffect } from 'react';
-import { beforeEach, describe, expect, test, vi } from 'vitest';
+import {
+  afterAll,
+  afterEach,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  test,
+  vi,
+} from 'vitest';
 import {
   AddSchemaTable,
   isBlankSchemaListRow,
@@ -19,7 +30,11 @@ const bypassFormValidation = {
   validator: async () => Promise.resolve(),
 } as FormRule;
 
-const { wrapper } = buildTestWrapper();
+beforeAll(() => server.listen({ onUnhandledRequest: 'error' }));
+afterEach(() => server.resetHandlers());
+afterAll(() => server.close());
+
+const { wrapper } = buildTestWrapper().withReactQuery();
 
 const validRow = (overrides: Partial<RowSchema> = {}): RowSchema => ({
   id: 'row-1',
@@ -498,6 +513,36 @@ describe('AddSchemaTable', { timeout: 15_000 }, () => {
         inputs.some((el) => (el as HTMLInputElement).value === 'auto_edit'),
       ).toBe(true);
     });
+  });
+
+  test('offers the primitives and index use cases the engine serves', async () => {
+    const user = userEvent.setup();
+    renderAddSchemaTable({
+      initialValues: [validRow()],
+      visibleColumns: ['name', 'type', 'use_case', '__rowId'],
+      config: { defaultEditFields: ['type', 'use_case'] },
+    });
+
+    const [typeSelect, useCaseSelect] = await screen.findAllByRole('combobox');
+
+    await user.click(typeSelect);
+    expect(await screen.findByText('Map')).toBeInTheDocument();
+    expect(screen.getByText('Vector')).toBeInTheDocument();
+
+    await user.click(useCaseSelect);
+    expect(await screen.findByText('Key search')).toBeInTheDocument();
+    expect(screen.getByText('Word search')).toBeInTheDocument();
+    expect(screen.queryByText('Fulltext')).not.toBeInTheDocument();
+    expect(screen.queryByText('Bloom')).not.toBeInTheDocument();
+  });
+
+  test('says so when the vocabulary cannot be loaded', async () => {
+    server.use(API_CONFIG_MOCKS.schemas.vocabulary.get.error());
+    renderAddSchemaTable();
+
+    expect(
+      await screen.findByText(/The column types could not be loaded/),
+    ).toBeInTheDocument();
   });
 
   test('forwards table props to the underlying table', () => {
