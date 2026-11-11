@@ -173,6 +173,7 @@ export const system = {
             stored: null,
             origin: 'deployment',
             deployment_default: 90,
+            maximum: 36500,
           },
           common_header_type: {
             effective: 'string',
@@ -216,6 +217,7 @@ export const system = {
             stored: null,
             origin: 'deployment',
             deployment_default: 90,
+            maximum: 36500,
           },
           common_header_type: {
             effective: 'string',

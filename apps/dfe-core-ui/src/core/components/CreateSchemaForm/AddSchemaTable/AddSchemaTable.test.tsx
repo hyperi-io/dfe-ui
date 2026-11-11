@@ -1,13 +1,26 @@
 import { SCHEMA_FIELD_TYPES } from '@/core/components/CreateSchemaForm/fieldType.constants';
 import { UploadedSchemaRow } from '@/core/components/CreateSchemaForm/types';
 import { Form as AntdForm, Form } from '@/core/components/Form';
+import { API_CONFIG_MOCKS } from '@/core/config/api/endpoints/generator';
+import { server } from '@/core/hooks/useFetchSchemaVocabulary/useFetchSchemaVocabulary.mocks';
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
 import { rowSchema } from '@/core/validationSchemas/CreateSchemaForm/AddSchemaTable.schema';
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { delay, http, HttpResponse } from 'msw';
+import { SCHEMA_VOCABULARY_FIXTURE } from '@/core/hooks/useFetchSchemaVocabulary/vocabulary.fixture';
 import type { FormInstance, FormRule } from 'antd';
 import { useEffect } from 'react';
-import { beforeEach, describe, expect, test, vi } from 'vitest';
+import {
+  afterAll,
+  afterEach,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  test,
+  vi,
+} from 'vitest';
 import {
   AddSchemaTable,
   isBlankSchemaListRow,
@@ -19,7 +32,11 @@ const bypassFormValidation = {
   validator: async () => Promise.resolve(),
 } as FormRule;
 
-const { wrapper } = buildTestWrapper();
+beforeAll(() => server.listen({ onUnhandledRequest: 'error' }));
+afterEach(() => server.resetHandlers());
+afterAll(() => server.close());
+
+const { wrapper } = buildTestWrapper().withReactQuery();
 
 const validRow = (overrides: Partial<RowSchema> = {}): RowSchema => ({
   id: 'row-1',
@@ -498,6 +515,124 @@ describe('AddSchemaTable', { timeout: 15_000 }, () => {
         inputs.some((el) => (el as HTMLInputElement).value === 'auto_edit'),
       ).toBe(true);
     });
+  });
+
+  test('offers the primitives the engine serves', async () => {
+    const user = userEvent.setup();
+    renderAddSchemaTable({
+      initialValues: [validRow()],
+      visibleColumns: ['name', 'type', '__rowId'],
+      config: { defaultEditFields: ['type'] },
+    });
+
+    await user.click((await screen.findAllByRole('combobox'))[0]);
+
+    expect(await screen.findByText('Map')).toBeInTheDocument();
+    expect(screen.getByText('Vector')).toBeInTheDocument();
+  });
+
+  test.each([
+    ['string', ['Word search'], ['Key search', 'Range']],
+    ['map', ['Key search'], ['Word search', 'Dimension']],
+  ])(
+    'offers the use cases valid for a %s column, by label, never a retired name',
+    async (type, offered, absent) => {
+      const user = userEvent.setup();
+      renderAddSchemaTable({
+        initialValues: [validRow({ type })],
+        visibleColumns: ['name', 'type', 'use_case', '__rowId'],
+        config: { defaultEditFields: ['use_case'] },
+      });
+
+      await user.click(await screen.findByRole('combobox'));
+
+      for (const label of offered) {
+        expect(await screen.findByText(label)).toBeInTheDocument();
+      }
+      for (const label of [...absent, 'Fulltext', 'Bloom']) {
+        expect(screen.queryByText(label)).not.toBeInTheDocument();
+      }
+    },
+  );
+
+  test('a use case carries the question it answers as its hint', async () => {
+    const user = userEvent.setup();
+    renderAddSchemaTable({
+      initialValues: [validRow()],
+      visibleColumns: ['name', 'type', 'use_case', '__rowId'],
+      config: { defaultEditFields: ['use_case'] },
+    });
+
+    await user.click(await screen.findByRole('combobox'));
+
+    expect(await screen.findByTitle('I search for whole words')).toBeVisible();
+  });
+
+  test('a column with no cardinality shows the one the engine reads it as', async () => {
+    renderAddSchemaTable({
+      initialValues: [validRow()],
+      visibleColumns: ['name', 'cardinality', '__rowId'],
+    });
+
+    expect(await screen.findByText('unknown')).toBeInTheDocument();
+  });
+
+  test('a retired lowcardinality attribute shows as Cardinality Low', async () => {
+    const { onColumns } = renderAddSchemaTable({
+      initialValues: [validRow({ attribute: ['lowcardinality'] })],
+      visibleColumns: ['name', 'cardinality', 'attribute', '__rowId'],
+    });
+
+    expect(await screen.findByText('low')).toBeInTheDocument();
+    await waitFor(() =>
+      expect(onColumns).toHaveBeenLastCalledWith([
+        expect.objectContaining({ cardinality: 'low', attribute: [] }),
+      ]),
+    );
+  });
+
+  test('a stored retired use case name shows as the one that replaced it', async () => {
+    const { onColumns } = renderAddSchemaTable({
+      initialValues: [validRow({ use_case: 'fulltext' })],
+      visibleColumns: ['name', 'use_case', '__rowId'],
+    });
+
+    expect(await screen.findByText('word_search')).toBeInTheDocument();
+    await waitFor(() =>
+      expect(onColumns).toHaveBeenLastCalledWith([
+        expect.objectContaining({ use_case: 'word_search' }),
+      ]),
+    );
+  });
+
+  test('a select says it is loading, not that there is no data, while the vocabulary loads', async () => {
+    server.use(
+      http.get(API_CONFIG_MOCKS.schemas.vocabulary.mockedUrl, async () => {
+        await delay(300);
+        return HttpResponse.json(SCHEMA_VOCABULARY_FIXTURE);
+      }),
+    );
+    const user = userEvent.setup();
+    renderAddSchemaTable({
+      initialValues: [validRow()],
+      visibleColumns: ['name', 'type', '__rowId'],
+      config: { defaultEditFields: ['type'] },
+    });
+
+    await user.click((await screen.findAllByRole('combobox'))[0]);
+
+    expect(await screen.findByText('Loading...')).toBeInTheDocument();
+    expect(screen.queryByText('No data')).not.toBeInTheDocument();
+    expect(await screen.findByText('Map')).toBeInTheDocument();
+  });
+
+  test('says so when the vocabulary cannot be loaded', async () => {
+    server.use(API_CONFIG_MOCKS.schemas.vocabulary.get.error());
+    renderAddSchemaTable();
+
+    expect(
+      await screen.findByText(/The column types could not be loaded/),
+    ).toBeInTheDocument();
   });
 
   test('forwards table props to the underlying table', () => {

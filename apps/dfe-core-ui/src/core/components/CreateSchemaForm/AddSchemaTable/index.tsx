@@ -1,28 +1,50 @@
 import { SCHEMA_FIELD_TYPES } from '@/core/components/CreateSchemaForm/fieldType.constants';
 import { UploadedSchemaRow } from '@/core/components/CreateSchemaForm/types';
 import { Form } from '@/core/components/Form';
+import { FormNotification } from '@/core/components/FormNotification';
 import { SchemaTable } from '@/core/components/SchemaTable';
 import { TableProps } from '@/core/components/Table';
 import { InlineEditInput } from '@/core/components/Table/InlineEditInput';
 import { InlineEditSelect } from '@/core/components/Table/InlineEditSelect';
 import { Tooltip } from '@/core/components/Tooltip';
+import { useFetchSchemaVocabulary } from '@/core/hooks/useFetchSchemaVocabulary';
+import {
+  attributeOptions,
+  cardinalityOptions,
+  currentUseCaseName,
+  indexOptionsFor,
+  primitiveOptions,
+  suitsPrimitive,
+} from '@/core/hooks/useFetchSchemaVocabulary/options';
 import { rowSchema } from '@/core/validationSchemas/CreateSchemaForm/AddSchemaTable.schema';
 import type { ValidatorRule } from '@rc-component/form/lib/interface';
 import { IconPlus, IconTrash } from '@repo/dfe-icons';
 import { Button, FormRule, Input } from 'antd';
 
 import type { FormListFieldData } from 'antd/es/form';
-import { useEffect, useLayoutEffect } from 'react';
-import z from 'zod';
-import { listItemFromPartial } from './AddSchemaTable.helpers';
 import {
-  ATTRIBUTE_OPTIONS,
-  PRIMITIVE_OPTIONS,
-  USE_CASE_OPTIONS,
-} from './fieldOptions.constants';
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  type ComponentProps,
+} from 'react';
+import z from 'zod';
+import {
+  foldRetiredAttributes,
+  listItemFromPartial,
+} from './AddSchemaTable.helpers';
 import { TypeOverrideSelect } from './TypeOverrideSelect';
 
 export type RowSchema = z.infer<typeof rowSchema>;
+
+/** A column that declares no cardinality shows the one the engine reads it as. */
+const CardinalitySelect = ({
+  value,
+  fallbackValue,
+  ...props
+}: ComponentProps<typeof InlineEditSelect> & { fallbackValue?: string }) => (
+  <InlineEditSelect {...props} value={value || fallbackValue} />
+);
 
 /** Stable default so layout effect does not treat a new `[]` each render as an update. */
 const EMPTY_COLUMNS: UploadedSchemaRow[] = [];
@@ -133,6 +155,28 @@ export const AddSchemaTable = ({
     'name',
   ];
   const form = Form.useFormInstance();
+  const {
+    data: vocabulary,
+    error: vocabularyError,
+    isLoading: isLoadingVocabulary,
+  } = useFetchSchemaVocabulary();
+  // A select with no options yet says it is loading, not that there is no data.
+  const loadingSelect = {
+    loading: isLoadingVocabulary,
+    notFoundContent: isLoadingVocabulary ? 'Loading...' : undefined,
+  };
+  const typeOptions = useMemo(
+    () => (vocabulary ? primitiveOptions(vocabulary) : []),
+    [vocabulary],
+  );
+  const cardinalitySelectOptions = useMemo(
+    () => (vocabulary ? cardinalityOptions(vocabulary) : []),
+    [vocabulary],
+  );
+  const columnAttributeOptions = useMemo(
+    () => (vocabulary ? attributeOptions(vocabulary) : []),
+    [vocabulary],
+  );
 
   /** New array refs from parents (e.g. `.map(...)`) must not retrigger a sync unless content changed. */
   const initialValuesSignature = JSON.stringify(initialValues);
@@ -151,289 +195,376 @@ export const AddSchemaTable = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps -- sync only when serialized content changes
   }, [form, name, initialValuesSignature, resetListWhenEmpty]);
 
+  // Once the engine says what a retired attribute or use case name means, a row that holds one
+  // reads as its replacement. The rows are edited in place, because writing the whole list
+  // again would remount them and drop an edit in progress.
+  useEffect(() => {
+    if (!vocabulary) {
+      return;
+    }
+    const rows = (form.getFieldValue(name) ?? []) as RowSchema[];
+    rows.forEach((row, index) => {
+      const folded = foldRetiredAttributes(
+        row.cardinality,
+        row.attribute ?? [],
+        vocabulary.cardinality.retired_attributes,
+      );
+      if (folded.cardinality !== row.cardinality) {
+        form.setFieldValue([name, index, 'cardinality'], folded.cardinality);
+        form.setFieldValue([name, index, 'attribute'], folded.attribute);
+      }
+      const useCase = row.use_case
+        ? currentUseCaseName(vocabulary, row.use_case)
+        : row.use_case;
+      if (useCase !== row.use_case) {
+        form.setFieldValue([name, index, 'use_case'], useCase);
+      }
+    });
+  }, [form, name, vocabulary, initialValuesSignature]);
+
   useEffect(() => {
     onMount?.();
   }, [onMount]);
 
   return (
-    <Form.List
-      name={name}
-      rules={
-        requireAtLeastOneRow ? [atLeastOneNonBlankSchemaRowRule()] : undefined
-      }
-    >
-      {(fields, { add, remove }) => {
-        const handleAddColumn = () => {
-          add(defaultEmptyRow());
-        };
+    <>
+      {vocabularyError && (
+        <FormNotification
+          type="error"
+          text={`The column types could not be loaded: ${vocabularyError.message}`}
+        />
+      )}
+      <Form.List
+        name={name}
+        rules={
+          requireAtLeastOneRow ? [atLeastOneNonBlankSchemaRowRule()] : undefined
+        }
+      >
+        {(fields, { add, remove }) => {
+          const handleAddColumn = () => {
+            add(defaultEmptyRow());
+          };
 
-        const columns = [
-          {
-            title: config.defaultAddColumns ? (
-              <Tooltip title="Add Column" destroyOnHidden>
-                <Button
-                  icon={<IconPlus />}
-                  size="small"
-                  shape="circle"
-                  type="default"
-                  onClick={handleAddColumn}
-                />
-              </Tooltip>
-            ) : null,
-            dataIndex: 'main_action',
-            key: 'main_action',
-            align: 'center' as const,
-            width: 30,
-            render: (_: unknown, record: SchemaColumnListRow) => {
-              return config.defaultRemoveColumns ? (
-                <Tooltip title="Remove Column" destroyOnHidden>
+          const columns = [
+            {
+              title: config.defaultAddColumns ? (
+                <Tooltip title="Add Column" destroyOnHidden>
                   <Button
-                    icon={<IconTrash />}
+                    icon={<IconPlus />}
                     size="small"
                     shape="circle"
                     type="default"
-                    onClick={() => {
-                      const rows = (form.getFieldValue(name) ??
-                        []) as UploadedSchemaRow[];
-                      const rowSnapshot = rows[record.name as number];
-                      remove(record.name);
-                      onRemoveRow?.(rowSnapshot);
-                    }}
+                    onClick={handleAddColumn}
                   />
                 </Tooltip>
-              ) : null;
+              ) : null,
+              dataIndex: 'main_action',
+              key: 'main_action',
+              align: 'center' as const,
+              width: 30,
+              render: (_: unknown, record: SchemaColumnListRow) => {
+                return config.defaultRemoveColumns ? (
+                  <Tooltip title="Remove Column" destroyOnHidden>
+                    <Button
+                      icon={<IconTrash />}
+                      size="small"
+                      shape="circle"
+                      type="default"
+                      onClick={() => {
+                        const rows = (form.getFieldValue(name) ??
+                          []) as UploadedSchemaRow[];
+                        const rowSnapshot = rows[record.name as number];
+                        remove(record.name);
+                        onRemoveRow?.(rowSnapshot);
+                      }}
+                    />
+                  </Tooltip>
+                ) : null;
+              },
             },
-          },
-          {
-            title: <p>Name (required)</p>,
-            dataIndex: 'name',
-            key: 'name',
-            render: (_: unknown, record: SchemaColumnListRow) => {
-              const { key: _rowKey, name: rowIndex, ...restField } = record;
-              return (
-                <Form.Item
-                  {...restField}
-                  name={[rowIndex, 'name']}
-                  rules={[formValidation]}
-                >
-                  <InlineEditInput
-                    classNames={{
-                      editContainer: 'w-full',
-                    }}
-                    defaultEditing={
-                      config.defaultEditFields === true ||
-                      (Array.isArray(config.defaultEditFields) &&
-                        config.defaultEditFields.includes('name'))
-                    }
-                  />
-                </Form.Item>
-              );
-            },
-          },
-          {
-            title: <p>Type (required)</p>,
-            dataIndex: 'type',
-            key: 'type',
-            width: 250,
-            render: (_: unknown, record: SchemaColumnListRow) => {
-              const { key: _rowKey, name: rowIndex, ...restField } = record;
-
-              const typeFormName = [rowIndex, 'type'];
-              const chOverrideFormName = [rowIndex, 'ch_override'];
-              return (
-                <div className="flex items-center gap-2 justify-between w-full">
+            {
+              title: <p>Name (required)</p>,
+              dataIndex: 'name',
+              key: 'name',
+              render: (_: unknown, record: SchemaColumnListRow) => {
+                const { key: _rowKey, name: rowIndex, ...restField } = record;
+                return (
                   <Form.Item
                     {...restField}
-                    name={typeFormName}
+                    name={[rowIndex, 'name']}
                     rules={[formValidation]}
-                    getValueFromEvent={(event) => {
-                      const nextType =
-                        event && typeof event === 'object' && 'target' in event
-                          ? (event as { target: { value: unknown } }).target
-                              .value
-                          : event;
-                      form.setFieldValue(
-                        [name, rowIndex, 'ch_override'],
-                        undefined,
-                      );
-                      return nextType;
-                    }}
                   >
-                    <InlineEditSelect
-                      options={PRIMITIVE_OPTIONS}
+                    <InlineEditInput
                       classNames={{
-                        editContainer: 'w-full min-w-60',
+                        editContainer: 'w-full',
                       }}
-                      className="grow w-full"
                       defaultEditing={
                         config.defaultEditFields === true ||
                         (Array.isArray(config.defaultEditFields) &&
-                          config.defaultEditFields.includes('type'))
+                          config.defaultEditFields.includes('name'))
                       }
                     />
                   </Form.Item>
+                );
+              },
+            },
+            {
+              title: <p>Type (required)</p>,
+              dataIndex: 'type',
+              key: 'type',
+              width: 250,
+              render: (_: unknown, record: SchemaColumnListRow) => {
+                const { key: _rowKey, name: rowIndex, ...restField } = record;
 
-                  <Form.Item {...restField} name={chOverrideFormName}>
-                    <TypeOverrideSelect
-                      form={form}
-                      className="shrink"
-                      typeDetails={{
-                        type_form_name: [name, ...typeFormName],
-                        ch_override_form_name: [name, ...chOverrideFormName],
+                const typeFormName = [rowIndex, 'type'];
+                const chOverrideFormName = [rowIndex, 'ch_override'];
+                return (
+                  <div className="flex items-center gap-2 justify-between w-full">
+                    <Form.Item
+                      {...restField}
+                      name={typeFormName}
+                      rules={[formValidation]}
+                      getValueFromEvent={(event) => {
+                        const nextType =
+                          event &&
+                          typeof event === 'object' &&
+                          'target' in event
+                            ? (event as { target: { value: unknown } }).target
+                                .value
+                            : event;
+                        form.setFieldValue(
+                          [name, rowIndex, 'ch_override'],
+                          undefined,
+                        );
+                        // An index that does not suit the new type would be refused by the engine.
+                        const useCasePath = [name, rowIndex, 'use_case'];
+                        const useCase = form.getFieldValue(useCasePath);
+                        if (
+                          vocabulary &&
+                          useCase &&
+                          !suitsPrimitive(vocabulary, useCase, String(nextType))
+                        ) {
+                          form.setFieldValue(useCasePath, '');
+                        }
+                        return nextType;
                       }}
-                    />
+                    >
+                      <InlineEditSelect
+                        {...loadingSelect}
+                        options={typeOptions}
+                        classNames={{
+                          editContainer: 'w-full min-w-60',
+                        }}
+                        className="grow w-full"
+                        defaultEditing={
+                          config.defaultEditFields === true ||
+                          (Array.isArray(config.defaultEditFields) &&
+                            config.defaultEditFields.includes('type'))
+                        }
+                      />
+                    </Form.Item>
+
+                    <Form.Item {...restField} name={chOverrideFormName}>
+                      <TypeOverrideSelect
+                        form={form}
+                        className="shrink"
+                        typeDetails={{
+                          type_form_name: [name, ...typeFormName],
+                          ch_override_form_name: [name, ...chOverrideFormName],
+                        }}
+                      />
+                    </Form.Item>
+                  </div>
+                );
+              },
+            },
+            {
+              title: 'Index Type',
+              dataIndex: 'use_case',
+              key: 'use_case',
+              render: (_: unknown, record: SchemaColumnListRow) => {
+                const { key: _rowKey, name: rowIndex, ...restField } = record;
+                return (
+                  <Form.Item noStyle dependencies={[[name, rowIndex, 'type']]}>
+                    {() => (
+                      <Form.Item
+                        {...restField}
+                        name={[rowIndex, 'use_case']}
+                        rules={[formValidation]}
+                      >
+                        <InlineEditSelect
+                          {...loadingSelect}
+                          options={
+                            vocabulary
+                              ? indexOptionsFor(
+                                  vocabulary,
+                                  form.getFieldValue([name, rowIndex, 'type']),
+                                )
+                              : []
+                          }
+                          defaultEditing={
+                            Array.isArray(config.defaultEditFields) &&
+                            config.defaultEditFields.includes('use_case')
+                          }
+                        />
+                      </Form.Item>
+                    )}
                   </Form.Item>
-                </div>
-              );
+                );
+              },
             },
-          },
-          {
-            title: 'Index Type',
-            dataIndex: 'use_case',
-            key: 'use_case',
-            render: (_: unknown, record: SchemaColumnListRow) => {
-              const { key: _rowKey, name: rowIndex, ...restField } = record;
-              return (
-                <Form.Item
-                  {...restField}
-                  name={[rowIndex, 'use_case']}
-                  rules={[formValidation]}
-                >
-                  <InlineEditSelect
-                    options={USE_CASE_OPTIONS}
-                    defaultEditing={
-                      Array.isArray(config.defaultEditFields) &&
-                      config.defaultEditFields.includes('use_case')
-                    }
-                  />
-                </Form.Item>
-              );
-            },
-          },
-          {
-            title: 'Attributes',
-            dataIndex: 'attribute',
-            key: 'attribute',
-            width: 200,
-            render: (_: unknown, record: SchemaColumnListRow) => {
-              const { key: _rowKey, name: rowIndex, ...restField } = record;
-              return (
-                <Form.Item
-                  {...restField}
-                  name={[rowIndex, 'attribute']}
-                  rules={[formValidation]}
-                >
-                  <InlineEditSelect
-                    mode="multiple"
-                    options={ATTRIBUTE_OPTIONS}
-                    defaultEditing={
-                      Array.isArray(config.defaultEditFields) &&
-                      config.defaultEditFields.includes('attribute')
-                    }
-                  />
-                </Form.Item>
-              );
-            },
-          },
-          {
-            title: 'Expression (CTE)',
-            dataIndex: 'expr',
-            key: 'expr',
-            render: (_: unknown, record: SchemaColumnListRow) => {
-              const { key: _rowKey, name: rowIndex, ...restField } = record;
-              return (
-                <Form.Item
-                  {...restField}
-                  name={[rowIndex, 'expr']}
-                  rules={[formValidation]}
-                >
-                  <InlineEditInput
-                    defaultEditing={
-                      Array.isArray(config.defaultEditFields) &&
-                      config.defaultEditFields.includes('expr')
-                    }
-                  />
-                </Form.Item>
-              );
-            },
-          },
-          {
-            title: 'Comment',
-            dataIndex: 'comment',
-            key: 'comment',
-            render: (_: unknown, record: SchemaColumnListRow) => {
-              const { key: _rowKey, name: rowIndex, ...restField } = record;
-              return (
-                <Form.Item
-                  {...restField}
-                  name={[rowIndex, 'comment']}
-                  rules={[formValidation]}
-                >
-                  <InlineEditInput
-                    defaultEditing={
-                      Array.isArray(config.defaultEditFields) &&
-                      config.defaultEditFields.includes('comment')
-                    }
-                  />
-                </Form.Item>
-              );
-            },
-          },
-          /** Ant Design Form only persists fields registered via Form.Item — `id` / `_field_type` must be stored for list merges and API mapping. */
-          {
-            title: '',
-            key: '__rowId',
-            width: 0,
-            render: (_: unknown, record: SchemaColumnListRow) => {
-              const { key: _rowKey, name: rowIndex, ...restField } = record;
-              return (
-                <>
-                  <Form.Item {...restField} name={[rowIndex, 'id']} hidden>
-                    <Input type="hidden" />
-                  </Form.Item>
+            {
+              title: 'Attributes',
+              dataIndex: 'attribute',
+              key: 'attribute',
+              width: 200,
+              render: (_: unknown, record: SchemaColumnListRow) => {
+                const { key: _rowKey, name: rowIndex, ...restField } = record;
+                return (
                   <Form.Item
                     {...restField}
-                    name={[rowIndex, '_field_type']}
-                    hidden
+                    name={[rowIndex, 'attribute']}
+                    rules={[formValidation]}
                   >
-                    <Input type="hidden" />
+                    <InlineEditSelect
+                      {...loadingSelect}
+                      mode="multiple"
+                      options={columnAttributeOptions}
+                      defaultEditing={
+                        Array.isArray(config.defaultEditFields) &&
+                        config.defaultEditFields.includes('attribute')
+                      }
+                    />
                   </Form.Item>
-                </>
-              );
+                );
+              },
             },
-          },
-        ];
-
-        return (
-          <SchemaTable<SchemaColumnListRow>
-            visibleColumns={visibleColumns}
-            lockedColumns={lockedColumns}
-            dataSource={fields}
-            rowKey="key"
-            columns={columns}
-            scroll={{ y: 280, x: 'max-content' }}
-            locale={{
-              emptyText: (
-                <div className="flex flex-col items-center justify-center gap-2">
-                  <p className="text-foreground-muted dark:text-dark-foreground-muted">
-                    Add columns to your schema
-                  </p>
-                  <Button
-                    size="small"
-                    className="text-sm"
-                    type="default"
-                    onClick={handleAddColumn}
-                    icon={<IconPlus />}
+            {
+              title: 'Cardinality',
+              dataIndex: 'cardinality',
+              key: 'cardinality',
+              width: 180,
+              render: (_: unknown, record: SchemaColumnListRow) => {
+                const { key: _rowKey, name: rowIndex, ...restField } = record;
+                return (
+                  <Form.Item
+                    {...restField}
+                    name={[rowIndex, 'cardinality']}
+                    rules={[formValidation]}
                   >
-                    Add Column
-                  </Button>
-                </div>
-              ),
-            }}
-            {...tableProps}
-          />
-        );
-      }}
-    </Form.List>
+                    <CardinalitySelect
+                      {...loadingSelect}
+                      fallbackValue={vocabulary?.cardinality.default}
+                      options={cardinalitySelectOptions}
+                      defaultEditing={
+                        Array.isArray(config.defaultEditFields) &&
+                        config.defaultEditFields.includes('cardinality')
+                      }
+                    />
+                  </Form.Item>
+                );
+              },
+            },
+            {
+              title: 'Expression (CTE)',
+              dataIndex: 'expr',
+              key: 'expr',
+              render: (_: unknown, record: SchemaColumnListRow) => {
+                const { key: _rowKey, name: rowIndex, ...restField } = record;
+                return (
+                  <Form.Item
+                    {...restField}
+                    name={[rowIndex, 'expr']}
+                    rules={[formValidation]}
+                  >
+                    <InlineEditInput
+                      defaultEditing={
+                        Array.isArray(config.defaultEditFields) &&
+                        config.defaultEditFields.includes('expr')
+                      }
+                    />
+                  </Form.Item>
+                );
+              },
+            },
+            {
+              title: 'Comment',
+              dataIndex: 'comment',
+              key: 'comment',
+              render: (_: unknown, record: SchemaColumnListRow) => {
+                const { key: _rowKey, name: rowIndex, ...restField } = record;
+                return (
+                  <Form.Item
+                    {...restField}
+                    name={[rowIndex, 'comment']}
+                    rules={[formValidation]}
+                  >
+                    <InlineEditInput
+                      defaultEditing={
+                        Array.isArray(config.defaultEditFields) &&
+                        config.defaultEditFields.includes('comment')
+                      }
+                    />
+                  </Form.Item>
+                );
+              },
+            },
+            /** Ant Design Form only persists fields registered via Form.Item — `id` / `_field_type` must be stored for list merges and API mapping. */
+            {
+              title: '',
+              key: '__rowId',
+              width: 0,
+              render: (_: unknown, record: SchemaColumnListRow) => {
+                const { key: _rowKey, name: rowIndex, ...restField } = record;
+                return (
+                  <>
+                    <Form.Item {...restField} name={[rowIndex, 'id']} hidden>
+                      <Input type="hidden" />
+                    </Form.Item>
+                    <Form.Item
+                      {...restField}
+                      name={[rowIndex, '_field_type']}
+                      hidden
+                    >
+                      <Input type="hidden" />
+                    </Form.Item>
+                  </>
+                );
+              },
+            },
+          ];
+
+          return (
+            <SchemaTable<SchemaColumnListRow>
+              visibleColumns={visibleColumns}
+              lockedColumns={lockedColumns}
+              dataSource={fields}
+              rowKey="key"
+              columns={columns}
+              scroll={{ y: 280, x: 'max-content' }}
+              locale={{
+                emptyText: (
+                  <div className="flex flex-col items-center justify-center gap-2">
+                    <p className="text-foreground-muted dark:text-dark-foreground-muted">
+                      Add columns to your schema
+                    </p>
+                    <Button
+                      size="small"
+                      className="text-sm"
+                      type="default"
+                      onClick={handleAddColumn}
+                      icon={<IconPlus />}
+                    >
+                      Add Column
+                    </Button>
+                  </div>
+                ),
+              }}
+              {...tableProps}
+            />
+          );
+        }}
+      </Form.List>
+    </>
   );
 };

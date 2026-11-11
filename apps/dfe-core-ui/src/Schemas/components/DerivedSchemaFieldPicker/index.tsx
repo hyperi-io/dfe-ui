@@ -1,7 +1,8 @@
 import type { FormControlAria } from '@/core/components/Form/formControlAria';
 import { Table } from '@/core/components/Table';
 import { Tooltip } from '@/core/components/Tooltip';
-import { INDEX_USE_CASE_OPTIONS } from '@/Schemas/constants/indexUseCase';
+import { useFetchSchemaVocabulary } from '@/core/hooks/useFetchSchemaVocabulary';
+import { indexUseCaseOptions } from '@/Schemas/constants/indexUseCase';
 import { useFetchInfiniteFilteredSchemaDetailColumns } from '@/Schemas/hooks/useFetchInfiniteSchemaDetailColumns';
 import { TMetaSchemaDetailColumnItem } from '@/Schemas/hooks/useFetchInfiniteSchemaDetailColumns/types';
 import { IconInfoCircle } from '@repo/dfe-icons';
@@ -64,11 +65,26 @@ export const DerivedSchemaFieldPicker = ({
       fetch_all: true,
     });
 
+  const {
+    data: vocabulary,
+    isLoading: isLoadingVocabulary,
+    error: vocabularyError,
+  } = useFetchSchemaVocabulary();
+
   const columnItems = useMemo(() => data?.items ?? [], [data]);
 
+  // A base column's index is read through the vocabulary, so none is read before it is in.
   const baseColumns: DerivedBaseColumn[] = useMemo(
-    () => columnItems.map(baseColumnFrom),
-    [columnItems],
+    () =>
+      vocabulary
+        ? columnItems.map((column) => baseColumnFrom(column, vocabulary))
+        : [],
+    [columnItems, vocabulary],
+  );
+
+  const indexOptions = useMemo(
+    () => (vocabulary ? indexUseCaseOptions(vocabulary) : []),
+    [vocabulary],
   );
 
   const baseColumnByName = useMemo(
@@ -118,7 +134,7 @@ export const DerivedSchemaFieldPicker = ({
               className="w-full"
               size="small"
               aria-label={`Index use case for ${column.name}`}
-              options={INDEX_USE_CASE_OPTIONS}
+              options={indexOptions}
               popupMatchSelectWidth={false}
               value={chosenIndexFor(value, column)}
               disabled={disabled || !selected}
@@ -166,7 +182,7 @@ export const DerivedSchemaFieldPicker = ({
       },
     ];
     // `value` and `onChange` drive the two interactive cells; the rest are static.
-  }, [baseColumnByName, value, onChange, disabled]);
+  }, [baseColumnByName, indexOptions, value, onChange, disabled]);
 
   if (!basePath || !baseVersion) {
     return (
@@ -179,12 +195,16 @@ export const DerivedSchemaFieldPicker = ({
     );
   }
 
-  if (isError) {
+  if (isError || vocabularyError) {
     return (
       <Alert
         type="error"
         showIcon
-        title={`The columns of ${basePath} ${baseVersion} could not be loaded.`}
+        title={
+          vocabularyError
+            ? 'The index use cases could not be loaded.'
+            : `The columns of ${basePath} ${baseVersion} could not be loaded.`
+        }
       />
     );
   }
@@ -220,7 +240,7 @@ export const DerivedSchemaFieldPicker = ({
         columns={tableColumns}
         dataSource={visibleItems}
         rowKey="name"
-        loading={isLoading || isFetchingNextPage}
+        loading={isLoading || isLoadingVocabulary || isFetchingNextPage}
         pagination={false}
         scroll={{ y: 360, x: 'max-content' }}
         rowSelection={{

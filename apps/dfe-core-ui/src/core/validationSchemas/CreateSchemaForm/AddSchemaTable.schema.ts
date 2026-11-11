@@ -7,6 +7,8 @@ export const rowSchema = z.object({
   type: z.string().min(1, { message: 'Type is required' }),
   ch_override: z.string().optional(),
   attribute: z.array(z.string()).optional(),
+  /** The values are the API's own, fixed by its schema. */
+  cardinality: z.enum(['low', 'high', 'unknown']).optional(),
   use_case: z.string().optional(),
   expr: z.string().optional(),
   comment: z.string().optional(),

@@ -1,9 +1,10 @@
 import {
-  ADVANCED_OPTIONS,
+  overrideSelectOptions,
   TransformFunctionParams,
 } from '@/core/components/CreateSchemaForm/AddSchemaTable/fieldOptions.constants';
 import { Form } from '@/core/components/Form';
 import { FormNotification } from '@/core/components/FormNotification';
+import { useFetchSchemaVocabulary } from '@/core/hooks/useFetchSchemaVocabulary';
 import {
   Button,
   FormInstance,
@@ -29,35 +30,49 @@ interface LazyMountedSelectProps extends SelectProps {
   form: FormInstance;
 }
 
+const NO_OVERRIDES: never[] = [];
+
 export const LazyMountedSelect = ({
   typeDetails,
   form,
   onChange,
   ...props
 }: LazyMountedSelectProps) => {
+  const { data: vocabulary } = useFetchSchemaVocabulary();
+  const overrides = vocabulary?.ch_overrides ?? NO_OVERRIDES;
   const [overrideType, setOverrideType] = useState<string | null>(
-    getInitialOverrideType(props.value),
+    getInitialOverrideType(props.value, overrides),
   );
   const [validationError, setValidationError] = useState<string | null>(null);
   const [advancedOptions, setAdvancedOptions] =
-    useState<TransformFunctionParams>(getInitialAdvancedOptions(props.value));
+    useState<TransformFunctionParams>(
+      getInitialAdvancedOptions(props.value, overrides),
+    );
   // Only fetch the form values when the select is mounted
   const baseTypeValue = Form.useWatch(typeDetails.type_form_name, form);
 
   const options = useMemo(() => {
     if (!baseTypeValue) return [];
-    return ADVANCED_OPTIONS.filter(
-      (option) => option.primitive === baseTypeValue,
-    );
-  }, [baseTypeValue]);
+    return overrideSelectOptions(overrides, baseTypeValue);
+  }, [baseTypeValue, overrides]);
+
+  const parameters =
+    overrides.find((option) => option.value === overrideType)?.parameters ?? [];
+  const numberParameters = parameters.filter(({ kind }) => kind === 'integer');
+  const textParameters = parameters.filter(({ kind }) => kind === 'text');
+
+  const setParameter = (name: string, value: number | string | undefined) => {
+    setValidationError(null);
+    setAdvancedOptions({ ...advancedOptions, [name]: value });
+  };
 
   const handleApplyOverride = () => {
-    const error = validateOverride(overrideType, advancedOptions);
+    const error = validateOverride(overrideType, advancedOptions, overrides);
     if (error) {
       setValidationError(error);
       return;
     }
-    onChange?.(transformOverride(overrideType, advancedOptions));
+    onChange?.(transformOverride(overrideType, advancedOptions, overrides));
   };
 
   return (
@@ -74,80 +89,36 @@ export const LazyMountedSelect = ({
         value={overrideType}
       />
 
-      {(overrideType === 'Decimal' ||
-        overrideType === 'Decimal64' ||
-        overrideType === 'DateTime64') && (
+      {numberParameters.length > 0 && (
         <div className="flex gap-2">
-          {overrideType !== 'Decimal64' && (
-            <span className="flex flex-col gap-1 w-full">
-              <label>Precision</label>
+          {numberParameters.map(({ name, label }) => (
+            <span key={name} className="flex flex-col gap-1 w-full">
+              <label>{label}</label>
               <InputNumber
                 className="w-full"
-                value={advancedOptions.precision}
-                onChange={(value: number | null) => {
-                  setValidationError(null);
-                  setAdvancedOptions({
-                    ...advancedOptions,
-                    precision: value || undefined,
-                  });
-                }}
-                placeholder="Input Precision"
+                value={advancedOptions[name] as number | undefined}
+                onChange={(value: number | null) =>
+                  setParameter(name, value || undefined)
+                }
+                placeholder={`Input ${label}`}
               />
             </span>
-          )}
-          {overrideType !== 'DateTime64' && (
-            <span className="flex flex-col gap-1 w-full">
-              <label>Scale</label>
-              <InputNumber
-                className="w-full"
-                placeholder="Input Scale"
-                value={advancedOptions.scale}
-                onChange={(value: number | null) => {
-                  setValidationError(null);
-                  setAdvancedOptions({
-                    ...advancedOptions,
-                    scale: value || undefined,
-                  });
-                }}
-              />
-            </span>
-          )}
+          ))}
         </div>
       )}
-      {overrideType === 'FixedString' && (
-        <span className="flex flex-col gap-1 w-full">
-          <label>Length</label>
-          <InputNumber
-            className="w-full"
-            placeholder="Input Length"
-            value={advancedOptions.length}
-            onChange={(value: number | null) => {
-              setValidationError(null);
-              setAdvancedOptions({
-                ...advancedOptions,
-                length: value || undefined,
-              });
-            }}
-          />
-        </span>
-      )}
-      {overrideType === 'Enum16' && (
-        <span className="flex flex-col gap-1 w-full">
-          <label>Values (comma separated)</label>
+      {textParameters.map(({ name, label }) => (
+        <span key={name} className="flex flex-col gap-1 w-full">
+          <label>{label}</label>
           <Input
             className="w-full"
-            placeholder="Input Values"
-            value={advancedOptions.values}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-              setValidationError(null);
-              setAdvancedOptions({
-                ...advancedOptions,
-                values: e.target.value,
-              });
-            }}
+            placeholder={`Input ${label.split(' (')[0]}`}
+            value={advancedOptions[name] as string | undefined}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              setParameter(name, e.target.value)
+            }
           />
         </span>
-      )}
+      ))}
       {validationError && (
         <FormNotification type="error" text={validationError} />
       )}

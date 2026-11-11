@@ -6,6 +6,7 @@ import {
   selectEntry,
   withIndexUseCase,
 } from '@/Schemas/components/DerivedSchemaFieldPicker/DerivedSchemaFieldPicker.helpers';
+import { SCHEMA_VOCABULARY_FIXTURE } from '@/core/hooks/useFetchSchemaVocabulary/vocabulary.fixture';
 import { describe, expect, it } from 'vitest';
 
 const baseColumns: DerivedBaseColumn[] = [
@@ -17,14 +18,21 @@ const baseColumns: DerivedBaseColumn[] = [
 
 describe('baseColumnFrom', () => {
   it('reads the base column index through the rename', () => {
-    expect(baseColumnFrom({ name: 'message', use_case: 'fulltext' })).toEqual({
+    expect(
+      baseColumnFrom(
+        { name: 'message', use_case: 'fulltext' },
+        SCHEMA_VOCABULARY_FIXTURE,
+      ),
+    ).toEqual({
       name: 'message',
       baseIndex: 'word_search',
     });
   });
 
   it('gives a column with no index use case none', () => {
-    expect(baseColumnFrom({ name: 'log_offset' })).toEqual({
+    expect(
+      baseColumnFrom({ name: 'log_offset' }, SCHEMA_VOCABULARY_FIXTURE),
+    ).toEqual({
       name: 'log_offset',
       baseIndex: 'none',
     });

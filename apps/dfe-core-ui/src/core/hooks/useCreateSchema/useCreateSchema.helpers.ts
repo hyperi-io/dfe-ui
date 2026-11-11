@@ -16,6 +16,7 @@ export const mapFormColumnToRequestColumn = (
   ...(column.attribute && column.attribute.length > 0
     ? { attribute: column.attribute }
     : {}),
+  ...(column.cardinality ? { cardinality: column.cardinality } : {}),
   ...(column.use_case ? { use_case: column.use_case } : {}),
   ...(column.expr ? { expr: column.expr } : {}),
   ...(column.comment ? { comment: column.comment } : {}),

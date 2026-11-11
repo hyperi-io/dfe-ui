@@ -17,6 +17,7 @@ export const COLUMN_LIST_USER_EDITABLE_KEYS = [
   'type',
   'use_case',
   'attribute',
+  'cardinality',
   'expr',
   'comment',
 ] as const;

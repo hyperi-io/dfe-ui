@@ -4,6 +4,8 @@ import {
 } from '@/core/components/CreateSchemaForm/fieldType.constants';
 import { TCreateSchemaResponse } from '@/core/hooks/useCreateSchema/types';
 import { TElasticConvertResponse } from '@/core/hooks/useElasticConvert/types';
+import { SCHEMA_VOCABULARY_FIXTURE } from '@/core/hooks/useFetchSchemaVocabulary/vocabulary.fixture';
+import { TSchemaVocabularyResponse } from '@/core/hooks/useFetchSchemaVocabulary/types';
 import { TSchemaListResponse } from '@/core/hooks/useFetchInfiniteFilteredSchemas/types';
 import { TSchemaCreateVersionResponse } from '@/Schemas/hooks/useCreateSchemaVersion/types';
 import { TMetaSchemaDetailResponse } from '@/Schemas/hooks/useFetchInfiniteSchemaDetailColumns/types';
@@ -357,6 +359,31 @@ export const schemas = {
         status?: number;
       } = {}) => {
         return http.post(schemas.elasticConvert.mockedUrl, () => {
+          return HttpResponse.json(mockedResponse, { status });
+        });
+      },
+    },
+  },
+  vocabulary: {
+    mockedUrl: '/api/v1/schemas/vocabulary',
+    get: {
+      success: ({
+        mockedResponse = SCHEMA_VOCABULARY_FIXTURE,
+      }: {
+        mockedResponse?: TSchemaVocabularyResponse;
+      } = {}) => {
+        return http.get(schemas.vocabulary.mockedUrl, () => {
+          return HttpResponse.json(mockedResponse);
+        });
+      },
+      error: ({
+        mockedResponse = DEFAULT_VALIDATION_ERROR,
+        status = 422,
+      }: {
+        mockedResponse?: TValidationError;
+        status?: number;
+      } = {}) => {
+        return http.get(schemas.vocabulary.mockedUrl, () => {
           return HttpResponse.json(mockedResponse, { status });
         });
       },

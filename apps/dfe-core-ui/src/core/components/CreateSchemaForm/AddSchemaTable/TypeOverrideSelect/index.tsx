@@ -1,4 +1,5 @@
 import { Popover } from '@/core/components/Popover';
+import { useFetchSchemaVocabulary } from '@/core/hooks/useFetchSchemaVocabulary';
 import { IconDots, IconX } from '@repo/dfe-icons';
 import { Button, FormInstance, SelectProps } from 'antd';
 import { useState } from 'react';
@@ -19,11 +20,18 @@ export const TypeOverrideSelect = ({
   ...props
 }: TypeOverrideSelectProps) => {
   const [open, setOpen] = useState(false);
+  const { data: vocabulary } = useFetchSchemaVocabulary();
+  // A free-text argument can be long, so only the type name is shown for it.
+  const takesText = vocabulary?.ch_overrides.some(
+    (option) =>
+      value?.startsWith(option.value) &&
+      option.parameters.some(({ kind }) => kind === 'text'),
+  );
   return (
     <div className="flex items-center gap-1 w-full">
       {value && (
         <span className="flex items-center gap-1 text-xs bg-foreground/10 px-2 pr-0 py-0.5 rounded-md dark:bg-dark-foreground/10">
-          {value.startsWith('Enum16') ? value.split('(')[0] : value}
+          {takesText ? value.split('(')[0] : value}
           <Button
             size="small"
             type="text"

@@ -65,6 +65,7 @@ export const API_CONFIG = Object.freeze({
     schema: '/api/v1/schemas/definitions/{schema_path}',
     schemaDetail: '/api/v1/schemas/definitions/{schema_path}/versions/columns',
     elasticConvert: '/api/v1/schemas/elastic-converter',
+    vocabulary: '/api/v1/schemas/vocabulary',
     sampleRows: '/api/v1/schemas/{source_name}/sample-rows',
     jsonPaths: '/api/v1/schemas/{source_name}/json-paths',
     promoteField: '/api/v1/schemas/{source_name}/promote-field',

@@ -291,6 +291,7 @@ export const QUERY_KEYS = Object.freeze({
       ...(page_size ? ['page_size', page_size] : []),
     ],
     elasticConvert: () => ['schemas', 'elastic-converter'],
+    vocabulary: () => ['schemas', 'vocabulary'],
     sampleRows: ({
       source_name,
       version,

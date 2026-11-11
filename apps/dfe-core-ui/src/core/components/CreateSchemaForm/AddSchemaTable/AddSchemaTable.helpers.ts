@@ -37,6 +37,35 @@ const normalizeAttribute = (raw: unknown): string[] => {
   return [];
 };
 
+type Cardinality = z.infer<typeof rowSchema>['cardinality'];
+
+export const asCardinality = (raw: unknown): Cardinality => {
+  const parsed = rowSchema.shape.cardinality.safeParse(raw);
+  return parsed.success ? parsed.data : undefined;
+};
+
+/**
+ * A column that still carries a retired attribute for its cardinality, such as
+ * `lowcardinality`, reads as that cardinality and no longer holds the attribute.
+ * The engine refuses a column that declares both and disagrees with itself.
+ */
+export const foldRetiredAttributes = (
+  cardinality: Cardinality,
+  attribute: string[],
+  retired: Record<string, string>,
+) => {
+  if (cardinality) {
+    return { cardinality, attribute };
+  }
+  const folded = attribute.find((name) => name in retired);
+  return folded
+    ? {
+        cardinality: asCardinality(retired[folded]),
+        attribute: attribute.filter((name) => name !== folded),
+      }
+    : { cardinality, attribute };
+};
+
 export const listItemFromPartial = (
   column: Partial<UploadedSchemaRow>,
 ): z.infer<typeof rowSchema> => {
@@ -54,6 +83,10 @@ export const listItemFromPartial = (
     rowLookup(column, 'comment', 'Comment') ?? column.comment ?? '',
   );
 
+  const declaredCardinality = asCardinality(
+    rowLookup(column, 'cardinality', 'Cardinality') ?? column.cardinality,
+  );
+
   const ch_override = String(
     rowLookup(column, 'ch_override', 'chOverride') ?? column.ch_override ?? '',
   );
@@ -64,6 +97,7 @@ export const listItemFromPartial = (
     name,
     type,
     ch_override: ch_override || undefined,
+    cardinality: declaredCardinality,
     attribute: normalizeAttribute(attributeRaw),
     use_case,
     expr,

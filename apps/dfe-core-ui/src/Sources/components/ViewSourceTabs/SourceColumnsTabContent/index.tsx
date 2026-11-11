@@ -120,6 +120,11 @@ export const SourceColumnsTabContent = ({
       key: 'attribute',
     },
     {
+      title: 'Cardinality',
+      dataIndex: 'cardinality',
+      key: 'cardinality',
+    },
+    {
       title: 'Index Type',
       dataIndex: 'use_case',
       key: 'use_case',
@@ -147,7 +152,14 @@ export const SourceColumnsTabContent = ({
             </p>
           </div>
         )}
-        visibleColumns={['name', 'type', 'attribute', 'use_case', 'comment']}
+        visibleColumns={[
+          'name',
+          'type',
+          'attribute',
+          'cardinality',
+          'use_case',
+          'comment',
+        ]}
         lockedColumns={['_field_type', 'name']}
         dataSource={sourceColumns ?? []}
         columns={columns}

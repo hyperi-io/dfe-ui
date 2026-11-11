@@ -10,14 +10,16 @@ import isInteger from 'lodash/isInteger';
 import { useCallback, useMemo, useState } from 'react';
 import z from 'zod';
 
-const formSchema = z.object({
-  ttl_days: z.number().min(0).max(365),
-  engine: z.string().min(1),
-  common_header_version: z.string().min(1),
-  common_header_type: z.string().min(1),
-});
+/** The retention bound is the engine's, served with the defaults. */
+export const buildFormSchema = (maxTtlDays: number) =>
+  z.object({
+    ttl_days: z.number().min(0).max(maxTtlDays),
+    engine: z.string().min(1),
+    common_header_version: z.string().min(1),
+    common_header_type: z.string().min(1),
+  });
 
-type TFormValues = z.infer<typeof formSchema>;
+type TFormValues = z.infer<ReturnType<typeof buildFormSchema>>;
 
 const normalizeHeaderType = (value?: string) =>
   (value ?? '').replace(/^common-header\//, '');
@@ -78,10 +80,12 @@ const hasDefaultsChanged = ({
 };
 export const EditSystemDefaultsForm = ({
   initialValues,
+  maxTtlDays,
   onSuccess,
   onClose,
 }: {
   initialValues?: TFormValues;
+  maxTtlDays: number;
   onSuccess?: (
     response: TUpdateSystemDefaultsResponse & { changed: boolean },
   ) => void;
@@ -116,6 +120,7 @@ export const EditSystemDefaultsForm = ({
   });
 
   const [form] = Form.useForm<TFormValues>();
+  const formSchema = useMemo(() => buildFormSchema(maxTtlDays), [maxTtlDays]);
   const formValidation = useAntdZodResolver(formSchema);
   const ttlDays = Form.useWatch('ttl_days', form);
   const engine = Form.useWatch('engine', form);

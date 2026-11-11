@@ -1,7 +1,10 @@
 import { SCHEMA_FIELD_TYPES } from '@/core/components/CreateSchemaForm/fieldType.constants';
 import { RowFormSchema } from '@/core/validationSchemas/CreateSchemaForm/AddSchemaTable.schema';
 import { describe, expect, test } from 'vitest';
-import { listItemFromPartial } from './AddSchemaTable.helpers';
+import {
+  foldRetiredAttributes,
+  listItemFromPartial,
+} from './AddSchemaTable.helpers';
 import type { SchemaColumnRow } from './types';
 
 describe('listItemFromPartial', () => {
@@ -146,6 +149,97 @@ describe('listItemFromPartial', () => {
       use_case: '',
       expr: '',
       comment: '',
+    });
+  });
+});
+
+describe('listItemFromPartial cardinality', () => {
+  const column = (extra: Partial<SchemaColumnRow>): SchemaColumnRow => ({
+    id: '1',
+    name: 'host',
+    type: 'string',
+    _field_type: SCHEMA_FIELD_TYPES.USER_DEFINED,
+    ...extra,
+  });
+
+  test('keeps a declared cardinality', () => {
+    expect(
+      listItemFromPartial(column({ cardinality: 'high' })).cardinality,
+    ).toBe('high');
+  });
+
+  test('a cardinality the API does not know is dropped', () => {
+    const row = listItemFromPartial(
+      column({ cardinality: 'huge' } as unknown as Partial<SchemaColumnRow>),
+    );
+
+    expect(row.cardinality).toBeUndefined();
+  });
+
+  test('reads a Cardinality CSV-style key', () => {
+    const row = listItemFromPartial({
+      id: '1',
+      Name: 'host',
+      Type: 'string',
+      Cardinality: 'low',
+    } as unknown as SchemaColumnRow);
+
+    expect(row.cardinality).toBe('low');
+  });
+});
+
+describe('foldRetiredAttributes', () => {
+  const retired = { lowcardinality: 'low' };
+
+  test.each([
+    [
+      'a declared cardinality is kept',
+      'high' as const,
+      ['nullable'],
+      'high',
+      ['nullable'],
+    ],
+    [
+      'the retired attribute reads as the cardinality it names',
+      undefined,
+      ['lowcardinality', 'not_null'],
+      'low',
+      ['not_null'],
+    ],
+    [
+      'a declared cardinality wins and the attribute is left alone',
+      'high' as const,
+      ['lowcardinality'],
+      'high',
+      ['lowcardinality'],
+    ],
+    [
+      'a column with neither has no cardinality',
+      undefined,
+      ['nullable'],
+      undefined,
+      ['nullable'],
+    ],
+  ])(
+    '%s',
+    (
+      _label,
+      cardinality,
+      attribute,
+      expectedCardinality,
+      expectedAttribute,
+    ) => {
+      expect(foldRetiredAttributes(cardinality, attribute, retired)).toEqual({
+        cardinality: expectedCardinality,
+        attribute: expectedAttribute,
+      });
+    },
+  );
+
+  test('an attribute the engine has no meaning for stays', () => {
+    expect(foldRetiredAttributes(undefined, ['lowcardinality'], {})).toEqual({
+      cardinality: undefined,
+      attribute: ['lowcardinality'],
     });
   });
 });

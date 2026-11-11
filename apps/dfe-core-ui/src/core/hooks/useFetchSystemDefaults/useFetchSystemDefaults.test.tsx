@@ -83,6 +83,9 @@ describe('.useFetchSystemDefaults', () => {
       await waitFor(() => {
         expect(result.current.error).toBeDefined();
       });
+      // No client-side fallback stands in for the engine's answer.
+      expect(result.current.data).toBeUndefined();
+      expect(useSystemDefaultsStore.getState().defaults).toBeNull();
     });
   });
 });
