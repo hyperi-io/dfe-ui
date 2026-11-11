@@ -1,4 +1,5 @@
 import { components } from '@repo/dfe-engine-types';
+import { MATCH_NESTING_LIMIT } from '@repo/dfe-engine-types/limits';
 
 type TGeneratedSourceMatch = components['schemas']['SourceMatch'];
 
@@ -40,8 +41,7 @@ export type TMatchFormNode = {
   parts?: TMatchFormNode[] | null;
 };
 
-/** The engine's MATCH_NESTING_LIMIT: how deep all and any groups may nest in one match. */
-export const MATCH_NESTING_LIMIT = 4;
+export { MATCH_NESTING_LIMIT };
 
 /** Operators that compare no operand. */
 const OPERATORS_WITHOUT_VALUE: ReadonlySet<TMatchOperator> = new Set([

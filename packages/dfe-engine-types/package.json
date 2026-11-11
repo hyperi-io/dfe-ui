@@ -8,14 +8,16 @@
   "exports": {
     ".": "./types/index.d.ts",
     "./e2e": "./types/e2e.d.ts",
-    "./scopes": "./scopes/index.ts"
+    "./scopes": "./scopes/index.ts",
+    "./limits": "./limits/index.ts"
   },
   "scripts": {
     "clean": "rm -rf types",
     "generate:e2e-types": "openapi-typescript ./specs/openapi.e2e.json -o ./types/e2e.d.ts",
     "generate:engine-types": "openapi-typescript ./specs/openapi.json -o ./types/index.d.ts",
-    "generate": "yarn clean && yarn generate:e2e-types && yarn generate:engine-types && yarn generate:scopes",
-    "generate:scopes": "node ./scripts/generate-scopes.mjs"
+    "generate": "yarn clean && yarn generate:e2e-types && yarn generate:engine-types && yarn generate:scopes && yarn generate:limits",
+    "generate:scopes": "node ./scripts/generate-scopes.mjs",
+    "generate:limits": "node ./scripts/generate-limits.mjs"
   },
   "devDependencies": {
     "openapi-typescript": "^7.13.0",

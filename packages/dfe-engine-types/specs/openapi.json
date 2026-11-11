@@ -51688,7 +51688,14 @@
               }
             ],
             "title": "Credential Ref",
-            "description": "Where the customer's pipeline keeps the Kafka principal it authenticates as, e.g. vault:kv/acme/kafka/vector. A reference only: the engine never reads, stores or mints the credential, and refuses a value that is not one of vault:, bao:, openbao:, env: or file:"
+            "description": "Where the customer's pipeline keeps the Kafka principal it authenticates as, e.g. vault:kv/acme/kafka/vector. A reference only: the engine never reads, stores or mints the credential, and refuses a value that is not one of vault:, bao:, openbao:, env: or file:",
+            "x-dfe-reference-prefixes": [
+              "vault:",
+              "bao:",
+              "openbao:",
+              "env:",
+              "file:"
+            ]
           },
           "org": {
             "anyOf": [
@@ -52055,11 +52062,11 @@
                 "type": "string",
                 "enum": [
                   "equals",
-                  "not_equals",
                   "exists",
                   "includes",
                   "starts_with",
                   "ends_with",
+                  "not_equals",
                   "always"
                 ]
               },
@@ -52068,7 +52075,10 @@
               }
             ],
             "title": "Operator",
-            "description": "How a test compares ``field`` to ``value``: equals (the default for a test), exists, includes, starts_with, ends_with, not_equals, always. ``always`` matches every record and is reserved for the ``default`` source. Absent on a group"
+            "description": "How a test compares ``field`` to ``value``: equals (the default for a test), exists, includes, starts_with, ends_with, not_equals, always. ``always`` matches every record and is reserved for the ``default`` source. Absent on a group",
+            "x-dfe-reserved-values": [
+              "always"
+            ]
           },
           "value": {
             "type": "string",
@@ -52101,7 +52111,8 @@
         },
         "type": "object",
         "title": "SourceMatch",
-        "description": "How the receiver recognises this source's records: one test, or all or any of several.\n\nA test compares one ``field`` with an ``operator``. ``all`` holds when every\npart does and ``any`` when at least one does. Each part is a match of its\nown, so groups nest, and ``negate`` inverts the test or group it sits on."
+        "description": "How the receiver recognises this source's records: one test, or all or any of several.\n\nA test compares one ``field`` with an ``operator``. ``all`` holds when every\npart does and ``any`` when at least one does. Each part is a match of its\nown, so groups nest, and ``negate`` inverts the test or group it sits on.",
+        "x-dfe-max-nesting": 4
       },
       "SourcePlanResponse": {
         "properties": {
@@ -52694,7 +52705,14 @@
               }
             ],
             "title": "Credential Ref",
-            "description": "Where the customer's pipeline keeps the Kafka principal it authenticates as, e.g. vault:kv/acme/kafka/vector. A reference only: the engine never reads, stores or mints the credential, and refuses a value that is not one of vault:, bao:, openbao:, env: or file:"
+            "description": "Where the customer's pipeline keeps the Kafka principal it authenticates as, e.g. vault:kv/acme/kafka/vector. A reference only: the engine never reads, stores or mints the credential, and refuses a value that is not one of vault:, bao:, openbao:, env: or file:",
+            "x-dfe-reference-prefixes": [
+              "vault:",
+              "bao:",
+              "openbao:",
+              "env:",
+              "file:"
+            ]
           },
           "org": {
             "anyOf": [

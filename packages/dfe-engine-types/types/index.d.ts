@@ -14964,7 +14964,7 @@ export interface components {
              * Operator
              * @description How a test compares ``field`` to ``value``: equals (the default for a test), exists, includes, starts_with, ends_with, not_equals, always. ``always`` matches every record and is reserved for the ``default`` source. Absent on a group
              */
-            operator?: ("equals" | "not_equals" | "exists" | "includes" | "starts_with" | "ends_with" | "always") | null;
+            operator?: ("equals" | "exists" | "includes" | "starts_with" | "ends_with" | "not_equals" | "always") | null;
             /**
              * Value
              * @description Operand for the operator (not used by ``exists`` or ``always``)
