@@ -3,7 +3,9 @@ import {
   attributeOptions,
   cardinalityOptions,
   indexOptionsFor,
+  currentUseCaseName,
   primitiveOptions,
+  suitsPrimitive,
 } from './options';
 import { SCHEMA_VOCABULARY_FIXTURE } from './vocabulary.fixture';
 
@@ -80,5 +82,28 @@ describe('the other option lists', () => {
       label: 'Not null',
       value: 'not_null',
     });
+  });
+});
+
+describe('suitsPrimitive', () => {
+  it.each([
+    ['dimension', 'integer', true],
+    ['dimension', 'float', false],
+    ['range', 'float', true],
+    ['key_search', 'string', false],
+    ['word_search', 'String', true],
+  ])('%s on a %s column: %s', (useCase, primitive, expected) => {
+    expect(suitsPrimitive(vocabulary, useCase, primitive)).toBe(expected);
+  });
+});
+
+describe('currentUseCaseName', () => {
+  it.each([
+    ['fulltext', 'word_search'],
+    [' Bloom ', 'exact_match'],
+    ['dimension', 'dimension'],
+    ['nonsense', 'nonsense'],
+  ])('%s reads as %s', (stored, expected) => {
+    expect(currentUseCaseName(vocabulary, stored)).toBe(expected);
   });
 });

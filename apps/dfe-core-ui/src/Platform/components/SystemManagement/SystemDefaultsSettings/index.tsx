@@ -8,7 +8,7 @@ import { SystemDefaultsActionMenu } from './SystemDefaultsActionMenu';
 import { ViewSystemDefaults } from './ViewSystemDefaults';
 
 export const SystemDefaultsSettings = () => {
-  const { data: defaults, error } = useFetchDefaults();
+  const { data: defaults, error, isLoading } = useFetchDefaults();
 
   const [isEditDefaultsOpen, setIsEditDefaultsOpen] = useState(false);
   const [hasDefaultsChanged, setHasDefaultsChanged] = useState(false);
@@ -50,7 +50,11 @@ export const SystemDefaultsSettings = () => {
           }}
         />
       ) : (
-        <ViewSystemDefaults defaults={defaults} error={error} />
+        <ViewSystemDefaults
+          defaults={defaults}
+          error={error}
+          isLoading={isLoading}
+        />
       )}
     </SectionCard>
   );

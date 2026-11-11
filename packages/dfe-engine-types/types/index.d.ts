@@ -17443,6 +17443,11 @@ export interface components {
             /** Attribute */
             attribute?: string[] | null;
             /**
+             * Cardinality
+             * @description How many distinct values the column holds, as declared. A column holding the retired lowcardinality attribute reads as low. Absent means unknown.
+             */
+            cardinality?: ("low" | "high" | "unknown") | null;
+            /**
              * Description
              * @default
              */

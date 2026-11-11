@@ -1,6 +1,7 @@
 import { API_CONFIG_MOCKS } from '@/core/config/api/endpoints/generator';
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
 import { fireEvent, render, screen } from '@testing-library/react';
+import { delay, http, HttpResponse } from 'msw';
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
 import { SystemDefaultsSettings } from '.';
 import { server } from './SystemDefaultSettings.mocks';
@@ -10,6 +11,27 @@ afterEach(() => server.resetHandlers());
 afterAll(() => server.close());
 
 const { wrapper } = buildTestWrapper().withTheme().withReactQuery();
+
+const stringDefault = (effective: string) => ({
+  effective,
+  stored: null,
+  origin: 'deployment' as const,
+  deployment_default: effective,
+});
+
+const defaultsBody = {
+  ttl_days: {
+    effective: 90,
+    stored: null,
+    origin: 'deployment' as const,
+    deployment_default: 90,
+    maximum: 36500,
+  },
+  common_header_type: stringDefault('timeseries'),
+  common_header_version: stringDefault('1.0.3'),
+  engine: stringDefault('MergeTree'),
+  editable: true,
+};
 
 describe('SystemDefaultsSettings', () => {
   it('shows the environment default, with the editor closed', async () => {
@@ -84,5 +106,30 @@ describe('SystemDefaultsSettings', () => {
     expect(
       screen.queryByText(/so they cannot be edited/),
     ).not.toBeInTheDocument();
+  });
+
+  it('shows the same error notice as the edit form, and no zero values, when the defaults failed', async () => {
+    server.use(API_CONFIG_MOCKS.system.defaults.get.error());
+    render(<SystemDefaultsSettings />, { wrapper });
+
+    expect(
+      await screen.findByText(/The defaults could not be loaded:/),
+    ).toBeInTheDocument();
+    expect(screen.queryByText('none (kept forever)')).not.toBeInTheDocument();
+    expect(screen.queryByText(/@v/)).not.toBeInTheDocument();
+  });
+
+  it('says it is loading, and shows no zero values, until the defaults arrive', async () => {
+    server.use(
+      http.get(API_CONFIG_MOCKS.system.defaults.mockedUrl, async () => {
+        await delay(300);
+        return HttpResponse.json(defaultsBody);
+      }),
+    );
+    render(<SystemDefaultsSettings />, { wrapper });
+
+    expect(await screen.findByText('Loading defaults...')).toBeInTheDocument();
+    expect(screen.queryByText('none (kept forever)')).not.toBeInTheDocument();
+    expect(await screen.findByText('90 days')).toBeInTheDocument();
   });
 });

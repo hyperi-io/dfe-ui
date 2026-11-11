@@ -11,8 +11,10 @@ import { useFetchSchemaVocabulary } from '@/core/hooks/useFetchSchemaVocabulary'
 import {
   attributeOptions,
   cardinalityOptions,
+  currentUseCaseName,
   indexOptionsFor,
   primitiveOptions,
+  suitsPrimitive,
 } from '@/core/hooks/useFetchSchemaVocabulary/options';
 import { rowSchema } from '@/core/validationSchemas/CreateSchemaForm/AddSchemaTable.schema';
 import type { ValidatorRule } from '@rc-component/form/lib/interface';
@@ -171,7 +173,6 @@ export const AddSchemaTable = ({
     () => (vocabulary ? cardinalityOptions(vocabulary) : []),
     [vocabulary],
   );
-  const retiredAttributes = vocabulary?.cardinality.retired_attributes;
   const columnAttributeOptions = useMemo(
     () => (vocabulary ? attributeOptions(vocabulary) : []),
     [vocabulary],
@@ -194,11 +195,11 @@ export const AddSchemaTable = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps -- sync only when serialized content changes
   }, [form, name, initialValuesSignature, resetListWhenEmpty]);
 
-  // Once the engine says what a retired attribute means, a row that holds one reads as that
-  // cardinality. The rows are edited in place, because writing the whole list again would
-  // remount them and drop an edit in progress.
+  // Once the engine says what a retired attribute or use case name means, a row that holds one
+  // reads as its replacement. The rows are edited in place, because writing the whole list
+  // again would remount them and drop an edit in progress.
   useEffect(() => {
-    if (!retiredAttributes) {
+    if (!vocabulary) {
       return;
     }
     const rows = (form.getFieldValue(name) ?? []) as RowSchema[];
@@ -206,14 +207,20 @@ export const AddSchemaTable = ({
       const folded = foldRetiredAttributes(
         row.cardinality,
         row.attribute ?? [],
-        retiredAttributes,
+        vocabulary.cardinality.retired_attributes,
       );
       if (folded.cardinality !== row.cardinality) {
         form.setFieldValue([name, index, 'cardinality'], folded.cardinality);
         form.setFieldValue([name, index, 'attribute'], folded.attribute);
       }
+      const useCase = row.use_case
+        ? currentUseCaseName(vocabulary, row.use_case)
+        : row.use_case;
+      if (useCase !== row.use_case) {
+        form.setFieldValue([name, index, 'use_case'], useCase);
+      }
     });
-  }, [form, name, retiredAttributes, initialValuesSignature]);
+  }, [form, name, vocabulary, initialValuesSignature]);
 
   useEffect(() => {
     onMount?.();
@@ -329,6 +336,16 @@ export const AddSchemaTable = ({
                           [name, rowIndex, 'ch_override'],
                           undefined,
                         );
+                        // An index that does not suit the new type would be refused by the engine.
+                        const useCasePath = [name, rowIndex, 'use_case'];
+                        const useCase = form.getFieldValue(useCasePath);
+                        if (
+                          vocabulary &&
+                          useCase &&
+                          !suitsPrimitive(vocabulary, useCase, String(nextType))
+                        ) {
+                          form.setFieldValue(useCasePath, '');
+                        }
                         return nextType;
                       }}
                     >
@@ -426,7 +443,7 @@ export const AddSchemaTable = ({
               title: 'Cardinality',
               dataIndex: 'cardinality',
               key: 'cardinality',
-              width: 140,
+              width: 180,
               render: (_: unknown, record: SchemaColumnListRow) => {
                 const { key: _rowKey, name: rowIndex, ...restField } = record;
                 return (

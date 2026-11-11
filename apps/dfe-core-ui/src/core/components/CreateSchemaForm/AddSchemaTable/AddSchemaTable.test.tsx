@@ -591,6 +591,20 @@ describe('AddSchemaTable', { timeout: 15_000 }, () => {
     );
   });
 
+  test('a stored retired use case name shows as the one that replaced it', async () => {
+    const { onColumns } = renderAddSchemaTable({
+      initialValues: [validRow({ use_case: 'fulltext' })],
+      visibleColumns: ['name', 'use_case', '__rowId'],
+    });
+
+    expect(await screen.findByText('word_search')).toBeInTheDocument();
+    await waitFor(() =>
+      expect(onColumns).toHaveBeenLastCalledWith([
+        expect.objectContaining({ use_case: 'word_search' }),
+      ]),
+    );
+  });
+
   test('a select says it is loading, not that there is no data, while the vocabulary loads', async () => {
     server.use(
       http.get(API_CONFIG_MOCKS.schemas.vocabulary.mockedUrl, async () => {

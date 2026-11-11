@@ -189,6 +189,12 @@ export const ViewSchemaDetails = ({
           }),
       },
       {
+        title: 'Cardinality',
+        dataIndex: 'cardinality',
+        key: 'cardinality',
+        render: (cardinality?: string | null) => cardinality || undefined,
+      },
+      {
         dataIndex: 'use_case',
         key: 'use_case',
         ...columnFilter('Index Type', 'use_case'),
@@ -343,7 +349,14 @@ export const ViewSchemaDetails = ({
 
       <SchemaTable<SchemaColumnItem>
         columns={tableColumns}
-        visibleColumns={['_field_type', 'name', 'type', 'expr', 'comment']}
+        visibleColumns={[
+          '_field_type',
+          'name',
+          'type',
+          'cardinality',
+          'expr',
+          'comment',
+        ]}
         lockedColumns={['_field_type', 'name']}
         showSearchableColumns={showSearchableColumns}
         title={() => (

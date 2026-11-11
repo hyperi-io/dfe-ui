@@ -1,3 +1,4 @@
+import { asCardinality } from '@/core/components/CreateSchemaForm/AddSchemaTable/AddSchemaTable.helpers';
 import { SCHEMA_FIELD_TYPES } from '@/core/components/CreateSchemaForm/fieldType.constants';
 import {
   PreloadedSchema,
@@ -31,16 +32,16 @@ const textField = (value: PreloadedSchema[number], keys: string[]): string => {
 
 /**
  * A DFE CSV still writes the v1 compound type. The engine stores a primitive,
- * with the width on ch_override and low cardinality as an attribute.
+ * with the width on ch_override and low cardinality as a cardinality.
  */
 const CSV_COMPOUND_TYPE: Record<
   string,
-  { type: string; attribute?: string; ch_override?: string }
+  { type: string; cardinality?: 'low'; ch_override?: string }
 > = {
   string: { type: 'string' },
   string_fast: { type: 'string' },
-  string_lowcardinality: { type: 'string', attribute: 'lowcardinality' },
-  string_fast_lowcardinality: { type: 'string', attribute: 'lowcardinality' },
+  string_lowcardinality: { type: 'string', cardinality: 'low' },
+  string_fast_lowcardinality: { type: 'string', cardinality: 'low' },
   text: { type: 'text' },
   json: { type: 'json' },
   int8: { type: 'integer', ch_override: 'Int8' },
@@ -63,7 +64,7 @@ const CSV_COMPOUND_TYPE: Record<
 
 const csvColumnType = (
   rawType: string,
-): { type: string; attribute?: string; ch_override?: string } =>
+): { type: string; cardinality?: 'low'; ch_override?: string } =>
   CSV_COMPOUND_TYPE[rawType.trim().toLowerCase()] ?? { type: rawType };
 
 export const transformDataToUploadedSchemaRow = (
@@ -79,9 +80,11 @@ export const transformDataToUploadedSchemaRow = (
     const type = mapped.type;
     const attribute = Array.isArray(value.attribute)
       ? value.attribute
-      : mapped.attribute
-        ? [mapped.attribute]
-        : undefined;
+      : undefined;
+    // A cardinality the file declares wins over the one a compound type implies.
+    const cardinality =
+      asCardinality((value as Record<string, unknown>).cardinality) ??
+      ('cardinality' in mapped ? mapped.cardinality : undefined);
     const use_case =
       typeof value.use_case === 'string' ? value.use_case : undefined;
     const expr = typeof value.expr === 'string' ? value.expr : undefined;
@@ -95,6 +98,7 @@ export const transformDataToUploadedSchemaRow = (
       type,
       ...(mapped.ch_override ? { ch_override: mapped.ch_override } : {}),
       attribute,
+      ...(cardinality ? { cardinality } : {}),
       use_case,
       expr,
       comment,

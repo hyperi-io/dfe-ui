@@ -37,3 +37,17 @@ export const indexOptionsFor = (vocabulary: Vocabulary, primitive?: string) => {
       title: description || undefined,
     }));
 };
+
+/** A use case under the name that replaced it, or `value` unchanged when it was not retired. */
+export const currentUseCaseName = (vocabulary: Vocabulary, value: string) =>
+  vocabulary.use_cases.find(({ retired_names }) =>
+    retired_names.includes(value.trim().toLowerCase()),
+  )?.name ?? value;
+
+/** Whether a column of `primitive` can keep the use case `useCase`, so a type change can clear one it cannot. */
+export const suitsPrimitive = (
+  vocabulary: Vocabulary,
+  useCase: string,
+  primitive: string,
+) =>
+  indexOptionsFor(vocabulary, primitive).some(({ value }) => value === useCase);

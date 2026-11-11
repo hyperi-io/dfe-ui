@@ -39,7 +39,7 @@ const normalizeAttribute = (raw: unknown): string[] => {
 
 type Cardinality = z.infer<typeof rowSchema>['cardinality'];
 
-const asCardinality = (raw: unknown): Cardinality => {
+export const asCardinality = (raw: unknown): Cardinality => {
   const parsed = rowSchema.shape.cardinality.safeParse(raw);
   return parsed.success ? parsed.data : undefined;
 };
