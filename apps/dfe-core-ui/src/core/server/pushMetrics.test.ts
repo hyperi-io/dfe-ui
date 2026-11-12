@@ -6,7 +6,11 @@ import {
   MeterProvider,
   PeriodicExportingMetricReader,
 } from '@opentelemetry/sdk-metrics';
+import { mkdtempSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { describe, expect, test } from 'vitest';
+import { cgroupBytes } from '@/core/metrics';
 import { observeRegistry } from './pushMetrics';
 
 const exportOnce = async () => {
@@ -33,14 +37,19 @@ const exportOnce = async () => {
 describe('observeRegistry', () => {
   test('pushes what the engine reads and leaves the nodejs family to /metrics', async () => {
     const pushed = await exportOnce();
+    const names = [...pushed.keys()].sort();
 
-    expect([...pushed.keys()].sort()).toEqual([
+    expect(names.filter((name) => !name.startsWith('container_'))).toEqual([
       'info',
       'process_cpu_seconds_total',
       'process_open_fds',
       'process_resident_memory_bytes',
       'start_time_seconds',
     ]);
+    // A host with a memory cgroup adds these, and never as a zero
+    for (const name of names.filter((name) => name.startsWith('container_'))) {
+      expect(pushed.get(name)?.[0]?.value).toBeGreaterThan(0);
+    }
   });
 
   test('info keeps its version and commit, which liveness reads as reporting', async () => {
@@ -58,5 +67,41 @@ describe('observeRegistry', () => {
     const expected = Date.now() / 1000 - process.uptime();
 
     expect(startTime?.value).toBeCloseTo(expected, -1);
+  });
+});
+
+describe('cgroupBytes', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'cgroup-'));
+  const file = (name: string, text: string) => {
+    const path = join(dir, name);
+    writeFileSync(path, text);
+    return path;
+  };
+  const missing = join(dir, 'missing');
+
+  test.each([
+    {
+      expected: 536870912,
+      files: () => [file('v2-number', '536870912\n')],
+      when: 'the v2 file holds a number',
+    },
+    {
+      expected: undefined,
+      files: () => [file('v2-max', 'max\n'), file('v1-under-max', '1024\n')],
+      when: 'the v2 limit is max',
+    },
+    {
+      expected: 2048,
+      files: () => [missing, file('v1-number', '2048\n')],
+      when: 'only the v1 file exists',
+    },
+    {
+      expected: undefined,
+      files: () => [file('empty', '')],
+      when: 'the file is empty',
+    },
+    { expected: undefined, files: () => [missing], when: 'no file exists' },
+  ])('reads $expected when $when', ({ expected, files }) => {
+    expect(cgroupBytes(files())).toBe(expected);
   });
 });

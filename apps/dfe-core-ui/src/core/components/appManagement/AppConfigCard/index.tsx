@@ -13,7 +13,7 @@ import { useFetchAppConfig } from '@/core/hooks/apps/config/useFetchAppConfig';
 import { TAppConfigField } from '@/core/hooks/apps/config/useFetchAppConfig/types';
 import { useUpdateAppConfig } from '@/core/hooks/apps/config/useUpdateAppConfig';
 import { IconAlertTriangle } from '@repo/dfe-icons';
-import { Button, Spin } from 'antd';
+import { Button, Collapse, Spin, Tag } from 'antd';
 import { useMemo, useState } from 'react';
 import { CustomEnvEditor } from './CustomEnvEditor';
 import { SchemaField } from './SchemaField';
@@ -22,6 +22,8 @@ import {
   ENV_ROOT,
   fieldErrorFrom,
   groupFields,
+  isOverride,
+  sectionNameFor,
   TFieldError,
 } from './appConfig';
 
@@ -48,6 +50,7 @@ export const AppConfigCard = ({
   instance: string;
 }) => {
   const [drafts, setDrafts] = useState<Record<string, unknown>>({});
+  const [openSections, setOpenSections] = useState<string[]>([]);
   const [added, setAdded] = useState<string[]>([]);
   const [localError, setLocalError] = useState<TFieldError | null>(null);
 
@@ -152,6 +155,13 @@ export const AppConfigCard = ({
   const onField = fieldError !== null && shownPaths.has(fieldError.path);
   const errorFor = (path: string) =>
     onField && fieldError?.path === path ? fieldError.message : undefined;
+  // The section holding a refused option opens, so its reason is on screen
+  const errorSection =
+    onField && fieldError ? sectionNameFor(fieldError.path) : undefined;
+  const activeSections =
+    errorSection && !openSections.includes(errorSection)
+      ? [...openSections, errorSection]
+      : openSections;
 
   const conflict = getApiWriteConflict(updateError);
   const cardMessage =
@@ -186,22 +196,41 @@ export const AppConfigCard = ({
       <RbacProtected action={RbacProtected.rbacActions.helmvars_write}>
         <RbacProtected.Unrestricted>
           <div className="flex flex-col gap-4">
-            {sections.map((section) => (
-              <div key={section.name} className="flex flex-col">
-                <h3 className="text-sm font-semibold capitalize">
-                  {section.name}
-                </h3>
-                {section.fields.map((field) => (
-                  <SchemaField
-                    key={field.path}
-                    field={field}
-                    draft={drafts[field.path]}
-                    onChange={(value) => setDraft(field.path, value)}
-                    errorMessage={errorFor(field.path)}
-                  />
-                ))}
-              </div>
-            ))}
+            <Collapse
+              activeKey={activeSections}
+              onChange={(keys) =>
+                setOpenSections(Array.isArray(keys) ? keys : [keys])
+              }
+              items={sections.map((section) => {
+                const overridden = section.fields.filter(isOverride).length;
+                const unsaved = section.fields.filter(
+                  (field) => field.path in drafts,
+                ).length;
+                return {
+                  key: section.name,
+                  label: (
+                    <span className="text-sm font-semibold capitalize">
+                      {section.name}
+                    </span>
+                  ),
+                  extra: (
+                    <>
+                      {overridden > 0 && <Tag>{overridden} overridden</Tag>}
+                      {unsaved > 0 && <Tag color="blue">{unsaved} unsaved</Tag>}
+                    </>
+                  ),
+                  children: section.fields.map((field) => (
+                    <SchemaField
+                      key={field.path}
+                      field={field}
+                      draft={drafts[field.path]}
+                      onChange={(value) => setDraft(field.path, value)}
+                      errorMessage={errorFor(field.path)}
+                    />
+                  )),
+                };
+              })}
+            />
 
             <CustomEnvEditor
               custom={config.custom ?? []}

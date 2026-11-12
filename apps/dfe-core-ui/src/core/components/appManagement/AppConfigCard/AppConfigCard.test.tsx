@@ -16,6 +16,17 @@ const { wrapper } = buildTestWrapper().withTheme().withReactQuery();
 const renderCard = () =>
   render(<AppConfigCard service={SERVICE} instance={INSTANCE} />, { wrapper });
 
+// Sections start closed, so a test reading the options opens every one
+const renderOpenCard = async () => {
+  const user = userEvent.setup();
+  renderCard();
+  for (const header of await screen.findAllByRole('button', {
+    expanded: false,
+  })) {
+    await user.click(header);
+  }
+};
+
 const capturePut = (body: { current: Record<string, unknown> | null }) =>
   http.put(CONFIG_URL, async ({ request }) => {
     body.current = (await request.json()) as Record<string, unknown>;
@@ -32,8 +43,39 @@ const capturePut = (body: { current: Record<string, unknown> | null }) =>
   });
 
 describe('AppConfigCard', () => {
-  it('shows every declared option, grouped by the section its path names', async () => {
+  it('starts each section closed, its header counting the overrides inside', async () => {
     renderCard();
+
+    const batch = await screen.findByRole('button', { name: /^batch/ });
+    expect(batch).toHaveAttribute('aria-expanded', 'false');
+    expect(batch).toHaveTextContent('1 overridden');
+    expect(
+      screen.getByRole('button', { name: /^general/ }),
+    ).not.toHaveTextContent('overridden');
+    expect(
+      screen.queryByLabelText('Maximum records per batch'),
+    ).not.toBeInTheDocument();
+  });
+
+  it('counts the unsaved edits on the section that holds them', async () => {
+    const user = userEvent.setup();
+    await renderOpenCard();
+
+    await user.type(
+      await screen.findByLabelText('Maximum records per batch'),
+      '250',
+    );
+
+    expect(screen.getByRole('button', { name: /^batch/ })).toHaveTextContent(
+      '1 unsaved',
+    );
+    expect(
+      screen.getByRole('button', { name: /^kafka/ }),
+    ).not.toHaveTextContent('unsaved');
+  });
+
+  it('shows every declared option, grouped by the section its path names', async () => {
+    await renderOpenCard();
 
     expect(
       await screen.findByText('Maximum records per batch'),
@@ -48,7 +90,7 @@ describe('AppConfigCard', () => {
   // Derek's rule: a default renders as grey placeholder text, never as a value
   // sitting in the box where it cannot be told apart from something set.
   it('renders an unset option with its default as placeholder, not as a value', async () => {
-    renderCard();
+    await renderOpenCard();
 
     const input = await screen.findByLabelText('Maximum records per batch');
     expect(input).toHaveValue('');
@@ -56,7 +98,7 @@ describe('AppConfigCard', () => {
   });
 
   it('marks an override so it cannot be mistaken for a default', async () => {
-    renderCard();
+    await renderOpenCard();
 
     await screen.findByText('Batch timeout');
     const option = screen.getByRole('group', {
@@ -69,7 +111,7 @@ describe('AppConfigCard', () => {
   // An option running its own default is not an override, and must not carry
   // the marker that says it is.
   it('does not mark an option that is merely running its default', async () => {
-    renderCard();
+    await renderOpenCard();
 
     await screen.findByText('Maximum records per batch');
     const option = screen.getByRole('group', {
@@ -82,7 +124,7 @@ describe('AppConfigCard', () => {
   // chart is its own state: not a default, not a blank box. Folding it into
   // either tells the operator the wrong story about where the value came from.
   it('renders a chart-derived option as its own state and refuses the edit', async () => {
-    renderCard();
+    await renderOpenCard();
 
     await screen.findByText('Kafka brokers');
     expect(screen.getByText('set by the deployment')).toBeInTheDocument();
@@ -90,7 +132,7 @@ describe('AppConfigCard', () => {
   });
 
   it('never renders a secret value, only whether one is set', async () => {
-    renderCard();
+    await renderOpenCard();
 
     await screen.findByText('Kafka SASL password');
     expect(screen.getByText('secret set')).toBeInTheDocument();
@@ -100,7 +142,7 @@ describe('AppConfigCard', () => {
   // The failure this page exists to avoid: opening it and saving must not turn
   // a screenful of defaults into a screenful of overrides.
   it('has nothing to save until something is actually edited', async () => {
-    renderCard();
+    await renderOpenCard();
 
     await screen.findByText('Log level');
     expect(
@@ -113,7 +155,7 @@ describe('AppConfigCard', () => {
     const body: { current: Record<string, unknown> | null } = { current: null };
     server.use(capturePut(body));
 
-    renderCard();
+    await renderOpenCard();
 
     const input = await screen.findByLabelText('Maximum records per batch');
     await user.type(input, '250');
@@ -135,7 +177,7 @@ describe('AppConfigCard', () => {
       }),
     );
 
-    renderCard();
+    await renderOpenCard();
 
     const input = await screen.findByLabelText('Maximum records per batch');
     await user.type(input, '7');
@@ -158,7 +200,7 @@ describe('AppConfigCard', () => {
       }),
     );
 
-    renderCard();
+    await renderOpenCard();
 
     const input = await screen.findByLabelText('Maximum records per batch');
     await user.type(input, '250');
@@ -167,6 +209,33 @@ describe('AppConfigCard', () => {
     const alert = await screen.findByRole('alert', {}, { timeout: 15000 });
     expect(alert).toHaveTextContent(
       'the deployment sets this through kafka.mode',
+    );
+  }, 20000);
+
+  it('opens a closed section when a save refuses an option in it', async () => {
+    const user = userEvent.setup();
+    server.use(
+      API_CONFIG_MOCKS.apps.config.put.chartDerived({
+        service: SERVICE,
+        instance: INSTANCE,
+        path: 'config.batch.max_records',
+        message: 'the deployment sets this through kafka.mode',
+      }),
+    );
+
+    await renderOpenCard();
+    await user.type(
+      await screen.findByLabelText('Maximum records per batch'),
+      '250',
+    );
+    const batch = screen.getByRole('button', { name: /^batch/ });
+    await user.click(batch);
+    expect(batch).toHaveAttribute('aria-expanded', 'false');
+    await user.click(screen.getByRole('button', { name: 'Save 1 change' }));
+
+    await waitFor(
+      () => expect(batch).toHaveAttribute('aria-expanded', 'true'),
+      { timeout: 15000 },
     );
   }, 20000);
 
@@ -181,7 +250,7 @@ describe('AppConfigCard', () => {
       }),
     );
 
-    renderCard();
+    await renderOpenCard();
 
     const input = await screen.findByLabelText('extraEnv.RUST_BACKTRACE');
     await user.clear(input);
@@ -208,7 +277,7 @@ describe('AppConfigCard', () => {
       }),
     );
 
-    renderCard();
+    await renderOpenCard();
 
     const input = await screen.findByLabelText('Maximum records per batch');
     await user.type(input, '250');
@@ -234,7 +303,7 @@ describe('AppConfigCard', () => {
       }),
     );
 
-    renderCard();
+    await renderOpenCard();
 
     const input = await screen.findByLabelText('Maximum records per batch');
     await user.type(input, '250');
@@ -267,7 +336,7 @@ describe('AppConfigCard', () => {
       }),
     );
 
-    renderCard();
+    await renderOpenCard();
 
     await user.clear(await screen.findByLabelText('extraEnv.RUST_BACKTRACE'));
     await user.type(screen.getByLabelText('extraEnv.RUST_BACKTRACE'), '0');
@@ -287,7 +356,7 @@ describe('AppConfigCard', () => {
     const body: { current: Record<string, unknown> | null } = { current: null };
     server.use(capturePut(body));
 
-    renderCard();
+    await renderOpenCard();
 
     const name = await screen.findByLabelText('New environment key');
     await user.type(name, 'EXTRA_KEY');
@@ -307,7 +376,7 @@ describe('AppConfigCard', () => {
     const body: { current: Record<string, unknown> | null } = { current: null };
     server.use(capturePut(body));
 
-    renderCard();
+    await renderOpenCard();
 
     await screen.findByText('RUST_BACKTRACE');
     await user.click(screen.getByRole('button', { name: 'Remove' }));
@@ -320,7 +389,7 @@ describe('AppConfigCard', () => {
   });
 
   it('names the overlay keys the contract no longer declares', async () => {
-    renderCard();
+    await renderOpenCard();
 
     expect(
       await screen.findByText(

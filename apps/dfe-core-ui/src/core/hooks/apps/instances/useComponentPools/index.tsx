@@ -24,6 +24,11 @@ export type TComponentPool = {
 const poolKey = (service: string, instance: string, process?: string) =>
   [service, instance, ...(process ? [process] : [])].join('/');
 
+const poolLabel = (service: string) => POOL_LABELS[service] ?? service;
+
+const byLabel = (a: TAppCatalogueEntry, b: TAppCatalogueEntry) =>
+  poolLabel(a.service).localeCompare(poolLabel(b.service));
+
 /** The query naming one component, with the instance only when it is not the default. */
 const componentQuery = (
   service: string,
@@ -43,7 +48,7 @@ const componentQuery = (
  * Which apps count is the manifest's `multiplicity`, not a list kept in the UI.
  * Each pool is labelled by its service id, the name it reports telemetry
  * under, or by its name in POOL_LABELS. With `includeProcesses`, each process deployed from an app's image
- * follows that app as a pool of its own. A missing or unknown `?component=`
+ * follows that app as a pool of its own. Apps run in alphabetical order of their label, whatever order the catalogue lists them in. A missing or unknown `?component=`
  * opens the first pool.
  */
 export const useComponentPools = (
@@ -56,13 +61,14 @@ export const useComponentPools = (
 
   const pools: TComponentPool[] = (apps ?? [])
     .filter((app) => app.multiplicity === 'single')
+    .sort(byLabel)
     .flatMap((app) =>
       app.instances.flatMap((instance) => [
         {
           defaultInstance: instance === DEFAULT_INSTANCE,
           instance,
           key: poolKey(app.service, instance),
-          label: POOL_LABELS[app.service] ?? app.service,
+          label: poolLabel(app.service),
           query: componentQuery(app.service, instance),
           scaleDeployed: app.scale_deployed,
           service: app.service,
