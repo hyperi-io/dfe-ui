@@ -24,12 +24,12 @@ the single source the iframe URL and the sidebar gating read.
 
 Neither is `NEXT_PUBLIC_`, and that is deliberate: a build-inlined read would
 bake the build machine's value into the browser bundle. With neither set,
-`/observe` renders "HyperDX is not configured for this deployment."
+`/observe` renders "Search is not configured for this deployment."
 
 The console's Content-Security-Policy frames nothing but dfe-hyperdx: `frame-src` is `HYPERDX_URL`'s origin, or the host the browser used on `HYPERDX_PORT`. dfe-hyperdx reached any other way is blocked in the browser.
 
 ## Rule-create round trip
 
-dfe-hyperdx posts the search to the engine's `dfe/create-rule` route and opens
-`/rules/{id}` in the console. dfe-ui holds no listener for it. Detail:
+dfe-hyperdx creates the rule through its `dfe/create-rule` route, which
+forwards to the engine, and opens `/rules/{id}` in a new tab. dfe-ui holds no listener for it. Detail:
 [hyperdx-rule-create.md](hyperdx-rule-create.md).
