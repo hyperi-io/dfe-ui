@@ -4,7 +4,7 @@ import { createLogger } from '@/core/server/logger';
 
 // Next's instrumentation hook: runs ONCE per server process, before anything serves.
 //
-// This is dfe-ui joining the stack's ONE telemetry seam. dfe-infra resolves the
+// This is dfe-ui joining the stack's ONE telemetry pipeline. dfe-infra resolves the
 // destination from telemetry.mode (telemetry.otlpEndpointTemplate) and hands it to
 // every container as OTEL_EXPORTER_OTLP_ENDPOINT -- HyperDX by default (the otel
 // collector dfe-infra deploys), or the receiver pipeline, or a deployer's own OTLP

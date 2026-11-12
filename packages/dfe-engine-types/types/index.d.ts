@@ -6527,7 +6527,7 @@ export interface components {
         };
         /**
          * AuthKind
-         * @description How a provider authenticates. Secrets are held via the scalo.secrets seam.
+         * @description How a provider authenticates. Secrets are held via the scalo.secrets interface.
          * @enum {string}
          */
         AuthKind: "none" | "api_key" | "git_token";
