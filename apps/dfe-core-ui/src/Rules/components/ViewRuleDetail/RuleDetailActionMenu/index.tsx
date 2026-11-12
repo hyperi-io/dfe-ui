@@ -1,9 +1,9 @@
 import { ActionsMenu } from '@/core/components/ActionsMenu';
+import { useListRulesContext } from '@/core/contexts/ListRulesContext';
+import { TRuleCreateResponse } from '@/core/hooks/useCreateRule/types';
 import { CloneRuleModal } from '@/Rules/components/CloneRuleModal';
 import { DeleteRuleModal } from '@/Rules/components/DeleteRuleModal';
 import { UpdateRuleDrawer } from '@/Rules/components/UpdateRuleDrawer';
-import { useListRulesContext } from '@/Rules/contexts/ListRulesContext';
-import { TRuleCreateResponse } from '@/Rules/hooks/useCreateRule/types';
 import { TRuleDetail } from '@/Rules/hooks/useFetchRuleDetail/types';
 import { TRuleUpdateResponse } from '@/Rules/hooks/useUpdateRule/types';
 import { IconCopy, IconEdit, IconTrash } from '@repo/dfe-icons';

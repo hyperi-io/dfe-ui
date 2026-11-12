@@ -10,7 +10,7 @@ import { IconDeviceFloppy, IconPlus, IconTrash } from '@repo/dfe-icons';
 import { Button, FormProps, Input } from 'antd';
 import { useEffect, useMemo } from 'react';
 import z from 'zod';
-import { RuleSelect } from './RuleSelect';
+import { RuleSelect } from './RuleSelectCreate';
 
 /** The engine's code for a hunt naming an organisation it does not hold, such as a deleted one. */
 export const UNKNOWN_ORG_CODE = 'unknown_org';

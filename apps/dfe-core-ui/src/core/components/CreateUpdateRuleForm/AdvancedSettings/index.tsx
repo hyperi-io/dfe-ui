@@ -1,7 +1,7 @@
 import { ContentCard } from '@/core/components/ContentCard';
 import { Form } from '@/core/components/Form';
+import { HuntSelect } from '@/core/components/HuntSelect';
 import { SourceSelect } from '@/core/components/SourceSelect';
-import { HuntSelect } from '@/Rules/components/HuntSelect';
 import { IconChevronDown, IconChevronUp } from '@repo/dfe-icons';
 import { Button, FormRule, Input, Switch } from 'antd';
 import { useState } from 'react';

@@ -1,5 +1,5 @@
 import { FormNotification } from '@/core/components/FormNotification';
-import { TSqlValidationResponse } from '@/Rules/hooks/useValidateRule/types';
+import { TSqlValidationResponse } from '@/core/hooks/useValidateRule/types';
 
 type TSqlValidationError = NonNullable<
   TSqlValidationResponse['errors']

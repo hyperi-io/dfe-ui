@@ -56,7 +56,7 @@ vi.mock('@/core/components/SourceSelect', () => ({
     />
   ),
 }));
-vi.mock('@/Hunts/components/CreateUpdateHuntForm/RuleSelect', () => ({
+vi.mock('@/Hunts/components/CreateUpdateHuntForm/RuleSelectCreate', () => ({
   RuleSelect: ({
     value,
     onChange,

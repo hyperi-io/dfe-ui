@@ -1,4 +1,4 @@
-import { TRuleCreateResponse } from '@/Rules/hooks/useCreateRule/types';
+import { TRuleCreateResponse } from '@/core/hooks/useCreateRule/types';
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 import { RuleSaveSummary, ruleSaveNotice, ruleSaveWarnings } from '.';

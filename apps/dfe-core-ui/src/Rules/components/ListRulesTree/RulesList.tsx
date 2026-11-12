@@ -1,5 +1,5 @@
-import { useListRulesContext } from '@/Rules/contexts/ListRulesContext';
 import { CustomScrollbar } from '@/core/components/CustomScrollbar';
+import { useListRulesContext } from '@/core/contexts/ListRulesContext';
 import { TRuleListItem } from '@/core/hooks/useFetchInfiniteFilteredRules/types';
 import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
 import { cn } from '@/core/utils/style';

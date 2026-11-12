@@ -1,8 +1,8 @@
+import { TRuleCreateResponse } from '@/core/hooks/useCreateRule/types';
 import { TRuleListResponse } from '@/core/hooks/useFetchInfiniteFilteredRules/types';
-import { TRuleCreateResponse } from '@/Rules/hooks/useCreateRule/types';
+import { TSqlValidationResponse } from '@/core/hooks/useValidateRule/types';
 import { TRuleDetail } from '@/Rules/hooks/useFetchRuleDetail/types';
 import { TRuleUpdateResponse } from '@/Rules/hooks/useUpdateRule/types';
-import { TSqlValidationResponse } from '@/Rules/hooks/useValidateRule/types';
 import { http, HttpResponse } from 'msw';
 import {
   DEFAULT_VALIDATION_ERROR,

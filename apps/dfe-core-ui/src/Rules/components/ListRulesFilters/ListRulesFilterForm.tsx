@@ -1,8 +1,8 @@
 import { Form } from '@/core/components/Form';
 import { SortActions } from '@/core/components/SortActions';
 import { SourceSelect } from '@/core/components/SourceSelect';
+import { useListRulesContext } from '@/core/contexts/ListRulesContext';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
-import { useListRulesContext } from '@/Rules/contexts/ListRulesContext';
 import { Button, Input, Select } from 'antd';
 import { useEffect, useId } from 'react';
 import z from 'zod';
