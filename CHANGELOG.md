@@ -3,6 +3,13 @@
 Rendered by CI and committed back at the end of a release -- do not edit by
 hand. Release notes also appear on the GitHub Releases page, one per tag.
 
+## [1.7.44](https://github.com/hyperi-io/dfe-ui/compare/v1.7.43...v1.7.44) (2026-11-12)
+
+### Bug Fixes
+
+* 722 fixui hunts createupdate   allow create rule from form ([#726](https://github.com/hyperi-io/dfe-ui/issues/726)) ([48b77bd](https://github.com/hyperi-io/dfe-ui/commit/48b77bdc430c325d840740d41b04f168407eef4a))
+* 723-fixui-fix-fetching-all-source-details-on-source-list ([#725](https://github.com/hyperi-io/dfe-ui/issues/725)) ([649feed](https://github.com/hyperi-io/dfe-ui/commit/649feedb2ba685bbe5dc385b2118fcba4b6f3577))
+
 ## [1.7.43](https://github.com/hyperi-io/dfe-ui/compare/v1.7.42...v1.7.43) (2026-11-11)
 
 ### Bug Fixes
