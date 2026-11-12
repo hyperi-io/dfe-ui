@@ -47,7 +47,7 @@ A Turborepo/yarn-workspaces monorepo with one shipped app and four packages:
 | Doc                                                          | Covers                                                                       |
 | ------------------------------------------------------------ | ---------------------------------------------------------------------------- |
 | [docs/architecture.md](docs/architecture.md)                 | app + package map, route groups, where dfe-ui sits in the DFE stack          |
-| [docs/console-and-the-flow.md](docs/console-and-the-flow.md) | the five menu groups, and how a source page draws the engine's flow resolver |
+| [docs/console-and-the-flow.md](docs/console-and-the-flow.md) | the four menu groups, and how a source page draws the engine's flow resolver |
 | [docs/engine-api-client.md](docs/engine-api-client.md)       | the typed engine API client + spec re-vendor procedure                       |
 | [docs/authentication.md](docs/authentication.md)             | local and OIDC sign-in, session renewal, sign-out and redirects              |
 | [docs/observe-embed.md](docs/observe-embed.md)               | the embedded dfe-hyperdx explore surface                                     |
