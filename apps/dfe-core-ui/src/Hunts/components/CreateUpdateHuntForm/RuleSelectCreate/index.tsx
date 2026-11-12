@@ -52,7 +52,7 @@ export const RuleSelect = ({ value, ...props }: SelectProps) => {
           <ListRulesProvider>
             <CreateRuleDrawer
               onSuccess={(response) => {
-                setRuleValue([...(ruleValue ?? []), response.rule.name]);
+                handleChange([...(ruleValue ?? []), response.rule.name]);
               }}
               redirectOnCreate={false}
             />
