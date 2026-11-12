@@ -18,7 +18,7 @@ export interface paths {
          * @description Authenticate with local credentials and receive a JWT token.
          *
          *     The password check runs off the event loop. Failed attempts back off per
-         *     username and per client address (``auth.login_throttle``); a waiting attempt is
+         *     username and per client address (``auth.login_throttle``). A waiting attempt is
          *     refused with 429 before the password is checked.
          */
         post: operations["auth.login"];
@@ -90,8 +90,8 @@ export interface paths {
          *     groups or orgs, because its token carries none until the change.
          *
          *     ``hyperdx_role`` and ``hyperdx_identity`` are what dfe-hyperdx takes a
-         *     session's dashboard role and team from; it caches this answer for 30 seconds,
-         *     so a group change reaches HyperDX in that window rather than at token expiry.
+         *     session's dashboard role and team from. It caches this answer for 30 seconds,
+         *     so a group change reaches dfe-hyperdx in that window rather than at token expiry.
          */
         get: operations["auth.me.list"];
         put?: never;
@@ -139,7 +139,7 @@ export interface paths {
          *     configured deployment does not serve its inventory to anonymous callers.
          *     The exception is the name and display name of each enabled OIDC provider,
          *     which stay (no configuration) because the login screen needs to know which
-         *     IdPs to offer and what to call them. Accounts are never returned; the
+         *     IdPs to offer and what to call them. Accounts are never returned. The
          *     ``first_user`` step reports whether a real (non break-glass) user exists.
          */
         get: operations["auth.setup-status.list"];
@@ -421,7 +421,7 @@ export interface paths {
          * @description Poll whether an account's password has merged to the deploy repo's main.
          *
          *     Step 2 of the review-PR path for the local admin and ``breakglass``: the UI
-         *     polls this after the operator merges the PR; it fetches remote main and flips
+         *     polls this after the operator merges the PR. It fetches remote main and flips
          *     ``merged`` true. Durable immediately in the auto-merge and file-share modes. A
          *     regular user is never git-persisted, so it reports not-git-backed (durable in
          *     its own store).
@@ -550,7 +550,7 @@ export interface paths {
         put?: never;
         /**
          * Add Member
-         * @description Add a member to a group (idempotent; checked at the group's scope).
+         * @description Add a member to a group (idempotent, checked at the group's scope).
          */
         post: operations["auth.groups.members.create"];
         delete?: never;
@@ -790,7 +790,7 @@ export interface paths {
          * Update Provider
          * @description Update an OIDC provider configuration (admin only).
          *
-         *     A secret the body omits, value and env var name alike, keeps what the provider already holds, so an update that only flips ``enabled`` does not strand a stored credential; an empty env var name clears the name and keeps the stored copy. A secret the body names an env var for and sends no value for moves onto that env var and its stored copy is deleted once the update is saved, unless the name is the one already held with nothing stored. A move onto an env var the engine does not set is refused (``env_var_not_set``). Any update that touches more than ``enabled`` or ``display_name`` must leave the provider passing the field rules. Both are checked before a secret is written or deleted.
+         *     A secret the body omits, value and env var name alike, keeps what the provider already holds, so an update that only flips ``enabled`` does not strand a stored credential. An empty env var name clears the name and keeps the stored copy. A secret the body names an env var for and sends no value for moves onto that env var and its stored copy is deleted once the update is saved, unless the name is the one already held with nothing stored. A move onto an env var the engine does not set is refused (``env_var_not_set``). Any update that touches more than ``enabled`` or ``display_name`` must leave the provider passing the field rules. Both are checked before a secret is written or deleted.
          */
         put: operations["auth.oidc-providers.apply"];
         post?: never;
@@ -887,7 +887,7 @@ export interface paths {
          * List Orgs
          * @description List organisations visible to the caller, paginated.
          *
-         *     System-scope org:read holders see every org; org-scope holders see
+         *     System-scope org:read holders see every org. Org-scope holders see
          *     only the orgs their grants cover.
          */
         get: operations["orgs.list"];
@@ -896,7 +896,7 @@ export interface paths {
          * Create Org
          * @description Create a new customer organisation (admin only).
          *
-         *     If HyperDX integration is enabled, the lifecycle manager handles
+         *     If the Search integration is enabled, the lifecycle manager handles
          *     team creation as part of org provisioning.  Failure is non-fatal.
          *
          *     A hunt already naming the org, such as one whose org was deleted, has the new
@@ -1071,7 +1071,7 @@ export interface paths {
          * @description List sources with pagination, search, filtering, and a full object tree.
          *
          *     The landing source (``main``) is always the first item when it is in the
-         *     result set; remaining sources keep the requested sort. A caller held to its
+         *     result set. Remaining sources keep the requested sort. A caller held to its
          *     orgs does not see a fetcher source bound to another org.
          */
         get: operations["sources.list"];
@@ -1373,7 +1373,7 @@ export interface paths {
          *
          *     A delete production+team sends to review answers ``review_required`` and
          *     touches nothing else: main still carries the source, so its topics, records and
-         *     HyperDX source stay until the branch is merged.
+         *     Search source stay until the branch is merged.
          */
         delete: operations["sources.delete"];
         options?: never;
@@ -1452,7 +1452,7 @@ export interface paths {
          *
          *     Reads the loader's per-table counter out of the otel tables over a bounded
          *     five-minute window, so the console can put a number beside a source without
-         *     the operator opening HyperDX. It answers 200 with nulls where the series is
+         *     the operator opening Search. It answers 200 with nulls where the series is
          *     absent: a source that was only just defined has nothing to report, and that
          *     is not an error.
          */
@@ -1506,7 +1506,7 @@ export interface paths {
          *
          *     ``enable`` / ``disable`` / ``dormant`` / ``delete`` apply immediately.
          *     ``deploy`` submits one ``source:deploy`` background task per accepted source
-         *     (poll ``GET /operations/{operation}``); refused names land in ``failed``.
+         *     (poll ``GET /operations/{operation}``). Refused names land in ``failed``.
          *
          *     An action that applies immediately reports the one reconcile it ends with, as
          *     a single-source write does.
@@ -1533,7 +1533,7 @@ export interface paths {
          *
          *     Recompiles every stack-scoped routing block (receiver, loader, archiver) and
          *     deploys, syncs or removes the instances of every instance-scoped app (a fetcher
-         *     per active fetcher-based source). Every source write does this on its own; this
+         *     per active fetcher-based source). Every source write does this on its own. This
          *     route is the retry when one reported ``apps_sync_error``, and the pass that
          *     deletes a stranded ``_load`` topic a deploy reported in ``topics_pending_removal``.
          */
@@ -1833,7 +1833,10 @@ export interface paths {
         };
         /**
          * Get Service Config
-         * @description Get a full service config by service + instance, every credential masked.
+         * @description A service config as its instance runs it, every credential masked.
+         *
+         *     The stored keys over the app's own defaults, read from its mounted contract.
+         *     With no contract mounted only the stored keys are shown.
          */
         get: operations["services.get"];
         /**
@@ -1849,7 +1852,8 @@ export interface paths {
          *     stored behind it, or in a list entry that cannot be told apart, is a 400
          *     ``masked_value`` and nothing is saved. A changed field beside a masked secret,
          *     in the same mapping or with the secret one mapping down, is a 400
-         *     ``credential_reentry_required``: the secret is typed again.
+         *     ``credential_reentry_required``: the secret is typed again. A value the app's
+         *     contract refuses is a 422 ``invalid_config``.
          */
         put: operations["services.apply"];
         post?: never;
@@ -1916,7 +1920,7 @@ export interface paths {
          *
          *     The deployer supplies the list, so an empty one means it listed none. Gated to
          *     the admin-class roles, which hold ``deployment:*`` or ``*``: the list maps the
-         *     deployment's consoles. Links only; nothing here carries a credential.
+         *     deployment's consoles. Links only. Nothing here carries a credential.
          */
         get: operations["deployment.admin-links.list"];
         put?: never;
@@ -2058,8 +2062,8 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Create Rule From Hyperdx
-         * @description Create a hunt rule from the SQL a HyperDX view renders to.
+         * Create Rule From Search
+         * @description Create a hunt rule from the SQL a Search view renders to.
          *
          *     Wraps the create pipeline with ``source_type='hyperdx'`` and auto-derives a
          *     unique rule id from the saved-search name, so the caller need not supply one.
@@ -2276,7 +2280,7 @@ export interface paths {
          * @description Conditions that leave the engine degraded while it keeps serving.
          *
          *     A refused YAML write keeps the old file or the old deploy-repo content, so reads
-         *     stay correct and readiness is not failed; this is where the refusal shows.
+         *     stay correct and readiness is not failed. This is where the refusal shows.
          */
         get: operations["system.status"];
         put?: never;
@@ -2326,7 +2330,7 @@ export interface paths {
          *     The engine's own tables and every deployed source's table are brought to the new
          *     effective default in this request, with ``ALTER TABLE ... MODIFY TTL`` (or
          *     ``REMOVE TTL`` for 0). A table that declares its own TTL is left alone. A
-         *     ClickHouse failure answers 502 with the override ALREADY committed; sending the
+         *     ClickHouse failure answers 502 with the override ALREADY committed. Sending the
          *     same value again applies it.
          */
         put: operations["system.retention.apply"];
@@ -2359,8 +2363,8 @@ export interface paths {
          * @description Store the named defaults. Only ttl_days is applied to live tables.
          *
          *     Omitted fields are left alone. null clears that override. Common-header type,
-         *     version and engine are what a source inherits the next time it is deployed;
-         *     this request does not rewrite them onto live tables. A patch that names
+         *     version and engine are what a source inherits the next time it is deployed.
+         *     This request does not rewrite them onto live tables. A patch that names
          *     ttl_days stores it and then runs the same reconcile as PUT /retention.
          */
         patch: operations["system.defaults.update"];
@@ -2557,7 +2561,7 @@ export interface paths {
          *     Hunts execute in the separate dfe-hunt-runner service (pull-based, coordinated
          *     via ClickHouse), not in this API process, so ``runners`` counts the runners that
          *     beat within their last two polls and ``running`` is whether any did. For "is this
-         *     hunt running", read the per-hunt ``running`` on the hunts list; ``hunt_count`` is
+         *     hunt running", read the per-hunt ``running`` on the hunts list. ``hunt_count`` is
          *     the configured-hunt count.
          */
         get: operations["hunts.status"];
@@ -2628,7 +2632,7 @@ export interface paths {
          * @description Delete a hunt configuration.
          *
          *     A production+team delete is routed to a review branch, so the runner keeps
-         *     executing the hunt until that branch is merged; ``X-DFE-Review-Required`` says so.
+         *     executing the hunt until that branch is merged. ``X-DFE-Review-Required`` says so.
          */
         delete: operations["hunts.delete"];
         options?: never;
@@ -2652,13 +2656,13 @@ export interface paths {
          *     The pull model is kept. Nothing is pushed at the runner and no listener is added
          *     -- the fire is written into the coordination state, and the runner that is
          *     already running picks it up on its next poll, through the same claim that stops
-         *     a hunt double-running. 202 says it is queued, not that it has run; the response
+         *     a hunt double-running. 202 says it is queued, not that it has run. The response
          *     carries the poll interval so the caller knows the longest wait before it starts.
          *
          *     A hunt with no rate schedule is not something the runner ticks, so a queued run
          *     for one sits unclaimed. That is the schedule's shape, not a failure here.
          *
-         *     503 is reserved for ClickHouse actually being unreachable; any other failure to
+         *     503 is reserved for ClickHouse actually being unreachable. Any other failure to
          *     write the request is a 500, so a bug here never reads as an outage.
          */
         post: operations["hunts.run"];
@@ -2878,7 +2882,7 @@ export interface paths {
         };
         /**
          * List Samples
-         * @description List recent sample tasks (most recent first); a caller held to its orgs sees only theirs.
+         * @description List recent sample tasks (most recent first). A caller held to its orgs sees only theirs.
          */
         get: operations["samples.list"];
         put?: never;
@@ -3503,7 +3507,7 @@ export interface paths {
          *
          *     Returns one record per path with observed types, a suggested column name,
          *     and whether the path is already promoted. ``?samples=N`` adds random
-         *     distinct example values; ``?stats=true`` adds coverage + distinct counts.
+         *     distinct example values. ``?stats=true`` adds coverage + distinct counts.
          *
          *     A caller without a platform grant holding ``schema:read`` reads only its own
          *     orgs' rows, as the sampler holds it, and a table it cannot be held on is 403.
@@ -3530,7 +3534,7 @@ export interface paths {
          *
          *     Resolves the requested ``version`` (or the source's current version). A
          *     version with a ``meta_schema`` uses ``db.<source>`` only after that version
-         *     is deployed and the table exists; otherwise rows are read from
+         *     is deployed and the table exists. Otherwise rows are read from
          *     ``db.<landing>`` filtered by the version's match rule.
          *
          *     Intended for inspecting real data while authoring a match condition or CEL
@@ -3570,7 +3574,7 @@ export interface paths {
          *     ``?dry_run=true`` returns the proposed diff and DDL without forking core schemas,
          *     adding meta-schema versions, or updating the source. A core source, such as the
          *     landing source ``main``, is refused with 409 before any schema is resolved or
-         *     written, dry run included; its ``json-paths`` and ``sample-rows`` reads stay open.
+         *     written, dry run included. Its ``json-paths`` and ``sample-rows`` reads stay open.
          */
         post: operations["schemas.promote-field"];
         delete?: never;
@@ -3594,7 +3598,7 @@ export interface paths {
         put?: never;
         /**
          * Create User
-         * @description Provision a user. IdP-owned; local password is randomised when omitted.
+         * @description Provision a user. IdP-owned. Local password is randomised when omitted.
          *
          *     A password the IdP does send is held to the same length floor as every other
          *     password the API sets, and one under it is refused rather than replaced.
@@ -3794,7 +3798,7 @@ export interface paths {
          * @description Generate Sigma view DDL for all sources (stored definitions win over field maps).
          *
          *     Defaults to the data database, since that is where a propagated hunt reads
-         *     the view from (``{source}_sigma``); an explicit ``database`` still overrides it.
+         *     the view from (``{source}_sigma``). An explicit ``database`` still overrides it.
          */
         post: operations["sigma.views.create"];
         delete?: never;
@@ -3825,12 +3829,12 @@ export interface paths {
          * @description Generate (preview) Sigma view DDL for a source.
          *
          *     A stored view definition drives generation - including its JSON-derived
-         *     columns - when one exists; otherwise falls back to the static field maps via
+         *     columns - when one exists. Otherwise falls back to the static field maps via
          *     the source mapper, keeping only the mappings whose column the source's table
-         *     carries. Returns the DDL string; does NOT execute it against ClickHouse.
+         *     carries. Returns the DDL string. Does NOT execute it against ClickHouse.
          *
          *     Defaults to the data database, since that is where a propagated hunt reads
-         *     the view from (``{source}_sigma``); an explicit ``database`` still overrides it.
+         *     the view from (``{source}_sigma``). An explicit ``database`` still overrides it.
          */
         post: operations["sigma.views.post"];
         /**
@@ -3946,7 +3950,7 @@ export interface paths {
         put?: never;
         /**
          * Disable Provider
-         * @description Disable a provider (blocks scheduled polling; a manual sync is refused).
+         * @description Disable a provider (blocks scheduled polling, a manual sync is refused).
          */
         post: operations["sigma.providers.disable"];
         delete?: never;
@@ -3968,7 +3972,7 @@ export interface paths {
          * Sync Provider Endpoint
          * @description Trigger a provider sync into the catalogue.
          *
-         *     Submitted to the task manager (a git-repo clone is long-running); blocks up to
+         *     Submitted to the task manager (a git-repo clone is long-running). Blocks up to
          *     ``wait`` seconds for inline completion, else returns ``pending`` - poll via
          *     GET /sigma/syncs/{task_id}.
          */
@@ -4058,7 +4062,7 @@ export interface paths {
         put?: never;
         /**
          * Adopt Catalogue Rule
-         * @description Detach a rule from upstream (pin its content; a re-import records drift only).
+         * @description Detach a rule from upstream (pin its content, a re-import records drift only).
          */
         post: operations["sigma.catalogue.adopt"];
         delete?: never;
@@ -4144,11 +4148,11 @@ export interface paths {
          *     the matching source's ``{source}_sigma`` view and stores a DFE rule (with a
          *     ``sigma_rule_id`` back-reference), then binds it into a per-source hunt. Drifted
          *     or hand-edited bindings are reported ``skipped_drifted`` unless ``force``.
-         *     Submitted to the task manager; blocks up to ``wait`` seconds for inline
+         *     Submitted to the task manager. Blocks up to ``wait`` seconds for inline
          *     completion, else returns ``pending`` - poll via GET /sigma/propagations/{id}.
          *
          *     A production+team run commits each generated rule and hunt to its own review
-         *     branch rather than the branch the hunt runner syncs; the report carries every
+         *     branch rather than the branch the hunt runner syncs. The report carries every
          *     branch and PR, and ``X-DFE-Review-Required`` says so on a run that completed
          *     inline. 422 ``unknown_org`` when ``hunt_customers`` names no registered org.
          */
@@ -4375,7 +4379,7 @@ export interface paths {
         };
         /**
          * List Overlays
-         * @description List substrate/platform overlay resources in the deploy repo's infra/ dir.
+         * @description List infra overlay resources in the deploy repo's infra/ dir.
          */
         get: operations["backing-services.overlays"];
         put?: never;
@@ -4438,21 +4442,21 @@ export interface paths {
         get?: never;
         /**
          * Set Overlay Var
-         * @description Set a substrate/platform value.
+         * @description Set an infra overlay value.
          *
          *     409 managed_by_provider, before any other check, when DFE does not run the
-         *     service and the value is one of its read_only paths; helmvars:override does not
+         *     service and the value is one of its read_only paths. helmvars:override does not
          *     lift it. 403 with the policy that blocked it when the var is protected - the
          *     storage model, the data-layer modes and the disk size are decided at deploy, and
          *     moving one on a live deployment is a data migration. 400 when the value would
          *     lower a declared node or broker count, or leave it undeclared (a parent map that
-         *     omits it), which loses data rather than capacity; helmvars:override does not lift it.
+         *     omits it), which loses data rather than capacity. helmvars:override does not lift it.
          */
         put: operations["backing-services.overlays.vars.apply"];
         post?: never;
         /**
          * Delete Overlay Var
-         * @description Revert a substrate/platform value to its chart default. Protected vars refuse.
+         * @description Revert an infra overlay value to its chart default. Protected vars refuse.
          *
          *     409 managed_by_provider, before any other check and whatever the caller holds,
          *     when DFE does not run the service and the value is one of its read_only paths.
@@ -4609,7 +4613,7 @@ export interface paths {
          *     A secret is written like any other option: it goes into the overlay as the rest
          *     of this surface writes one, and neither this response nor a read route on this
          *     surface says what it is. A masked value written back as it was read keeps the
-         *     stored credential; the mask where nothing is stored is a 400 ``masked_value``.
+         *     stored credential. The mask where nothing is stored is a 400 ``masked_value``.
          *     A changed field beside a stored credential, in the same mapping or with the
          *     credential one mapping down (``brokers`` beside ``sasl.password``), is a 400
          *     ``credential_reentry_required`` until that mapping is written whole with its
@@ -4747,7 +4751,7 @@ export interface paths {
          * Relink App Files
          * @description Re-resolve every link in the set to what its target now names.
          *
-         *     A tag link follows its tag; a version-pinned link advances to the artefact's
+         *     A tag link follows its tag. A version-pinned link advances to the artefact's
          *     current version. This is the fix-once-roll-everywhere half of the library.
          */
         post: operations["apps.files.relink"];
@@ -4770,7 +4774,7 @@ export interface paths {
          * Copy App Files
          * @description Copy this instance's authored files onto another instance of the same app.
          *
-         *     A transform is written against one source; reusing it on another should not mean
+         *     A transform is written against one source. Reusing it on another should not mean
          *     retyping it. Only the files move - the target keeps its own source binding,
          *     scaling and identity.
          */
@@ -4870,7 +4874,7 @@ export interface paths {
          * @description Run an authored file over real events from the source, and report each one.
          *
          *     Nothing is written: no topic, no table, no commit. ``content`` runs unsaved
-         *     content, which is what makes this useful in an editor; omitted, the file
+         *     content, which is what makes this useful in an editor. Omitted, the file
          *     already in the overlay runs instead.
          */
         post: operations["apps.files.dry-run"];
@@ -5104,7 +5108,7 @@ export interface paths {
          * @description Publish content as a version.
          *
          *     Re-sending identical content is a no-op naming the version that already holds
-         *     it; sending different content at an existing version number is refused.
+         *     it. Sending different content at an existing version number is refused.
          */
         post: operations["library.versions.create"];
         delete?: never;
@@ -5226,7 +5230,7 @@ export interface paths {
         };
         /**
          * Get Action
-         * @description One defined action; a credential a legacy definition still carries comes back masked.
+         * @description One defined action. A credential a legacy definition still carries comes back masked.
          */
         get: operations["governance.actions.get"];
         put?: never;
@@ -5291,14 +5295,14 @@ export interface paths {
          * @description Invoke a defined action - gated on the action's OWN required_action.
          *
          *     ``body.params`` supplies values for the action's declared params (422 on a
-         *     constraint violation; omitted params take their defaults). A hunt or rule
+         *     constraint violation. Omitted params take their defaults). A hunt or rule
          *     document the action would leave invalid is 422 ``invalid_document``, with the
          *     hunts API's own message. A change to the infra overlay meets the backing-services
          *     guards on what the action leaves, dry run included, whatever the caller holds:
          *     409 ``managed_by_provider`` for a read-only value of a service DFE does not run,
          *     then 400 ``scale_down_refused`` where it lowers or un-declares a node or broker
          *     count.
-         *     Direct commit in dev/solo; a production+team invoke is routed to a review PR (or
+         *     Direct commit in dev/solo. A production+team invoke is routed to a review PR (or
          *     409 ``review_required`` when no forge is configured).
          */
         post: operations["governance.actions.invoke"];
@@ -5454,7 +5458,7 @@ export interface paths {
         get: operations["gitops.auto-merge.list"];
         /**
          * Put Auto Merge
-         * @description Toggle auto-merge. Enabling requires the deployment gate; disabling always works.
+         * @description Toggle auto-merge. Enabling requires the deployment gate. Disabling always works.
          */
         put: operations["gitops.auto-merge.put"];
         post?: never;
@@ -5476,7 +5480,7 @@ export interface paths {
          * @description The resource-class registry - what VarChange.cls may legally name.
          *
          *     Registry metadata only (no resource content), so any authenticated caller
-         *     may read it; the per-class listings below are gated by each class's grant.
+         *     may read it. The per-class listings below are gated by each class's grant.
          */
         get: operations["gitops.classes.list"];
         put?: never;
@@ -5543,7 +5547,7 @@ export interface paths {
          *
          *     Flat + cursor-paginated by default; ?group_by= buckets the page for
          *     summaries. applied_revision (the Argo-synced SHA) turns state into
-         *     applied/pending; without it every entry is 'committed'.
+         *     applied/pending. Without it every entry is 'committed'.
          */
         get: operations["gitops.log.list"];
         put?: never;
@@ -5585,7 +5589,7 @@ export interface paths {
         put?: never;
         /**
          * Set Lifecycle
-         * @description Set a service's lifecycle state - per-service RBAC; pinned services are 404.
+         * @description Set a service's lifecycle state - per-service RBAC. Pinned services are 404.
          */
         post: operations["lifecycle.post"];
         delete?: never;
@@ -5604,8 +5608,8 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * From Hyperdx
-         * @description Strip a HyperDX query's time bounds -> {window}, ready to save as a rule.
+         * Strip Search Query Time Bounds
+         * @description Strip a Search query's time bounds -> {window}, ready to save as a rule.
          */
         post: operations["authoring.from-hyperdx"];
         delete?: never;
@@ -5725,7 +5729,7 @@ export interface paths {
          * Client Config
          * @description Runtime config for the web UI.
          *
-         *     Authenticated but ungated: every console pane may read it, and the HyperDX URL
+         *     Authenticated but ungated: every console pane may read it, and the Search URL
          *     it returns is internal to the deployment.
          */
         get: operations["config.client"];
@@ -5745,7 +5749,7 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Hyperdx Connection
+         * Get Search Connection
          * @description Return the caller's OWN org connection - never another org's.
          *
          *     A caller granted ``query:execute`` at system scope by a declared, unscoped role
@@ -5771,11 +5775,11 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Hyperdx Sources
-         * @description List every HyperDX team and the DFE sources on it.
+         * List Search Sources
+         * @description List every Search team and the DFE sources on it.
          *
          *     A deploy writes its source to every team, so this is the read that says where
-         *     it landed. 503 when HyperDX is not deployed or not answering -- an empty list
+         *     it landed. 503 when Search is not deployed or not answering -- an empty list
          *     would read as "the source is missing", which is a different fault.
          */
         get: operations["hyperdx.sources"];
@@ -6527,7 +6531,7 @@ export interface components {
         };
         /**
          * AuthKind
-         * @description How a provider authenticates. Secrets are held via the scalo.secrets seam.
+         * @description How a provider authenticates. Secrets are held via the scalo.secrets interface.
          * @enum {string}
          */
         AuthKind: "none" | "api_key" | "git_token";
@@ -8362,7 +8366,7 @@ export interface components {
          * DeclaredValue
          * @description One value as the deploy repo declares it.
          *
-         *     ``source`` names the overlay file it came from; a null source means the
+         *     ``source`` names the overlay file it came from. A null source means the
          *     deployment declared nothing and the chart or profile default applies. Those
          *     defaults live in dfe-infra, which the engine does not read, so the API says
          *     "not declared" rather than guessing a number.
@@ -8699,7 +8703,7 @@ export interface components {
          *     Shaped to drop straight into ``MetaSchemaAddVersionRequest.columns`` (the
          *     create-version endpoint) or a new meta-schema's version -- the UI sends these
          *     verbatim, no field mapping. ``type`` is derived from the first observed
-         *     ClickHouse type; for a multi-type path (``is_consistent=false``) confirm it
+         *     ClickHouse type. For a multi-type path (``is_consistent=false``) confirm it
          *     before saving.
          */
         DraftColumn: {
@@ -8792,7 +8796,7 @@ export interface components {
             source: string;
             /**
              * Limit
-             * @description Events to sample and run over
+             * @description Events to sample and run over, at most transform_validation.dry_run_max_events (100 by default), which a larger value is refused against
              * @default 10
              */
             limit: number;
@@ -9225,7 +9229,7 @@ export interface components {
         };
         /**
          * FromHyperdxRequest
-         * @description Body for turning a HyperDX query into rule SQL.
+         * @description Body for turning a Search query into rule SQL.
          */
         FromHyperdxRequest: {
             /** Query */
@@ -9882,7 +9886,7 @@ export interface components {
         };
         /**
          * HyperDXConfig
-         * @description Whether the UI links to HyperDX, and where.
+         * @description Whether the UI links to Search, and where.
          */
         HyperDXConfig: {
             /**
@@ -9898,7 +9902,7 @@ export interface components {
         };
         /**
          * HyperDXConnection
-         * @description Connection material in the fork's shape (name, host URL, username, password).
+         * @description Connection material in the fork's shape, plus where its seed sources live.
          */
         HyperDXConnection: {
             /** Name */
@@ -9909,10 +9913,27 @@ export interface components {
             username: string;
             /** Password */
             password: string;
+            /**
+             * Platform
+             * @description True for the platform reader, which reads every org
+             */
+            platform: boolean;
+            /**
+             * Database
+             * @description The DFE data database every seeded table lives in
+             */
+            database: string;
+            /**
+             * Tables
+             * @description Seeded table name by dfe-schemas manifest id
+             */
+            tables: {
+                [key: string]: string;
+            };
         };
         /**
          * HyperDXSourcesResponse
-         * @description Where every deployed DFE source actually landed in HyperDX.
+         * @description Where every deployed DFE source actually landed in Search.
          */
         HyperDXSourcesResponse: {
             /** Teams */
@@ -9920,17 +9941,17 @@ export interface components {
         };
         /**
          * HyperDXTeamSource
-         * @description One HyperDX source on one team, as the fork holds it.
+         * @description One Search source on one team, as dfe-hyperdx holds it.
          */
         HyperDXTeamSource: {
             /**
              * Id
-             * @description HyperDX source id on that team
+             * @description Search source id on that team
              */
             id: string;
             /**
              * Name
-             * @description DFE source name; the HyperDX source carries the same one
+             * @description DFE source name; the Search source carries the same one
              */
             name: string;
             /**
@@ -9943,17 +9964,17 @@ export interface components {
         };
         /**
          * HyperDXTeamSources
-         * @description One HyperDX team and the DFE sources it holds.
+         * @description One Search team and the DFE sources it holds.
          */
         HyperDXTeamSources: {
             /**
              * Team
-             * @description HyperDX team id
+             * @description Search team id
              */
             team: string;
             /**
              * Team Name
-             * @description HyperDX team name: the ClickHouse user its members read as
+             * @description Search team name: the ClickHouse user its members read as
              */
             team_name: string;
             /** Sources */
@@ -10615,7 +10636,7 @@ export interface components {
          *     Attributes:
          *         current: Current version of the schema.
          *         versions: Dictionary of versions and their metadata.
-         *         path: Registry path key (e.g. ``aws/cloudtrail``); omitted from YAML on disk.
+         *         path: Registry path key (e.g. ``aws/cloudtrail``). Omitted from YAML on disk.
          */
         MetaSchema: {
             /**
@@ -11174,8 +11195,8 @@ export interface components {
          *         display_name: Human-readable label for UI display.
          *         org_ids: Tenant IDs used for ClickHouse row-level security filters.
          *         enabled: Whether this org is active.
-         *         hyperdx_team_id: HyperDX team ID for this org's connection sync.
-         *         hyperdx_team_api_key_env: Environment variable name holding the org's HyperDX team API key.
+         *         hyperdx_team_id: dfe-hyperdx team ID for this org's connection sync.
+         *         hyperdx_team_api_key_env: Environment variable name holding the org's dfe-hyperdx team API key.
          *         ch_password_env: Environment variable name holding the ClickHouse password.
          *         created_at: ISO 8601 timestamp of creation.
          *         updated_at: ISO 8601 timestamp of last update.
@@ -12339,11 +12360,6 @@ export interface components {
              * @default true
              */
             cache: boolean;
-            /**
-             * Store
-             * @description Target store (database/schema/topic) - only if query allows
-             */
-            store?: string | null;
         };
         /**
          * QueryResponse
@@ -12871,7 +12887,7 @@ export interface components {
             name: string;
             /**
              * Source Type
-             * @description 'raw' (plain SQL) or 'hyperdx' (HyperDX saved search format)
+             * @description 'raw' (plain SQL) or 'hyperdx' (Search saved search format)
              * @default raw
              * @enum {string}
              */
@@ -12905,23 +12921,23 @@ export interface components {
         };
         /**
          * RuleFromHyperdxRequest
-         * @description Create a hunt rule from the SQL a HyperDX view runs.
+         * @description Create a hunt rule from the SQL a Search view runs.
          *
-         *     HyperDX renders the view to ``raw_sql`` and sends it here. The create
+         *     Search renders the view to ``raw_sql`` and sends it here. The create
          *     pipeline strips the UI meta (time bounds, LIMIT, ``__hdx_time_bucket``,
-         *     SETTINGS) via the HyperDX sanitizer, and the engine derives a unique rule id
+         *     SETTINGS) via the dfe-hyperdx sanitizer, and the engine derives a unique rule id
          *     from the saved-search name. The caller gets that id back and opens
          *     ``/rules/{id}`` -- no id to invent, no IndexedDB round-trip.
          */
         RuleFromHyperdxRequest: {
             /**
              * Raw Sql
-             * @description The ClickHouse SELECT the HyperDX view renders to
+             * @description The ClickHouse SELECT the Search view renders to
              */
             raw_sql: string;
             /**
              * Saved Search Name
-             * @description HyperDX saved-search name; seeds the rule id and label
+             * @description Search saved-search name; seeds the rule id and label
              */
             saved_search_name?: string | null;
             /**
@@ -12943,7 +12959,7 @@ export interface components {
         };
         /**
          * RuleFromHyperdxResponse
-         * @description The rule created from a HyperDX query.
+         * @description The rule created from a Search query.
          */
         RuleFromHyperdxResponse: {
             /**
@@ -13155,7 +13171,7 @@ export interface components {
          * SampleMode
          * @description How to pick the sample.
          *
-         *     - ``recent``  - newest rows first (fast tail; ClickHouse ORDER BY ts DESC,
+         *     - ``recent``  - newest rows first (fast tail, ClickHouse ORDER BY ts DESC,
          *       Kafka reads from the partition high-watermark backwards).
          *     - ``random``  - uniform-ish random rows (fair distribution, no recency bias).
          *     - ``smart``   - logreducer representative/diverse sample (default). Gated.
@@ -13192,7 +13208,7 @@ export interface components {
          *     Provide EITHER a registered ``source`` (its CH table / land topic are
          *     resolved for you) OR an explicit ``table``/``topic`` (ad-hoc - for a source
          *     that is not registered yet, e.g. AI onboarding). ``filter`` (ClickHouse
-         *     backend only) must be one condition over the sampled table's columns; it is
+         *     backend only) must be one condition over the sampled table's columns. It is
          *     replaced by the condition rendered from its parse tree, and anything else is
          *     refused when the request is built.
          */
@@ -13691,12 +13707,12 @@ export interface components {
             apps_sync_error?: string | null;
             /**
              * Hyperdx Source Teams
-             * @description How many HyperDX teams now carry a source over this source's table
+             * @description How many Search teams now carry a source over this source's table
              */
             hyperdx_source_teams?: number | null;
             /**
              * Hyperdx Source Error
-             * @description Why HyperDX was not pointed at the table. Never fails the deploy - the schema is live and HyperDX may be down or not deployed at all.
+             * @description Why Search was not pointed at the table. Never fails the deploy - the schema is live and Search may be down or not deployed at all.
              */
             hyperdx_source_error?: string | null;
             /**
@@ -14047,7 +14063,7 @@ export interface components {
         };
         /**
          * ServiceConfigDetail
-         * @description Full service config. Inner config is dynamic (schema-less mode).
+         * @description One service config as its instance runs it: the stored keys over the app's defaults.
          */
         ServiceConfigDetail: {
             /**
@@ -14154,7 +14170,7 @@ export interface components {
          * @description Pre-login setup snapshot: the wizard state plus what is configured.
          *
          *     Accounts are deliberately absent. Whether a real user exists is reported
-         *     through the ``first_user`` step; the account list itself is never served
+         *     through the ``first_user`` step. The account list itself is never served
          *     to an unauthenticated caller.
          */
         SetupStatus: {
@@ -14258,8 +14274,7 @@ export interface components {
          *     A column maps a standard ``sigma_field`` (the alias the view exposes) to EITHER
          *     a real table column (``source_column``) OR a dotted path inside the source's
          *     ``_json`` column (``json_path``) - exactly one of the two. ``type`` is an
-         *     optional ClickHouse type the extracted value is CAST to (mainly for a
-         *     JSON-derived column, whose subcolumn is otherwise a ``Dynamic``). This is the
+         *     optional ClickHouse type for the value, read as RemapColumn reads it. This is the
          *     Sigma-named shape of :class:`~dfe_engine.fieldmap.remap_view.RemapColumn`.
          */
         SigmaViewColumn: {
@@ -14280,7 +14295,7 @@ export interface components {
             json_path?: string | null;
             /**
              * Type
-             * @description Optional ClickHouse type to CAST the value to (e.g. 'String', 'UInt32')
+             * @description Optional ClickHouse type for the value (e.g. 'String', 'UInt32')
              */
             type?: string | null;
         };
@@ -14288,7 +14303,7 @@ export interface components {
          * SigmaViewDefinition
          * @description A CRUD-managed Sigma view definition for one source.
          *
-         *     Keyed (in the store) by ``source_name``; the generated view targets table
+         *     Keyed (in the store) by ``source_name``. The generated view targets table
          *     ``source_name`` and is named ``{source_name}_sigma``. ``include_source_columns``
          *     appends ``SELECT *`` so the base table columns remain visible alongside the
          *     Sigma-aligned aliases (the legacy view's behaviour).
@@ -14358,7 +14373,7 @@ export interface components {
          * @description Create/replace body for a source's Sigma view definition (source_name is the path).
          *
          *     Each column maps a Sigma field to a real source column OR a path inside the
-         *     source's ``_json`` payload (a JSON-derived column); the ``SigmaViewColumn``
+         *     source's ``_json`` payload (a JSON-derived column). The ``SigmaViewColumn``
          *     validator enforces exactly one per column.
          */
         SigmaViewWriteRequest: {
@@ -14888,10 +14903,9 @@ export interface components {
             type: string;
             /**
              * Version
-             * @description Common header version (semver)
-             * @default 1.0.3
+             * @description Common header version (semver); the profile's current version when omitted
              */
-            version: string;
+            version?: string;
         };
         /**
          * SourceImportResponse
@@ -15883,7 +15897,7 @@ export interface components {
         };
         /**
          * SystemDefaultsPatch
-         * @description A partial change. Omitted fields stay as they are; null clears that override.
+         * @description A partial change. Omitted fields stay as they are. Null clears that override.
          */
         SystemDefaultsPatch: {
             /**
@@ -16108,7 +16122,7 @@ export interface components {
         };
         /**
          * TopicFailure
-         * @description One topic the broker would not do the thing to; the broker's own text is in the log.
+         * @description One topic the broker would not do the thing to. The broker's own text is in the log.
          */
         TopicFailure: {
             /** Name */
@@ -16182,7 +16196,7 @@ export interface components {
          * @description Outcome of a converge pass.
          *
          *     ``refused`` is what DFE declined to do (a partition decrease, a replication
-         *     factor change); ``failed`` is what the broker rejected. They are different
+         *     factor change). ``failed`` is what the broker rejected. They are different
          *     problems with different fixes, so they are different lists.
          */
         TopicUpdateResponse: {
@@ -16644,7 +16658,7 @@ export interface components {
             groups?: string[];
             /**
              * Org Ids
-             * @description Orgs this user can browse in the data plane (HyperDX). Empty means no org-scoped data access.
+             * @description Orgs this user can browse in the data plane (Search). Empty means no org-scoped data access.
              */
             org_ids?: string[];
             /**
@@ -17592,7 +17606,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description The break-glass account is disabled in governance settings */
+            /** @description The break-glass password is right, but the account is disabled in governance settings */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -20742,8 +20756,8 @@ export interface operations {
     "orgs.available-ids": {
         parameters: {
             query?: {
-                /** @description Most tenant ids to return -- a suggestion list, not an export */
-                limit?: number;
+                /** @description Most tenant ids to return -- a suggestion list, not an export. Unset takes orgs.available_ids_limit (200 by default) */
+                limit?: number | null;
             };
             header?: never;
             path?: never;
