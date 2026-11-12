@@ -6,6 +6,6 @@ DFE UI integrates with dfe-hyperdx so users can create rules directly from searc
 
 ## Flow
 
-1. **dfe-hyperdx** - The user clicks the "Create Rule" trigger. dfe-hyperdx calls the `/exportSql` endpoint to fetch the raw SQL for the current search.
-2. **Engine** - dfe-hyperdx posts the search to the engine's `dfe/create-rule` route, which stores the rule.
-3. **DFE UI** - dfe-hyperdx opens `/rules/{id}`, the rule's own page. The console keeps no copy of the search.
+1. **dfe-hyperdx** - The user clicks the "Create Rule" trigger. dfe-hyperdx renders the current search to SQL (`POST dfe/export-sql`).
+2. **Engine** - dfe-hyperdx creates the rule through its own `dfe/create-rule` route, which forwards to the engine's `POST /api/v1/rules/from-hyperdx`.
+3. **DFE UI** - dfe-hyperdx opens `/rules/{id}`, the rule's own page, in a new tab. The console keeps no copy of the search.

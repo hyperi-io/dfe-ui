@@ -33,13 +33,17 @@ flowchart LR
         ICONS[dfe-icons<br/>SVG -> React codegen]
         LOG[dev-logger]
         TSC[typescript-config]
+        JSON[dfe-json-viewer-cn]
+        SHARED[dfe-shared-ui]
     end
     TYPES --> CORE
     ICONS --> CORE
     LOG --> CORE
+    JSON --> CORE
+    SHARED --> CORE
 ```
 
-Only `dfe-core-ui` ships (Next standalone output in a two-stage container).
+Only `dfe-core-ui` ships (Next standalone output in a three-stage build).
 The packages are build-time dependencies.
 
 ## App structure

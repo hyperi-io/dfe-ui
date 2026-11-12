@@ -10,49 +10,31 @@ flowchart LR
     DF[Data flow<br/>define what comes in]
     DT[Detect<br/>define what to look for]
     ST[Stack<br/>see and tune what is running]
-    AC[Access<br/>who may do what]
     DF --> OB
     DF --> DT
     ST -.-> DF
-    AC -.-> ST
 ```
 
-## The five groups
+## The four groups
 
 Each group is one RBAC family: a heading appears exactly when at least one
 destination under it is the signed-in user's.
 
-| Group     | Destinations                                                     | What the user does there                               | RBAC family                                                                              |
-| --------- | ---------------------------------------------------------------- | ------------------------------------------------------ | ---------------------------------------------------------------------------------------- |
-| Observe   | Search, Saved Searches, Chart Explorer, Dashboards, Hunt Results | look at the data                                       | `dashboard_read`                                                                         |
-| Data flow | Sources, Meta Schemas, Library                                   | define what comes in, how it is shaped, where it lands | `source_*`, `schema_*`, `library_*`                                                      |
-| Detect    | Rules, Hunts                                                     | define what to look for                                | `rule_*`, `hunt_*`                                                                       |
-| Stack     | Components, Platform, Admin Tools                                | see and tune what is running                           | `deployment_*`, `service_*`, `helmvars_*`, `lifecycle_*`, `config_write`, `governance_*` |
-| Access    | Settings                                                         | who may do what                                        | `org_*`, `account_*`, `role_*`, `group_*`, `oidc_*`, `api_key_*`                         |
+| Group     | Destinations                                                     | Route                                                                                              | What the user does there                               | RBAC family                                    |
+| --------- | ---------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- | ------------------------------------------------------ | ---------------------------------------------- |
+| Observe   | Search, Saved Searches, Chart Explorer, Dashboards, Hunt Results | `/observe/search`, `/observe/search/list`, `/observe/chart`, `/observe/dashboards`, `/observe/hunt-results` | look at the data                                       | `dashboard_read`                               |
+| Data flow | Sources, Meta Schemas, Library                                   | `/sources`, `/schemas`, `/library`                                                                 | define what comes in, how it is shaped, where it lands | `source_*`, `schema_*`, `library_*`            |
+| Detect    | Rules, Hunts                                                     | `/rules`, `/hunts`                                                                                 | define what to look for                                | `rule_*`, `hunt_*`                             |
+| Stack     | Components, Admin Tools                                          | `/components`, `/admin-tools`                                                                      | see and tune what is running                           | `deployment_read`, `helmvars_read`, `helmvars_write`, `deployment_admin_links_read` |
 
 The Observe destinations are dfe-hyperdx embeds and appear only once a dfe-hyperdx URL
 is configured.
 
-## Old menu to new
-
-The destinations and their routes are unchanged; what moved is the order and
-the grouping.
-
-| Old position         | New group | Route                   |
-| -------------------- | --------- | ----------------------- |
-| Search (1st)         | Observe   | `/observe/search`       |
-| Saved Searches (2nd) | Observe   | `/observe/search/list`  |
-| Chart Explorer (3rd) | Observe   | `/observe/chart`        |
-| Dashboards (4th)     | Observe   | `/observe/dashboards`   |
-| Hunt Results (5th)   | Observe   | `/observe/hunt-results` |
-| Sources (6th)        | Data flow | `/sources`              |
-| Meta Schemas (7th)   | Data flow | `/schemas`              |
-| Library (11th)       | Data flow | `/library`              |
-| Rules (8th)          | Detect    | `/rules`                |
-| Hunts (9th)          | Detect    | `/hunts`                |
-| Components (10th)    | Stack     | `/components`           |
-| Platform (14th)      | Stack     | `/platform`             |
-| Settings (13th)      | Access    | `/settings`             |
+Settings and Platform are not in the menu. The settings button in the header
+opens them, at `/settings/admin` and `/settings/platform`. Some routes have no
+menu entry either: `/sources/ingest-rules`, `/schemas/meta-schemas`,
+`/schemas/other-schemas`, `/field-maps`, `/transforms`, `/account`, and the
+first-run `/setup/[step]`.
 
 ## The Source page follows the flow
 
