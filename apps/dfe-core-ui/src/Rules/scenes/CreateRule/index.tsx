@@ -1,13 +1,13 @@
 'use client';
 
 import { MainContentCard } from '@/core/components/ContentCard';
-import { RbacProtected } from '@/core/components/RbacProtected';
 import {
   CreateUpdateRuleForm,
   CreateUpdateRuleFormData,
   DEFAULT_ESTIMATE_COST,
-} from '@/Rules/components/CreateUpdateRuleForm';
-import { useCreateRule } from '@/Rules/hooks/useCreateRule';
+} from '@/core/components/CreateUpdateRuleForm';
+import { RbacProtected } from '@/core/components/RbacProtected';
+import { useCreateRule } from '@/core/hooks/useCreateRule';
 
 export const CreateRuleScene = () => {
   const {

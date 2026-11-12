@@ -1,13 +1,13 @@
 import { Form } from '@/core/components/Form';
 
+import { DEFAULT_ESTIMATE_COST } from '@/core/components/CreateUpdateRuleForm/defaults';
 import { FormNotification } from '@/core/components/FormNotification';
 import { Modal } from '@/core/components/Modal';
 import { RbacProtected } from '@/core/components/RbacProtected';
+import { useCreateRule } from '@/core/hooks/useCreateRule';
+import { TRuleCreateResponse } from '@/core/hooks/useCreateRule/types';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
 import { RULE_HUNT_NAME_VALIDATOR } from '@/core/validationSchemas/utils';
-import { DEFAULT_ESTIMATE_COST } from '@/Rules/components/CreateUpdateRuleForm/defaults';
-import { useCreateRule } from '@/Rules/hooks/useCreateRule';
-import { TRuleCreateResponse } from '@/Rules/hooks/useCreateRule/types';
 import { TRuleDetail } from '@/Rules/hooks/useFetchRuleDetail/types';
 import { IconCopy } from '@repo/dfe-icons';
 import { Button, ButtonProps, Input } from 'antd';

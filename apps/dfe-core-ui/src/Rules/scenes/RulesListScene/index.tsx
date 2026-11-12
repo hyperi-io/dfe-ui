@@ -2,10 +2,10 @@
 
 import { ListRulesTree } from '@/Rules/components/ListRulesTree';
 import { ViewRuleDetail } from '@/Rules/components/ViewRuleDetail';
-import { ListRulesProvider } from '@/Rules/contexts/ListRulesContext';
 import { MainContentCard } from '@/core/components/ContentCard';
 import { RbacProtected } from '@/core/components/RbacProtected';
 import { Splitter } from '@/core/components/Splitter';
+import { ListRulesProvider } from '@/core/contexts/ListRulesContext';
 
 export const RulesListScene = () => {
   return (

@@ -3,8 +3,8 @@ import { NotificationCard } from '@/core/components/NotificationCard';
 import {
   RuleCostEstimate,
   ruleSaveWarnings,
-} from '@/Rules/components/RuleSaveNotice';
-import { TRuleCreateResponse } from '@/Rules/hooks/useCreateRule/types';
+} from '@/core/components/RuleSaveNotice';
+import { TRuleCreateResponse } from '@/core/hooks/useCreateRule/types';
 import { IconAlertCircle, IconInfoCircle } from '@repo/dfe-icons';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
