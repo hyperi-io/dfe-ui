@@ -1,6 +1,6 @@
 import { Drawer } from '@/core/components/Drawer';
 import { RbacProtected } from '@/core/components/RbacProtected';
-import { ruleSaveNotice } from '@/Rules/components/RuleSaveNotice';
+import { ruleSaveNotice } from '@/core/components/RuleSaveNotice';
 import { TRuleDetail } from '@/Rules/hooks/useFetchRuleDetail/types';
 import { TRuleUpdateResponse } from '@/Rules/hooks/useUpdateRule/types';
 import { IconEdit } from '@repo/dfe-icons';

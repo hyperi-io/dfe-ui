@@ -17,7 +17,7 @@ vi.mock('@/core/components/OrganisationSelect', () => ({
 vi.mock('@/core/components/SourceSelect', () => ({
   SourceSelect: () => null,
 }));
-vi.mock('./RuleSelect', () => ({ RuleSelect: () => null }));
+vi.mock('./RuleSelectCreate', () => ({ RuleSelect: () => null }));
 vi.mock('@/Hunts/components/CRONBuilderDrawer', () => ({
   CRONBuilderDrawer: ({ value }: { value?: string }) => (
     <input readOnly aria-label="Cron expression" value={value ?? ''} />

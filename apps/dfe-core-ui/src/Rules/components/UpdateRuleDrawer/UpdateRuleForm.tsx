@@ -1,11 +1,11 @@
-import { CustomScrollbar } from '@/core/components/CustomScrollbar';
-import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
-import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
 import {
   CreateUpdateRuleForm,
   CreateUpdateRuleFormData,
   DEFAULT_ESTIMATE_COST,
-} from '@/Rules/components/CreateUpdateRuleForm';
+} from '@/core/components/CreateUpdateRuleForm';
+import { CustomScrollbar } from '@/core/components/CustomScrollbar';
+import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
+import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
 import { TRuleDetail } from '@/Rules/hooks/useFetchRuleDetail/types';
 import { useUpdateRule } from '@/Rules/hooks/useUpdateRule';
 import { TRuleUpdateResponse } from '@/Rules/hooks/useUpdateRule/types';

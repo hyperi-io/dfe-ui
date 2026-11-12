@@ -1,4 +1,4 @@
-import { TRuleCreateResponse } from '@/Rules/hooks/useCreateRule/types';
+import { TRuleCreateResponse } from '@/core/hooks/useCreateRule/types';
 import type { NotificationArgsProps } from 'antd';
 
 type TCostEstimate = NonNullable<TRuleCreateResponse['cost_estimate']>;

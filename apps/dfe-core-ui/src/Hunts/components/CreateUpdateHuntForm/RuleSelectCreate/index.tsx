@@ -1,9 +1,12 @@
+import { CreateRuleDrawer } from '@/core/components/CreateRuleDrawer';
 import { RbacProtected } from '@/core/components/RbacProtected';
+import { ListRulesProvider } from '@/core/contexts/ListRulesContext';
 import { useFetchInfiniteFilteredRules } from '@/core/hooks/useFetchInfiniteFilteredRules';
 import { Select, SelectProps } from 'antd';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 
 export const RuleSelect = ({ value, ...props }: SelectProps) => {
+  const [ruleValue, setRuleValue] = useState<string[] | null>(value ?? null);
   const {
     data: { items: rules = [] } = {},
     isLoading,
@@ -28,16 +31,33 @@ export const RuleSelect = ({ value, ...props }: SelectProps) => {
     return [...fromInitialValues, ...fromApi];
   }, [rules, value]);
 
+  const handleChange = (value: string[]) => {
+    setRuleValue(value);
+    props.onChange?.(value);
+  };
+
   return (
     <RbacProtected action={RbacProtected.rbacActions.rule_read}>
       <RbacProtected.Unrestricted>
-        <Select
-          {...props}
-          value={value}
-          options={options}
-          loading={isLoading}
-          disabled={isLoading || !!error}
-        />
+        <div className="flex items-center gap-2">
+          <Select
+            {...props}
+            value={ruleValue}
+            options={options}
+            loading={isLoading}
+            disabled={isLoading || !!error}
+            onChange={handleChange}
+            mode="tags"
+          />
+          <ListRulesProvider>
+            <CreateRuleDrawer
+              onSuccess={(response) => {
+                handleChange([...(ruleValue ?? []), response.rule.name]);
+              }}
+              redirectOnCreate={false}
+            />
+          </ListRulesProvider>
+        </div>
       </RbacProtected.Unrestricted>
       <RbacProtected.Restricted tooltip={{ show: true }}>
         <Select disabled {...props} />

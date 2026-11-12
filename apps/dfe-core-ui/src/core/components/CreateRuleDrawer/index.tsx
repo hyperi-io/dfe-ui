@@ -1,13 +1,14 @@
-import { Drawer } from '@/core/components/Drawer';
-import { RbacProtected } from '@/core/components/RbacProtected';
 import {
   CreateUpdateRuleForm,
   CreateUpdateRuleFormData,
   DEFAULT_ESTIMATE_COST,
-} from '@/Rules/components/CreateUpdateRuleForm';
-import { ruleSaveNotice } from '@/Rules/components/RuleSaveNotice';
-import { useListRulesContext } from '@/Rules/contexts/ListRulesContext';
-import { useCreateRule } from '@/Rules/hooks/useCreateRule';
+} from '@/core/components/CreateUpdateRuleForm';
+import { Drawer } from '@/core/components/Drawer';
+import { RbacProtected } from '@/core/components/RbacProtected';
+import { ruleSaveNotice } from '@/core/components/RuleSaveNotice';
+import { useListRulesContext } from '@/core/contexts/ListRulesContext';
+import { useCreateRule } from '@/core/hooks/useCreateRule';
+import { TRuleCreateResponse } from '@/core/hooks/useCreateRule/types';
 
 import { IconPlus } from '@repo/dfe-icons';
 import { Button, notification } from 'antd';
@@ -16,9 +17,13 @@ import { useState } from 'react';
 export const CreateRuleDrawer = ({
   open,
   onClose,
+  onSuccess,
+  redirectOnCreate = true,
 }: {
   open?: boolean;
   onClose?: () => void;
+  onSuccess?: (response: TRuleCreateResponse) => void;
+  redirectOnCreate?: boolean;
 }) => {
   const title = 'Add Rule';
   const [api, contextHolder] = notification.useNotification();
@@ -37,9 +42,12 @@ export const CreateRuleDrawer = ({
     reset: resetCreateRule,
   } = useCreateRule({
     onSuccess: (response) => {
-      setSelectedRuleName(response.rule.name);
+      if (redirectOnCreate) {
+        setSelectedRuleName(response.rule.name);
+      }
       setIsDrawerVisible(false);
       api.open(ruleSaveNotice(response, 'created'));
+      onSuccess?.(response);
     },
   });
   const handleCreateRule = (values: CreateUpdateRuleFormData) => {

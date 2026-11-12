@@ -1,9 +1,9 @@
 'use client';
 
+import { CreateRuleDrawer } from '@/core/components/CreateRuleDrawer';
 import { Toolbar } from '@/core/components/Toolbar';
+import { ListRulesProvider } from '@/core/contexts/ListRulesContext';
 import { cn } from '@/core/utils/style';
-import { CreateRuleDrawer } from '@/Rules/components/CreateRuleDrawer';
-import { ListRulesProvider } from '@/Rules/contexts/ListRulesContext';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
