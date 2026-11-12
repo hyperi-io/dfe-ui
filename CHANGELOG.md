@@ -321,7 +321,7 @@ hand. Release notes also appear on the GitHub Releases page, one per tag.
 
 ### Features
 
-* app-management and library engine seam ([e6eb78e](https://github.com/hyperi-io/dfe-ui/commit/e6eb78e7871c206efc5a3953908061469359788f))
+* app-management and library engine client ([e6eb78e](https://github.com/hyperi-io/dfe-ui/commit/e6eb78e7871c206efc5a3953908061469359788f))
 * backing-service dials on the Components page ([bc379c1](https://github.com/hyperi-io/dfe-ui/commit/bc379c15909719ae98a1724cd70a8da914314580))
 * consume the five app-management contract additions ([d5f3d44](https://github.com/hyperi-io/dfe-ui/commit/d5f3d44daf7d3a3e3d25f2297a101cc027b55a46))
 * Playwright cover for the app-management surfaces ([b213419](https://github.com/hyperi-io/dfe-ui/commit/b213419146eded87e56953aebec9dcdce0f92131))
