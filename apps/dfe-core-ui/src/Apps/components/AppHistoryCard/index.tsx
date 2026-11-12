@@ -20,6 +20,7 @@ const STATE_COLOUR: Record<string, string> = {
   committed: 'blue',
 };
 
+// Change takes what the fixed columns leave, so every component's table is the same shape
 const COLUMNS = [
   {
     title: 'Commit',
@@ -30,9 +31,16 @@ const COLUMNS = [
         {value.slice(0, 7)}
       </span>
     ),
+    width: 96,
   },
   { title: 'Change', dataIndex: 'summary', key: 'summary' },
-  { title: 'By', dataIndex: 'actor', key: 'actor' },
+  {
+    title: 'By',
+    dataIndex: 'actor',
+    key: 'actor',
+    ellipsis: true,
+    width: 140,
+  },
   {
     title: 'When',
     dataIndex: 'timestamp',
@@ -42,12 +50,14 @@ const COLUMNS = [
         {new Date(value * 1000).toLocaleString()}
       </span>
     ),
+    width: 200,
   },
   {
     title: 'State',
     dataIndex: 'state',
     key: 'state',
     render: (value: string) => <Tag color={STATE_COLOUR[value]}>{value}</Tag>,
+    width: 120,
   },
 ];
 
@@ -117,9 +127,9 @@ export const AppHistoryCard = ({
         rowKey="sha"
         columns={COLUMNS}
         dataSource={data}
-        // Wider than its card it scrolls sideways, and past five changes it scrolls rather than growing the page
+        tableLayout="fixed"
+        // Past five changes it scrolls rather than growing the page
         scroll={{
-          x: 'max-content',
           y: data.length > SCROLL_AFTER_ROWS ? SCROLL_HEIGHT_PX : undefined,
         }}
         onScroll={loadMoreNearTheEnd}

@@ -5,6 +5,8 @@ import { getRegistry } from '@/core/metrics';
 
 // Pushed as gauges, because the engine reads process_cpu_seconds_total from the gauge table as it does for scalo-rs.
 const PUSHED_METRICS = [
+  'container_memory_limit_bytes',
+  'container_memory_usage_bytes',
   'info',
   'process_cpu_seconds_total',
   'process_open_fds',

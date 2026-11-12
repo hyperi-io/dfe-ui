@@ -26,36 +26,30 @@ afterAll(() => server.close());
 
 const { wrapper } = buildTestWrapper().withTheme().withReactQuery();
 
-// The receiver, and HyperDX with a display name the tabs leave out
-const twoPools = () =>
-  API_CONFIG_MOCKS.apps.default.get.success({
-    mockedResponse: [
-      {
-        service: 'dfe-receiver',
-        display_name: null,
-        scale_deployed: true,
-        multiplicity: 'single',
-        has_compiled_routing: true,
-        routing_scope: 'stack',
-        optional: false,
-        offered: true,
-        file_sets: [],
-        instances: ['default'],
-      },
-      {
-        service: 'dfe-hyperdx',
-        display_name: 'Search',
-        scale_deployed: false,
-        multiplicity: 'single',
-        has_compiled_routing: false,
-        routing_scope: 'stack',
-        optional: false,
-        offered: true,
-        file_sets: [],
-        instances: ['default'],
-      },
-    ],
-  });
+const RECEIVER_APP = {
+  service: 'dfe-receiver',
+  display_name: null,
+  scale_deployed: true,
+  multiplicity: 'single' as const,
+  has_compiled_routing: true,
+  routing_scope: 'stack' as const,
+  optional: false,
+  offered: true,
+  file_sets: [],
+  instances: ['default'],
+};
+
+// HyperDX, with a display name the tabs leave out
+const HYPERDX_APP = {
+  ...RECEIVER_APP,
+  service: 'dfe-hyperdx',
+  display_name: 'Search',
+  scale_deployed: false,
+  has_compiled_routing: false,
+};
+
+const twoPools = (apps = [RECEIVER_APP, HYPERDX_APP]) =>
+  API_CONFIG_MOCKS.apps.default.get.success({ mockedResponse: apps });
 
 const engine = { service: 'dfe-engine', instance: 'default' };
 
@@ -141,6 +135,19 @@ describe('ComponentsScene', () => {
     expect(
       screen.getByRole('tab', { name: /^dfe-receiver/ }),
     ).toBeInTheDocument();
+  });
+
+  it('orders the tabs by label, whatever order the catalogue lists them in', async () => {
+    // The catalogue lists by service id, so dfe-hyperdx comes before dfe-receiver
+    server.use(twoPools([HYPERDX_APP, RECEIVER_APP]));
+
+    render(<ComponentsScene />, { wrapper });
+    await screen.findByRole('tab', { name: /^discovery/ });
+
+    expect(screen.getAllByRole('tab').map((tab) => tab.textContent)).toEqual([
+      'dfe-receiverInstance default',
+      'discoveryInstance default',
+    ]);
   });
 
   it('shows status, metrics and history, and links to the settings', async () => {
