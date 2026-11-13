@@ -15,11 +15,13 @@ export const BlockRow = ({
   const rows = block.rules.length;
   const warnings = block.warnings ?? [];
   return (
-    <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
+    <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 hover:cursor-grab">
       {block.kind === 'source' ? (
         <Link
           href={`/sources?source_name=${encodeURIComponent(block.name)}`}
           className="truncate font-medium text-foreground! hover:text-tertiary! dark:text-dark-foreground!"
+          target="_blank"
+          rel="noopener noreferrer"
         >
           {title}
         </Link>
