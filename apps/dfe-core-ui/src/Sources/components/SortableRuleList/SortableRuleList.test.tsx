@@ -123,14 +123,21 @@ describe('SortableRuleList', () => {
     ).toHaveFocus();
   });
 
-  it('moves to a chosen position from the menu', async () => {
+  it('moves to a position chosen from the search', async () => {
     const user = userEvent.setup();
     render(<Harness />, { wrapper });
 
     await user.click(
       screen.getByRole('button', { name: 'Move alpha to position' }),
     );
-    await user.click(await screen.findByText('Position 3'));
+    const search = await screen.findByRole('combobox', {
+      name: 'Search positions for alpha',
+    });
+    await user.type(search, '3');
+    expect(
+      screen.queryByRole('option', { name: 'Position 1' }),
+    ).not.toBeInTheDocument();
+    await user.click(screen.getByRole('option', { name: 'Position 3' }));
 
     expect(order().slice(0, 3)).toEqual([
       'rule-block-b',

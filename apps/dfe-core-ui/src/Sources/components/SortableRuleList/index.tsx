@@ -9,7 +9,7 @@ import {
   IconGripVertical,
   IconPin,
 } from '@repo/dfe-icons';
-import { Button, Dropdown } from 'antd';
+import { Button, Dropdown, Select } from 'antd';
 import { useEffect, useId, useRef, useState } from 'react';
 
 export type SortableRuleItem = {
@@ -27,7 +27,7 @@ type DropTarget = { index: number; after: boolean };
  * A first-match list whose order is edited by drag, by keyboard and by menu.
  *
  * Dragging is pointer-only, so every move it offers is also a button (WCAG 2.2
- * SC 2.5.7): Move up, Move down and a move-to-position menu on each row, and
+ * SC 2.5.7): Move up, Move down and a move-to-position search on each row, and
  * the arrow keys on its handle. Each move is announced in a live region as
  * "Moved <name> to position N of M", and focus stays on the control that made
  * it. Pinned rows sit where the engine keeps them and are never a drop target
@@ -54,6 +54,7 @@ export function SortableRuleList<T extends SortableRuleItem>({
   // The count re-keys the message, so a repeat of the same words is announced again.
   const [announcement, setAnnouncement] = useState({ text: '', count: 0 });
   const [dragIndex, setDragIndex] = useState<number | null>(null);
+  const [positionMenuId, setPositionMenuId] = useState<string | null>(null);
   const [dropTarget, setDropTarget] = useState<DropTarget | null>(null);
   const pendingFocus = useRef<{ id: string; control: Control } | null>(null);
   const controls = useRef(new Map<string, HTMLElement | null>());
@@ -254,14 +255,47 @@ export function SortableRuleList<T extends SortableRuleItem>({
                   </Tooltip>
                   <Dropdown
                     trigger={['click']}
-                    menu={{
-                      items: Array.from({ length: movableCount }, (_, to) => ({
-                        key: String(to),
-                        label: `Position ${to + 1}`,
-                        disabled: to === index,
-                      })),
-                      onClick: ({ key }) => move(index, Number(key), 'menu'),
-                    }}
+                    destroyOnHidden
+                    open={positionMenuId === item.id}
+                    onOpenChange={(next) =>
+                      setPositionMenuId(next ? item.id : null)
+                    }
+                    popupRender={() => (
+                      <div
+                        className="rounded-md border border-foreground/15 bg-background p-2 shadow-md dark:border-dark-foreground/15 dark:bg-dark-background"
+                        onMouseDown={(event) => event.preventDefault()}
+                      >
+                        <Select
+                          autoFocus
+                          open
+                          showSearch={{
+                            filterOption: (input, option) =>
+                              String(option?.label ?? '')
+                                .toLowerCase()
+                                .includes(input.trim().toLowerCase()),
+                          }}
+                          virtual={false}
+                          className="w-44"
+                          placeholder="Search position"
+                          aria-label={`Search positions for ${name}`}
+                          options={Array.from(
+                            { length: movableCount },
+                            (_, to) => ({
+                              value: to,
+                              label: `Position ${to + 1}`,
+                              disabled: to === index,
+                            }),
+                          )}
+                          onChange={(to) => {
+                            setPositionMenuId(null);
+                            move(index, to, 'menu');
+                          }}
+                          getPopupContainer={(trigger) =>
+                            trigger.parentElement ?? document.body
+                          }
+                        />
+                      </div>
+                    )}
                   >
                     <Button
                       ref={register(item.id, 'menu')}
