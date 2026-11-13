@@ -2,7 +2,8 @@ import { Form } from '@/core/components/Form';
 import { Popover } from '@/core/components/Popover';
 import { CreateUpdateSourceFormData } from '@/Sources/components/CreateUpdateSourceForm/sourceForm.schema';
 import { IconInfoCircle } from '@repo/dfe-icons';
-import { Button, FormInstance, FormRule, Select } from 'antd';
+import { cn } from '@repo/dfe-shared-ui';
+import { FormInstance, FormRule, Select } from 'antd';
 import Link from 'next/link';
 import { useCallback, useMemo, useState } from 'react';
 import { DefaultsSection } from './DefaultsSection';
@@ -58,7 +59,7 @@ export const MetaSchemaForm = ({
          */
         validateTrigger={['onBlur']}
         label={
-          <p>
+          <p className="flex items-center">
             Meta Schema{' '}
             <Popover
               destroyOnHidden
@@ -73,13 +74,16 @@ export const MetaSchemaForm = ({
                 </>
               }
             >
-              <Button
-                className="ml-1"
-                type="text"
-                shape="circle"
-                size="small"
-                icon={<IconInfoCircle />}
-              />
+              <button
+                className={cn(
+                  'ml-1 p-0.5 rounded-full hover:cursor-pointer',
+                  'hover:bg-dark-foreground/40 hover:dark:text-dark-foreground/40 hover:text-foreground dark:hover:bg-foreground/40',
+                )}
+                type="button"
+                aria-label="More information about meta schema configuration"
+              >
+                <IconInfoCircle />
+              </button>
             </Popover>
           </p>
         }
