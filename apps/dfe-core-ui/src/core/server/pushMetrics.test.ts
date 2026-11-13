@@ -39,10 +39,13 @@ describe('observeRegistry', () => {
     const pushed = await exportOnce();
     const names = [...pushed.keys()].sort();
 
+    // prom-client registers this only on Linux, where it can read /proc/self/fd.
+    const openFds = process.platform === 'linux' ? ['process_open_fds'] : [];
+
     expect(names.filter((name) => !name.startsWith('container_'))).toEqual([
       'info',
       'process_cpu_seconds_total',
-      'process_open_fds',
+      ...openFds,
       'process_resident_memory_bytes',
       'start_time_seconds',
     ]);
