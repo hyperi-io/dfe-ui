@@ -2,6 +2,7 @@ import { Locator, Page, expect, test } from '@playwright/test';
 
 import { BASE_URL, e2eClient } from '@e2e/config/e2e.client';
 import { loginAs } from '@e2e/config/login.helpers';
+import { rx } from '@e2e/config/regex.helpers';
 import { TAGS } from '@e2e/config/tags.constants';
 
 /**
@@ -54,7 +55,7 @@ const openProviders = async (page: Page) => {
 
 const providerCard = (page: Page, name: string) =>
   page.locator('li').filter({
-    has: page.getByRole('heading', { name: new RegExp(`\\(${name}\\)`) }),
+    has: page.getByRole('heading', { name: rx`\(${name}\)` }),
   });
 
 const openActions = async (card: Locator) => {
