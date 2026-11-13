@@ -277,7 +277,7 @@ Bring the console up the same way as
 `NEXT_PUBLIC_API_URL` and `INTERNAL_API_URL` pointed at the engine and
 `NEXTAUTH_URL` matching the console. The suite defaults to
 `http://localhost:3000` and `http://localhost:8003`. `BASE_URL` overrides the
-console, and `NEXT_PUBLIC_API_URL` or `INTERNAL_API_URL` overrides the engine. Port
+console, and `NEXT_PUBLIC_API_URL` overrides the engine, falling back to `INTERNAL_API_URL`, then `http://localhost:8003`. Port
 3000 is on the engine's default CORS allowlist, so login on another port fails
 until that list is extended.
 
