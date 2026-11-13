@@ -1,7 +1,9 @@
 import { AceEditor } from '@/core/components/AceEditor';
+import { CustomScrollbar } from '@/core/components/CustomScrollbar';
 import { SimpleCollapse } from '@/core/components/SimpleCollapse';
 import { YAML_POSTFIX } from '@/core/config/environmentVariables';
 import { useFetchSystemDefaults } from '@/core/hooks/useFetchSystemDefaults';
+import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
 import { cn } from '@/core/utils/style';
 import { FETCHER_TOPIC_LABELS } from '@/Sources/components/CreateUpdateSourceForm/sourceForm.schema';
 import {
@@ -134,8 +136,12 @@ export const ConfigurationDetailsTabContent = ({
 
   const isMainSource = sourceName === 'main';
 
+  const { componentHeight } = useSetComponentHeight({
+    offset: 200,
+  });
+
   return (
-    <div className="relative h-full min-h-0">
+    <CustomScrollbar height={componentHeight} innerPadding={false}>
       <dl className="grid grid-cols-[155px_1fr] gap-x-6 gap-y-1 mb-4">
         <dt className={dataListTermStyle}>File Pathname:</dt>
         <dd>{sourceName}</dd>
@@ -363,6 +369,6 @@ export const ConfigurationDetailsTabContent = ({
           </ul>
         </SimpleCollapse>
       )}
-    </div>
+    </CustomScrollbar>
   );
 };
