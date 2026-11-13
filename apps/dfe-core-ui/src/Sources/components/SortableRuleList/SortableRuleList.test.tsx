@@ -133,6 +133,10 @@ describe('SortableRuleList', () => {
     const search = await screen.findByRole('combobox', {
       name: 'Search positions for alpha',
     });
+    expect(screen.getByTestId('rule-block-a')).toHaveClass('outline-tertiary');
+    expect(screen.getByTestId('rule-block-b')).not.toHaveClass(
+      'outline-tertiary',
+    );
     await user.type(search, '3');
     expect(
       screen.queryByRole('option', { name: 'Position 1' }),

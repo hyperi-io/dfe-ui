@@ -183,6 +183,8 @@ export function SortableRuleList<T extends SortableRuleItem>({
                 'relative flex items-center gap-2 rounded-md border px-2 py-2',
                 'border-foreground/15 bg-background dark:border-dark-foreground/15 dark:bg-dark-background',
                 dragIndex === index && 'opacity-50',
+                positionMenuId === item.id &&
+                  'outline-2 -outline-offset-2 outline-tertiary/50',
                 item.pinned &&
                   'bg-foreground/[0.03] dark:bg-dark-foreground/[0.04]',
               )}
