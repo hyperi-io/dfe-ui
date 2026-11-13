@@ -266,7 +266,7 @@ describe('ListSourcesContext', () => {
       expect(mockReplace).toHaveBeenCalledWith('/sources');
     });
 
-    it('drops the detail tab when the selected source changes', async () => {
+    it('keeps the detail tab when the selected source changes', async () => {
       searchParamsRef.current = new URLSearchParams(
         'source_name=syslog&source_version=1.0.0&tab=processing',
       );
@@ -285,7 +285,7 @@ describe('ListSourcesContext', () => {
       });
 
       expect(mockReplace).toHaveBeenCalledWith(
-        '/sources?source_name=main&source_version=1.0.0',
+        '/sources?tab=processing&source_name=main&source_version=1.0.0',
       );
     });
 
