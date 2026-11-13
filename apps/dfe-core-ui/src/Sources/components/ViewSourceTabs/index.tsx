@@ -61,8 +61,9 @@ export const ViewSourceDetailTabs = ({
 
   const isMainSource = selectedSourceName === 'main';
 
-  // Same gates as the strip below: a URL tab that is not on screen falls back
-  // to Flow. Clearing that param is the list's job when the source changes.
+  // Same gates as the strip below. A URL tab this source does not show is
+  // sent to Flow once these gates are known (this view mounts after the
+  // detail has loaded).
   const availableTabKeys = useMemo((): SourceDetailTabKey[] => {
     const keys: SourceDetailTabKey[] = [
       'flow',
@@ -84,6 +85,18 @@ export const ViewSourceDetailTabs = ({
       ? tab
       : DEFAULT_SOURCE_DETAIL_TAB;
   }, [availableTabKeys, searchParams]);
+
+  // Flow is the absent `tab` param. Drop a name this source does not render
+  // so the next source opens on Flow rather than the one left behind.
+  useLayoutEffect(() => {
+    const tab = searchParams.get('tab');
+    if (tab === null) return;
+    if (isSourceDetailTabKey(tab) && availableTabKeys.includes(tab)) return;
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete('tab');
+    const query = params.toString();
+    router.replace(query ? `${pathname}?${query}` : pathname);
+  }, [availableTabKeys, pathname, router, searchParams]);
 
   // Ant Design Tabs calls onChange(firstItem) when `items` resettles after a
   // source/version change. That echoed "flow" was deleting tab=buildDeploy
