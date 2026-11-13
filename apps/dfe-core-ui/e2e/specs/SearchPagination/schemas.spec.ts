@@ -2,6 +2,7 @@ import { Page, expect, test } from '@playwright/test';
 
 import { BASE_URL, e2eClient } from '@e2e/config/e2e.client';
 import { loginAs } from '@e2e/config/login.helpers';
+import { rx } from '@e2e/config/regex.helpers';
 import { TAGS } from '@e2e/config/tags.constants';
 
 /** Leaf title. The path search uses the directory prefix so the two lists do not share a hit. */
@@ -19,7 +20,7 @@ test.beforeEach(async ({ playwright, page }) => {
 
 const openSchemas = async (page: Page, path: string) => {
   await page.goto(`${BASE_URL}${path}`);
-  await expect(page).toHaveURL(new RegExp(`${path}$`));
+  await expect(page).toHaveURL(rx`${path}$`);
 };
 
 const resultCount = (page: Page) => page.getByText(/\d+ of \d+ results?/);
