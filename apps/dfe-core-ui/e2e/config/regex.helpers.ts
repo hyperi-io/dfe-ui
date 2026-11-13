@@ -7,7 +7,7 @@ const escapeRegExp = (text: string) =>
  * backslashes stay raw: rx`\s${name}\s`.
  */
 export const rx = (strings: TemplateStringsArray, ...values: string[]) =>
-  // nosemgrep: javascript.lang.security.audit.detect-non-literal-regexp -- the values are the test's own data, escaped above
+  // nosemgrep: javascript.lang.security.audit.detect-non-literal-regexp.detect-non-literal-regexp -- the values are the test's own data, escaped above
   new RegExp(
     strings.raw.reduce(
       (pattern, part, i) =>
