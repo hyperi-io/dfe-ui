@@ -56,7 +56,7 @@ A Turborepo/yarn-workspaces monorepo with one shipped app and four packages:
 | [docs/build-and-deploy.md](docs/build-and-deploy.md)         | standalone build, container, publish                                         |
 | [docs/local-development.md](docs/local-development.md)       | toolchain, env vars, tests, storybook                                        |
 
-The suite's published docs are at <https://dfe.docs.hyperi.io>.
+The suite's published docs are at <https://dfe.docs.hyperi.io>, and this repository's pages at <https://dfe.docs.hyperi.io/dfe-ui/>.
 
 ## Help and contributing
 
