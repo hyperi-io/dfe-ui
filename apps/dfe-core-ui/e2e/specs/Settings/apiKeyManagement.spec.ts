@@ -2,6 +2,7 @@ import { Locator, Page, expect, test } from '@playwright/test';
 
 import { BASE_URL, e2eClient } from '@e2e/config/e2e.client';
 import { loginAs } from '@e2e/config/login.helpers';
+import { rx } from '@e2e/config/regex.helpers';
 import { TAGS } from '@e2e/config/tags.constants';
 
 /**
@@ -50,7 +51,7 @@ const apiKeysSection = (page: Page) =>
     .last();
 
 const keyRow = (section: Locator, name: string) =>
-  section.getByRole('row', { name: new RegExp(`\\s${name}\\s`) });
+  section.getByRole('row', { name: rx`\s${name}\s` });
 
 const acknowledgeKey = async (page: Page) => {
   const generated = page.getByRole('dialog', { name: 'API Key Generated' });

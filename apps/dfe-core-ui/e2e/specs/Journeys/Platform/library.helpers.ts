@@ -1,5 +1,7 @@
 import { Page, expect } from '@playwright/test';
 
+import { rx } from '@e2e/config/regex.helpers';
+
 import { api } from './platform.helpers';
 
 export type Artefact = {
@@ -47,7 +49,5 @@ export const publishViaTab = async (
     .fill(content);
   await detail.getByRole('textbox', { name: 'What changed' }).fill(why);
   await detail.getByRole('button', { name: 'Publish', exact: true }).click();
-  await expect(
-    detail.getByRole('row', { name: new RegExp(why) }),
-  ).toBeVisible();
+  await expect(detail.getByRole('row', { name: rx`${why}` })).toBeVisible();
 };

@@ -2,6 +2,7 @@ import { Locator, Page, expect, test } from '@playwright/test';
 
 import { BASE_URL, e2eClient } from '@e2e/config/e2e.client';
 import { loginAs } from '@e2e/config/login.helpers';
+import { rx } from '@e2e/config/regex.helpers';
 import { TAGS } from '@e2e/config/tags.constants';
 
 /**
@@ -46,7 +47,7 @@ const providersSection = (page: Page) =>
     .locator('..');
 
 const providerName = (section: Locator, name: string) =>
-  section.getByRole('heading', { name: new RegExp(`${name}\\b`) });
+  section.getByRole('heading', { name: rx`${name}\b` });
 
 const providerCards = (section: Locator) => section.locator('ul.grid > li');
 

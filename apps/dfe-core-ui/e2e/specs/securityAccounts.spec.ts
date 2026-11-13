@@ -9,6 +9,7 @@ import {
   loginAs,
   textbox,
 } from '@e2e/config/login.helpers';
+import { rx } from '@e2e/config/regex.helpers';
 import { logOut, openSettingsMenu } from '@e2e/config/settingsMenu.helpers';
 
 /*
@@ -42,9 +43,7 @@ const accountCard = (drawer: Locator, username: string) =>
   drawer
     .locator('dl')
     .filter({
-      hasText: new RegExp(
-        `Username:\\s*${username}(?=\\s*(?:Email:|Phone:|$))`,
-      ),
+      hasText: rx`Username:\s*${username}(?=\s*(?:Email:|Phone:|$))`,
     })
     .locator('xpath=ancestor::*[.//button][1]');
 
