@@ -72,7 +72,7 @@ The fork iframe is optional for console work. Wiring it up is covered in
 | `INTERNAL_API_URL`                 | runtime            | engine base URL for server-side fetches (middleware, NextAuth)                             |
 | `NEXTAUTH_URL` / `NEXTAUTH_SECRET` | runtime            | NextAuth session config -- any non-empty secret works for dev                              |
 | `DFE_COOKIE_DOMAIN`                | runtime            | parent domain for the `dfe_token` cookie -- leave unset locally                            |
-| `HYPERDX_URL` / `HYPERDX_PORT`     | runtime            | the embed pair, either shape -- see [observe-embed.md](observe-embed.md)                   |
+| `HYPERDX_URL` / `HYPERDX_PORT`     | runtime            | the embed pair, either variable -- see [observe-embed.md](observe-embed.md)                |
 | `LOG_LEVEL`                        | runtime            | server log threshold, `DEBUG` to `ERROR`, default `INFO`                                   |
 | `LOG_FORMAT`                       | runtime            | `json` or `text`. Unset writes JSON in production or with an OTLP endpoint, text otherwise |
 

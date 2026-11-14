@@ -44,7 +44,7 @@ Implications:
 
 ### Full-form Zod validation per field rule
 
-`useAntdZodResolver` implements each `Form.Item` rule by calling `schema.safeParseAsync(getFieldsValue())` — i.e. it parses the **entire** form shape for **every** validated control path that uses `formValidation`.
+`useAntdZodResolver` implements each `Form.Item` rule by calling `schema.safeParseAsync(getFieldsValue())` — i.e. it parses the **entire** form value for **every** validated control path that uses `formValidation`.
 
 With large `uploadedColumns` / `schemaColumns` lists, **each** triggered validation can mean a **full** parse of the combined schema. Many cells × many validations scales poorly even when the table paginates visible rows.
 
