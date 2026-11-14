@@ -59,7 +59,7 @@ type DfeClientQueryParams<Op> = Op extends { parameters: { query?: infer Q } }
  * Header parameters when the operation declares them.
  *
  * Only headers the spec puts on that one operation are expressible, so this is
- * not a general escape hatch for setting arbitrary headers - today it is
+ * not a general escape hatch for setting arbitrary headers, such as
  * `If-Match` on the writes the engine guards. A header typed `string | null`
  * is omitted entirely when null, which is what an unguarded first write needs.
  */

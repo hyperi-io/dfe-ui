@@ -5,12 +5,8 @@
 # License:   BUSL-1.1
 # Copyright: (c) 2026 HYPERI PTY LIMITED
 #
-# Auto-built + published to ghcr.io/hyperi-io/dfe-ui by hyperi-ci (container
-# publish is auto-on-Dockerfile-presence). Next.js standalone output (see
-# apps/dfe-core-ui/next.config.ts: output 'standalone' + outputFileTracingRoot at
-# the monorepo root) gives a minimal runtime: a self-contained server + the
-# traced workspace deps. yarn 4 (berry, node-modules linker) via corepack; turbo
-# builds the app + its @repo/* workspace packages.
+# Next.js standalone output (apps/dfe-core-ui/next.config.ts) gives a
+# self-contained server plus the traced workspace deps.
 
 # Trixie by name: the bare node:24-slim tag is still Debian 12. Renovate moves the digest.
 ARG NODE_IMAGE=node:24-trixie-slim@sha256:43b9ba1142b8dcf33fa8f922ca1be85714adc444e0586c7cf7726daaeabc1bea
