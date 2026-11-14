@@ -23,7 +23,7 @@ destination under it is the signed-in user's.
 | Group     | Destinations                                                     | Route                                                                                              | What the user does there                               | RBAC family                                    |
 | --------- | ---------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- | ------------------------------------------------------ | ---------------------------------------------- |
 | Observe   | Search, Saved Searches, Chart Explorer, Dashboards, Hunt Results | `/observe/search`, `/observe/search/list`, `/observe/chart`, `/observe/dashboards`, `/observe/hunt-results` | look at the data                                       | `dashboard_read`                               |
-| Data flow | Sources, Meta Schemas, Library                                   | `/sources`, `/schemas`, `/library`                                                                 | define what comes in, how it is shaped, where it lands | `source_*`, `schema_*`, `library_*`            |
+| Data flow | Sources, Meta Schemas, Library                                   | `/sources`, `/schemas`, `/library`                                                                 | define what comes in, its fields, where it lands       | `source_*`, `schema_*`, `library_*`            |
 | Detect    | Rules, Hunts                                                     | `/rules`, `/hunts`                                                                                 | define what to look for                                | `rule_*`, `hunt_*`                             |
 | Stack     | Components, Admin Tools                                          | `/components`, `/admin-tools`                                                                      | see and tune what is running                           | `deployment_read`, `helmvars_read`, `helmvars_write`, `deployment_admin_links_read` |
 
@@ -83,7 +83,7 @@ Both live on the source form's first tab, beside the name:
 - **Archive** -- keep the raw record as it arrived. The archiver reads the
   landing topic, so this needs the bus.
 
-## Reading an app's shape rather than naming it
+## Reading an app's manifest rather than naming it
 
 The Stack destinations render from `GET /api/v1/apps`, whose entries come from
 the app manifest. Nothing in the console is keyed to an app's name:

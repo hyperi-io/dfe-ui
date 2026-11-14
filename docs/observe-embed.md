@@ -13,11 +13,11 @@ flowchart LR
 
 ## How it is configured
 
-One runtime mechanism, two deployment shapes. The `(auth)` layout reads both
+One runtime mechanism, two ways to reach dfe-hyperdx. The `(auth)` layout reads both
 values per request and hands them to `HyperdxContext`; `useHyperdxUrl()` is
 the single source the iframe URL and the sidebar gating read.
 
-| Variable       | Shape                                                                                                                        |
+| Variable       | Points at                                                                                                                    |
 | -------------- | ---------------------------------------------------------------------------------------------------------------------------- |
 | `HYPERDX_URL`  | dfe-hyperdx on its own hostname (k8s gateway: `https://hyperdx.{domain}`). Wins when set.                                        |
 | `HYPERDX_PORT` | Same host, different port (docker compose). Host comes from `window.location`, so it is correct for localhost and LAN alike. |
