@@ -4,9 +4,7 @@
 #
 # License:   BUSL-1.1
 # Copyright: (c) 2026 HYPERI PTY LIMITED
-#
-# Override defaults with HYPERCI_* env vars.
-# Reference: config/defaults.yaml in hyperi-ci.
+
 classification: product
 
 language: typescript
@@ -21,15 +19,10 @@ build:
     - native
 release:
   enabled: true
-  # dfe-ui is a private, deployed application ("private": true), not an npm
-  # library -- opt out of the default npm publish (destinations.npm: npmjs)
-  # so the release stage does not try to `npm publish` (which fails on the
-  # missing NPM_TOKEN). Only the container ships.
+  # A deployed app, not an npm library: only the container ships.
   destinations:
     npm: false
-  # Build + publish the container to ghcr.io/hyperi-io/dfe-ui. Explicit `true`
-  # (not the default `auto`) so a missing/broken Dockerfile fails the build loudly
-  # -- dfe-ui is a deployed service, the image must always ship.
+  # `true`, not `auto`, so a missing Dockerfile fails the build.
   container:
     enabled: true
     dockerfile: Dockerfile
