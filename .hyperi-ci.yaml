@@ -30,4 +30,4 @@ release:
   helm:
     enabled: true
     contract: deploy/contract.json
-    library: '2.14.15'
+    library: '2.14.30'
