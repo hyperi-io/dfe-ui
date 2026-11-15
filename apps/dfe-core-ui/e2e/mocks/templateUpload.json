@@ -1,0 +1,318 @@
+{
+  "template": {
+    "mappings": {
+      "date_detection": false,
+      "properties": {
+        "@timestamp": {
+          "type": "keyword",
+          "ignore_above": 1024
+        },
+        "tags": {
+          "type": "keyword",
+          "ignore_above": 1024
+        },
+        "host": {
+          "properties": {
+            "name": {
+              "type": "keyword",
+              "ignore_above": 1024
+            },
+            "hostname": {
+              "type": "keyword",
+              "ignore_above": 1024
+            },
+            "id": {
+              "type": "keyword",
+              "ignore_above": 1024
+            },
+            "domain": {
+              "type": "keyword",
+              "ignore_above": 1024
+            },
+            "type": {
+              "type": "keyword",
+              "ignore_above": 1024
+            },
+            "ip": {
+              "type": "keyword",
+              "ignore_above": 1024
+            },
+            "mac": {
+              "type": "keyword",
+              "ignore_above": 1024
+            },
+            "uptime": {
+              "type": "long"
+            },
+            "os": {
+              "properties": {
+                "family": {
+                  "type": "keyword",
+                  "ignore_above": 1024
+                },
+                "name": {
+                  "type": "keyword",
+                  "ignore_above": 1024
+                },
+                "platform": {
+                  "type": "keyword",
+                  "ignore_above": 1024
+                },
+                "version": {
+                  "type": "keyword",
+                  "ignore_above": 1024
+                },
+                "kernel": {
+                  "type": "keyword",
+                  "ignore_above": 1024
+                }
+              }
+            },
+            "name_alias": {
+              "type": "alias",
+              "path": "host.name"
+            }
+          }
+        },
+        "network": {
+          "properties": {
+            "protocol": {
+              "type": "keyword",
+              "ignore_above": 1024
+            },
+            "transport": {
+              "type": "keyword",
+              "ignore_above": 1024
+            },
+            "direction": {
+              "type": "keyword",
+              "ignore_above": 1024
+            },
+            "type": {
+              "type": "keyword",
+              "ignore_above": 1024
+            },
+            "bytes": {
+              "type": "long"
+            },
+            "packets": {
+              "type": "long"
+            },
+            "community_id": {
+              "type": "keyword",
+              "ignore_above": 1024
+            }
+          }
+        },
+        "source": {
+          "properties": {
+            "ip": {
+              "type": "keyword",
+              "ignore_above": 1024
+            },
+            "port": {
+              "type": "long"
+            },
+            "bytes": {
+              "type": "long"
+            },
+            "domain": {
+              "type": "keyword",
+              "ignore_above": 1024
+            }
+          }
+        },
+        "destination": {
+          "properties": {
+            "ip": {
+              "type": "keyword",
+              "ignore_above": 1024
+            },
+            "port": {
+              "type": "long"
+            },
+            "bytes": {
+              "type": "long"
+            },
+            "domain": {
+              "type": "keyword",
+              "ignore_above": 1024
+            }
+          }
+        },
+        "user": {
+          "properties": {
+            "name": {
+              "type": "keyword",
+              "ignore_above": 1024,
+              "fields": {
+                "text": {
+                  "type": "match_only_text"
+                }
+              }
+            },
+            "id": {
+              "type": "keyword",
+              "ignore_above": 1024
+            },
+            "domain": {
+              "type": "keyword",
+              "ignore_above": 1024
+            },
+            "email": {
+              "type": "keyword",
+              "ignore_above": 1024
+            },
+            "full_name": {
+              "type": "keyword",
+              "ignore_above": 1024
+            },
+            "group": {
+              "properties": {
+                "id": {
+                  "type": "keyword",
+                  "ignore_above": 1024
+                },
+                "name": {
+                  "type": "keyword",
+                  "ignore_above": 1024
+                }
+              }
+            }
+          }
+        },
+        "process": {
+          "properties": {
+            "name": {
+              "type": "keyword",
+              "ignore_above": 1024,
+              "fields": {
+                "text": {
+                  "type": "match_only_text"
+                }
+              }
+            },
+            "pid": {
+              "type": "long"
+            },
+            "ppid": {
+              "type": "long"
+            },
+            "executable": {
+              "type": "wildcard"
+            },
+            "command_line": {
+              "type": "wildcard"
+            },
+            "working_directory": {
+              "type": "keyword",
+              "ignore_above": 1024
+            },
+            "start": {
+              "type": "keyword",
+              "ignore_above": 1024
+            },
+            "exit_code": {
+              "type": "long"
+            },
+            "parent": {
+              "properties": {
+                "name": {
+                  "type": "keyword",
+                  "ignore_above": 1024
+                },
+                "pid": {
+                  "type": "long"
+                }
+              }
+            }
+          }
+        },
+        "event": {
+          "properties": {
+            "action": {
+              "type": "keyword",
+              "ignore_above": 1024
+            },
+            "category": {
+              "type": "keyword",
+              "ignore_above": 1024
+            },
+            "dataset": {
+              "type": "keyword",
+              "ignore_above": 1024
+            },
+            "kind": {
+              "type": "keyword",
+              "ignore_above": 1024
+            },
+            "module": {
+              "type": "keyword",
+              "ignore_above": 1024
+            },
+            "outcome": {
+              "type": "keyword",
+              "ignore_above": 1024
+            },
+            "type": {
+              "type": "keyword",
+              "ignore_above": 1024
+            },
+            "severity": {
+              "type": "long"
+            },
+            "duration": {
+              "type": "long"
+            },
+            "created": {
+              "type": "keyword",
+              "ignore_above": 1024
+            },
+            "original": {
+              "type": "keyword",
+              "ignore_above": 1024
+            }
+          }
+        },
+        "file": {
+          "properties": {
+            "name": {
+              "type": "keyword",
+              "ignore_above": 1024
+            },
+            "path": {
+              "type": "wildcard"
+            },
+            "extension": {
+              "type": "keyword",
+              "ignore_above": 1024
+            },
+            "directory": {
+              "type": "keyword",
+              "ignore_above": 1024
+            },
+            "size": {
+              "type": "long"
+            },
+            "mtime": {
+              "type": "keyword",
+              "ignore_above": 1024
+            },
+            "hash": {
+              "properties": {
+                "sha256": {
+                  "type": "keyword",
+                  "ignore_above": 1024
+                },
+                "md5": {
+                  "type": "keyword",
+                  "ignore_above": 1024
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
