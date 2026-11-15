@@ -20,7 +20,7 @@ flowchart LR
 
 ## The engine opens the sync PR
 
-A push to dfe-engine's main that changes either spec runs its Sync dfe-engine-types workflow (`.github/workflows/sync-dfe-engine-types.yml` in dfe-engine). It copies both specs here, runs `generate`, and opens a `sync-dfe-engine-types-<sha>` pull request, closing any older one. The compile errors that PR raises in the endpoint map are the drift check working.
+A push to dfe-engine's main that changes either spec runs its Sync dfe-engine-types workflow ([sync-dfe-engine-types.yml](https://github.com/hyperi-io/dfe-engine/blob/main/.github/workflows/sync-dfe-engine-types.yml) in dfe-engine). It copies both specs here, runs `generate`, and opens a `sync-dfe-engine-types-<sha>` pull request, closing any older one. The compile errors that PR raises in the endpoint map are the drift check working.
 
 To do the same by hand against a local engine checkout:
 
