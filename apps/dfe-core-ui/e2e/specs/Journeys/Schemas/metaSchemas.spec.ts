@@ -52,7 +52,7 @@ test.describe('', { tag: [TAGS.core, TAGS.schema] }, () => {
     await drawer.getByText('ELASTIC INDEX TEMPLATE', { exact: true }).click();
     await drawer
       .locator('input[type="file"]')
-      .setInputFiles(path.join(MOCKS, 'elasticUpload.json'));
+      .setInputFiles(path.join(MOCKS, 'templateUpload.json'));
     await expect(drawer.getByText('tags', { exact: true })).toBeVisible({
       timeout: 30_000,
     });

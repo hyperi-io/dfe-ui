@@ -78,7 +78,7 @@ const deployHints = new Map<string, string[]>();
 
 test.skip(
   !corpusAvailable(),
-  'DFE_FILEBEAT_CORPUS is not set: the corpus is read where it lies, never unpacked here',
+  'DFE_ENGINE_DIR is not set: name a dfe-engine checkout to read tests/e2e/filebeat_cases.yaml',
 );
 
 test.describe.configure({ mode: 'serial' });
