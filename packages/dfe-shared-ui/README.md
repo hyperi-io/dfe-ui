@@ -1,3 +1,3 @@
-# @repo/dfe-utilities
+# @repo/dfe-shared-ui
 
-Shared utilities for all packages and apps in the monorepo
+Shared React components and utilities, under `src/components` and `src/utils`, that the console app imports.
