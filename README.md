@@ -48,16 +48,16 @@ A Turborepo/yarn-workspaces monorepo with one shipped app and six packages:
 
 ## Documentation
 
-| Doc                                                          | Covers                                                                       |
-| ------------------------------------------------------------ | ---------------------------------------------------------------------------- |
-| [docs/architecture.md](docs/architecture.md)                 | app + package map, route groups, where dfe-ui sits in the DFE stack          |
-| [docs/console-and-the-flow.md](docs/console-and-the-flow.md) | the four menu groups, and how a source page draws the engine's flow resolver |
-| [docs/engine-api-client.md](docs/engine-api-client.md)       | the typed engine API client and how the engine spec is synced                |
-| [docs/authentication.md](docs/authentication.md)             | local and OIDC sign-in, session renewal, sign-out and redirects              |
-| [docs/observe-embed.md](docs/observe-embed.md)               | how the Observe pages are framed in the console                              |
-| [docs/build-and-deploy.md](docs/build-and-deploy.md)         | standalone build, container, publish                                         |
-| [docs/local-development.md](docs/local-development.md)       | toolchain, env vars, tests, storybook, running natively on a Mac             |
-| [docs/e2e-tests.md](docs/e2e-tests.md)                       | running the Playwright suite against a console and an engine                 |
+| Doc                                                              | Covers                                                                       |
+| ---------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| [docs/architecture.md](docs/architecture.md)                     | app + package map, route groups, where dfe-ui sits in the DFE stack          |
+| [docs/console-and-the-flow.md](docs/console-and-the-flow.md)     | the four menu groups, and how a source page draws the engine's flow resolver |
+| [docs/engine-api-client.md](docs/engine-api-client.md)           | the typed engine API client and how the engine spec is synced                |
+| [docs/authentication.md](docs/authentication.md)                 | local and OIDC sign-in, session renewal, sign-out and redirects              |
+| [docs/observe-embed.md](docs/observe-embed.md)                   | how the Observe pages are framed in the console                              |
+| [docs/build-and-deploy.md](docs/build-and-deploy.md)             | standalone build, container, publish                                         |
+| [docs/local-development.md](docs/local-development.md)           | toolchain, env vars, tests, storybook, running natively on a Mac             |
+| [apps/dfe-core-ui/e2e/README.md](apps/dfe-core-ui/e2e/README.md) | running the Playwright suite against a console and an engine                 |
 
 The suite's published docs are at <https://dfe.docs.hyperi.io>, and this repository's pages at <https://dfe.docs.hyperi.io/dfe-ui/>.
 

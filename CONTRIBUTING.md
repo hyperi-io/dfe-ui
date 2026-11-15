@@ -224,7 +224,7 @@ make check                           # hyperi-ci check, what CI runs
 yarn workspace dfe-core-ui test:e2e  # Playwright, needs a console and an engine up
 ```
 
-The Playwright suite's setup is [docs/e2e-tests.md](docs/e2e-tests.md), and running natively on a Mac is in [docs/local-development.md](docs/local-development.md).
+The Playwright suite's setup is [apps/dfe-core-ui/e2e/README.md](apps/dfe-core-ui/e2e/README.md), and running natively on a Mac is in [docs/local-development.md](docs/local-development.md).
 
 ### What tends to bite
 
@@ -243,8 +243,8 @@ The Playwright suite's setup is [docs/e2e-tests.md](docs/e2e-tests.md), and runn
 Both edges are declared data -- read them with
 `dfe-stack suite --consumer dfe-ui` and `--producer dfe-ui`.
 
-**dfe-engine -> dfe-ui, inbound.** Two edges. This repo commits byte copies of the engine's `openapi/openapi.json` and `openapi/openapi.e2e.json`, so drift is measurable by hashing both copies, and dfe-engine's Sync dfe-engine-types workflow copies them here by pull request on a push to its main. An engine API change arrives here on its own. The second edge is derived: `packages/dfe-engine-types/scopes/index.ts` is written from the `RbacScope` enum in that spec by `yarn workspace @repo/dfe-engine-types generate`. A hand edit to either is drift.
+dfe-engine -> dfe-ui is inbound, with two edges. This repo commits byte copies of the engine's `openapi/openapi.json` and `openapi/openapi.e2e.json`, so drift is measurable by hashing both copies, and dfe-engine's Sync dfe-engine-types workflow copies them here by pull request on a push to its main. An engine API change arrives here on its own. The second edge is derived: `packages/dfe-engine-types/scopes/index.ts` is written from the `RbacScope` enum in that spec by `yarn workspace @repo/dfe-engine-types generate`. A hand edit to either is drift.
 
-**dfe-ui -> dfe-infra, outbound, lockstep.** dfe-infra's `versions.yaml` pins the container this repo publishes, as a tag plus the digest that makes the tag immutable, and the thin chart published at that tag. `check_versions_drift.py` holds every copy of the pin to it. It is the one repo a release here moves.
+dfe-ui -> dfe-infra is outbound and lockstep. dfe-infra's `versions.yaml` pins the container this repo publishes, as a tag plus the digest that makes the tag immutable, and the thin chart published at that tag. `check_versions_drift.py` holds every copy of the pin to it. It is the one repo a release here moves.
 
-**dfe-hyperdx, runtime only.** `/observe` frames the fork on its own subdomain, which authenticates the operator from the `dfe_token` cookie `apps/dfe-core-ui/src/proxy.ts` plants on the shared parent domain (`DFE_COOKIE_DOMAIN`). The suite graph declares no build edge -- nothing here is generated from that repo or pinned to it.
+dfe-hyperdx is a runtime link only. `/observe` frames the fork on its own subdomain, which authenticates the operator from the `dfe_token` cookie `apps/dfe-core-ui/src/proxy.ts` plants on the shared parent domain (`DFE_COOKIE_DOMAIN`). The suite graph declares no build edge -- nothing here is generated from that repo or pinned to it.

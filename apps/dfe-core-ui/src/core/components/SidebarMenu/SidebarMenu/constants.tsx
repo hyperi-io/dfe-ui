@@ -77,7 +77,8 @@ const observeItems = (hyperdxUrl?: string): SidebarNavItem[] =>
     : [];
 
 /**
- * The sidebar, grouped in the order a record travels.
+ * The sidebar: Observe first, then Data flow, Detect and Stack, one group per
+ * stage of the flow.
  *
  * Observe is where the data is looked at. Data flow defines what comes in, how
  * it is transformed and where it lands. Detect defines what to look for, and

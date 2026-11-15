@@ -8,7 +8,7 @@ yarn workspace dfe-core-ui test:e2e                  # the folder, one worker
 yarn workspace dfe-core-ui test:e2e --grep-invert @docker-only
 ```
 
-Bring the console up the same way as [local development](local-development.md), on port 3000, with `NEXT_PUBLIC_API_URL` and `INTERNAL_API_URL` pointed at the engine and `NEXTAUTH_URL` matching the console. The suite reads the console from `BASE_URL`, then `NEXTAUTH_URL`, then `http://localhost:3000`, and the engine from `NEXT_PUBLIC_API_URL`, then `INTERNAL_API_URL`, then `http://localhost:8003` (`apps/dfe-core-ui/e2e/config/e2e.client.ts`). Port 3000 is on a dev engine's fallback CORS allowlist, so login on another port fails until that list is extended.
+Bring the console up the same way as [local development](../../../docs/local-development.md), on port 3000, with `NEXT_PUBLIC_API_URL` and `INTERNAL_API_URL` pointed at the engine and `NEXTAUTH_URL` matching the console. The suite reads the console from `BASE_URL`, then `NEXTAUTH_URL`, then `http://localhost:3000`, and the engine from `NEXT_PUBLIC_API_URL`, then `INTERNAL_API_URL`, then `http://localhost:8003` (`apps/dfe-core-ui/e2e/config/e2e.client.ts`). Port 3000 is on a dev engine's fallback CORS allowlist, so login on another port fails until that list is extended.
 
 ## The engine has to mount the e2e helpers
 
@@ -47,9 +47,9 @@ The suite loads `apps/dfe-core-ui/.env.local`, then `.env`, and leaves any name 
 
 Some specs need more than the engine.
 
-Specs tagged `@docker-only` (`filebeatDataPath.spec.ts`, `promoteJsonField.spec.ts`, and the Compose scaling case in `components.spec.ts`) shell out to `docker`, so they need a docker daemon and the stack's containers. `DFE_CONTAINER_PREFIX` defaults to `e2e-`, and a dfe-docker checkout names containers after their compose services, so set the prefix empty there. `DFE_DOCKER_DIR` is that checkout, so `make apply` can create a container the suite just asked for. `DFE_FILEBEAT_CORPUS` is the filebeat archive, and those corpus cases skip when it is unset.
+A spec or case tagged `@docker-only` (`TAGS.docker` in `apps/dfe-core-ui/e2e/config/tags.constants.ts`) shells out to `docker`, so it needs a docker daemon and the stack's containers. `git grep -n TAGS.docker -- apps/dfe-core-ui/e2e` lists them, and `--grep-invert @docker-only` skips them. `DFE_CONTAINER_PREFIX` defaults to `e2e-`, and a dfe-docker checkout names containers after their compose services, so set the prefix empty there. `DFE_DOCKER_DIR` is that checkout, so `make apply` can create a container the suite just asked for. `DFE_FILEBEAT_CORPUS` is the filebeat archive, and those corpus cases skip when it is unset.
 
-`e2e/specs/library.spec.ts` and `sourcesProcessing.spec.ts` seed a fetcher source, which a docker-slim engine refuses because that tier does not offer `dfe-fetcher`.
+`apps/dfe-core-ui/e2e/specs/library.spec.ts` and `apps/dfe-core-ui/e2e/specs/Sources/sourcesProcessing.spec.ts` seed a fetcher source, which a docker-slim engine refuses because that tier does not offer `dfe-fetcher`.
 
 Leave `fullyParallel: false` and `workers: 1`. The specs share one engine, and workers race on `seed-static`.
 

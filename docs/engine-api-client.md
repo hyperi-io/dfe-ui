@@ -28,4 +28,4 @@ To do the same by hand against a local engine checkout:
 2. `yarn workspace @repo/dfe-engine-types generate`
 3. Fix any compile errors in the endpoint map.
 
-The spec's `info.version` does not change on every engine edit, so a version comparison cannot detect drift. Compare the files. The type-safety sync is documented engine-side in [type-safety-sync.md](https://github.com/hyperi-io/dfe-engine/blob/main/docs/control-plane/type-safety-sync.md).
+The spec's `info.version` moves with every engine release, because each release commit rewrites `openapi/openapi.json`. A version comparison detects drift between releases but not edits within one, so compare the files. The type-safety sync is documented engine-side in [type-safety-sync.md](https://github.com/hyperi-io/dfe-engine/blob/main/docs/control-plane/type-safety-sync.md).
