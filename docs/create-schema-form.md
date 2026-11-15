@@ -1,94 +1,58 @@
 # `CreateSchemaForm` (dfe-core-ui)
 
-Documentation for `apps/dfe-core-ui/src/core/components/CreateSchemaForm` and how it behaves with large uploads.
-
-## Purpose
-
-Users can create a schema from metadata fields plus columns. Columns can come from a **manual table** or from **CSV / Elastic index template** conversion. Imports can be large, so the UI limits how much of the editable grid is rendered at once while still keeping the full dataset in application state for save and validation.
+`apps/dfe-core-ui/src/core/components/CreateSchemaForm` builds a schema from its metadata fields plus columns, and pages the uploaded columns so a large import stays usable. Columns come from a manual table or from a CSV or Elastic index template upload. The full column lists live in React context for promotion and submit, and only the current page of uploaded rows is rendered.
 
 ## Component map
 
-| Piece                                                       | Role                                                                                                                                     |
-| ----------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| `CreateSchemaForm`                                          | Ant Design `Form` with `preserve`, wires `onFinish`, clears a top-level error banner on change.                                          |
-| `CreateSchemaFormProvider` (`CreateSchemaForm.context.tsx`) | Holds `uploadedSchemaColumns`, `invalidUploadedSchemaColumns`, `schemaColumns`, sync helpers, and merges form ↔ invalid-row state.       |
-| `SchemaUploadCollapse`                                      | Upload type (CSV vs JSON), file dragger, tabs for uploaded vs additional columns once a file produced rows.                              |
-| `SchemaUploadFileSection`                                   | Calls `convertCsv` (CSV) or `useElasticConvert` (JSON); pushes rows into context via `handleSetUploadedSchemaColumns`.                   |
-| `UploadedSchemaTable`                                       | “Valid” uploaded columns: `AddSchemaTable` over `uploadedColumns` **with pagination** (default page size 50).                            |
-| `InvalidColumnsCollapse`                                    | Rows that failed `rowSchema` on import: separate `Form.List` `invalidColumns`, **no pagination**, effect-driven promotion back to valid. |
-| `AddSchemaTable`                                            | `Form.List` + table; syncs list from `initialValues` when a `JSON.stringify` signature of those values changes.                          |
+Paths are relative to the component directory.
 
-## Implementation flow
+| Piece                                                               | Role                                                                                                                                         |
+| ------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| `CreateSchemaForm` (`index.tsx`)                                    | Ant Design `Form` with `preserve`, the metadata fields, the submit guards. Clears the form-level error banner on every change.               |
+| `CreateSchemaFormProvider` (`contexts/CreateSchemaForm.context.tsx`) | Holds `uploadedSchemaColumns`, `invalidUploadedSchemaColumns` and `schemaColumns`, with refs for synchronous reads, promotion and removal. |
+| `SchemaUploadCollapse` (`SchemaUploadCollapse/index.tsx`)           | Upload type (DFE CSV or JSON), the file section, and the column tabs.                                                                        |
+| `SchemaUploadFileSection` (`SchemaUploadCollapse/SchemaUploadFileSection.tsx`) | Calls `convertCsv` (CSV) or `useElasticConvert` (JSON) and hands the rows to `handleSetUploadedSchemaColumns`.                    |
+| `UploadedSchemaTable` (`UploadedSchemaTable/index.tsx`)             | The valid uploaded columns: an `AddSchemaTable` over `uploadedColumns`, searchable, paged at 50 rows by default. Renders `InvalidColumnsTable` above it when there are invalid rows. |
+| `InvalidColumnsTable` (`InvalidColumnsTable/index.tsx`)             | Rows that failed `rowSchema` on import, in their own `Form.List` (`invalidColumns`), unpaged, promoted back to valid as they are fixed.       |
+| `AddSchemaTable` (`AddSchemaTable/index.tsx`)                       | `Form.List` plus table. Syncs the list from `initialValues` when a `JSON.stringify` signature of those values changes.                       |
 
-1. **Import** — File is converted; rows are normalized (e.g. `listItemFromPartial`) and passed to `handleSetUploadedSchemaColumns`. That function runs `rowSchema.safeParse` per row: valid rows become `uploadedSchemaColumns`, failures become `invalidUploadedSchemaColumns` (with Zod error metadata).
+## How a row moves from import to submit
 
-2. **Form lists** — `AddSchemaTable` uses `useLayoutEffect` to `setFieldsValue` for its `Form.List` name when `initialValues` content changes (dependency is a serialized signature, not reference equality).
+```mermaid
+flowchart LR
+    FILE[file] -->|convertCsv / useElasticConvert| SET[handleSetUploadedSchemaColumns]
+    SET -->|rowSchema.safeParse passes| UP[uploadedSchemaColumns]
+    SET -->|fails| INV[invalidUploadedSchemaColumns]
+    INV -->|fixed in InvalidColumnsTable| PROMOTE[handleUpdateInvalidUploadedSchemaColumn]
+    PROMOTE --> UP
+    UP --> SUBMIT[onFinish: rowSchema over every row]
+```
 
-3. **Invalid → valid promotion (two paths)**
-   - **`InvalidColumnsCollapse`**: `Form.useWatch('invalidColumns')` + `useEffect` re-parses rows; when a row becomes valid, `handleUpdateInvalidUploadedSchemaColumn` moves it into `uploadedSchemaColumns`, updates `invalidColumns` / `uploadedColumns` in the form, then `queueMicrotask` → `validateFields` on the promoted row paths.
-   - **`handleUpdateUploadedSchemaColumns`** (called from `onValuesChange` on the main form): if `uploadedColumns` changed and there are still invalid rows, merges live form rows with invalid payloads **by stable row `id`** and promotes when `rowSchema.safeParse` succeeds.
+1. Import. `SchemaUploadFileSection` converts the file (`transformDataToUploadedSchemaRow`) and passes the rows to `handleSetUploadedSchemaColumns`, which runs `rowSchema.safeParse` per row. Valid rows become `uploadedSchemaColumns`, failures `invalidUploadedSchemaColumns` with their Zod issues.
+2. Form lists. `AddSchemaTable` uses `useLayoutEffect` to `setFieldsValue` its `Form.List` when the `initialValues` signature changes, so a parent passing a new array each render does not reset the list.
+3. Promotion, two paths. `InvalidColumnsTable` watches `invalidColumns` (`Form.useWatch` plus `useEffect`) and promotes each row that now parses. `handleUpdateUploadedSchemaColumns`, reached from the form's `onValuesChange` through `handleFormValuesChange`, merges live form rows with the invalid payloads by row `id` and promotes those that parse. Both validate the moved paths in a `queueMicrotask`.
+4. Submit. `onFinish` runs `rowSchema.safeParse` over every `uploadedSchemaColumns` entry and every non-blank `schemaColumns` entry from context, and blocks the submit when any fails or `invalidUploadedSchemaColumns` is not empty.
 
-4. **Submit** — `onFinish` does **not** rely on Ant Design alone: it runs `rowSchema.safeParse` over **every** `uploadedSchemaColumns` and `schemaColumns` entry from context and blocks submit if `invalidUploadedSchemaColumns` is non-empty or any parse fails.
+## Paging limits rendering, not validation
 
-## Pagination vs “viewport”
+The uploaded table passes `pagination` to the table, so only the current page of rows mounts its `Form.Item`s. The form's `preserve` keeps list values when rows unmount as the user pages. The authoritative full lists for submit are the context arrays and the `safeParse` in `onFinish`, never the visible cells.
 
-The uploaded-columns table passes Ant Design **`pagination`** into `Table`. The table only **renders** the current page of rows, so nested `Form.Item`s for off-page rows are typically **not mounted** on that page.
+`InvalidColumnsTable` and the manual `schemaColumns` table ("Schema Columns" with no upload, "Additional Columns" beside one) are not paged, so a large invalid set or a large manual schema renders every row at once.
 
-Implications:
+## What costs time on a large import
 
-- **Mounted fields** are mostly the current page (plus invalid rows, which use a separate list and are **not** paginated).
-- The parent form uses **`preserve`**, which helps avoid losing list values when list field components unmount as the user changes pages; do not assume this removes all edge cases around list registration and validation ordering.
-- **Authoritative full-list state for submit** is the context arrays + explicit `safeParse` in `onFinish`, not “whatever the visible cells show.”
+- Whole-form parses. Every `Form.Item` rule from `useAntdZodResolver` (`apps/dfe-core-ui/src/core/utils/zod/useAntdZodResolver.ts`) asks for a parse of the whole form. Calls with deep-equal values share the last parse, but each check runs `isEqual` over the form and each new parse takes a `cloneDeep` snapshot, so every edit costs one full parse plus a deep compare and a deep copy of every column.
+- Signatures. `AddSchemaTable` builds `JSON.stringify(initialValues)` on every render.
+- Repeat parses. Each row is parsed at import and again at submit.
+- Mounted tabs. Both `SchemaUploadCollapse` tabs set `forceRender: true`, so the uploaded and manual tables stay mounted together.
 
-## Performance implications
+CSV conversion (`convertCsv`, a server action) and Elastic conversion (`useElasticConvert`, an engine call) run before any of this, so a payload or timeout limit there fails before paging can help.
 
-### Full-form Zod validation per field rule
+## What breaks if a change ignores the model
 
-`useAntdZodResolver` implements each `Form.Item` rule by calling `schema.safeParseAsync(getFieldsValue())` — i.e. it parses the **entire** form value for **every** validated control path that uses `formValidation`.
+- Two sources of truth. Editing flows through Ant Design `Form.List`, and the arrays for promotion and submit live in context. The helpers keep them aligned on promotion and removal, so a change that writes only one side lets them diverge.
+- Effect order. Promotion runs partly from `useWatch` plus `useEffect` and partly from `onValuesChange`, and `validateFields` runs after both in a microtask. Reordering them changes which errors show.
+- The change filter. `onValuesChange` work for the column lists runs only when `changedValuesMayAffectTabLists` (`contexts/CreateSchemaForm.context.helpers.tsx`) says the change touches `schemaColumns`, `uploadedColumns` or `invalidColumns`.
+- Row ids. Promotion and removal match rows by `id`, carried in a hidden `Form.Item`. A row without a stable `id` cannot be promoted or removed.
 
-With large `uploadedColumns` / `schemaColumns` lists, **each** triggered validation can mean a **full** parse of the combined schema. Many cells × many validations scales poorly even when the table paginates visible rows.
-
-### Other costs
-
-- **`JSON.stringify(initialValues)`** in `AddSchemaTable` runs each render to build a dependency signature; for very large arrays this is extra CPU and allocation on every render where the parent passes a new array reference.
-- **Duplicate row validation**: import-time `safeParse`, submit-time `safeParse` again over full context arrays.
-- **`SchemaUploadCollapse` tabs** use `forceRender: true`, so uploaded and additional-column subtrees stay mounted together once tabs appear — more simultaneous components than lazy mounting would imply.
-- **`InvalidColumnsCollapse`** disables pagination; a large invalid set renders **all** invalid rows at once (heavy DOM + many registered fields).
-
-### Upload / conversion path
-
-CSV conversion (`convertCsv`) and Elastic conversion (`useElasticConvert`) run outside the table pagination story: timeouts or payload limits hit **network/server or mutation** layers before the paginated UI helps.
-
-## Caveats and behavioral quirks
-
-1. **Two sources of truth** — Display/editing flows through Ant Design `Form.List`; canonical arrays for promotion and submit live in React context (`uploadedSchemaColumns`, etc.). Helpers keep them aligned when promoting or removing rows; divergence is possible if a future change writes only one side.
-
-2. **Invalid-row editing relies on effects** — Fixing invalid rows is partly driven by `useWatch` + `useEffect` (`InvalidColumnsCollapse`) and partly by `onValuesChange` merges (`handleUpdateUploadedSchemaColumns`). Order and timing matter for promotion and `validateFields`.
-
-3. **`changedValuesMayAffectUploadedColumns`** — `onValuesChange` short-circuits unless the change might touch nested `uploadedColumns`; merges for invalid rows only run when that predicate passes.
-
-4. **Stable row ids** — Promotion and removal match rows by **`id`**. Hidden `Form.Item` for `id` exists so list merges and promotions stay stable; missing or unstable ids break promotion/removal logic.
-
-5. **`schemaColumns` manual table** — When no upload exists, schema columns use `AddSchemaTable` **without** pagination in `SchemaUploadCollapse`; large manual schemas face the same validation and stringify costs without row paging.
-
-## Practical workarounds
-
-### For users / operators
-
-- Prefer **cleaning CSV/JSON upstream** so fewer rows land in **Invalid Columns** (that panel is unpaginated).
-- For enormous files, consider **splitting** artifacts or correcting imports outside the UI if conversion or submit payloads hit limits.
-
-### For maintainers
-
-- Treat context arrays + submit-time `rowSchema` checks as the **contract** for correctness; use pagination as a **rendering** mitigation, not proof that validation cost is bounded.
-- Before adding more `Form.Item`s with `formValidation`, remember each validation can re-parse the **whole** form — scoped rules or lighter validators on hot paths reduce quadratic-style blowups.
-- If `InvalidColumnsCollapse` grows unwieldy for huge error sets, **pagination or virtualization** there would align it with the uploaded table’s strategy (would require careful promotion/remove semantics).
-
-## Related files
-
-- `CreateSchemaForm/index.tsx` — form shell, schemas (`formSchema` / `formSchemaRequest`), submit guards.
-- `CreateSchemaForm.context.tsx` — state, refs for synchronous updates, promotion/remove, microtask validation.
-- `UploadedSchemaTable/index.tsx` — pagination defaults for uploaded rows.
-- `InvalidColumnsCollapse/index.tsx` — invalid list, watch/effect promotion.
-- `AddSchemaTable/index.tsx` — `Form.List`, table, `initialValues` sync.
-- `SchemaUploadFileSection.tsx` — file handling and conversion entry points.
+Before adding another `Form.Item` with `formValidation` on a column row, weigh that each edit re-parses the whole form. A scoped validator on that path costs less. Paging or virtualising `InvalidColumnsTable` would match the uploaded table, provided promotion and removal still match by `id`.

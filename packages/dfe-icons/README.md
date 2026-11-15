@@ -12,9 +12,9 @@ Source directories are auto-discovered. The upstream Tabler icons live in `svg/t
 
 | Directory                         | Naming convention              | Example                                 |
 | --------------------------------- | ------------------------------ | --------------------------------------- |
-| `svg/third-party/tabler/outline/` | `Icon` + PascalCase            | `zoom.svg` → `IconZoom`                 |
-| `svg/third-party/tabler/filled/`  | `Icon` + PascalCase + `Filled` | `alarm.svg` → `IconAlarmFilled`         |
-| `svg/custom/`                     | `Icon` + PascalCase            | `file-type-yml.svg` → `IconFileTypeYml` |
+| `svg/third-party/tabler/outline/` | `Icon` + PascalCase            | `zoom.svg` -> `IconZoom`                 |
+| `svg/third-party/tabler/filled/`  | `Icon` + PascalCase + `Filled` | `alarm.svg` -> `IconAlarmFilled`         |
+| `svg/custom/`                     | `Icon` + PascalCase            | `file-type-yml.svg` -> `IconFileTypeYml` |
 | `svg/<any>/`                      | `Icon` + PascalCase            | (auto-discovered, no suffix)            |
 
 ## Usage
@@ -33,7 +33,7 @@ function Example() {
 }
 ```
 
-Every component is a `React.forwardRef` wrapping an `<svg>` element, so it accepts all standard SVG props (`className`, `width`, `height`, `stroke`, `fill`, `ref`, etc.).
+Every component is an SVGR component wrapped in `React.memo` that spreads its props onto the `<svg>`, so it accepts all standard SVG props (`className`, `width`, `height`, `stroke`, `fill` and the rest).
 
 ## Adding a custom icon
 
@@ -50,7 +50,7 @@ Every component is a `React.forwardRef` wrapping an `<svg>` element, so it accep
    import { IconMyNewIcon } from '@repo/dfe-icons';
    ```
 
-The SVG should follow the same 24×24 viewBox convention used by Tabler:
+The SVG should follow the same 24x24 viewBox convention used by Tabler:
 
 ```xml
 <svg

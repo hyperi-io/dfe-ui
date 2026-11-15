@@ -1,8 +1,6 @@
 # How the console maps to the flow
 
-A record enters DFE, is optionally reshaped, and lands in a table. The console
-is arranged in that order, so a new operator can read the menu top to bottom and
-learn how their data moves.
+A record enters DFE, is optionally transformed, and lands in a table. The console's menu groups follow that flow: Data flow defines what comes in, Detect what to look for in it, Observe is where the landed data is read, and Stack is what is running.
 
 ```mermaid
 flowchart LR
@@ -38,13 +36,12 @@ first-run `/setup/[step]`.
 
 ## The Source page follows the flow
 
-A source's own page opens on **Flow**: three stages and the two arrows between
-them.
+A source's own page opens on its Flow tab: three stages and the two arrows between them. The `main` source, and a source with no meta schema or not yet deployed, shows no Transform stage.
 
 ```mermaid
 flowchart LR
-    IN[INPUT<br/>receiver match, or the fetcher instance]
-    TR[TRANSFORM<br/>app, variant, the files it reads]
+    IN[INPUT<br/>receiver match, fetcher instance, or your own pipeline]
+    TR[TRANSFORM<br/>app, variant, endpoint or topics]
     OUT[OUTPUT<br/>table, archive]
     IN -->|carrier + topic or endpoint| TR
     TR -->|carrier + topic or endpoint| OUT
@@ -58,43 +55,24 @@ never builds a topic name or an endpoint of its own.
 
 Three things follow from reading the resolver rather than the source's fields:
 
-- **The effective transport is shown, not the declared one.** A source that
-  names no transport takes the deployment's default, and the card says which.
-- **A refusal is the engine's own sentence.** When a source's stages cannot run
-  as declared -- archiving on a deployment with no bus, a transform app that
-  does not carry the chosen transport -- the resolver answers 422 and the card
-  shows that message verbatim, beside the choice that caused it.
-- **Engine-owned stages are read-only.** A fetcher instance and a transform
-  instance are derived from the source, so the card marks them and links to
-  where the deployed app is managed rather than offering an edit that would be
-  recompiled away.
+- The card shows the effective transport, never the declared one. A source that names no transport takes the deployment's default, and the card says which.
+- A refusal is the engine's own sentence. When a source's stages cannot run as declared (archiving where the archiver does not carry the transport, a transform app that does not carry it, a transport the deployment does not offer) the resolver answers 422 and the card shows that message verbatim.
+- Engine-owned stages are read-only. A fetcher instance and a transform instance are derived from the source, so the card marks them engine-owned and links to the app's page under `/components` rather than offering an edit that would be recompiled away.
 
-The same card draws the **default flow** -- where a record the receiver cannot
-place lands -- on the Sources page before any source is selected. It answers
-before anyone has configured anything, because that flow is already running.
+With no source named in the URL, the Sources page opens the `main` source, where every record the receiver cannot place lands. So the card draws that default flow before anyone has defined a source. An engine with no `main` source shows an empty panel instead.
 
 ## Where a source's transport and archive are set
 
 Both live on the source form's first tab, beside the name:
 
-- **Transport** -- leave it inherited to follow the deployment default, or name
-  `bus` or `direct`. The engine refuses a transport the deployment does not
-  offer, at save.
-- **Archive** -- keep the raw record as it arrived. The archiver reads the
-  landing topic, so this needs the bus.
+- Transport: leave it empty to inherit the deployment default, or pick one the deployment offers, `bus` or `direct`. The engine refuses at save a flow its resolver cannot run.
+- Archive: keep the raw record as it arrived. The archiver reads the landing topic, so this needs the bus.
 
 ## Reading an app's manifest rather than naming it
 
 The Stack destinations render from `GET /api/v1/apps`, whose entries come from
 the app manifest. Nothing in the console is keyed to an app's name:
 
-- `multiplicity` decides where an app appears -- a single deployment serves
-  every source and belongs to the fleet; a per-config one belongs to its source
-  and appears on that source's page.
-- `file_sets` decides whether an app gets a file editor at all.
-- `has_compiled_routing` decides whether its routing is derived from the sources
-  (and so read-only, with drift re-synced) or hand-set.
-- `profiles` says which deployment profiles may run the app, and `default_in`
-  which ones run it without being asked. An app nothing deploys by default is
-  reported as `optional`, and the console offers it as something to turn on
-  rather than something missing.
+- `multiplicity` decides where an app appears. A `single` app serves every source and belongs to the fleet. A `per_config` app belongs to its source and appears on that source's page.
+- `file_sets` decides whether an app instance gets a Files panel at all.
+- `has_compiled_routing` decides whether a source page shows the app's routing card. That card is read-only, because the routing is compiled from the sources, and offers Sync routing when the deployed routing has drifted from them.
