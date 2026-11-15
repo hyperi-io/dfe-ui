@@ -79,9 +79,9 @@ const observeItems = (hyperdxUrl?: string): SidebarNavItem[] =>
 /**
  * The sidebar, grouped in the order a record travels.
  *
- * Observe is where the data is looked at; Data flow defines what comes in, how
- * it is shaped and where it lands; Detect defines what to look for; Stack is
- * what is running; Access is who may do what. Each group is one RBAC family, so
+ * Observe is where the data is looked at. Data flow defines what comes in, how
+ * it is transformed and where it lands. Detect defines what to look for, and
+ * Stack is what is running. Each group is one RBAC family, so
  * a user sees a heading exactly when at least one destination under it is
  * theirs.
  *

@@ -1,9 +1,6 @@
 # dfe-ui architecture
 
-dfe-ui is the operator surface of the DFE suite: a Next.js app that talks to
-exactly one backend - the dfe-engine API - and embeds dfe-hyperdx
-for data exploration. It holds no state of its own beyond the browser
-session; everything it shows and changes goes through engine endpoints.
+dfe-ui is the operator surface of the DFE suite: a Next.js app that talks to exactly one backend, the dfe-engine API, and frames dfe-hyperdx for data exploration. It holds no state of its own beyond the browser session. Everything it shows and changes goes through engine endpoints.
 
 ## Where it sits in the DFE stack
 
@@ -29,7 +26,7 @@ flowchart LR
         CORE[dfe-core-ui<br/>the shipped app]
     end
     subgraph packages
-        TYPES[dfe-engine-types<br/>vendored spec + generated types]
+        TYPES[dfe-engine-types<br/>engine spec copy + generated types]
         ICONS[dfe-icons<br/>SVG -> React codegen]
         LOG[dev-logger]
         TSC[typescript-config]
@@ -43,16 +40,13 @@ flowchart LR
     SHARED --> CORE
 ```
 
-Only `dfe-core-ui` ships (Next standalone output in a three-stage build).
-The packages are build-time dependencies.
+Only `dfe-core-ui` ships (Next standalone output in a three-stage Dockerfile). The packages are bundled into it at build and never published on their own.
 
 ## App structure
 
-- Route groups: `(auth)` for the signed-in app, `(no-auth)` for login.
+- Route groups: `(auth)` for the signed-in app, `(no-auth)` for login, first-run setup, the forced password change and the engine-unavailable page.
 - Feature directories per domain (Hunts, Schemas, Settings, ...) with
   TanStack Query hooks per endpoint.
-- Every engine call goes through one typed client
-  ([engine-api-client.md](engine-api-client.md)) - no raw fetch in feature
-  code (the only raw fetch sites are the NextAuth server-side callbacks).
+- Feature code reaches the engine through one typed client ([engine-api-client.md](engine-api-client.md)), with no raw fetch in feature code. The raw fetch sites are all server-side: the NextAuth sign-in and session helpers, and the `getAuthPermissions` and `getSetupStatus` server actions.
 - `/observe` iframes dfe-hyperdx ([observe-embed.md](observe-embed.md)).
 - Auth is NextAuth over local accounts and the engine's OIDC hand-back ([authentication.md](authentication.md)).

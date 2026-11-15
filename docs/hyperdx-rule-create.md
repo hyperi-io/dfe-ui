@@ -1,11 +1,11 @@
 # Creating a Rule from a Search
 
-## Overview
-
-DFE UI integrates with dfe-hyperdx so users can create rules directly from search results. When a user runs a search and clicks the **Create Rule** trigger, dfe-hyperdx creates the rule in the engine and opens it in the console.
+A search in the console's Observe pages can become a detection rule. dfe-hyperdx creates the rule in the engine and opens it in the console, which keeps no copy of the search and holds no listener for the hand-off.
 
 ## Flow
 
-1. **dfe-hyperdx** - The user clicks the "Create Rule" trigger. dfe-hyperdx renders the current search to SQL (`POST dfe/export-sql`).
-2. **Engine** - dfe-hyperdx creates the rule through its own `dfe/create-rule` route, which forwards to the engine's `POST /api/v1/rules/from-hyperdx`.
-3. **DFE UI** - dfe-hyperdx opens `/rules/{id}`, the rule's own page, in a new tab. The console keeps no copy of the search.
+1. In dfe-hyperdx, the user clicks the Create Rule trigger, and dfe-hyperdx renders the current search to SQL (`POST /dfe/export-sql`).
+2. dfe-hyperdx creates the rule through its own `POST /dfe/create-rule` route, which forwards to the engine's `POST /api/v1/rules/from-hyperdx` with the caller's engine token.
+3. dfe-hyperdx opens `/rules/{id}`, the rule's own page in the console, in a new tab.
+
+The routes are in dfe-hyperdx's `packages/api/src/dfe/routers/query-export.ts`, and the trigger in `packages/app/src/dfe/components/CreateRuleFromSearch/index.tsx`.

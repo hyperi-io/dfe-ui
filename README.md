@@ -5,7 +5,7 @@ The DFE console, where an operator sets up and runs a deployment.
 [![Build Status](https://github.com/hyperi-io/dfe-ui/actions/workflows/ci.yml/badge.svg)](https://github.com/hyperi-io/dfe-ui/actions)
 [![License: BUSL-1.1](https://img.shields.io/badge/License-BUSL--1.1-blue)](LICENSE)
 
-It manages the deployment through the dfe-engine API alone, never past it to the infrastructure. Observe embeds dfe-hyperdx, which the browser loads from its own URL, and the console sends its own telemetry to an OTLP endpoint when `OTEL_EXPORTER_OTLP_ENDPOINT` is set.
+It manages the deployment through the dfe-engine API alone, never past it to the infrastructure. Its Observe pages are served from their own URL and framed inside the console, and the console sends its own telemetry to an OTLP endpoint when `OTEL_EXPORTER_OTLP_ENDPOINT` is set.
 
 ## What it does
 
@@ -29,20 +29,22 @@ On a system-installed node (`/usr/bin/node`) `corepack enable` fails with
 with `corepack` -- `corepack yarn install` -- which needs no enable. A yarn 1
 already on your PATH is the wrong yarn for this lockfile.
 
-Point it at an engine with `NEXT_PUBLIC_API_URL` (defaults suit local dev).
+Point it at an engine with `NEXT_PUBLIC_API_URL` and `INTERNAL_API_URL`. With neither set, every page says the engine URL is not configured.
 Full environment reference: [docs/local-development.md](docs/local-development.md).
 
 ## What's inside
 
-A Turborepo/yarn-workspaces monorepo with one shipped app and four packages:
+A Turborepo/yarn-workspaces monorepo with one shipped app and six packages:
 
-| Workspace                    | What it is                                                         |
-| ---------------------------- | ------------------------------------------------------------------ |
-| `apps/dfe-core-ui`           | the Next.js app - the only artifact shipped (standalone container) |
-| `packages/dfe-engine-types`  | vendored engine OpenAPI spec + generated TypeScript types          |
-| `packages/dfe-icons`         | SVG -> React icon codegen + storybook                              |
-| `packages/dev-logger`        | small shared logging helper                                        |
-| `packages/typescript-config` | shared tsconfigs                                                   |
+| Workspace                     | What it is                                                         |
+| ----------------------------- | ------------------------------------------------------------------ |
+| `apps/dfe-core-ui`            | the Next.js app - the only artifact shipped (standalone container) |
+| `packages/dfe-engine-types`   | a committed copy of the engine's OpenAPI specs + generated types   |
+| `packages/dfe-icons`          | SVG -> React icon codegen + storybook                              |
+| `packages/dev-logger`         | small shared logging helper                                        |
+| `packages/dfe-json-viewer-cn` | the JSON viewer component                                          |
+| `packages/dfe-shared-ui`      | shared React components and utilities                              |
+| `packages/typescript-config`  | shared tsconfigs                                                   |
 
 ## Documentation
 
@@ -50,11 +52,12 @@ A Turborepo/yarn-workspaces monorepo with one shipped app and four packages:
 | ------------------------------------------------------------ | ---------------------------------------------------------------------------- |
 | [docs/architecture.md](docs/architecture.md)                 | app + package map, route groups, where dfe-ui sits in the DFE stack          |
 | [docs/console-and-the-flow.md](docs/console-and-the-flow.md) | the four menu groups, and how a source page draws the engine's flow resolver |
-| [docs/engine-api-client.md](docs/engine-api-client.md)       | the typed engine API client + spec re-vendor procedure                       |
+| [docs/engine-api-client.md](docs/engine-api-client.md)       | the typed engine API client and how the engine spec is synced                |
 | [docs/authentication.md](docs/authentication.md)             | local and OIDC sign-in, session renewal, sign-out and redirects              |
-| [docs/observe-embed.md](docs/observe-embed.md)               | the embedded dfe-hyperdx explore surface                                     |
+| [docs/observe-embed.md](docs/observe-embed.md)               | how the Observe pages are framed in the console                              |
 | [docs/build-and-deploy.md](docs/build-and-deploy.md)         | standalone build, container, publish                                         |
-| [docs/local-development.md](docs/local-development.md)       | toolchain, env vars, tests, storybook                                        |
+| [docs/local-development.md](docs/local-development.md)       | toolchain, env vars, tests, storybook, running natively on a Mac             |
+| [docs/e2e-tests.md](docs/e2e-tests.md)                       | running the Playwright suite against a console and an engine                 |
 
 The suite's published docs are at <https://dfe.docs.hyperi.io>, and this repository's pages at <https://dfe.docs.hyperi.io/dfe-ui/>.
 
