@@ -3,6 +3,16 @@
 Rendered by CI and committed back at the end of a release -- do not edit by
 hand. Release notes also appear on the GitHub Releases page, one per tag.
 
+## [1.7.45](https://github.com/hyperi-io/dfe-ui/compare/v1.7.44...v1.7.45) (2026-11-15)
+
+### Bug Fixes
+
+* 720 fixui source details view ([#731](https://github.com/hyperi-io/dfe-ui/issues/731)) ([f81de7a](https://github.com/hyperi-io/dfe-ui/commit/f81de7a7cf9d99614755a018c184e3f8c1ae94e2))
+* **apps:** tidy the Components page ([#717](https://github.com/hyperi-io/dfe-ui/issues/717)) ([09a23db](https://github.com/hyperi-io/dfe-ui/commit/09a23db8dd2431062b2bae3deb10d986830c4139))
+* **chart:** assemble the thin chart on scalo-service 2.14.30 ([#736](https://github.com/hyperi-io/dfe-ui/issues/736)) ([b7585c6](https://github.com/hyperi-io/dfe-ui/commit/b7585c682c5604beda33e1e7700160d158456c18))
+* **e2e:** escape test values in locator patterns with one helper ([1d89a6c](https://github.com/hyperi-io/dfe-ui/commit/1d89a6c001c16004a42aa4979ed36aa95f82164f))
+* fix meta schema info label padding ([#730](https://github.com/hyperi-io/dfe-ui/issues/730)) ([59b263c](https://github.com/hyperi-io/dfe-ui/commit/59b263cdfd7043cc651e41c1b7035de5bb83cf6a))
+
 ## [1.7.44](https://github.com/hyperi-io/dfe-ui/compare/v1.7.43...v1.7.44) (2026-11-12)
 
 ### Bug Fixes
