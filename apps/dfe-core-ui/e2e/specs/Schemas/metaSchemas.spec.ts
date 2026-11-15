@@ -210,7 +210,7 @@ test.describe('', { tag: [TAGS.core, TAGS.schema] }, () => {
     await expect(drawer.getByText('JSON File', { exact: true })).toBeVisible();
     await drawer
       .locator('input[type="file"]')
-      .setInputFiles(path.join(MOCKS, 'elasticUpload.json'));
+      .setInputFiles(path.join(MOCKS, 'templateUpload.json'));
     await expect(drawer.getByText('tags', { exact: true })).toBeVisible({
       timeout: 30_000,
     });

@@ -1,89 +1,54 @@
 import { execFileSync } from 'node:child_process';
-import { existsSync } from 'node:fs';
-import { gunzipSync } from 'node:zlib';
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
+import { join } from 'node:path';
+
+import { parse } from 'yaml';
 
 import { CONTAINER_PREFIX } from './engineApi.helpers';
 
 /**
- * The filebeat sample corpus, in the shape a real shipper sends.
+ * The synthetic filebeat cases, in the shape a real shipper sends.
  *
- * The archive carries Elastic-licensed data whose terms travel with it, so it is
- * read where it lies and never unpacked into this repo. Point
- * DFE_FILEBEAT_CORPUS at it; without it the corpus tests skip.
+ * The cases live in a dfe-engine checkout at tests/e2e/filebeat_cases.yaml.
+ * Point DFE_ENGINE_DIR at it, and without it the corpus tests skip.
  */
-export const CORPUS_ARCHIVE = process.env.DFE_FILEBEAT_CORPUS;
+export const CORPUS_FILE = process.env.DFE_ENGINE_DIR
+  ? join(process.env.DFE_ENGINE_DIR, 'tests/e2e/filebeat_cases.yaml')
+  : undefined;
 
-/** The modules the archive ships, and the data stream each one's events declare. */
-export const CORPUS_MODULES = [
-  'cisco_ios',
-  'cisco_meraki',
-  'cisco_umbrella',
-] as const;
+/** The modules the cases cover, and the key each uses in the YAML. */
+const CASE_MODULE = {
+  cisco_ios: 'ios',
+  cisco_meraki: 'meraki',
+  cisco_umbrella: 'umbrella',
+} as const;
 
-export type CorpusModule = (typeof CORPUS_MODULES)[number];
+export const CORPUS_MODULES = Object.keys(CASE_MODULE) as CorpusModule[];
+
+export type CorpusModule = keyof typeof CASE_MODULE;
 
 export const datasetOf = (beatsModule: CorpusModule) => `${beatsModule}.log`;
 
-export const corpusAvailable = () =>
-  !!CORPUS_ARCHIVE && existsSync(CORPUS_ARCHIVE);
+export const corpusAvailable = () => !!CORPUS_FILE && existsSync(CORPUS_FILE);
 
-/** One tar entry: the header's name and size, then its content. */
-const tarEntries = (buffer: Buffer) => {
-  const entries: { name: string; body: Buffer }[] = [];
-  const BLOCK = 512;
-  for (let at = 0; at + BLOCK <= buffer.length;) {
-    const name = buffer.toString('utf8', at, at + 100).replace(/\0.*$/, '');
-    if (!name) {
-      at += BLOCK;
-      continue;
-    }
-    const size = parseInt(
-      buffer
-        .toString('utf8', at + 124, at + 136)
-        .replace(/\0.*$/, '')
-        .trim(),
-      8,
-    );
-    const start = at + BLOCK;
-    entries.push({ name, body: buffer.subarray(start, start + size) });
-    at = start + Math.ceil(size / BLOCK) * BLOCK;
-  }
-  return entries;
-};
-
-/** Every raw vendor line in the archive, by module, capped at `limit` per module. */
+/** Every raw vendor line in the cases, by module, capped at `limit` per module. */
 export const corpusLines = (
   modules: readonly CorpusModule[] = CORPUS_MODULES,
   limit = 0,
 ): Record<string, string[]> => {
-  if (!CORPUS_ARCHIVE) {
-    throw new Error('DFE_FILEBEAT_CORPUS is not set');
+  if (!CORPUS_FILE) {
+    throw new Error('DFE_ENGINE_DIR is not set');
   }
-  const tar = gunzipSync(readFileSync(CORPUS_ARCHIVE));
+  const cases = parse(readFileSync(CORPUS_FILE, 'utf8')) as {
+    module: string;
+    line: string;
+  }[];
   const out: Record<string, string[]> = {};
   for (const beatsModule of modules) {
-    out[beatsModule] = [];
-  }
-  for (const entry of tarEntries(tar).sort((a, b) =>
-    a.name.localeCompare(b.name),
-  )) {
-    if (!entry.name.endsWith('.log')) {
-      continue;
-    }
-    const beatsModule = modules.find((m) => entry.name.startsWith(`${m}/`));
-    if (!beatsModule) {
-      continue;
-    }
-    for (const line of entry.body.toString('utf8').split('\n')) {
-      if (!line.trim()) {
-        continue;
-      }
-      if (limit && out[beatsModule].length >= limit) {
-        break;
-      }
-      out[beatsModule].push(line);
-    }
+    out[beatsModule] = cases
+      .filter((entry) => entry.module === CASE_MODULE[beatsModule])
+      .map((entry) => entry.line.trim())
+      .slice(0, limit || undefined);
   }
   return out;
 };
@@ -129,7 +94,7 @@ export const agentEnvelope = (
  * The bundled filebeat pipeline each transform app runs, and the lookup table
  * it reads.
  *
- * Generated against the same integrations vintage as the corpus and shipped by
+ * Generated against the same integrations vintage as the cases and shipped by
  * the deployment, so they are named rather than copied here.
  */
 export const PROGRAMS: Record<string, { file: string; path?: string }> = {

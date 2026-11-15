@@ -47,7 +47,7 @@ The suite loads `apps/dfe-core-ui/.env.local`, then `.env`, and leaves any name 
 
 Some specs need more than the engine.
 
-A spec or case tagged `@docker-only` (`TAGS.docker` in `apps/dfe-core-ui/e2e/config/tags.constants.ts`) shells out to `docker`, so it needs a docker daemon and the stack's containers. `git grep -n TAGS.docker -- apps/dfe-core-ui/e2e` lists them, and `--grep-invert @docker-only` skips them. `DFE_CONTAINER_PREFIX` defaults to `e2e-`, and a dfe-docker checkout names containers after their compose services, so set the prefix empty there. `DFE_DOCKER_DIR` is that checkout, so `make apply` can create a container the suite just asked for. `DFE_FILEBEAT_CORPUS` is the filebeat archive, and those corpus cases skip when it is unset.
+A spec or case tagged `@docker-only` (`TAGS.docker` in `apps/dfe-core-ui/e2e/config/tags.constants.ts`) shells out to `docker`, so it needs a docker daemon and the stack's containers. `git grep -n TAGS.docker -- apps/dfe-core-ui/e2e` lists them, and `--grep-invert @docker-only` skips them. `DFE_CONTAINER_PREFIX` defaults to `e2e-`, and a dfe-docker checkout names containers after their compose services, so set the prefix empty there. `DFE_DOCKER_DIR` is that checkout, so `make apply` can create a container the suite just asked for. `DFE_ENGINE_DIR` is a dfe-engine checkout holding the synthetic filebeat cases, and those corpus cases skip when it is unset.
 
 `apps/dfe-core-ui/e2e/specs/library.spec.ts` and `apps/dfe-core-ui/e2e/specs/Sources/sourcesProcessing.spec.ts` seed a fetcher source, which a docker-slim engine refuses because that tier does not offer `dfe-fetcher`.
 
