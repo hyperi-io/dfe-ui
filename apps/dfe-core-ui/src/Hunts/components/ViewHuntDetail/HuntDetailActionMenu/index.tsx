@@ -1,4 +1,5 @@
 import { ActionsMenu } from '@/core/components/ActionsMenu';
+import { RbacProtected } from '@/core/components/RbacProtected';
 import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
 import { CloneHuntModal } from '@/Hunts/components/CloneHuntModal';
 import { DeleteHuntModal } from '@/Hunts/components/DeleteHuntModal';
@@ -6,8 +7,15 @@ import { UpdateHuntDrawer } from '@/Hunts/components/UpdateHuntDrawer';
 import { useListHuntsContext } from '@/Hunts/contexts/ListHuntsContext';
 import { THuntCreateResponse } from '@/Hunts/hooks/useCreateHunt/types';
 import { THuntDetailResponse } from '@/Hunts/hooks/useFetchHuntDetail/types';
+import { useToggleHuntEnabled } from '@/Hunts/hooks/useToggleHuntEnabled';
 import { THuntUpdateResponse } from '@/Hunts/hooks/useUpdateHunt/types';
-import { IconCopy, IconEdit, IconTrash } from '@repo/dfe-icons';
+import {
+  IconCopy,
+  IconEdit,
+  IconPlayerPause,
+  IconPlayerPlay,
+  IconTrash,
+} from '@repo/dfe-icons';
 import { useQueryClient } from '@tanstack/react-query';
 import { App, Button } from 'antd';
 
@@ -15,6 +23,51 @@ interface HuntDetailActionMenuProps {
   onEditSuccess?: (hunt: THuntUpdateResponse) => void;
   hunt: THuntDetailResponse;
 }
+
+const ToggleHuntEnabled = ({
+  hunt,
+  onSuccess,
+}: {
+  hunt: THuntDetailResponse;
+  onSuccess: (hunt: THuntUpdateResponse) => void;
+}) => {
+  const { label, turnOn, loading, toggle } = useToggleHuntEnabled({
+    hunt,
+    onSuccess,
+  });
+  const Icon = turnOn ? IconPlayerPlay : IconPlayerPause;
+
+  return (
+    <RbacProtected action={RbacProtected.rbacActions.hunt_write}>
+      <RbacProtected.Unrestricted>
+        <Button
+          className="flex items-center justify-start"
+          type="text"
+          icon={<Icon />}
+          aria-label={label}
+          loading={loading}
+          onClick={toggle}
+        >
+          {label}
+        </Button>
+      </RbacProtected.Unrestricted>
+      <RbacProtected.Restricted
+        className="justify-start opacity-100"
+        tooltip={{ show: true, placement: 'left' }}
+      >
+        <Button
+          className="flex items-center justify-start"
+          type="text"
+          icon={<Icon />}
+          aria-label={label}
+          disabled
+        >
+          {label}
+        </Button>
+      </RbacProtected.Restricted>
+    </RbacProtected>
+  );
+};
 
 export const HuntDetailActionMenu = ({
   hunt,
@@ -73,6 +126,11 @@ export const HuntDetailActionMenu = ({
             Edit Hunt
           </Button>
         }
+        onSuccess={onEditSuccess}
+      />
+      <ToggleHuntEnabled
+        key="toggle-hunt-enabled"
+        hunt={hunt}
         onSuccess={onEditSuccess}
       />
       <CloneHuntModal

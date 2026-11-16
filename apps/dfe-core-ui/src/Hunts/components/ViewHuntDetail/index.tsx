@@ -1,13 +1,60 @@
 import { CustomScrollbar } from '@/core/components/CustomScrollbar';
 import { EmptyDetail } from '@/core/components/EmptyDetail';
 import { GenericErrorCard } from '@/core/components/GenericError';
+import { RbacProtected } from '@/core/components/RbacProtected';
 import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
+import { HuntStateTag } from '@/Hunts/components/HuntStateTag';
 import { ViewHuntDetailTabs } from '@/Hunts/components/ViewHuntTabs';
 import { useListHuntsContext } from '@/Hunts/contexts/ListHuntsContext';
 import { useFetchHuntDetail } from '@/Hunts/hooks/useFetchHuntDetail';
-import { Spin } from 'antd';
+import type { THuntDetailResponse } from '@/Hunts/hooks/useFetchHuntDetail/types';
+import { useHuntRunState } from '@/Hunts/hooks/useHuntRunState';
+import { useToggleHuntEnabled } from '@/Hunts/hooks/useToggleHuntEnabled';
+import { autoDisableNotice } from '@/Hunts/utils/autoDisable';
+import { Alert, Button, Spin } from 'antd';
 import { HuntDetailActionMenu } from './HuntDetailActionMenu';
 import { TriggerHunt } from './TriggerHunt';
+
+const HuntDetailStateTag = ({ hunt }: { hunt: THuntDetailResponse }) => {
+  const state = useHuntRunState(hunt);
+  return <HuntStateTag {...state} />;
+};
+
+/** The way back, in the alert itself rather than only behind the actions menu. */
+const ReenableHuntButton = ({ hunt }: { hunt: THuntDetailResponse }) => {
+  const { label, loading, toggle } = useToggleHuntEnabled({ hunt });
+  return (
+    <RbacProtected action={RbacProtected.rbacActions.hunt_write}>
+      <RbacProtected.Unrestricted>
+        <Button size="small" loading={loading} onClick={toggle}>
+          {label}
+        </Button>
+      </RbacProtected.Unrestricted>
+      <RbacProtected.Restricted tooltip={{ show: true }}>
+        <Button size="small" disabled>
+          {label}
+        </Button>
+      </RbacProtected.Restricted>
+    </RbacProtected>
+  );
+};
+
+/** The auto-disable and the way back as text, because the tag's tooltip is hover only. */
+const HuntStopAlert = ({ hunt }: { hunt: THuntDetailResponse }) => {
+  const { autoDisabledAt, autoDisabledReason } = useHuntRunState(hunt);
+  if (autoDisabledAt == null) {
+    return null;
+  }
+  return (
+    <Alert
+      type="warning"
+      showIcon
+      title={autoDisableNotice(autoDisabledAt, autoDisabledReason)}
+      description="It fires nothing until it is re-enabled."
+      action={<ReenableHuntButton hunt={hunt} />}
+    />
+  );
+};
 
 export const ViewHuntDetail = () => {
   const { selectedHuntName } = useListHuntsContext();
@@ -57,12 +104,15 @@ export const ViewHuntDetail = () => {
             Hunt Configuration:
           </span>
           {huntDetail.display_name ?? huntDetail.name}
+          <HuntDetailStateTag hunt={huntDetail} />
         </h4>
         <div className="flex items-center gap-x-2">
-          <TriggerHunt selectedHuntName={selectedHuntName ?? ''} />
+          <TriggerHunt hunt={huntDetail} />
           <HuntDetailActionMenu hunt={huntDetail} />
         </div>
       </div>
+
+      <HuntStopAlert hunt={huntDetail} />
 
       <ViewHuntDetailTabs selectedHuntName={selectedHuntName} {...huntDetail} />
     </CustomScrollbar>

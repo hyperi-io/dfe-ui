@@ -35,6 +35,7 @@ describe('.useCreateHunt', () => {
     global_source_table_name: 'string',
     customers: ['string'],
     rules: ['string'],
+    enabled: true,
   };
   describe('onSuccess', () => {
     test('should call onSuccess', async () => {
@@ -55,6 +56,7 @@ describe('.useCreateHunt', () => {
         customers: requestBody.customers,
         rules: requestBody.rules,
         display_name: requestBody.display_name,
+        enabled: requestBody.enabled,
       });
 
       const expectedResponse: THuntCreateResponse = {
@@ -79,6 +81,8 @@ describe('.useCreateHunt', () => {
         checkpoint_timestamp_field: 'string',
         scheduling_mode: 'string',
         min_interval_seconds: 0,
+        enabled: true,
+        auto_disabled_reason: '',
         explain_queries: false,
       };
 
@@ -123,6 +127,7 @@ describe('.useCreateHunt', () => {
         customers: requestBody.customers,
         rules: requestBody.rules,
         display_name: requestBody.display_name,
+        enabled: requestBody.enabled,
       });
 
       await waitFor(() => {

@@ -2,6 +2,7 @@ import type { CreateUpdateHuntFormData } from '@/Hunts/components/CreateUpdateHu
 import type { THuntCreateRequest } from '@/Hunts/hooks/useCreateHunt/types';
 import type { THuntDetailResponse } from '@/Hunts/hooks/useFetchHuntDetail/types';
 import type { THuntUpdateRequest } from '@/Hunts/hooks/useUpdateHunt/types';
+import { effectiveEnabled } from '@/Hunts/utils/autoDisable';
 
 const cronList = (cron: THuntDetailResponse['cron']): string[] => {
   if (Array.isArray(cron)) {
@@ -25,6 +26,7 @@ export const transformHuntDetailToFormData = (
   rules: hunt.rules.map((rule) => rule.rule_name),
   global_target_table_name: hunt.global_target_table_name ?? '',
   global_source_table_name: hunt.global_source_table_name ?? '',
+  enabled: effectiveEnabled(hunt),
 });
 
 /**
@@ -43,6 +45,17 @@ export const transformHuntFormDataToCreateRequest = (
   return { ...rest, cron: cronForRequest(cron), ...targetTableField(values) };
 };
 
+/**
+ * An edit that leaves the switch alone must not name `enabled`, because the
+ * engine clears an auto-disable on any PUT that names it true. The switch
+ * opens showing the effective state, so turning it on is what clears it.
+ */
+const enabledField = (
+  values: CreateUpdateHuntFormData,
+  hunt: THuntDetailResponse,
+) =>
+  values.enabled !== effectiveEnabled(hunt) ? { enabled: values.enabled } : {};
+
 export const transformHuntFormDataToUpdateRequest = (
   values: CreateUpdateHuntFormData,
   hunt: THuntDetailResponse,
@@ -58,4 +71,5 @@ export const transformHuntFormDataToUpdateRequest = (
   scheduling_mode: hunt.scheduling_mode ?? null,
   min_interval_seconds: hunt.min_interval_seconds ?? null,
   explain_queries: hunt.explain_queries ?? null,
+  ...enabledField(values, hunt),
 });

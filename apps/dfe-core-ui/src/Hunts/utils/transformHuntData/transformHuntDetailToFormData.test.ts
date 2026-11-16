@@ -29,6 +29,8 @@ const huntDetail: THuntDetailResponse = {
   scheduling_mode: null,
   min_interval_seconds: null,
   explain_queries: null,
+  enabled: true,
+  auto_disabled_reason: '',
 };
 
 describe('transformHuntDetailToFormData', () => {
@@ -42,9 +44,39 @@ describe('transformHuntDetailToFormData', () => {
       rules: ['rule_one'],
       global_target_table_name: 'target',
       global_source_table_name: '',
+      enabled: true,
     };
     expect(transformHuntDetailToFormData(huntDetail)).toEqual(expectedFormData);
   });
+
+  // The switch shows what the hunt does: on in its configuration and not auto-disabled.
+  it.each([
+    { case: 'enabled', stored: true, stoppedAt: null, shown: true },
+    { case: 'disabled', stored: false, stoppedAt: null, shown: false },
+    {
+      case: 'storing no state, as enabled',
+      stored: undefined,
+      stoppedAt: null,
+      shown: true,
+    },
+    {
+      case: 'enabled but auto-disabled, as off',
+      stored: true,
+      stoppedAt: 1_763_300_000,
+      shown: false,
+    },
+  ])(
+    'opens a hunt $case with the switch $shown',
+    ({ stored, stoppedAt, shown }) => {
+      const hunt = {
+        ...huntDetail,
+        enabled: stored,
+        auto_disabled_at: stoppedAt,
+      } as THuntDetailResponse;
+
+      expect(transformHuntDetailToFormData(hunt).enabled).toBe(shown);
+    },
+  );
 
   it('opens a stored hunt naming no organisation with none selected', () => {
     const { customers: _customers, ...namingNone } = huntDetail;
@@ -136,6 +168,59 @@ describe('transformHuntFormDataToUpdateRequest', () => {
     expect(transformHuntDetailToFormData(hunt).cron).toEqual(expected);
   });
 
+  it.each([
+    { case: 'leaves an enabled hunt alone', stored: true, form: true },
+    { case: 'leaves a disabled hunt alone', stored: false, form: false },
+    {
+      case: 'leaves a hunt storing no state alone',
+      stored: undefined,
+      form: true,
+    },
+    {
+      case: 'names false when an enabled hunt is switched off',
+      stored: true,
+      form: false,
+      sent: false,
+    },
+    {
+      case: 'names true when a disabled hunt is switched on',
+      stored: false,
+      form: true,
+      sent: true,
+    },
+    {
+      case: 'leaves an auto-disabled hunt alone with the switch off',
+      stored: true,
+      stoppedAt: 1_763_300_000,
+      form: false,
+    },
+    {
+      case: 'names true when an auto-disabled hunt is switched on',
+      stored: true,
+      stoppedAt: 1_763_300_000,
+      form: true,
+      sent: true,
+    },
+  ])('enabled: $case', ({ stored, stoppedAt, form, sent }) => {
+    const hunt = {
+      ...huntDetail,
+      enabled: stored,
+      auto_disabled_at: stoppedAt ?? null,
+    } as THuntDetailResponse;
+    const formValues = {
+      ...transformHuntDetailToFormData(hunt),
+      enabled: form,
+    };
+
+    const request = transformHuntFormDataToUpdateRequest(formValues, hunt);
+
+    if (sent === undefined) {
+      expect(request).not.toHaveProperty('enabled');
+    } else {
+      expect(request.enabled).toBe(sent);
+    }
+  });
+
   it.each(['', '   ', null, undefined])(
     'sends no target table key when the form value is %j',
     (blank) => {
@@ -162,6 +247,7 @@ describe('transformHuntFormDataToCreateRequest', () => {
     rules: ['rule_one'],
     global_source_table_name: 'windows_audit',
     global_target_table_name: 'alerts',
+    enabled: true,
   };
 
   it('sends the form as it is when both tables are filled', () => {
@@ -170,6 +256,16 @@ describe('transformHuntFormDataToCreateRequest', () => {
       cron: '*/15 * * * *',
     });
   });
+
+  it.each([true, false])(
+    'sends enabled: %j as the form holds it',
+    (enabled) => {
+      expect(
+        transformHuntFormDataToCreateRequest({ ...formValues, enabled })
+          .enabled,
+      ).toBe(enabled);
+    },
+  );
 
   it('sends every expression when the form holds several', () => {
     const cron = ['*/15 * * * *', '0 0 * * *'];

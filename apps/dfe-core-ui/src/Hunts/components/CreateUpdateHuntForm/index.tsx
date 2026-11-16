@@ -6,8 +6,9 @@ import { getApiErrorResponseBody } from '@/core/config/api/client';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
 import { RULE_HUNT_NAME_VALIDATOR } from '@/core/validationSchemas/utils';
 import { CRONBuilderDrawer } from '@/Hunts/components/CRONBuilderDrawer';
+import { autoDisableNotice } from '@/Hunts/utils/autoDisable';
 import { IconDeviceFloppy, IconPlus, IconTrash } from '@repo/dfe-icons';
-import { Button, FormProps, Input } from 'antd';
+import { Alert, Button, FormProps, Input, Switch } from 'antd';
 import { useEffect, useMemo } from 'react';
 import z from 'zod';
 import { RuleSelect } from './RuleSelectCreate';
@@ -53,6 +54,7 @@ const buildFormSchema = (nameIsNew: boolean) =>
     log_buffer: z
       .number({ message: 'Log buffer is required' })
       .min(1, { message: 'Log buffer is required' }),
+    enabled: z.boolean(),
   });
 export type CreateUpdateHuntFormData = z.infer<
   ReturnType<typeof buildFormSchema>
@@ -69,6 +71,8 @@ type CreateUpdateHuntFormProps = FormProps<CreateUpdateHuntFormData> & {
   error: Error | null;
   buttonLabel?: string;
   disabledFields?: DisabledFields;
+  /** Set when the hunt runner auto-disabled the hunt. Saving with Enabled on clears it. */
+  autoDisabled?: { at: number; reason: string } | null;
 };
 
 export const CreateUpdateHuntForm = ({
@@ -78,6 +82,7 @@ export const CreateUpdateHuntForm = ({
   error,
   buttonLabel = 'Save Hunt',
   disabledFields,
+  autoDisabled,
   ...props
 }: CreateUpdateHuntFormProps) => {
   const [form] = Form.useForm<CreateUpdateHuntFormData>();
@@ -195,6 +200,24 @@ export const CreateUpdateHuntForm = ({
           </div>
         )}
       </Form.List>
+
+      {autoDisabled && (
+        <Alert
+          type="warning"
+          showIcon
+          className="mb-4"
+          title={autoDisableNotice(autoDisabled.at, autoDisabled.reason)}
+          description="Turn Enabled on and save to start it again."
+        />
+      )}
+      <Form.Item
+        name="enabled"
+        label="Enabled"
+        valuePropName="checked"
+        extra="A disabled hunt keeps its configuration and fires nothing."
+      >
+        <Switch />
+      </Form.Item>
 
       {error && !unknownOrg && <ApiErrorNotification error={error} />}
 
