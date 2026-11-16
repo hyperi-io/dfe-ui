@@ -1,6 +1,7 @@
 import { CustomScrollbar } from '@/core/components/CustomScrollbar';
 import { EmptyDetail } from '@/core/components/EmptyDetail';
 import { GenericErrorCard } from '@/core/components/GenericError';
+import { formatEpochSecondsLocal } from '@/core/helpers/date.helpers';
 import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
 import { HuntStateTag } from '@/Hunts/components/HuntStateTag';
 import { ViewHuntDetailTabs } from '@/Hunts/components/ViewHuntTabs';
@@ -8,13 +9,30 @@ import { useListHuntsContext } from '@/Hunts/contexts/ListHuntsContext';
 import { useFetchHuntDetail } from '@/Hunts/hooks/useFetchHuntDetail';
 import type { THuntDetailResponse } from '@/Hunts/hooks/useFetchHuntDetail/types';
 import { useHuntRunState } from '@/Hunts/hooks/useHuntRunState';
-import { Spin } from 'antd';
+import { Alert, Spin } from 'antd';
 import { HuntDetailActionMenu } from './HuntDetailActionMenu';
 import { TriggerHunt } from './TriggerHunt';
 
 const HuntDetailStateTag = ({ hunt }: { hunt: THuntDetailResponse }) => {
   const state = useHuntRunState(hunt);
   return <HuntStateTag {...state} />;
+};
+
+/** The stop and the way back as text, because the tag's tooltip is hover only. */
+const HuntStopAlert = ({ hunt }: { hunt: THuntDetailResponse }) => {
+  const { autoDisabledAt, autoDisabledReason } = useHuntRunState(hunt);
+  if (autoDisabledAt == null) {
+    return null;
+  }
+  const reason = autoDisabledReason ? ` (${autoDisabledReason})` : '';
+  return (
+    <Alert
+      type="warning"
+      showIcon
+      title={`The runner stopped this hunt on ${formatEpochSecondsLocal(autoDisabledAt)}${reason}.`}
+      description="It fires nothing until you choose Re-enable Hunt from the actions menu."
+    />
+  );
 };
 
 export const ViewHuntDetail = () => {
@@ -72,6 +90,8 @@ export const ViewHuntDetail = () => {
           <HuntDetailActionMenu hunt={huntDetail} />
         </div>
       </div>
+
+      <HuntStopAlert hunt={huntDetail} />
 
       <ViewHuntDetailTabs selectedHuntName={selectedHuntName} {...huntDetail} />
     </CustomScrollbar>
