@@ -1,5 +1,6 @@
 import { useListHuntsContext } from '@/Hunts/contexts/ListHuntsContext';
 import { CustomScrollbar } from '@/core/components/CustomScrollbar';
+import { Tooltip } from '@/core/components/Tooltip';
 import { THuntListItem } from '@/core/hooks/useFetchInfiniteFilteredHunts/types';
 import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
 import { cn } from '@/core/utils/style';
@@ -76,7 +77,9 @@ export const HuntList = ({
                 )}
                 onClick={() => setSelectedHuntName(hunt.name)}
               >
-                <span className="truncate">{hunt.display_name}</span>
+                <Tooltip title={hunt.display_name}>
+                  <span className="truncate">{hunt.display_name}</span>
+                </Tooltip>
                 <HuntStateTag
                   className="ml-2 shrink-0"
                   enabled={hunt.enabled}
