@@ -50,9 +50,7 @@ const huntRow = async (name: string): Promise<HuntRow> => {
 
 const openHunt = async (page: Page, name: string, label: string) => {
   await page.goto(`${BASE_URL}/hunts?name=${name}`);
-  await expect(
-    page.getByRole('heading', { name: new RegExp(label) }),
-  ).toBeVisible();
+  await expect(page.getByRole('heading', { name: label })).toBeVisible();
 };
 
 const listRow = (page: Page, label: string) =>
@@ -119,9 +117,7 @@ test.describe('A hunt made through the API', () => {
     await expect(page.getByText(`Hunt ${HUNT_LABEL} disabled`)).toBeVisible();
     await expect(listRow(page, HUNT_LABEL).getByText('Disabled')).toBeVisible();
     await expect(
-      page
-        .getByRole('heading', { name: new RegExp(HUNT_LABEL) })
-        .getByText('Disabled'),
+      page.getByRole('heading', { name: HUNT_LABEL }).getByText('Disabled'),
     ).toBeVisible();
     await page.screenshot({ path: `${SHOTS}/disabled.png` });
     expect((await huntRow(HUNT)).enabled).toBe(false);

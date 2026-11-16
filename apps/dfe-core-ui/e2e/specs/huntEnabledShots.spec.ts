@@ -71,9 +71,7 @@ const settledDrawer = async (page: Page) => {
 
 const openHunt = async (page: Page, name: string, label: string) => {
   await page.goto(`${BASE_URL}/hunts?name=${name}`);
-  await expect(
-    page.getByRole('heading', { name: new RegExp(label) }),
-  ).toBeVisible();
+  await expect(page.getByRole('heading', { name: label })).toBeVisible();
 };
 
 const openMenu = async (page: Page) => {
