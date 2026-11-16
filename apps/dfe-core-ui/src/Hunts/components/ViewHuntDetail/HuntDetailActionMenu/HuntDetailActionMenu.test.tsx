@@ -152,6 +152,30 @@ describe('HuntDetailActionMenu enable action', () => {
     });
   });
 
+  it('sends the direction the server state calls for, not the one on the page', async () => {
+    let body: Record<string, unknown> | undefined;
+    server.use(
+      http.get('/api/v1/hunts/windows_audit', () =>
+        HttpResponse.json({ ...hunt, enabled: false }),
+      ),
+      http.put('/api/v1/hunts/windows_audit', async ({ request }) => {
+        body = (await request.json()) as Record<string, unknown>;
+        return HttpResponse.json(hunt);
+      }),
+    );
+    render(<HuntDetailActionMenu hunt={hunt} />, { wrapper });
+
+    await userEvent.click(
+      await screen.findByRole('button', { name: 'Disable Hunt' }),
+    );
+
+    await waitFor(() => expect(body).toBeDefined());
+    expect(body).toMatchObject({ enabled: true });
+    expect(
+      await screen.findByText('Hunt Windows audit enabled'),
+    ).toBeInTheDocument();
+  });
+
   it('reports a failed fresh read and sends no update', async () => {
     let putSent = false;
     server.use(

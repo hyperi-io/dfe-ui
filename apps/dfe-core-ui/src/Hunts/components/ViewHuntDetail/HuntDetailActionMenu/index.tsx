@@ -25,7 +25,7 @@ import {
 } from '@repo/dfe-icons';
 import { useQueryClient } from '@tanstack/react-query';
 import { App, Button } from 'antd';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 
 interface HuntDetailActionMenuProps {
   onEditSuccess?: (hunt: THuntUpdateResponse) => void;
@@ -53,10 +53,12 @@ const ToggleHuntEnabled = ({
   const huntLabel = hunt.display_name || hunt.name;
 
   const [isReading, setIsReading] = useState(false);
+  // The direction the PUT carries, which the fresh read can change from the label's.
+  const sent = useRef(turnOn);
 
   const onError = (error: Error) =>
     notification.error({
-      title: `Hunt ${huntLabel} was not ${turnOn ? 'enabled' : 'disabled'}`,
+      title: `Hunt ${huntLabel} was not ${sent.current ? 'enabled' : 'disabled'}`,
       description: <ApiErrorNotification error={error} />,
       placement: 'bottomLeft',
     });
@@ -66,7 +68,7 @@ const ToggleHuntEnabled = ({
     onSuccess: (response) => {
       onSuccess(response);
       notification.success({
-        title: `Hunt ${huntLabel} ${turnOn ? 'enabled' : 'disabled'}`,
+        title: `Hunt ${huntLabel} ${sent.current ? 'enabled' : 'disabled'}`,
         placement: 'bottomLeft',
       });
     },
@@ -75,15 +77,17 @@ const ToggleHuntEnabled = ({
 
   // The engine has no per-field write, so a toggle sends the whole config, and a fresh read keeps it from undoing an edit landed since the page loaded.
   const toggle = async () => {
+    sent.current = turnOn;
     setIsReading(true);
     try {
       const fresh = await fetchHuntDetail({ pathParams: { name: hunt.name } });
+      sent.current = fresh.auto_disabled_at != null || fresh.enabled === false;
       mutate({
         ...transformHuntFormDataToUpdateRequest(
           transformHuntDetailToFormData(fresh),
           fresh,
         ),
-        enabled: turnOn,
+        enabled: sent.current,
       });
     } catch (error) {
       onError(error instanceof Error ? error : new Error(String(error)));
