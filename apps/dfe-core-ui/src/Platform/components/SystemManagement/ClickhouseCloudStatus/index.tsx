@@ -2,7 +2,12 @@ import { NotificationCard } from '@/core/components/NotificationCard';
 import { RbacProtected } from '@/core/components/RbacProtected';
 import { SectionCard } from '@/core/components/SectionCard';
 import { useFetchSystemClickhouseStatus } from '@/Platform/hooks/system/useFetchSystemClickhouseStatus';
-import { IconCircleCheck, IconCircleX, IconInfoCircle } from '@repo/dfe-icons';
+import {
+  IconCircleCheck,
+  IconCircleMinus,
+  IconCircleX,
+  IconInfoCircle,
+} from '@repo/dfe-icons';
 import { Spin } from 'antd';
 import { StartStopClickhouseButton } from './StartStopClickhouseButton';
 
@@ -53,24 +58,29 @@ export const ClickhouseCloudStatus = () => {
                     </span>
                   ) : (
                     <span className="flex items-center gap-2">
-                      <IconCircleX className="text-red-500 text-base" /> No
+                      <IconCircleMinus className="text-foreground/50 dark:text-dark-foreground/50 text-base" />{' '}
+                      No
                     </span>
                   )}
                 </dd>
 
-                <dt>Is Running:</dt>
-                <dd>
-                  {clickhouseStatus.is_running ? (
-                    <span className="flex items-center gap-2">
-                      <IconCircleCheck className="text-green-500 text-base" />{' '}
-                      Yes
-                    </span>
-                  ) : (
-                    <span className="flex items-center gap-2">
-                      <IconCircleX className="text-red-500 text-base" /> No
-                    </span>
-                  )}
-                </dd>
+                {clickhouseStatus.configured && (
+                  <>
+                    <dt>Is Running:</dt>
+                    <dd>
+                      {clickhouseStatus.is_running ? (
+                        <span className="flex items-center gap-2">
+                          <IconCircleCheck className="text-green-500 text-base" />{' '}
+                          Yes
+                        </span>
+                      ) : (
+                        <span className="flex items-center gap-2">
+                          <IconCircleX className="text-red-500 text-base" /> No
+                        </span>
+                      )}
+                    </dd>
+                  </>
+                )}
                 {clickhouseStatus.id && (
                   <>
                     <dt>ID:</dt>
