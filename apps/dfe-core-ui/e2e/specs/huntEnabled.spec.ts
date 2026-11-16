@@ -161,9 +161,21 @@ test.describe('A hunt made through the API', () => {
 });
 
 test.describe('A hunt the runner stopped', () => {
+  // The reset above wiped the hunt's definition. Its stop marker is coordinator
+  // state and survives, so the definition is put back and the marker shows again.
   test.beforeEach(async ({ page }) => {
     test.skip(!STOPPED, 'E2E_STOPPED_HUNT names no hunt a runner is stopping');
     forgetEngineToken();
+    await deleteIfPresent(`/api/v1/hunts/${STOPPED}`);
+    await engine('POST', '/api/v1/hunts', {
+      name: STOPPED,
+      display_name: 'Stopped Hunt',
+      cron: '*/5 * * * *',
+      log_buffer: 60,
+      customers: [ORG],
+      rules: [RULE],
+      global_source_table_name: 'main',
+    });
     await loginAs(page, 'dfe_admin');
   });
 
