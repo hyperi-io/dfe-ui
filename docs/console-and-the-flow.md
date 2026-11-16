@@ -34,7 +34,7 @@ Each group is one RBAC family: a heading appears when at least one destination u
 
 The Observe destinations are dfe-hyperdx embeds and appear once a dfe-hyperdx URL is configured.
 
-Settings and Platform are not in the menu. The settings button in the header opens them, at `/settings/admin` and `/settings/platform`. Some routes have no menu entry either: `/sources/ingest-rules`, `/schemas/meta-schemas`, `/schemas/other-schemas`, `/field-maps`, `/transforms`, `/account`, and the first-run `/setup/[step]`.
+Settings and Platform are not in the menu. The settings button in the header opens them, at `/settings/admin` and `/settings/platform`. Some routes have no menu entry either: `/sources/ingest-procedures`, `/schemas/meta-schemas`, `/schemas/other-schemas`, `/field-maps`, `/transforms`, `/account`, and the first-run `/setup/[step]`.
 
 ## The Source page draws the engine's flow resolver
 

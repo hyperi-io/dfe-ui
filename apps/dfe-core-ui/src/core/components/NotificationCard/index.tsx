@@ -116,7 +116,7 @@ export const NotificationCard = ({
           {typeof title === 'string' ? (
             <h3
               className={cn(
-                'text-sm font-medium text-foreground-muted dark:text-dark-foreground-muted',
+                'text-sm font-medium text-foreground-muted dark:text-dark-foreground/80',
                 classNames?.title,
               )}
             >
@@ -129,7 +129,7 @@ export const NotificationCard = ({
           {typeof description === 'string' ? (
             <p
               className={cn(
-                'text-sm text-foreground-muted dark:text-dark-foreground-muted',
+                'text-sm text-foreground-muted dark:text-dark-foreground/80',
                 classNames?.description,
               )}
             >
