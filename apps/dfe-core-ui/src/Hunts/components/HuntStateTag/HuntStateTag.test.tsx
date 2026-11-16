@@ -36,7 +36,7 @@ describe('HuntStateTag', () => {
       },
       tag: 'Auto-disabled',
       tooltip:
-        /^Auto-disabled by the hunt runner on .+ after hitting ClickHouse's memory limit repeatedly\. Turn Enabled on to start it again\.$/,
+        /^Auto-disabled by the hunt runner on .+ after hitting ClickHouse's memory limit repeatedly\. Use Re-enable Hunt to start it again\.$/,
     },
     {
       case: 'the auto-disable wins over a plain disable',

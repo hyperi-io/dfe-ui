@@ -22,7 +22,7 @@ export const HuntStateTag = ({
   if (autoDisabledAt != null) {
     return (
       <Tooltip
-        title={`${autoDisableNotice(autoDisabledAt, autoDisabledReason)} Turn Enabled on to start it again.`}
+        title={`${autoDisableNotice(autoDisabledAt, autoDisabledReason)} Use Re-enable Hunt to start it again.`}
       >
         <Tag
           color="warning"
