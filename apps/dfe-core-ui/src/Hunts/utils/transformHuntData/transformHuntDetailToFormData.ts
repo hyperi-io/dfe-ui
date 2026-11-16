@@ -25,6 +25,7 @@ export const transformHuntDetailToFormData = (
   rules: hunt.rules.map((rule) => rule.rule_name),
   global_target_table_name: hunt.global_target_table_name ?? '',
   global_source_table_name: hunt.global_source_table_name ?? '',
+  enabled: hunt.enabled ?? true,
 });
 
 /**
@@ -43,6 +44,16 @@ export const transformHuntFormDataToCreateRequest = (
   return { ...rest, cron: cronForRequest(cron), ...targetTableField(values) };
 };
 
+/**
+ * An edit that leaves the switch alone must not name `enabled`, because the
+ * engine clears a runner stop on any PUT that names it true.
+ */
+const enabledField = (
+  values: CreateUpdateHuntFormData,
+  hunt: THuntDetailResponse,
+) =>
+  values.enabled !== (hunt.enabled ?? true) ? { enabled: values.enabled } : {};
+
 export const transformHuntFormDataToUpdateRequest = (
   values: CreateUpdateHuntFormData,
   hunt: THuntDetailResponse,
@@ -58,4 +69,5 @@ export const transformHuntFormDataToUpdateRequest = (
   scheduling_mode: hunt.scheduling_mode ?? null,
   min_interval_seconds: hunt.min_interval_seconds ?? null,
   explain_queries: hunt.explain_queries ?? null,
+  ...enabledField(values, hunt),
 });

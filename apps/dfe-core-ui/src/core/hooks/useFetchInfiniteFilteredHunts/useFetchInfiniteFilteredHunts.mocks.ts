@@ -15,6 +15,9 @@ const HUNT_ITEM: THuntListItem = {
   running: false,
   too_aggressive: false,
   run_requested: false,
+  enabled: true,
+  auto_disabled_at: null,
+  auto_disabled_reason: '',
 } as const;
 
 const TOTAL_ITEMS = 25;

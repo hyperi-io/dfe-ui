@@ -3,6 +3,7 @@ import { CustomScrollbar } from '@/core/components/CustomScrollbar';
 import { THuntListItem } from '@/core/hooks/useFetchInfiniteFilteredHunts/types';
 import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
 import { cn } from '@/core/utils/style';
+import { HuntStateTag } from '@/Hunts/components/HuntStateTag';
 import { Spin } from 'antd';
 import { EmptyList } from './EmptyList';
 import { ErrorList } from './ErrorList';
@@ -75,7 +76,13 @@ export const HuntList = ({
                 )}
                 onClick={() => setSelectedHuntName(hunt.name)}
               >
-                {hunt.display_name}
+                <span className="truncate">{hunt.display_name}</span>
+                <HuntStateTag
+                  className="ml-2 shrink-0"
+                  enabled={hunt.enabled}
+                  autoDisabledAt={hunt.auto_disabled_at}
+                  autoDisabledReason={hunt.auto_disabled_reason}
+                />
               </button>
             </li>
           );

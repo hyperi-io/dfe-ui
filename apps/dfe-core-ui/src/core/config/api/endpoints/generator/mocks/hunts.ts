@@ -27,6 +27,9 @@ export const hunts = {
               running: false,
               too_aggressive: false,
               run_requested: false,
+              enabled: true,
+              auto_disabled_at: null,
+              auto_disabled_reason: '',
             },
           ],
           total_size: 0,
@@ -76,6 +79,7 @@ export const hunts = {
           scheduling_mode: 'string',
           min_interval_seconds: 0,
           explain_queries: false,
+          enabled: true,
         },
       }: {
         mockedResponse?: THuntCreateResponse;
@@ -142,6 +146,7 @@ export const hunts = {
           checkpoint_timestamp_field: 'string',
           scheduling_mode: 'string',
           min_interval_seconds: 0,
+          enabled: true,
         },
         name = 'name',
       }: {
@@ -177,6 +182,7 @@ export const hunts = {
           checkpoint_timestamp_field: 'string',
           scheduling_mode: 'string',
           min_interval_seconds: 0,
+          enabled: true,
         },
         name = 'name',
       }: {

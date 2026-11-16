@@ -62,6 +62,7 @@ export const CloneHuntModal = ({
       global_source_table_name: hunt.global_source_table_name,
       customers: hunt.customers ?? [],
       rules: hunt.rules.map((rule) => rule.rule_name),
+      enabled: hunt.enabled,
       ...values,
     });
   };

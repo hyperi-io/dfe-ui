@@ -64,6 +64,7 @@ describe('CreateUpdateHuntForm name', () => {
           cron: ['*/15 * * * *'],
           log_buffer: 60,
           global_source_table_name: 'windows_audit',
+          enabled: true,
         }}
       />,
       { wrapper },
@@ -86,6 +87,7 @@ describe('CreateUpdateHuntForm cron expressions', () => {
     cron: ['0 * * * *', '0 0 * * *'],
     log_buffer: 60,
     global_source_table_name: 'windows_audit',
+    enabled: true,
   };
   const renderForm = (onFinish = vi.fn()) =>
     render(
@@ -142,6 +144,49 @@ describe('CreateUpdateHuntForm cron expressions', () => {
     expect(await screen.findByText('Cron is required')).toBeInTheDocument();
     expect(onFinish).not.toHaveBeenCalled();
   });
+});
+
+describe('CreateUpdateHuntForm enabled', () => {
+  const stored = {
+    name: 'windows_audit',
+    customers: ['acme'],
+    rules: ['brute_force'],
+    cron: ['*/15 * * * *'],
+    log_buffer: 60,
+    global_source_table_name: 'windows_audit',
+    enabled: true,
+  };
+
+  test.each([
+    { case: 'left on', clicks: 0, saved: true },
+    { case: 'turned off', clicks: 1, saved: false },
+    { case: 'turned off then on', clicks: 2, saved: true },
+  ])(
+    'saves enabled as the switch holds it, $case',
+    async ({ clicks, saved }) => {
+      const onFinish = vi.fn();
+      render(
+        <CreateUpdateHuntForm
+          onFinish={onFinish}
+          isPending={false}
+          error={null}
+          disabledFields={{ name: true }}
+          initialValues={stored}
+        />,
+        { wrapper },
+      );
+      const toggle = screen.getByRole('switch', { name: 'Enabled' });
+      expect(toggle).toBeChecked();
+
+      for (let i = 0; i < clicks; i++) {
+        await userEvent.click(toggle);
+      }
+      await userEvent.click(screen.getByRole('button', { name: 'Save Hunt' }));
+
+      await waitFor(() => expect(onFinish).toHaveBeenCalledTimes(1));
+      expect(onFinish.mock.calls[0]?.[0].enabled).toBe(saved);
+    },
+  );
 });
 
 describe('CreateUpdateHuntForm refusals', () => {

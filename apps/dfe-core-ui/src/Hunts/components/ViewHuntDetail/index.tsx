@@ -2,12 +2,20 @@ import { CustomScrollbar } from '@/core/components/CustomScrollbar';
 import { EmptyDetail } from '@/core/components/EmptyDetail';
 import { GenericErrorCard } from '@/core/components/GenericError';
 import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
+import { HuntStateTag } from '@/Hunts/components/HuntStateTag';
 import { ViewHuntDetailTabs } from '@/Hunts/components/ViewHuntTabs';
 import { useListHuntsContext } from '@/Hunts/contexts/ListHuntsContext';
 import { useFetchHuntDetail } from '@/Hunts/hooks/useFetchHuntDetail';
+import type { THuntDetailResponse } from '@/Hunts/hooks/useFetchHuntDetail/types';
+import { useHuntRunState } from '@/Hunts/hooks/useHuntRunState';
 import { Spin } from 'antd';
 import { HuntDetailActionMenu } from './HuntDetailActionMenu';
 import { TriggerHunt } from './TriggerHunt';
+
+const HuntDetailStateTag = ({ hunt }: { hunt: THuntDetailResponse }) => {
+  const state = useHuntRunState(hunt);
+  return <HuntStateTag {...state} />;
+};
 
 export const ViewHuntDetail = () => {
   const { selectedHuntName } = useListHuntsContext();
@@ -57,6 +65,7 @@ export const ViewHuntDetail = () => {
             Hunt Configuration:
           </span>
           {huntDetail.display_name ?? huntDetail.name}
+          <HuntDetailStateTag hunt={huntDetail} />
         </h4>
         <div className="flex items-center gap-x-2">
           <TriggerHunt selectedHuntName={selectedHuntName ?? ''} />

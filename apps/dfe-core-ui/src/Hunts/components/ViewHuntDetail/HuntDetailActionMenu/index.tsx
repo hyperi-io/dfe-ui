@@ -1,4 +1,6 @@
 import { ActionsMenu } from '@/core/components/ActionsMenu';
+import { ApiErrorNotification } from '@/core/components/ApiErrorNotification';
+import { RbacProtected } from '@/core/components/RbacProtected';
 import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
 import { CloneHuntModal } from '@/Hunts/components/CloneHuntModal';
 import { DeleteHuntModal } from '@/Hunts/components/DeleteHuntModal';
@@ -6,8 +8,20 @@ import { UpdateHuntDrawer } from '@/Hunts/components/UpdateHuntDrawer';
 import { useListHuntsContext } from '@/Hunts/contexts/ListHuntsContext';
 import { THuntCreateResponse } from '@/Hunts/hooks/useCreateHunt/types';
 import { THuntDetailResponse } from '@/Hunts/hooks/useFetchHuntDetail/types';
+import { useHuntRunState } from '@/Hunts/hooks/useHuntRunState';
+import { useUpdateHunt } from '@/Hunts/hooks/useUpdateHunt';
 import { THuntUpdateResponse } from '@/Hunts/hooks/useUpdateHunt/types';
-import { IconCopy, IconEdit, IconTrash } from '@repo/dfe-icons';
+import {
+  transformHuntDetailToFormData,
+  transformHuntFormDataToUpdateRequest,
+} from '@/Hunts/utils/transformHuntData/transformHuntDetailToFormData';
+import {
+  IconCopy,
+  IconEdit,
+  IconPlayerPause,
+  IconPlayerPlay,
+  IconTrash,
+} from '@repo/dfe-icons';
 import { useQueryClient } from '@tanstack/react-query';
 import { App, Button } from 'antd';
 
@@ -15,6 +29,85 @@ interface HuntDetailActionMenuProps {
   onEditSuccess?: (hunt: THuntUpdateResponse) => void;
   hunt: THuntDetailResponse;
 }
+
+/** Disable, Enable, or Re-enable, which also clears a stop the runner made. */
+const ToggleHuntEnabled = ({
+  hunt,
+  onSuccess,
+}: {
+  hunt: THuntDetailResponse;
+  onSuccess: (hunt: THuntUpdateResponse) => void;
+}) => {
+  const { notification } = App.useApp();
+  const { enabled, autoDisabledAt } = useHuntRunState(hunt);
+  const autoDisabled = autoDisabledAt != null;
+  const turnOn = autoDisabled || enabled === false;
+  const label = autoDisabled
+    ? 'Re-enable Hunt'
+    : turnOn
+      ? 'Enable Hunt'
+      : 'Disable Hunt';
+  const Icon = turnOn ? IconPlayerPlay : IconPlayerPause;
+  const huntLabel = hunt.display_name || hunt.name;
+
+  const { mutate, isPending } = useUpdateHunt({
+    name: hunt.name,
+    onSuccess: (response) => {
+      onSuccess(response);
+      notification.success({
+        title: `Hunt ${huntLabel} ${turnOn ? 'enabled' : 'disabled'}`,
+        placement: 'bottomLeft',
+      });
+    },
+    onError: (error) => {
+      notification.error({
+        title: `Hunt ${huntLabel} was not ${turnOn ? 'enabled' : 'disabled'}`,
+        description: <ApiErrorNotification error={error} />,
+        placement: 'bottomLeft',
+      });
+    },
+  });
+
+  const toggle = () =>
+    mutate({
+      ...transformHuntFormDataToUpdateRequest(
+        transformHuntDetailToFormData(hunt),
+        hunt,
+      ),
+      enabled: turnOn,
+    });
+
+  return (
+    <RbacProtected action={RbacProtected.rbacActions.hunt_write}>
+      <RbacProtected.Unrestricted>
+        <Button
+          className="flex items-center justify-start"
+          type="text"
+          icon={<Icon />}
+          aria-label={label}
+          loading={isPending}
+          onClick={toggle}
+        >
+          {label}
+        </Button>
+      </RbacProtected.Unrestricted>
+      <RbacProtected.Restricted
+        className="justify-start opacity-100"
+        tooltip={{ show: true, placement: 'left' }}
+      >
+        <Button
+          className="flex items-center justify-start"
+          type="text"
+          icon={<Icon />}
+          aria-label={label}
+          disabled
+        >
+          {label}
+        </Button>
+      </RbacProtected.Restricted>
+    </RbacProtected>
+  );
+};
 
 export const HuntDetailActionMenu = ({
   hunt,
@@ -73,6 +166,11 @@ export const HuntDetailActionMenu = ({
             Edit Hunt
           </Button>
         }
+        onSuccess={onEditSuccess}
+      />
+      <ToggleHuntEnabled
+        key="toggle-hunt-enabled"
+        hunt={hunt}
         onSuccess={onEditSuccess}
       />
       <CloneHuntModal

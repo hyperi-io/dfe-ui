@@ -99,6 +99,7 @@ export const CreateHuntDrawer = ({
             display_name: '',
             global_target_table_name: '',
             global_source_table_name: '',
+            enabled: true,
           }}
         />
       </Drawer>

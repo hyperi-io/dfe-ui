@@ -1,7 +1,11 @@
 import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { updateHunt } from './api';
-import { THuntUpdateRequest, THuntUpdateResponse } from './types';
+import {
+  THuntUpdateBody,
+  THuntUpdateRequest,
+  THuntUpdateResponse,
+} from './types';
 
 export const useUpdateHunt = ({
   name,
@@ -16,7 +20,7 @@ export const useUpdateHunt = ({
   const { data, mutate, isPending, error } = useMutation({
     mutationFn: (hunt: THuntUpdateRequest) =>
       updateHunt({
-        body: hunt,
+        body: hunt as THuntUpdateBody,
         pathParams: { name },
       }),
     onSuccess: (data) => {

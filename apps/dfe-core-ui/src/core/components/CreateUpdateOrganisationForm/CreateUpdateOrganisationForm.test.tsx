@@ -197,6 +197,9 @@ describe('CreateUpdateOrganisationForm refusals', () => {
     running: false,
     too_aggressive: false,
     run_requested: false,
+    enabled: true,
+    auto_disabled_at: null,
+    auto_disabled_reason: '',
   };
   const oldOrg = {
     name: 'oldco',

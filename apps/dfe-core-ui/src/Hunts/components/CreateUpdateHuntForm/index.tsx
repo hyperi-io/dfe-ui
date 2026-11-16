@@ -7,7 +7,7 @@ import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
 import { RULE_HUNT_NAME_VALIDATOR } from '@/core/validationSchemas/utils';
 import { CRONBuilderDrawer } from '@/Hunts/components/CRONBuilderDrawer';
 import { IconDeviceFloppy, IconPlus, IconTrash } from '@repo/dfe-icons';
-import { Button, FormProps, Input } from 'antd';
+import { Button, FormProps, Input, Switch } from 'antd';
 import { useEffect, useMemo } from 'react';
 import z from 'zod';
 import { RuleSelect } from './RuleSelectCreate';
@@ -53,6 +53,7 @@ const buildFormSchema = (nameIsNew: boolean) =>
     log_buffer: z
       .number({ message: 'Log buffer is required' })
       .min(1, { message: 'Log buffer is required' }),
+    enabled: z.boolean(),
   });
 export type CreateUpdateHuntFormData = z.infer<
   ReturnType<typeof buildFormSchema>
@@ -195,6 +196,15 @@ export const CreateUpdateHuntForm = ({
           </div>
         )}
       </Form.List>
+
+      <Form.Item
+        name="enabled"
+        label="Enabled"
+        valuePropName="checked"
+        extra="A disabled hunt keeps its configuration and fires nothing."
+      >
+        <Switch />
+      </Form.Item>
 
       {error && !unknownOrg && <ApiErrorNotification error={error} />}
 
