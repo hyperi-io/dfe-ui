@@ -5,8 +5,7 @@
 # License:   BUSL-1.1
 # Copyright: (c) 2026 HYPERI PTY LIMITED
 #
-# Next.js standalone output (apps/dfe-core-ui/next.config.ts) gives a
-# self-contained server plus the traced workspace deps.
+# docs/build-and-deploy.md covers the three stages.
 
 # Trixie by name: the bare node:24-slim tag is still Debian 12. Renovate moves the digest.
 ARG NODE_IMAGE=node:24-trixie-slim@sha256:43b9ba1142b8dcf33fa8f922ca1be85714adc444e0586c7cf7726daaeabc1bea
@@ -16,7 +15,7 @@ ARG NODE_IMAGE=node:24-trixie-slim@sha256:43b9ba1142b8dcf33fa8f922ca1be85714adc4
 FROM --platform=$BUILDPLATFORM ${NODE_IMAGE} AS builder
 WORKDIR /app
 
-# Toolchain for any native (node-gyp) transitive deps. Builder-only; discarded.
+# node-gyp toolchain for native dependencies, in the builder stage alone.
 # Unpinned: Debian removes superseded versions from its archive, so a version pin breaks the build at the next point release.
 # hadolint ignore=DL3008
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -25,7 +24,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 RUN corepack enable
 
-# Manifests first so the install layer caches independently of source.
 COPY package.json yarn.lock .yarnrc.yml turbo.json ./
 COPY apps/ apps/
 COPY packages/ packages/
@@ -36,11 +34,9 @@ COPY scripts/ scripts/
 RUN yarn config set supportedArchitectures.cpu --json '["x64","arm64"]' \
     && yarn install --immutable
 ENV NEXT_PUBLIC_API_URL=""
-# hyperi-ci stamp-version writes VERSION before a publish image build.
-# COPY of a missing file fails, so bind-mount the context and copy only when present.
+# VERSION exists in a publish build alone, and COPY of a missing file fails.
 RUN --mount=type=bind,source=.,target=/src \
     if [ -f /src/VERSION ]; then cp /src/VERSION /app/VERSION; fi
-# turbo builds the workspace packages (@repo/*) then the Next app.
 RUN yarn build
 
 # --- App tree ---
@@ -48,9 +44,7 @@ RUN yarn build
 FROM --platform=$BUILDPLATFORM ${NODE_IMAGE} AS app_tree
 WORKDIR /app
 
-# Standalone bundle carries the monorepo layout: apps/dfe-core-ui/server.js plus a
-# minimal node_modules + traced packages/. Neither the built static assets nor the
-# public/ tree ride in standalone -- copy both alongside the app.
+# The standalone output leaves out .next/static and public/, so both are copied beside it.
 COPY --from=builder /app/apps/dfe-core-ui/.next/standalone ./
 COPY --from=builder /app/apps/dfe-core-ui/.next/static ./apps/dfe-core-ui/.next/static
 COPY --from=builder /app/apps/dfe-core-ui/public ./apps/dfe-core-ui/public
@@ -67,7 +61,6 @@ ENV NODE_ENV=production
 ENV PORT=3000
 ENV HOSTNAME=0.0.0.0
 
-# Non-root runtime.
 RUN groupadd -g 1001 nodejs && useradd -u 1001 -g nodejs -m nextjs
 
 COPY --from=app_tree --chown=nextjs:nodejs /app ./

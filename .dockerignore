@@ -1,4 +1,3 @@
-# Keep the build context lean + never ship host artefacts into the image.
 **/node_modules
 **/.next
 **/.turbo

@@ -44,5 +44,5 @@ jobs:
       tag: ${{ inputs.tag || '' }}
       from-head: ${{ inputs.from-head || '' }}
       bump: ${{ inputs.bump || 'auto' }}
-    # The called workflow is our own hyperi-io/hyperi-ci ts-ci.yml (not a third party) and needs the full secret set for publishing (registry tokens, R2 credentials, GH App token). Matches the documented hyperi-ci.yml template.
+    # hyperi-ci's reusable workflow publishes, so it needs every secret.
     secrets: inherit # nosemgrep: yaml.github-actions.security.secrets-inherit.secrets-inherit

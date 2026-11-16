@@ -5,7 +5,7 @@ The DFE console, where an operator sets up and runs a deployment.
 [![Build Status](https://github.com/hyperi-io/dfe-ui/actions/workflows/ci.yml/badge.svg)](https://github.com/hyperi-io/dfe-ui/actions)
 [![License: BUSL-1.1](https://img.shields.io/badge/License-BUSL--1.1-blue)](LICENSE)
 
-It manages the deployment through the dfe-engine API alone, never past it to the infrastructure. Its Observe pages are served from their own URL and framed inside the console, and the console sends its own telemetry to an OTLP endpoint when `OTEL_EXPORTER_OTLP_ENDPOINT` is set.
+It manages the deployment through the dfe-engine API alone, never past it to the infrastructure. Its Observe pages are served from a separate URL and framed inside the console, and the console sends its telemetry to an OTLP endpoint when `OTEL_EXPORTER_OTLP_ENDPOINT` is set.
 
 ## What it does
 
@@ -27,7 +27,7 @@ On a system-installed node (`/usr/bin/node`) `corepack enable` fails with
 `EACCES` on its symlink. Either `corepack enable --install-directory
 ~/.local/bin` (any writable directory on your PATH), or prefix each command
 with `corepack` -- `corepack yarn install` -- which needs no enable. A yarn 1
-already on your PATH is the wrong yarn for this lockfile.
+on your PATH is the wrong yarn for this lockfile.
 
 Point it at an engine with `NEXT_PUBLIC_API_URL` and `INTERNAL_API_URL`. With neither set, every page says the engine URL is not configured.
 Full environment reference: [docs/local-development.md](docs/local-development.md).
@@ -36,15 +36,15 @@ Full environment reference: [docs/local-development.md](docs/local-development.m
 
 A Turborepo/yarn-workspaces monorepo with one shipped app and six packages:
 
-| Workspace                     | What it is                                                         |
-| ----------------------------- | ------------------------------------------------------------------ |
-| `apps/dfe-core-ui`            | the Next.js app - the only artifact shipped (standalone container) |
-| `packages/dfe-engine-types`   | a committed copy of the engine's OpenAPI specs + generated types   |
-| `packages/dfe-icons`          | SVG -> React icon codegen + storybook                              |
-| `packages/dev-logger`         | small shared logging helper                                        |
-| `packages/dfe-json-viewer-cn` | the JSON viewer component                                          |
-| `packages/dfe-shared-ui`      | shared React components and utilities                              |
-| `packages/typescript-config`  | shared tsconfigs                                                   |
+| Workspace                     | What it is                                                        |
+| ----------------------------- | ----------------------------------------------------------------- |
+| `apps/dfe-core-ui`            | the Next.js app - the one artifact shipped (standalone container) |
+| `packages/dfe-engine-types`   | a committed copy of the engine's OpenAPI specs + generated types  |
+| `packages/dfe-icons`          | SVG -> React icon codegen + storybook                             |
+| `packages/dev-logger`         | small shared logging helper                                       |
+| `packages/dfe-json-viewer-cn` | the JSON viewer component                                         |
+| `packages/dfe-shared-ui`      | shared React components and utilities                             |
+| `packages/typescript-config`  | shared tsconfigs                                                  |
 
 ## Documentation
 
@@ -63,7 +63,7 @@ The suite's published docs are at <https://dfe.docs.hyperi.io>, and this reposit
 
 ## Help and contributing
 
-How to work in this repo, the commands that prove a change and what tends to bite are in [CONTRIBUTING.md](CONTRIBUTING.md). A question that is not a bug goes in a new issue.
+How to work in this repo, the commands that prove a change and what tends to bite are in [CONTRIBUTING.md](CONTRIBUTING.md). A question that is not a bug goes in an issue as well.
 
 Open bugs: [this repo](https://github.com/hyperi-io/dfe-ui/issues?q=is%3Aopen+is%3Aissue+type%3ABug+-label%3Abacklog+-label%3Anext-minor) | [whole DFE suite](https://github.com/search?type=issues&q=is%3Aopen+is%3Aissue+type%3ABug+-label%3Abacklog+-label%3Anext-minor+repo%3Ahyperi-io%2Fdfe-infra+repo%3Ahyperi-io%2Fdfe-docker+repo%3Ahyperi-io%2Fdfe-deploy+repo%3Ahyperi-io%2Fdfe-engine+repo%3Ahyperi-io%2Fdfe-loader+repo%3Ahyperi-io%2Fdfe-receiver+repo%3Ahyperi-io%2Fdfe-fetcher+repo%3Ahyperi-io%2Fdfe-archiver+repo%3Ahyperi-io%2Fdfe-transform-vrl+repo%3Ahyperi-io%2Fdfe-transform-vector+repo%3Ahyperi-io%2Fdfe-transform-elastic+repo%3Ahyperi-io%2Fdfe-ui+repo%3Ahyperi-io%2Fdfe-hyperdx+repo%3Ahyperi-io%2Fscalo-rs+repo%3Ahyperi-io%2Fscalo-py+repo%3Ahyperi-io%2Flogreducer+repo%3Ahyperi-io%2Fdfe-schemas+repo%3Ahyperi-io%2Fvector-vrl+repo%3Ahyperi-io%2Fculvert+repo%3Ahyperi-io%2Fdfe-clickhouse-rs+repo%3Ahyperi-io%2Ffactbook-rs)
 
