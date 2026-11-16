@@ -6,7 +6,7 @@ import { Tooltip } from '@/core/components/Tooltip';
 import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
 import { useFetchInfiniteSourceColumns } from '@/Sources/hooks/useFetchInfiniteSourceColumns';
 import { IconInfoCircle } from '@repo/dfe-icons';
-import { Spin } from 'antd';
+import { Spin, Tag } from 'antd';
 import { useCallback } from 'react';
 
 export const SourceColumnsTabContent = ({
@@ -118,6 +118,16 @@ export const SourceColumnsTabContent = ({
       title: 'Attribute',
       dataIndex: 'attribute',
       key: 'attribute',
+      render: (attribute?: string[] | null) =>
+        attribute && attribute.length > 0 ? (
+          <span className="flex flex-wrap gap-1">
+            {attribute.map((item) => (
+              <Tag className="m-0" key={item}>
+                {item}
+              </Tag>
+            ))}
+          </span>
+        ) : null,
     },
     {
       title: 'Cardinality',
