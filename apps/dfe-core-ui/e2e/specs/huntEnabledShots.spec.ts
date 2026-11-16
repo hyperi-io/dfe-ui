@@ -43,10 +43,30 @@ const huntBody = (label: string) => ({
 });
 
 // The whole body, so a drawer or a tooltip rendered in a portal is in the tree.
+// Animations are run to their end first, so a drawer or tooltip is never caught mid-slide.
 const capture = async (page: Page, name: string) => {
-  await page.screenshot({ path: `${OUT}/${name}.png` });
+  await page.screenshot({ path: `${OUT}/${name}.png`, animations: 'disabled' });
   const aria = await page.locator('body').ariaSnapshot();
   writeFileSync(`${OUT}/${name}.aria.yaml`, aria);
+};
+
+// The actions menu's own entry, as the alert carries a button of the same name.
+const menuButton = (page: Page, name: string) =>
+  page
+    .getByRole('button', { name: 'Close actions', exact: true })
+    .locator('..')
+    .getByRole('button', { name, exact: true });
+
+// The drawer has finished opening once its last control, the submit button, is
+// on screen. The form is scrolled to it, so the alert, the switch and the
+// button are in the shot at the smaller height too.
+const settledDrawer = async (page: Page) => {
+  const drawer = page.getByRole('dialog');
+  const submit = drawer.getByRole('button', { name: 'Edit Hunt', exact: true });
+  await expect(drawer.getByRole('switch', { name: 'Enabled' })).toBeVisible();
+  await expect(submit).toBeVisible();
+  await submit.scrollIntoViewIfNeeded();
+  return drawer;
 };
 
 const openHunt = async (page: Page, name: string, label: string) => {
@@ -126,21 +146,22 @@ test('the enabled state in every theme and width', async ({ page }) => {
 
       await openHunt(page, DISABLED, DISABLED_LABEL);
       await setTheme(page, theme);
+      // A disabled hunt fires nothing, so the on-demand trigger is off with its reason.
+      const trigger = page.getByRole('button', { name: /Trigger On-Demand/ });
+      await expect(trigger).toBeDisabled();
+      await trigger.hover({ force: true });
+      await expect(page.getByRole('tooltip')).toBeVisible();
       await capture(page, `${tag}-disabled`);
       await openMenu(page);
+      await expect(menuButton(page, 'Enable Hunt')).toBeVisible();
       await capture(page, `${tag}-disabled-menu`);
-      await page
-        .getByRole('button', { name: 'Edit Hunt', exact: true })
-        .click();
-      const drawer = page.getByRole('dialog');
+      await menuButton(page, 'Edit Hunt').click();
+      const drawer = await settledDrawer(page);
       await expect(
         drawer.getByRole('switch', { name: 'Enabled' }),
       ).not.toBeChecked();
       await capture(page, `${tag}-disabled-edit`);
-      await page
-        .getByRole('dialog')
-        .getByRole('button', { name: 'Close' })
-        .click();
+      await drawer.getByRole('button', { name: 'Close' }).click();
       await expect(drawer).toBeHidden();
 
       if (!STOPPED) continue;
@@ -150,32 +171,31 @@ test('the enabled state in every theme and width', async ({ page }) => {
         .filter({ hasText: 'Shot Stopped' })
         .getByText('Auto-disabled');
       await expect(stopTag).toBeVisible();
+      await expect(
+        page.getByRole('alert').getByRole('button', { name: 'Re-enable Hunt' }),
+      ).toBeVisible();
       await stopTag.hover();
       await expect(page.getByRole('tooltip')).toBeVisible();
       await capture(page, `${tag}-stopped-tooltip`);
       await openMenu(page);
-      await expect(
-        page.getByRole('button', { name: 'Re-enable Hunt', exact: true }),
-      ).toBeVisible();
+      await expect(menuButton(page, 'Re-enable Hunt')).toBeVisible();
       await capture(page, `${tag}-stopped-menu`);
-      await page
-        .getByRole('button', { name: 'Edit Hunt', exact: true })
-        .click();
-      const stopDrawer = page.getByRole('dialog');
+      await menuButton(page, 'Edit Hunt').click();
+      const stopDrawer = await settledDrawer(page);
       await expect(stopDrawer.getByRole('alert')).toBeVisible();
+      await expect(
+        stopDrawer.getByRole('switch', { name: 'Enabled' }),
+      ).not.toBeChecked();
       await capture(page, `${tag}-stopped-edit`);
-      await page
-        .getByRole('dialog')
-        .getByRole('button', { name: 'Close' })
-        .click();
+      await stopDrawer.getByRole('button', { name: 'Close' }).click();
       await expect(stopDrawer).toBeHidden();
     }
   }
   if (STOPPED) {
     await openHunt(page, STOPPED, 'Shot Stopped');
-    await openMenu(page);
     await page
-      .getByRole('button', { name: 'Re-enable Hunt', exact: true })
+      .getByRole('alert')
+      .getByRole('button', { name: 'Re-enable Hunt' })
       .click();
     await expect(page.getByText('Hunt Shot Stopped enabled')).toBeVisible();
     // The settled state: the tag has gone from the row and the header.

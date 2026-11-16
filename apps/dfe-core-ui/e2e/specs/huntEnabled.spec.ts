@@ -66,9 +66,14 @@ const openMenu = async (page: Page) => {
   }
 };
 
+// The menu's own entry: the alert on an auto-disabled hunt has a button of the same name.
 const menuAction = async (page: Page, action: string) => {
   await openMenu(page);
-  await page.getByRole('button', { name: action, exact: true }).click();
+  await page
+    .getByRole('button', { name: 'Close actions', exact: true })
+    .locator('..')
+    .getByRole('button', { name: action, exact: true })
+    .click();
 };
 
 test.describe('A hunt made through the API', () => {
@@ -195,19 +200,35 @@ test.describe('A hunt the runner stopped', () => {
     const tag = listRow(page, label).getByText('Auto-disabled');
     await expect(tag).toBeVisible();
     await tag.hover();
+    // The reason reaches the user as words, never as the API's code.
     await expect(page.getByRole('tooltip')).toContainText(
+      /Auto-disabled by the hunt runner on .+ after hitting .+ repeatedly\./,
+    );
+    await expect(page.getByRole('tooltip')).not.toContainText(
       stopped.auto_disabled_reason,
     );
+    await expect(
+      page.getByRole('button', { name: /Trigger On-Demand/ }),
+    ).toBeDisabled();
     await page.screenshot({ path: `${SHOTS}/auto-disabled.png` });
 
+    const alertButton = page
+      .getByRole('alert')
+      .getByRole('button', { name: 'Re-enable Hunt', exact: true });
+    await expect(alertButton).toBeVisible();
     await openMenu(page);
     await expect(
-      page.getByRole('button', { name: 'Re-enable Hunt', exact: true }),
+      page
+        .getByRole('button', { name: 'Close actions', exact: true })
+        .locator('..')
+        .getByRole('button', { name: 'Re-enable Hunt', exact: true }),
     ).toBeVisible();
     await page.screenshot({ path: `${SHOTS}/auto-disabled-menu.png` });
+    // The open menu sits over the alert, so it is closed before the alert's button is used.
     await page
-      .getByRole('button', { name: 'Re-enable Hunt', exact: true })
+      .getByRole('button', { name: 'Close actions', exact: true })
       .click();
+    await alertButton.click();
     await expect(page.getByText(`Hunt ${label} enabled`)).toBeVisible();
     await expect(listRow(page, label).getByText('Auto-disabled')).toHaveCount(
       0,

@@ -49,15 +49,34 @@ describe('transformHuntDetailToFormData', () => {
     expect(transformHuntDetailToFormData(huntDetail)).toEqual(expectedFormData);
   });
 
+  // The switch shows what the hunt does: on in its configuration and not auto-disabled.
   it.each([
-    { case: 'enabled', stored: true, shown: true },
-    { case: 'disabled', stored: false, shown: false },
-    { case: 'storing no state, as enabled', stored: undefined, shown: true },
-  ])('opens a hunt $case with the switch $shown', ({ stored, shown }) => {
-    const hunt = { ...huntDetail, enabled: stored } as THuntDetailResponse;
+    { case: 'enabled', stored: true, stoppedAt: null, shown: true },
+    { case: 'disabled', stored: false, stoppedAt: null, shown: false },
+    {
+      case: 'storing no state, as enabled',
+      stored: undefined,
+      stoppedAt: null,
+      shown: true,
+    },
+    {
+      case: 'enabled but auto-disabled, as off',
+      stored: true,
+      stoppedAt: 1_763_300_000,
+      shown: false,
+    },
+  ])(
+    'opens a hunt $case with the switch $shown',
+    ({ stored, stoppedAt, shown }) => {
+      const hunt = {
+        ...huntDetail,
+        enabled: stored,
+        auto_disabled_at: stoppedAt,
+      } as THuntDetailResponse;
 
-    expect(transformHuntDetailToFormData(hunt).enabled).toBe(shown);
-  });
+      expect(transformHuntDetailToFormData(hunt).enabled).toBe(shown);
+    },
+  );
 
   it('opens a stored hunt naming no organisation with none selected', () => {
     const { customers: _customers, ...namingNone } = huntDetail;
@@ -169,8 +188,25 @@ describe('transformHuntFormDataToUpdateRequest', () => {
       form: true,
       sent: true,
     },
-  ])('enabled: $case', ({ stored, form, sent }) => {
-    const hunt = { ...huntDetail, enabled: stored } as THuntDetailResponse;
+    {
+      case: 'leaves an auto-disabled hunt alone with the switch off',
+      stored: true,
+      stoppedAt: 1_763_300_000,
+      form: false,
+    },
+    {
+      case: 'names true when an auto-disabled hunt is switched on',
+      stored: true,
+      stoppedAt: 1_763_300_000,
+      form: true,
+      sent: true,
+    },
+  ])('enabled: $case', ({ stored, stoppedAt, form, sent }) => {
+    const hunt = {
+      ...huntDetail,
+      enabled: stored,
+      auto_disabled_at: stoppedAt ?? null,
+    } as THuntDetailResponse;
     const formValues = {
       ...transformHuntDetailToFormData(hunt),
       enabled: form,

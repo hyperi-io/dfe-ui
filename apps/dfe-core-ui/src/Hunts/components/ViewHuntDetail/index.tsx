@@ -1,7 +1,7 @@
 import { CustomScrollbar } from '@/core/components/CustomScrollbar';
 import { EmptyDetail } from '@/core/components/EmptyDetail';
 import { GenericErrorCard } from '@/core/components/GenericError';
-import { formatEpochSecondsLocal } from '@/core/helpers/date.helpers';
+import { RbacProtected } from '@/core/components/RbacProtected';
 import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
 import { HuntStateTag } from '@/Hunts/components/HuntStateTag';
 import { ViewHuntDetailTabs } from '@/Hunts/components/ViewHuntTabs';
@@ -9,7 +9,9 @@ import { useListHuntsContext } from '@/Hunts/contexts/ListHuntsContext';
 import { useFetchHuntDetail } from '@/Hunts/hooks/useFetchHuntDetail';
 import type { THuntDetailResponse } from '@/Hunts/hooks/useFetchHuntDetail/types';
 import { useHuntRunState } from '@/Hunts/hooks/useHuntRunState';
-import { Alert, Spin } from 'antd';
+import { useToggleHuntEnabled } from '@/Hunts/hooks/useToggleHuntEnabled';
+import { autoDisableNotice } from '@/Hunts/utils/autoDisable';
+import { Alert, Button, Spin } from 'antd';
 import { HuntDetailActionMenu } from './HuntDetailActionMenu';
 import { TriggerHunt } from './TriggerHunt';
 
@@ -18,19 +20,38 @@ const HuntDetailStateTag = ({ hunt }: { hunt: THuntDetailResponse }) => {
   return <HuntStateTag {...state} />;
 };
 
-/** The stop and the way back as text, because the tag's tooltip is hover only. */
+/** The way back, in the alert itself rather than only behind the actions menu. */
+const ReenableHuntButton = ({ hunt }: { hunt: THuntDetailResponse }) => {
+  const { label, loading, toggle } = useToggleHuntEnabled({ hunt });
+  return (
+    <RbacProtected action={RbacProtected.rbacActions.hunt_write}>
+      <RbacProtected.Unrestricted>
+        <Button size="small" loading={loading} onClick={toggle}>
+          {label}
+        </Button>
+      </RbacProtected.Unrestricted>
+      <RbacProtected.Restricted tooltip={{ show: true }}>
+        <Button size="small" disabled>
+          {label}
+        </Button>
+      </RbacProtected.Restricted>
+    </RbacProtected>
+  );
+};
+
+/** The auto-disable and the way back as text, because the tag's tooltip is hover only. */
 const HuntStopAlert = ({ hunt }: { hunt: THuntDetailResponse }) => {
   const { autoDisabledAt, autoDisabledReason } = useHuntRunState(hunt);
   if (autoDisabledAt == null) {
     return null;
   }
-  const reason = autoDisabledReason ? ` (${autoDisabledReason})` : '';
   return (
     <Alert
       type="warning"
       showIcon
-      title={`The runner stopped this hunt on ${formatEpochSecondsLocal(autoDisabledAt)} after repeated ClickHouse resource-limit failures${reason}.`}
-      description="It fires nothing until you choose Re-enable Hunt from the actions menu."
+      title={autoDisableNotice(autoDisabledAt, autoDisabledReason)}
+      description="It fires nothing until it is re-enabled."
+      action={<ReenableHuntButton hunt={hunt} />}
     />
   );
 };

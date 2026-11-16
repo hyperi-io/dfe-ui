@@ -1,7 +1,18 @@
+import { server } from '@/core/components/RbacProtected/hooks/hooks.mocks';
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
 import type { THuntDetailResponse } from '@/Hunts/hooks/useFetchHuntDetail/types';
-import { render, screen } from '@testing-library/react';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { render, screen, within } from '@testing-library/react';
+import { App } from 'antd';
+import type { ReactNode } from 'react';
+import {
+  afterAll,
+  afterEach,
+  beforeAll,
+  describe,
+  expect,
+  it,
+  vi,
+} from 'vitest';
 import { ViewHuntDetail } from '.';
 
 // The tabs, the action menu and the trigger reach their own APIs. What is under test is the stop notice.
@@ -32,11 +43,20 @@ vi.mock('@/Hunts/hooks/useFetchHuntDetail', () => ({
   }),
 }));
 
+// The alert's Re-enable button reads the permissions the RBAC mocks serve.
+beforeAll(() => server.listen({ onUnhandledRequest: 'error' }));
 afterEach(() => {
+  server.resetHandlers();
   state.listed = [];
 });
+afterAll(() => server.close());
 
-const { wrapper } = buildTestWrapper().withTheme();
+const { wrapper: Providers } = buildTestWrapper().withTheme().withReactQuery();
+const wrapper = ({ children }: { children: ReactNode }) => (
+  <Providers>
+    <App>{children}</App>
+  </Providers>
+);
 
 const hunt: THuntDetailResponse = {
   name: 'windows_audit',
@@ -50,9 +70,8 @@ const hunt: THuntDetailResponse = {
   auto_disabled_reason: '',
 };
 
-const NOTICE = /^The runner stopped this hunt on /;
-const WAY_BACK =
-  'It fires nothing until you choose Re-enable Hunt from the actions menu.';
+const NOTICE = /^Auto-disabled by the hunt runner on /;
+const WAY_BACK = 'It fires nothing until it is re-enabled.';
 
 describe('ViewHuntDetail runner stop', () => {
   it.each([
@@ -63,24 +82,27 @@ describe('ViewHuntDetail runner stop', () => {
         auto_disabled_at: 1_763_300_000,
         auto_disabled_reason: 'resource_limit:241',
       },
-      shown: /failures \(resource_limit:241\)\.$/,
+      shown: /after hitting ClickHouse's memory limit repeatedly\.$/,
     },
     {
       case: 'the detail carries the stop with no reason',
       detail: { ...hunt, auto_disabled_at: 1_763_300_000 },
-      shown: /failures\.$/,
+      shown: /after hitting a ClickHouse resource limit repeatedly\.$/,
     },
-  ])('announces the stop when $case', ({ detail, shown }) => {
+  ])('announces the stop when $case', async ({ detail, shown }) => {
     state.detail = detail;
 
     render(<ViewHuntDetail />, { wrapper });
 
-    expect(screen.getByRole('alert')).toBeInTheDocument();
-    expect(screen.getByText(NOTICE)).toHaveTextContent(
-      /after repeated ClickHouse resource-limit failures/,
-    );
+    const alert = screen.getByRole('alert');
+    expect(alert).toBeInTheDocument();
     expect(screen.getByText(NOTICE)).toHaveTextContent(shown);
+    expect(alert).not.toHaveTextContent(/resource_limit/);
     expect(screen.getByText(WAY_BACK)).toBeInTheDocument();
+    // The button shows once the RBAC read has answered.
+    expect(
+      await within(alert).findByRole('button', { name: 'Re-enable Hunt' }),
+    ).toBeInTheDocument();
     expect(screen.getByText('Auto-disabled')).toBeInTheDocument();
   });
 

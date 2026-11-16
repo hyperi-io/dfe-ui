@@ -56,28 +56,35 @@ const captureRuns = () => {
 };
 
 describe('TriggerHunt', () => {
-  it('is disabled with the reason for a hunt the runner stopped, and sends nothing', async () => {
-    const runs = captureRuns();
-    render(
-      <TriggerHunt hunt={{ ...hunt, auto_disabled_at: 1_763_300_000 }} />,
-      { wrapper },
-    );
-    const button = await screen.findByRole('button', {
-      name: /Trigger On-Demand/,
-    });
+  it.each([
+    {
+      case: 'the hunt runner auto-disabled',
+      detail: { ...hunt, auto_disabled_at: 1_763_300_000 },
+      reason: 'The hunt runner auto-disabled this hunt. Re-enable it first.',
+    },
+    {
+      case: 'its configuration disabled',
+      detail: { ...hunt, enabled: false, auto_disabled_at: null },
+      reason: 'This hunt is disabled and fires nothing. Enable it first.',
+    },
+  ])(
+    'is disabled with the reason for a hunt $case, and sends nothing',
+    async ({ detail, reason }) => {
+      const runs = captureRuns();
+      render(<TriggerHunt hunt={detail} />, { wrapper });
+      const button = await screen.findByRole('button', {
+        name: /Trigger On-Demand/,
+      });
 
-    expect(button).toBeDisabled();
-    await userEvent.click(button);
-    await userEvent.hover(button.parentElement ?? button);
+      expect(button).toBeDisabled();
+      await userEvent.click(button);
+      await userEvent.hover(button.parentElement ?? button);
 
-    expect(
-      await screen.findByText(
-        'The runner stopped this hunt. Re-enable it first.',
-      ),
-    ).toBeInTheDocument();
-    expect(screen.queryByText('Trigger On-Demand Hunt')).toBeNull();
-    expect(runs).toEqual([]);
-  });
+      expect(await screen.findByText(reason)).toBeInTheDocument();
+      expect(screen.queryByText('Trigger On-Demand Hunt')).toBeNull();
+      expect(runs).toEqual([]);
+    },
+  );
 
   it('queues a run for a hunt the runner is firing', async () => {
     const runs = captureRuns();

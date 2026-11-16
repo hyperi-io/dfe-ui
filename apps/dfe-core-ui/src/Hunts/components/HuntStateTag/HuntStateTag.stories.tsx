@@ -24,7 +24,7 @@ export const Disabled: Story = {
   args: { enabled: false },
 };
 
-// A runner stop leaves the YAML's enabled flag on: the stop is state, not config.
+// An auto-disable leaves the YAML's enabled flag on: it is state, not config.
 export const AutoDisabled: Story = {
   args: {
     enabled: true,

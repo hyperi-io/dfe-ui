@@ -332,9 +332,11 @@ describe('Edit Hunt runner stop', () => {
 
       expect(
         drawer.getByText(
-          /The runner stopped this hunt on .+ \(resource_limit:241\)\./,
+          /Auto-disabled by the hunt runner on .+ after hitting ClickHouse's memory limit repeatedly\./,
         ),
       ).toBeInTheDocument();
+      // The switch shows the effective state, off, and an untouched switch names nothing.
+      expect(drawer.getByRole('switch', { name: 'Enabled' })).not.toBeChecked();
       await userEvent.click(drawer.getByRole('button', { name: 'Edit Hunt' }));
 
       await waitFor(() => expect(sent.body).toBeDefined());

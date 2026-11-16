@@ -12,7 +12,15 @@ import { useState } from 'react';
 export const TriggerHunt = ({ hunt }: { hunt: THuntDetailResponse }) => {
   const selectedHuntName = hunt.name;
   const [isOpen, setIsOpen] = useState(false);
-  const stopped = useHuntRunState(hunt).autoDisabledAt != null;
+  const { enabled, autoDisabledAt } = useHuntRunState(hunt);
+  // A disabled hunt fires nothing, however it came to be disabled.
+  const reason =
+    autoDisabledAt != null
+      ? 'The hunt runner auto-disabled this hunt. Re-enable it first.'
+      : enabled === false
+        ? 'This hunt is disabled and fires nothing. Enable it first.'
+        : undefined;
+  const stopped = reason !== undefined;
 
   const { notification } = App.useApp();
 
@@ -27,7 +35,7 @@ export const TriggerHunt = ({ hunt }: { hunt: THuntDetailResponse }) => {
       setIsOpen(false);
       notification.success({
         title: 'On-demand run queued',
-        description: `The runner picks it up within ${data.poll_seconds} seconds.`,
+        description: `The hunt runner picks it up within ${data.poll_seconds} seconds.`,
         placement: 'bottomLeft',
       });
     },
@@ -42,13 +50,7 @@ export const TriggerHunt = ({ hunt }: { hunt: THuntDetailResponse }) => {
     <>
       <RbacProtected action={RbacProtected.rbacActions.hunt_execute}>
         <RbacProtected.Unrestricted>
-          <Tooltip
-            title={
-              stopped
-                ? 'The runner stopped this hunt. Re-enable it first.'
-                : undefined
-            }
-          >
+          <Tooltip title={reason}>
             <Button disabled={stopped} onClick={() => setIsOpen(true)}>
               Trigger On-Demand <IconPlayerPlay />
             </Button>

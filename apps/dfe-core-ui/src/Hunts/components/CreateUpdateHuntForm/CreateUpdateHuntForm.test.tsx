@@ -279,49 +279,43 @@ describe('CreateUpdateHuntForm runner stop', () => {
     {
       case: 'with a reason',
       reason: 'resource_limit:241',
-      copy: /^The runner stopped this hunt on .+ after repeated ClickHouse resource-limit failures \(resource_limit:241\)\.$/,
+      copy: /^Auto-disabled by the hunt runner on .+ after hitting ClickHouse's memory limit repeatedly\.$/,
     },
     {
       case: 'without a reason',
       reason: '',
-      copy: /^The runner stopped this hunt on .+ after repeated ClickHouse resource-limit failures\.$/,
+      copy: /^Auto-disabled by the hunt runner on .+ after hitting a ClickHouse resource limit repeatedly\.$/,
     },
   ])(
-    'says when and why the runner stopped the hunt $case',
+    'says when and why the hunt runner auto-disabled the hunt $case',
     ({ reason, copy }) => {
       renderForm({ autoDisabled: { at: 1_763_300_000, reason } });
 
       expect(screen.getByText(copy)).toBeInTheDocument();
+      expect(screen.queryByText(/resource_limit/)).toBeNull();
       expect(
-        screen.getByText(
-          'Saving leaves it stopped. Use Re-enable Hunt in the actions menu to start it again.',
-        ),
+        screen.getByText('Turn Enabled on and save to start it again.'),
       ).toBeInTheDocument();
     },
   );
 
+  // The alert says it all, so the switch keeps its one line in both states.
   test.each([
     {
-      case: 'stopped by the runner',
+      case: 'auto-disabled by the hunt runner',
       autoDisabled: { at: 1_763_300_000, reason: 'resource_limit:241' },
-      shown:
-        'On in the saved configuration, but the runner has stopped it. Re-enable Hunt in the actions menu starts it again.',
-      hidden: 'A disabled hunt keeps its configuration and fires nothing.',
     },
-    {
-      case: 'not stopped',
-      autoDisabled: null,
-      shown: 'A disabled hunt keeps its configuration and fires nothing.',
-      hidden:
-        'On in the saved configuration, but the runner has stopped it. Re-enable Hunt in the actions menu starts it again.',
-    },
+    { case: 'not auto-disabled', autoDisabled: null },
   ])(
-    'describes the Enabled switch for a hunt $case',
-    ({ autoDisabled, shown, hidden }) => {
+    'describes the Enabled switch once for a hunt $case',
+    ({ autoDisabled }) => {
       renderForm({ autoDisabled });
 
-      expect(screen.getByText(shown)).toBeInTheDocument();
-      expect(screen.queryByText(hidden)).toBeNull();
+      expect(
+        screen.getAllByText(
+          'A disabled hunt keeps its configuration and fires nothing.',
+        ),
+      ).toHaveLength(1);
     },
   );
 
@@ -331,22 +325,29 @@ describe('CreateUpdateHuntForm runner stop', () => {
   ])('shows no stop notice when autoDisabled $case', ({ autoDisabled }) => {
     renderForm({ autoDisabled });
 
-    expect(screen.queryByText(/The runner stopped this hunt/)).toBeNull();
+    expect(screen.queryByText(/Auto-disabled by the hunt runner/)).toBeNull();
   });
 
-  test('leaves the Enabled switch as the stored value and still toggles it', async () => {
+  test('turning the Enabled switch on submits enabled: true', async () => {
     const onFinish = vi.fn();
-    renderForm({
-      autoDisabled: { at: 1_763_300_000, reason: 'resource_limit:241' },
-      onFinish,
-    });
+    render(
+      <CreateUpdateHuntForm
+        onFinish={onFinish}
+        isPending={false}
+        error={null}
+        disabledFields={{ name: true }}
+        initialValues={{ ...stored, enabled: false }}
+        autoDisabled={{ at: 1_763_300_000, reason: 'resource_limit:241' }}
+      />,
+      { wrapper },
+    );
     const toggle = screen.getByRole('switch', { name: 'Enabled' });
 
-    expect(toggle).toBeChecked();
+    expect(toggle).not.toBeChecked();
     await userEvent.click(toggle);
     await userEvent.click(screen.getByRole('button', { name: 'Save Hunt' }));
 
     await waitFor(() => expect(onFinish).toHaveBeenCalledTimes(1));
-    expect(onFinish.mock.calls[0]?.[0].enabled).toBe(false);
+    expect(onFinish.mock.calls[0]?.[0].enabled).toBe(true);
   });
 });

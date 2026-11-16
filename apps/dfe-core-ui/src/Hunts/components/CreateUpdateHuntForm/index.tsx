@@ -3,10 +3,10 @@ import { Form } from '@/core/components/Form';
 import { OrganisationSelect } from '@/core/components/OrganisationSelect';
 import { SourceSelect } from '@/core/components/SourceSelect';
 import { getApiErrorResponseBody } from '@/core/config/api/client';
-import { formatEpochSecondsLocal } from '@/core/helpers/date.helpers';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
 import { RULE_HUNT_NAME_VALIDATOR } from '@/core/validationSchemas/utils';
 import { CRONBuilderDrawer } from '@/Hunts/components/CRONBuilderDrawer';
+import { autoDisableNotice } from '@/Hunts/utils/autoDisable';
 import { IconDeviceFloppy, IconPlus, IconTrash } from '@repo/dfe-icons';
 import { Alert, Button, FormProps, Input, Switch } from 'antd';
 import { useEffect, useMemo } from 'react';
@@ -71,7 +71,7 @@ type CreateUpdateHuntFormProps = FormProps<CreateUpdateHuntFormData> & {
   error: Error | null;
   buttonLabel?: string;
   disabledFields?: DisabledFields;
-  /** Set when the runner stopped the hunt. A save leaves that stop in place. */
+  /** Set when the hunt runner auto-disabled the hunt. Saving with Enabled on clears it. */
   autoDisabled?: { at: number; reason: string } | null;
 };
 
@@ -206,19 +206,15 @@ export const CreateUpdateHuntForm = ({
           type="warning"
           showIcon
           className="mb-4"
-          title={`The runner stopped this hunt on ${formatEpochSecondsLocal(autoDisabled.at)} after repeated ClickHouse resource-limit failures${autoDisabled.reason ? ` (${autoDisabled.reason})` : ''}.`}
-          description="Saving leaves it stopped. Use Re-enable Hunt in the actions menu to start it again."
+          title={autoDisableNotice(autoDisabled.at, autoDisabled.reason)}
+          description="Turn Enabled on and save to start it again."
         />
       )}
       <Form.Item
         name="enabled"
         label="Enabled"
         valuePropName="checked"
-        extra={
-          autoDisabled
-            ? 'On in the saved configuration, but the runner has stopped it. Re-enable Hunt in the actions menu starts it again.'
-            : 'A disabled hunt keeps its configuration and fires nothing.'
-        }
+        extra="A disabled hunt keeps its configuration and fires nothing."
       >
         <Switch />
       </Form.Item>
