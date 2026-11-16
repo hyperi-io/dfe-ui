@@ -2,15 +2,34 @@
 
 Feature code reaches the engine through one typed client generated from the engine's OpenAPI spec. The endpoint map is compile-time checked against the generated types, so a route that disappears from the spec fails the build, not the user.
 
-## How the pieces connect
+## The spec becomes typed calls
+
+The endpoint map sits between the generated types and the client, so a route the spec drops fails compilation there.
 
 ```mermaid
 flowchart LR
-    SPEC[packages/dfe-engine-types/specs/openapi.json<br/>copied from dfe-engine] -->|openapi-typescript| TYPES[generated paths types]
-    TYPES --> MAP[API_CONFIG endpoint map<br/>satisfies keyof paths]
-    MAP --> CLIENT[createApiClient]
-    CLIENT --> HOOKS[TanStack Query hooks<br/>per feature dir]
+    accTitle: L4 Detail -- Engine API client
+    accDescr: openapi-typescript turns the copied engine spec into the paths types. The endpoint map is checked against those types, the API client sends requests from the map, and the TanStack Query hooks in each feature directory call the client.
+
+    spec[("Engine spec copy")]
+    types["Paths types"]
+    map["Endpoint map"]
+    client["API client"]
+    hooks["Query hooks"]
+
+    spec --> types
+    types --> map
+    map -->|routes| client
+    client -->|typed calls| hooks
+
+    classDef default fill:#F8FAFC,stroke:#64748B,stroke-width:1px,color:#0F172A
+    classDef core fill:#DCEBF7,stroke:#0072B2,stroke-width:2px,color:#0B2A3F
+    classDef store fill:#DDF3EC,stroke:#00785A,stroke-width:1px,color:#0B3327
+    class spec store
+    class client core
 ```
+
+*Figure 1. L4 Detail -- Engine API client. The blue box is the client.* Up: [L3 Components -- dfe-ui](architecture.md#the-console-is-five-parts).
 
 - Engine spec: `packages/dfe-engine-types/specs/openapi.json` and `openapi.e2e.json`, committed byte copies of dfe-engine's `openapi/openapi.json` and `openapi/openapi.e2e.json`.
 - Generated code: `yarn workspace @repo/dfe-engine-types generate` runs openapi-typescript over both specs (`types/index.d.ts`, `types/e2e.d.ts`) and writes the scope and limit constants (`scopes/index.ts`, `limits/index.ts`).

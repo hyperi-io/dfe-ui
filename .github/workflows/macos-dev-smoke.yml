@@ -5,10 +5,7 @@
 # License:   BUSL-1.1
 # Copyright: (c) 2026 HYPERI PTY LIMITED
 #
-# Runs scripts/macos-dev-smoke.py, the same file a developer runs on a Mac. The
-# GitHub macOS runner has no docker, so the engine runs with no ClickHouse. A Linux
-# leg runs the script's docker mode, the one a Mac with OrbStack or Docker Desktop picks.
-# Dispatch it with an engine tag and a ui tag to gate a release candidate.
+# docs/local-development.md "Running natively on a Mac, in VS Code" covers this workflow.
 
 name: macOS dev smoke
 

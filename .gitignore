@@ -1,5 +1,3 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
-
 # Dependencies
 node_modules
 .pnp
@@ -70,7 +68,7 @@ TODO.md
 .cursor/
 .cursorrules
 
-# OS junk (never useful in repo)
+# OS junk
 .DS_Store
 Thumbs.db
 *.swp
