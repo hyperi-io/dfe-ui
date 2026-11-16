@@ -5,7 +5,7 @@
 # License:   BUSL-1.1
 # Copyright: (c) 2026 HYPERI PTY LIMITED
 
-# Graded by reachability, per dfe-infra docs/THREAT-MODEL.md: dfe-ui takes
+# Graded by reachability, per dfe-infra docs/threat-model.md: dfe-ui takes
 # untrusted input, so only an advisory that reaches no shipped code is accepted.
 
 

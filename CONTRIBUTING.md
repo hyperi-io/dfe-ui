@@ -36,8 +36,6 @@ versioning and changelog generation. All commits must follow this format:
 | `chore`    | Other changes that don't modify src or test files       | None          |
 | `revert`   | Reverts a previous commit                               | Varies        |
 
-### Breaking Changes
-
 For breaking changes that require a major version bump, add `!` after the type
 or include `BREAKING CHANGE:` in the footer:
 
@@ -47,7 +45,7 @@ feat!: remove deprecated API endpoints
 BREAKING CHANGE: The /v1/users endpoint has been removed. Use /v2/users instead.
 ```
 
-### Examples
+Examples:
 
 ```text
 feat(auth): add OAuth2 support for Google login
@@ -61,18 +59,14 @@ refactor(core)!: restructure module exports
 BREAKING CHANGE: Named exports are now used instead of default exports.
 ```
 
-### Scope
-
 Scope is optional but recommended. Use it to indicate the area of the codebase
 affected (e.g., `api`, `auth`, `core`, `cli`, `docs`).
 
-## Semantic Versioning
-
 This project follows [Semantic Versioning 2.0.0](https://semver.org/):
 
-- **MAJOR** (X.0.0): Breaking changes that require users to modify their code
-- **MINOR** (0.X.0): New features that are backwards-compatible
-- **PATCH** (0.0.X): Bug fixes and minor improvements
+- MAJOR (X.0.0): Breaking changes that require users to modify their code
+- MINOR (0.X.0): New features that are backwards-compatible
+- PATCH (0.0.X): Bug fixes and minor improvements
 
 Versions are automatically determined by semantic-release based on commit
 messages. Do not manually update version numbers.
@@ -93,7 +87,7 @@ anniversary of its release.
 3. **Test your changes** to ensure they work as expected
 4. **Submit a pull request** with a clear description of what you've done
 
-### Pull Request Checklist
+Before you open it:
 
 - [ ] Commits follow the conventional commit format
 - [ ] Tests pass (if applicable)
@@ -113,8 +107,7 @@ hyperi-ci check
 it once with `uv tool install hyperi-ci` (or `pipx install hyperi-ci`), or run it
 ad hoc with `uvx hyperi-ci check`. It runs the project's full local validation --
 the same suite CI runs -- and reports what to fix. Run it before every push and before opening a
-pull request. It is the single best way to give your change the best chance of
-surviving CI.
+pull request.
 
 ## CI/CD Workflow
 
@@ -126,11 +119,7 @@ When your pull request is merged to `main`:
 4. Creates a new GitHub release with release notes
 5. Publishes the package (if applicable)
 
-This happens automatically - no manual intervention required.
-
-## Questions
-
-If you have questions about contributing, please open an issue or contact us.
+This happens automatically - no manual intervention required. A question about contributing goes in an issue.
 
 ## Context
 
@@ -138,9 +127,7 @@ If you have questions about contributing, please open an issue or contact us.
 
 The operator console: a Next.js app that reads and writes through one backend, the dfe-engine API, and frames the dfe-hyperdx fork for data exploration. It keeps no datastore. When the console needs data the engine grows an endpoint, rather than the UI reaching past it.
 
-Not an internal tool. Other organisations run this console against their own
-engine, so cluster names, our fleet and credential paths belong in the private
-config repos. One artifact ships, the `ghcr.io/hyperi-io/dfe-ui` container.
+Not an internal tool. Other organisations run this console against their engines, so cluster names, fleet details and credential paths belong in each deployment's private config repo. One artifact ships, the `ghcr.io/hyperi-io/dfe-ui` container.
 
 The console is one of the suite's user-facing components, with dfe-receiver and dfe-hyperdx, so an advisory here is graded on reachability before severity. The exposure model is declared once, in dfe-infra:
 <https://github.com/hyperi-io/dfe-infra/blob/main/docs/threat-model.md>
@@ -178,15 +165,16 @@ The Playwright suite's setup is [apps/dfe-core-ui/e2e/README.md](apps/dfe-core-u
 
 ### What tends to bite
 
-| Don't                                                                         | Do                                                                                | Why                                                                                                                                                              |
-| ----------------------------------------------------------------------------- | --------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| hand-patch a generated type to add a field the engine spec copy lacks         | copy the engine spec again, then `yarn workspace @repo/dfe-engine-types generate` | #298: a hand patch kept a stale spec alive after the engine made the field required                                                                              |
-| re-derive what the engine already declares -- a picker's options, a name rule | read the engine's list, carry the engine's rule                                   | #287, the engine picker was hardcoded and offered an engine that does not exist. #218, the form allowed `aws_cloudtrail` where the engine wants a DNS-1123 label |
-| put a health or metrics route behind `withAuth`                               | keep `livez`, `readyz`, `metrics` in the `proxy.ts` matcher exclusions            | probes carry no session, so `withAuth` returned 307 to `/login`. Kubernetes counts 3xx as success, so probes passed while the app was face down                  |
-| read a failed engine call as a completed state                                | tell a broken config apart from an unreachable engine                             | #236, `proxy.ts` treated a failed setup-status call as setup complete                                                                                            |
-| run the Playwright specs in parallel                                          | leave `fullyParallel: false` and `workers: 1`                                     | every spec shares one engine and calls `reset_all`. Workers race on seed-static, so a spec passes alone and hangs with the folder                                |
-| add a per-file timeout when a `findBy` backstop expires                       | rely on the global `testTimeout: 20_000`                                          | four suites died at vitest's 5s default on 4cpu runners, carrying 15s backstops the per-test budget beheads                                                      |
-| merge a `feat:` with the GitHub squash button                                 | default to `fix:`                                                                 | #209, the validator wants `HYPERCI_ALLOW_FEAT=1` set at commit time and the squash button has no environment. Main was red from 2026-09-03                       |
+| Don't                                                                         | Do                                                                                           | Why                                                                                                                                                              |
+| ----------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| hand-patch a generated type to add a field the engine spec copy lacks         | copy the engine spec again, then `yarn workspace @repo/dfe-engine-types generate`            | #298: a hand patch kept a stale spec alive after the engine made the field required                                                                              |
+| re-derive what the engine already declares -- a picker's options, a name rule | read the engine's list, carry the engine's rule                                              | #287, the engine picker was hardcoded and offered an engine that does not exist. #218, the form allowed `aws_cloudtrail` where the engine wants a DNS-1123 label |
+| put a health or metrics route behind `withAuth`                               | keep `livez`, `readyz`, `metrics` in the `proxy.ts` matcher exclusions                       | probes carry no session, so `withAuth` returned 307 to `/login`. Kubernetes counts 3xx as success, so probes passed while the app was face down                  |
+| read a failed engine call as a completed state                                | tell a broken config apart from an unreachable engine                                        | #236, `proxy.ts` treated a failed setup-status call as setup complete                                                                                            |
+| run the Playwright specs in parallel                                          | leave `fullyParallel: false` and `workers: 1`                                                | every spec shares one engine and calls `reset_all`. Workers race on seed-static, so a spec passes alone and hangs with the folder                                |
+| add a per-file timeout when a `findBy` backstop expires                       | rely on the global `testTimeout: 20_000`                                                     | four suites died at vitest's 5s default on 4cpu runners, carrying 15s backstops the per-test budget beheads                                                      |
+| lower `npmMinimalAgeGate` in `.yarnrc.yml` to land a CVE fix                  | pre-approve the exact locator in `npmPreapprovedPackages`, or `yarn add --no-time-gate` once | the gate applies at install and has no CVE exception, unlike Renovate's cooldown, so an early security PR fails with YN0016 "quarantined" (#129)                 |
+| merge a `feat:` with the GitHub squash button                                 | default to `fix:`                                                                            | #209, the validator wants `HYPERCI_ALLOW_FEAT=1` set at commit time and the squash button has no environment. Main was red from 2026-09-03                       |
 
 ### Where this sits
 
