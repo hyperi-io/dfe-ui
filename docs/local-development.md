@@ -45,7 +45,7 @@ yarn workspace dfe-core-ui storybook        # component workbench, port 6006
 yarn workspace @repo/dfe-icons storybook    # icon gallery, port 6007
 ```
 
-The engine's API spec arrives here by pull request from the engine. [engine-api-client.md](engine-api-client.md) has that and the manual sync. The Playwright suite is in [apps/dfe-core-ui/e2e/README.md](../apps/dfe-core-ui/e2e/README.md), and contribution mechanics (commit format, DCO, local CI) are in [CONTRIBUTING.md](../CONTRIBUTING.md).
+The engine's API spec arrives here by pull request from the engine. [engine-api-client.md](engine-api-client.md) has that and the manual sync. The Playwright suite is in [apps/dfe-core-ui/e2e/README.md](../apps/dfe-core-ui/e2e/README.md), and contribution mechanics (commit format, local CI) are in [CONTRIBUTING.md](../CONTRIBUTING.md).
 
 ## The browser and the server both talk straight to the engine
 
