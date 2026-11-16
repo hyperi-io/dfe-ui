@@ -9725,7 +9725,12 @@ export interface components {
              */
             enabled: boolean;
             /** Rules */
-            rules: components["schemas"]["HuntRuleEntry"][];
+            rules?: components["schemas"]["HuntRuleEntry"][];
+            /**
+             * Query
+             * @description The SQL a YAML hunt runs in place of rules, read from the deploy repo
+             */
+            query?: string | null;
             /**
              * Customer Tenant Ids
              * @description Each customer's tenant ids, resolved when the hunt was saved: the _org_id values the runner reads. A customer missing here stops every run.
@@ -14371,7 +14376,7 @@ export interface components {
              * @description The organisation registry, bar the reserved default org. Empty once setup is complete.
              */
             organisations?: components["schemas"]["Org"][];
-            /** @description Durability of the LOCAL ADMIN account in the deploy repo (the field name predates the separate breakglass recovery account): enabled/auto_merge/committed/merged. pending is always null here: the review PR URL or CLI merge command comes only in the reset-password response. committed without merged means a change is still waiting on that merge. */
+            /** @description Durability of the LOCAL ADMIN account in the deploy repo (the field name predates the separate breakglass recovery account): enabled/auto_merge/committed/merged. committed without merged means a change is still waiting on a merge, and pending then names its review branch and, with no forge configured, the command that merges it. pending.pr_url is only in the reset-password response. */
             break_glass?: components["schemas"]["AccountGitState"] | null;
             /**
              * Default Credentials
@@ -15006,7 +15011,8 @@ export interface components {
          *     under the source's name for a family the app manifest declares keyed. The
          *     engine owns ``enabled`` and ``topic`` on that stanza: ``topic`` selects
          *     whether records land on the source's own topic (and table) or on the shared
-         *     ``main`` landing.
+         *     ``main`` landing. It also sets ``topic_per_dump_unit`` false on a keyed family's
+         *     stanza, so a dump unit lands on that topic rather than on ``<topic>-<unit>``.
          */
         SourceFetcher: {
             /**
