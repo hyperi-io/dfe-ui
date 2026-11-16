@@ -99,6 +99,7 @@ const hunt: THuntDetailResponse = {
   customers: ['acme'],
   rules: [{ rule_name: 'brute_force' }],
   enabled: true,
+  auto_disabled_reason: '',
 };
 
 /** Records the body of the one write the form sends, and answers it. */
@@ -307,6 +308,37 @@ describe('Edit Hunt enabled', () => {
       } else {
         expect(sent.body).toMatchObject({ enabled: expected });
       }
+    },
+  );
+});
+
+describe('Edit Hunt runner stop', () => {
+  test(
+    'shows the stop from the detail and saves without naming enabled',
+    { timeout: TEST_TIMEOUT_MS },
+    async () => {
+      const sent = captureWrite('put', '/api/v1/hunts/windows_audit');
+      render(
+        <UpdateHuntDrawer
+          hunt={{
+            ...hunt,
+            auto_disabled_at: 1_763_300_000,
+            auto_disabled_reason: 'resource_limit:241',
+          }}
+        />,
+        { wrapper },
+      );
+      const drawer = await openDrawer('Edit Hunt');
+
+      expect(
+        drawer.getByText(
+          /The runner stopped this hunt on .+ \(resource_limit:241\)\./,
+        ),
+      ).toBeInTheDocument();
+      await userEvent.click(drawer.getByRole('button', { name: 'Edit Hunt' }));
+
+      await waitFor(() => expect(sent.body).toBeDefined());
+      expect(sent.body).not.toHaveProperty('enabled');
     },
   );
 });

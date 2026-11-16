@@ -7,6 +7,7 @@ import { DeleteHuntModal } from '@/Hunts/components/DeleteHuntModal';
 import { UpdateHuntDrawer } from '@/Hunts/components/UpdateHuntDrawer';
 import { useListHuntsContext } from '@/Hunts/contexts/ListHuntsContext';
 import { THuntCreateResponse } from '@/Hunts/hooks/useCreateHunt/types';
+import { fetchHuntDetail } from '@/Hunts/hooks/useFetchHuntDetail/api';
 import { THuntDetailResponse } from '@/Hunts/hooks/useFetchHuntDetail/types';
 import { useHuntRunState } from '@/Hunts/hooks/useHuntRunState';
 import { useUpdateHunt } from '@/Hunts/hooks/useUpdateHunt';
@@ -24,6 +25,7 @@ import {
 } from '@repo/dfe-icons';
 import { useQueryClient } from '@tanstack/react-query';
 import { App, Button } from 'antd';
+import { useState } from 'react';
 
 interface HuntDetailActionMenuProps {
   onEditSuccess?: (hunt: THuntUpdateResponse) => void;
@@ -50,6 +52,15 @@ const ToggleHuntEnabled = ({
   const Icon = turnOn ? IconPlayerPlay : IconPlayerPause;
   const huntLabel = hunt.display_name || hunt.name;
 
+  const [isReading, setIsReading] = useState(false);
+
+  const onError = (error: Error) =>
+    notification.error({
+      title: `Hunt ${huntLabel} was not ${turnOn ? 'enabled' : 'disabled'}`,
+      description: <ApiErrorNotification error={error} />,
+      placement: 'bottomLeft',
+    });
+
   const { mutate, isPending } = useUpdateHunt({
     name: hunt.name,
     onSuccess: (response) => {
@@ -59,23 +70,27 @@ const ToggleHuntEnabled = ({
         placement: 'bottomLeft',
       });
     },
-    onError: (error) => {
-      notification.error({
-        title: `Hunt ${huntLabel} was not ${turnOn ? 'enabled' : 'disabled'}`,
-        description: <ApiErrorNotification error={error} />,
-        placement: 'bottomLeft',
-      });
-    },
+    onError,
   });
 
-  const toggle = () =>
-    mutate({
-      ...transformHuntFormDataToUpdateRequest(
-        transformHuntDetailToFormData(hunt),
-        hunt,
-      ),
-      enabled: turnOn,
-    });
+  // The engine has no per-field write, so a toggle sends the whole config, and a fresh read keeps it from undoing an edit landed since the page loaded.
+  const toggle = async () => {
+    setIsReading(true);
+    try {
+      const fresh = await fetchHuntDetail({ pathParams: { name: hunt.name } });
+      mutate({
+        ...transformHuntFormDataToUpdateRequest(
+          transformHuntDetailToFormData(fresh),
+          fresh,
+        ),
+        enabled: turnOn,
+      });
+    } catch (error) {
+      onError(error instanceof Error ? error : new Error(String(error)));
+    } finally {
+      setIsReading(false);
+    }
+  };
 
   return (
     <RbacProtected action={RbacProtected.rbacActions.hunt_write}>
@@ -85,8 +100,8 @@ const ToggleHuntEnabled = ({
           type="text"
           icon={<Icon />}
           aria-label={label}
-          loading={isPending}
-          onClick={toggle}
+          loading={isReading || isPending}
+          onClick={() => void toggle()}
         >
           {label}
         </Button>

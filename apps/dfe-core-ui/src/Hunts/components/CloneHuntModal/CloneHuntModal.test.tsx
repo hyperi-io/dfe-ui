@@ -29,6 +29,7 @@ const hunt: THuntDetailResponse = {
   customers: ['acme'],
   rules: [{ rule_name: 'brute_force' }],
   enabled: true,
+  auto_disabled_reason: '',
 };
 
 const openClone = async (source: THuntDetailResponse) => {

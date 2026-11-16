@@ -39,6 +39,11 @@ export const UpdateHuntDrawer = ({
     [hunt],
   );
 
+  const autoDisabled =
+    hunt.auto_disabled_at == null
+      ? null
+      : { at: hunt.auto_disabled_at, reason: hunt.auto_disabled_reason ?? '' };
+
   const handleClose = () => {
     setIsDrawerVisible(false);
     onClose?.();
@@ -119,6 +124,7 @@ export const UpdateHuntDrawer = ({
           error={error}
           buttonLabel={title}
           initialValues={initialValues}
+          autoDisabled={autoDisabled}
           disabledFields={{
             name: true,
           }}

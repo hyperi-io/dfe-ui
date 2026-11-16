@@ -3,11 +3,12 @@ import { Form } from '@/core/components/Form';
 import { OrganisationSelect } from '@/core/components/OrganisationSelect';
 import { SourceSelect } from '@/core/components/SourceSelect';
 import { getApiErrorResponseBody } from '@/core/config/api/client';
+import { formatEpochSecondsLocal } from '@/core/helpers/date.helpers';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
 import { RULE_HUNT_NAME_VALIDATOR } from '@/core/validationSchemas/utils';
 import { CRONBuilderDrawer } from '@/Hunts/components/CRONBuilderDrawer';
 import { IconDeviceFloppy, IconPlus, IconTrash } from '@repo/dfe-icons';
-import { Button, FormProps, Input, Switch } from 'antd';
+import { Alert, Button, FormProps, Input, Switch } from 'antd';
 import { useEffect, useMemo } from 'react';
 import z from 'zod';
 import { RuleSelect } from './RuleSelectCreate';
@@ -70,6 +71,8 @@ type CreateUpdateHuntFormProps = FormProps<CreateUpdateHuntFormData> & {
   error: Error | null;
   buttonLabel?: string;
   disabledFields?: DisabledFields;
+  /** Set when the runner stopped the hunt. A save leaves that stop in place. */
+  autoDisabled?: { at: number; reason: string } | null;
 };
 
 export const CreateUpdateHuntForm = ({
@@ -79,6 +82,7 @@ export const CreateUpdateHuntForm = ({
   error,
   buttonLabel = 'Save Hunt',
   disabledFields,
+  autoDisabled,
   ...props
 }: CreateUpdateHuntFormProps) => {
   const [form] = Form.useForm<CreateUpdateHuntFormData>();
@@ -197,6 +201,15 @@ export const CreateUpdateHuntForm = ({
         )}
       </Form.List>
 
+      {autoDisabled && (
+        <Alert
+          type="warning"
+          showIcon
+          className="mb-4"
+          title={`The runner stopped this hunt on ${formatEpochSecondsLocal(autoDisabled.at)}${autoDisabled.reason ? ` (${autoDisabled.reason})` : ''}.`}
+          description="Saving leaves it stopped. Use Re-enable Hunt in the actions menu to start it again."
+        />
+      )}
       <Form.Item
         name="enabled"
         label="Enabled"

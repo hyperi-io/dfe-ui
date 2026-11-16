@@ -18,6 +18,7 @@ const hunt = (cron: THuntDetailResponse['cron']): THuntDetailResponse => ({
   min_interval_seconds: null,
   explain_queries: null,
   enabled: true,
+  auto_disabled_reason: '',
 });
 
 describe('ConfigurationDetailsTabContent cron', () => {

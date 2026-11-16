@@ -82,6 +82,7 @@ describe('.useCreateHunt', () => {
         scheduling_mode: 'string',
         min_interval_seconds: 0,
         enabled: true,
+        auto_disabled_reason: '',
         explain_queries: false,
       };
 

@@ -80,6 +80,7 @@ export const hunts = {
           min_interval_seconds: 0,
           explain_queries: false,
           enabled: true,
+          auto_disabled_reason: '',
         },
       }: {
         mockedResponse?: THuntCreateResponse;
@@ -147,6 +148,7 @@ export const hunts = {
           scheduling_mode: 'string',
           min_interval_seconds: 0,
           enabled: true,
+          auto_disabled_reason: '',
         },
         name = 'name',
       }: {
@@ -183,6 +185,7 @@ export const hunts = {
           scheduling_mode: 'string',
           min_interval_seconds: 0,
           enabled: true,
+          auto_disabled_reason: '',
         },
         name = 'name',
       }: {

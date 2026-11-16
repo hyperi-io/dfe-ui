@@ -70,6 +70,7 @@ const hunt: THuntDetailResponse = {
   customers: ['acme'],
   rules: [{ rule_name: 'brute_force' }],
   enabled: true,
+  auto_disabled_reason: '',
 };
 
 describe('HuntDetailActionMenu enable action', () => {
@@ -104,6 +105,9 @@ describe('HuntDetailActionMenu enable action', () => {
       listed.autoDisabledAt = autoDisabledAt;
       let body: Record<string, unknown> | undefined;
       server.use(
+        http.get('/api/v1/hunts/windows_audit', () =>
+          HttpResponse.json({ ...hunt, enabled }),
+        ),
         http.put('/api/v1/hunts/windows_audit', async ({ request }) => {
           body = (await request.json()) as Record<string, unknown>;
           return HttpResponse.json(hunt);
@@ -122,4 +126,52 @@ describe('HuntDetailActionMenu enable action', () => {
       expect(await screen.findByText(notice)).toBeInTheDocument();
     },
   );
+
+  it('writes the config the server holds now, not the one the page loaded', async () => {
+    let body: Record<string, unknown> | undefined;
+    server.use(
+      http.get('/api/v1/hunts/windows_audit', () =>
+        HttpResponse.json({ ...hunt, cron: '0 3 * * *', log_buffer: 15 }),
+      ),
+      http.put('/api/v1/hunts/windows_audit', async ({ request }) => {
+        body = (await request.json()) as Record<string, unknown>;
+        return HttpResponse.json(hunt);
+      }),
+    );
+    render(<HuntDetailActionMenu hunt={hunt} />, { wrapper });
+
+    await userEvent.click(
+      await screen.findByRole('button', { name: 'Disable Hunt' }),
+    );
+
+    await waitFor(() => expect(body).toBeDefined());
+    expect(body).toMatchObject({
+      enabled: false,
+      cron: '0 3 * * *',
+      log_buffer: 15,
+    });
+  });
+
+  it('reports a failed fresh read and sends no update', async () => {
+    let putSent = false;
+    server.use(
+      http.get('/api/v1/hunts/windows_audit', () =>
+        HttpResponse.json({ detail: 'gone' }, { status: 500 }),
+      ),
+      http.put('/api/v1/hunts/windows_audit', () => {
+        putSent = true;
+        return HttpResponse.json(hunt);
+      }),
+    );
+    render(<HuntDetailActionMenu hunt={hunt} />, { wrapper });
+
+    await userEvent.click(
+      await screen.findByRole('button', { name: 'Disable Hunt' }),
+    );
+
+    expect(
+      await screen.findByText('Hunt Windows audit was not disabled'),
+    ).toBeInTheDocument();
+    expect(putSent).toBe(false);
+  });
 });

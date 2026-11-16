@@ -245,3 +245,75 @@ describe('CreateUpdateHuntForm refusals', () => {
     ).not.toBeInTheDocument();
   });
 });
+
+describe('CreateUpdateHuntForm runner stop', () => {
+  const stored = {
+    name: 'stopped',
+    customers: ['acme'],
+    rules: ['brute_force'],
+    cron: ['0 * * * *'],
+    log_buffer: 60,
+    global_source_table_name: 'windows_audit',
+    enabled: true,
+  };
+  const renderForm = ({
+    autoDisabled,
+    onFinish = vi.fn(),
+  }: {
+    autoDisabled?: { at: number; reason: string } | null;
+    onFinish?: () => void;
+  }) =>
+    render(
+      <CreateUpdateHuntForm
+        onFinish={onFinish}
+        isPending={false}
+        error={null}
+        disabledFields={{ name: true }}
+        initialValues={stored}
+        autoDisabled={autoDisabled}
+      />,
+      { wrapper },
+    );
+
+  test('says when and why the runner stopped the hunt', () => {
+    renderForm({
+      autoDisabled: { at: 1_763_300_000, reason: 'resource_limit:241' },
+    });
+
+    expect(
+      screen.getByText(
+        /The runner stopped this hunt on .+ \(resource_limit:241\)\./,
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        'Saving leaves it stopped. Use Re-enable Hunt in the actions menu to start it again.',
+      ),
+    ).toBeInTheDocument();
+  });
+
+  test.each([
+    { case: 'is not passed', autoDisabled: undefined },
+    { case: 'is null', autoDisabled: null },
+  ])('shows no stop notice when autoDisabled $case', ({ autoDisabled }) => {
+    renderForm({ autoDisabled });
+
+    expect(screen.queryByText(/The runner stopped this hunt/)).toBeNull();
+  });
+
+  test('leaves the Enabled switch as the stored value and still toggles it', async () => {
+    const onFinish = vi.fn();
+    renderForm({
+      autoDisabled: { at: 1_763_300_000, reason: 'resource_limit:241' },
+      onFinish,
+    });
+    const toggle = screen.getByRole('switch', { name: 'Enabled' });
+
+    expect(toggle).toBeChecked();
+    await userEvent.click(toggle);
+    await userEvent.click(screen.getByRole('button', { name: 'Save Hunt' }));
+
+    await waitFor(() => expect(onFinish).toHaveBeenCalledTimes(1));
+    expect(onFinish.mock.calls[0]?.[0].enabled).toBe(false);
+  });
+});

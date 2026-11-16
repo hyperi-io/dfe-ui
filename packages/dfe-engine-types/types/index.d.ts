@@ -2644,7 +2644,7 @@ export interface paths {
         };
         /**
          * Get Hunt
-         * @description Get full hunt configuration by file name.
+         * @description Get full hunt configuration by file name, with the runner's stop on it if any.
          */
         get: operations["hunts.get"];
         /**
@@ -9659,10 +9659,9 @@ export interface components {
             explain_queries?: boolean | null;
             /**
              * Enabled
-             * @description Whether the runner fires this hunt. False keeps its YAML, state and watermark and fires nothing.
-             * @default true
+             * @description Whether the runner fires this hunt. Omitted on an update keeps the stored value. True also clears a stop the runner put on the hunt.
              */
-            enabled: boolean;
+            enabled?: boolean | null;
             /**
              * Rules
              * @description Rule names, each the ``{name}.yaml`` rule file the hunt runner reads
@@ -9715,16 +9714,16 @@ export interface components {
             /** Explain Queries */
             explain_queries?: boolean | null;
             /**
+             * Name
+             * @description Hunt file name (YAML stem)
+             */
+            name: string;
+            /**
              * Enabled
              * @description Whether the runner fires this hunt. False keeps its YAML, state and watermark and fires nothing.
              * @default true
              */
             enabled: boolean;
-            /**
-             * Name
-             * @description Hunt file name (YAML stem)
-             */
-            name: string;
             /** Rules */
             rules: components["schemas"]["HuntRuleEntry"][];
             /**
@@ -9734,6 +9733,17 @@ export interface components {
             customer_tenant_ids?: {
                 [key: string]: string[];
             };
+            /**
+             * Auto Disabled At
+             * @description When the runner stopped the hunt after repeated resource-limit failures, epoch seconds
+             */
+            auto_disabled_at?: number | null;
+            /**
+             * Auto Disabled Reason
+             * @description The ClickHouse error category and code that tripped the stop
+             * @default
+             */
+            auto_disabled_reason: string;
         };
         /**
          * HuntEngineStatus
@@ -9939,10 +9949,9 @@ export interface components {
             explain_queries?: boolean | null;
             /**
              * Enabled
-             * @description Whether the runner fires this hunt. False keeps its YAML, state and watermark and fires nothing.
-             * @default true
+             * @description Whether the runner fires this hunt. Omitted on an update keeps the stored value. True also clears a stop the runner put on the hunt.
              */
-            enabled: boolean;
+            enabled?: boolean | null;
             /**
              * Rules
              * @description Rule names, each the ``{name}.yaml`` rule file the hunt runner reads
