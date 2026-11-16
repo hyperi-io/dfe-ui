@@ -5,12 +5,12 @@ import { cn } from '@/core/utils/style';
 import {
   IconArrowDown,
   IconArrowUp,
-  IconDotsVertical,
   IconGripVertical,
   IconPin,
 } from '@repo/dfe-icons';
-import { Button, Dropdown, Select, Tag } from 'antd';
+import { Button, Tag } from 'antd';
 import { useEffect, useId, useRef, useState } from 'react';
+import { SortableDropdown } from './SortableDropdown';
 
 export type SortableRuleItem = {
   id: string;
@@ -242,8 +242,27 @@ export function SortableRuleList<T extends SortableRuleItem>({
                   </span>
                 </Tooltip>
               )}
-              <span className="w-6 shrink-0 text-center text-sm tabular-nums text-foreground/50 dark:text-dark-foreground/50">
+              <span className="flex items-center justify-center gap-1 w-6 shrink-0 text-center text-sm tabular-nums text-foreground/50 dark:text-dark-foreground/50">
                 {index + 1}
+                {canMove && (
+                  <SortableDropdown
+                    options={Array.from({ length: movableCount }, (_, to) => ({
+                      value: to,
+                      label: `Position ${to + 1}`,
+                      disabled: to === index,
+                    }))}
+                    onChange={(to) => {
+                      setPositionMenuId(null);
+                      move(index, to, 'menu');
+                    }}
+                    onOpenChange={(next) => {
+                      setPositionMenuId(next ? item.id : null);
+                    }}
+                    buttonRef={register(item.id, 'menu')}
+                    ruleName={name}
+                    open={positionMenuId === item.id}
+                  />
+                )}
               </span>
               <div className="min-w-0 flex-1">
                 {renderItem(item, index + 1)}
@@ -289,58 +308,6 @@ export function SortableRuleList<T extends SortableRuleItem>({
                       onClick={() => move(index, index + 1, 'down')}
                     />
                   </Tooltip>
-                  <Dropdown
-                    trigger={['click']}
-                    destroyOnHidden
-                    open={positionMenuId === item.id}
-                    onOpenChange={(next) =>
-                      setPositionMenuId(next ? item.id : null)
-                    }
-                    popupRender={() => (
-                      <div
-                        className="rounded-md border border-foreground/15 bg-background p-2 shadow-md dark:border-dark-foreground/15 dark:bg-dark-background"
-                        onMouseDown={(event) => event.preventDefault()}
-                      >
-                        <Select
-                          autoFocus
-                          open
-                          showSearch={{
-                            filterOption: (input, option) =>
-                              String(option?.label ?? '')
-                                .toLowerCase()
-                                .includes(input.trim().toLowerCase()),
-                          }}
-                          virtual={false}
-                          className="w-44"
-                          placeholder="Search position"
-                          aria-label={`Search positions for ${name}`}
-                          options={Array.from(
-                            { length: movableCount },
-                            (_, to) => ({
-                              value: to,
-                              label: `Position ${to + 1}`,
-                              disabled: to === index,
-                            }),
-                          )}
-                          onChange={(to) => {
-                            setPositionMenuId(null);
-                            move(index, to, 'menu');
-                          }}
-                          getPopupContainer={(trigger) =>
-                            trigger.parentElement ?? document.body
-                          }
-                        />
-                      </div>
-                    )}
-                  >
-                    <Button
-                      ref={register(item.id, 'menu')}
-                      type="text"
-                      size="small"
-                      aria-label={`Move ${name} to position`}
-                      icon={<IconDotsVertical className="h-4 w-4" />}
-                    />
-                  </Dropdown>
                 </div>
               )}
               {showLineAfter && (

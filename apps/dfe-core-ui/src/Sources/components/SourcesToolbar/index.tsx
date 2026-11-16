@@ -17,7 +17,7 @@ export const SourcesToolbar = () => {
       disabled: false,
     },
     {
-      path: '/sources/ingest-rules',
+      path: '/sources/ingest-procedures',
       label: 'Ingest Procedures',
       disabled: false,
     },

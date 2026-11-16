@@ -184,7 +184,7 @@ test.describe('', { tag: [TAGS.core, TAGS.source] }, () => {
     page,
     request,
   }) => {
-    await page.goto(`${BASE_URL}/sources/ingest-rules`);
+    await page.goto(`${BASE_URL}/sources/ingest-procedures`);
     const sourceRules = page.getByRole('list', { name: 'Source rules order' });
     await expect(
       sourceRules.getByTestId(`rule-block-source.${COMPOUND}`),
