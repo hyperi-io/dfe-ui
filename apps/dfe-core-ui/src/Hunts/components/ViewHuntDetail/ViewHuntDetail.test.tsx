@@ -63,12 +63,12 @@ describe('ViewHuntDetail runner stop', () => {
         auto_disabled_at: 1_763_300_000,
         auto_disabled_reason: 'resource_limit:241',
       },
-      shown: /\(resource_limit:241\)\.$/,
+      shown: /failures \(resource_limit:241\)\.$/,
     },
     {
       case: 'the detail carries the stop with no reason',
       detail: { ...hunt, auto_disabled_at: 1_763_300_000 },
-      shown: /\d\.$/,
+      shown: /failures\.$/,
     },
   ])('announces the stop when $case', ({ detail, shown }) => {
     state.detail = detail;
@@ -76,6 +76,9 @@ describe('ViewHuntDetail runner stop', () => {
     render(<ViewHuntDetail />, { wrapper });
 
     expect(screen.getByRole('alert')).toBeInTheDocument();
+    expect(screen.getByText(NOTICE)).toHaveTextContent(
+      /after repeated ClickHouse resource-limit failures/,
+    );
     expect(screen.getByText(NOTICE)).toHaveTextContent(shown);
     expect(screen.getByText(WAY_BACK)).toBeInTheDocument();
     expect(screen.getByText('Auto-disabled')).toBeInTheDocument();

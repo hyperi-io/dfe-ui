@@ -1,17 +1,18 @@
 import { FormNotification } from '@/core/components/FormNotification';
 import { Modal } from '@/core/components/Modal';
 import { RbacProtected } from '@/core/components/RbacProtected';
+import { Tooltip } from '@/core/components/Tooltip';
+import type { THuntDetailResponse } from '@/Hunts/hooks/useFetchHuntDetail/types';
+import { useHuntRunState } from '@/Hunts/hooks/useHuntRunState';
 import { useTriggerHunt } from '@/Hunts/hooks/useTriggerHunt';
 import { IconPlayerPlay } from '@repo/dfe-icons';
 import { App, Button } from 'antd';
 import { useState } from 'react';
 
-export const TriggerHunt = ({
-  selectedHuntName,
-}: {
-  selectedHuntName: string;
-}) => {
+export const TriggerHunt = ({ hunt }: { hunt: THuntDetailResponse }) => {
+  const selectedHuntName = hunt.name;
   const [isOpen, setIsOpen] = useState(false);
+  const stopped = useHuntRunState(hunt).autoDisabledAt != null;
 
   const { notification } = App.useApp();
 
@@ -41,9 +42,17 @@ export const TriggerHunt = ({
     <>
       <RbacProtected action={RbacProtected.rbacActions.hunt_execute}>
         <RbacProtected.Unrestricted>
-          <Button onClick={() => setIsOpen(true)}>
-            Trigger On-Demand <IconPlayerPlay />
-          </Button>
+          <Tooltip
+            title={
+              stopped
+                ? 'The runner stopped this hunt. Re-enable it first.'
+                : undefined
+            }
+          >
+            <Button disabled={stopped} onClick={() => setIsOpen(true)}>
+              Trigger On-Demand <IconPlayerPlay />
+            </Button>
+          </Tooltip>
         </RbacProtected.Unrestricted>
         <RbacProtected.Restricted tooltip={{ show: true }}>
           <Button disabled>
@@ -65,6 +74,7 @@ export const TriggerHunt = ({
               type="primary"
               onClick={() => triggerHunt()}
               loading={isPending}
+              disabled={stopped}
             >
               Trigger Hunt
             </Button>

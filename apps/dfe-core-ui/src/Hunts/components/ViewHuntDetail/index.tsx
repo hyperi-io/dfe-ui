@@ -29,7 +29,7 @@ const HuntStopAlert = ({ hunt }: { hunt: THuntDetailResponse }) => {
     <Alert
       type="warning"
       showIcon
-      title={`The runner stopped this hunt on ${formatEpochSecondsLocal(autoDisabledAt)}${reason}.`}
+      title={`The runner stopped this hunt on ${formatEpochSecondsLocal(autoDisabledAt)} after repeated ClickHouse resource-limit failures${reason}.`}
       description="It fires nothing until you choose Re-enable Hunt from the actions menu."
     />
   );
@@ -86,7 +86,7 @@ export const ViewHuntDetail = () => {
           <HuntDetailStateTag hunt={huntDetail} />
         </h4>
         <div className="flex items-center gap-x-2">
-          <TriggerHunt selectedHuntName={selectedHuntName ?? ''} />
+          <TriggerHunt hunt={huntDetail} />
           <HuntDetailActionMenu hunt={huntDetail} />
         </div>
       </div>

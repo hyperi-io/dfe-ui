@@ -1,10 +1,13 @@
 import { server } from '@/core/components/RbacProtected/hooks/hooks.mocks';
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
+import { HuntStateTag } from '@/Hunts/components/HuntStateTag';
+import { useFetchHuntDetail } from '@/Hunts/hooks/useFetchHuntDetail';
 import type { THuntDetailResponse } from '@/Hunts/hooks/useFetchHuntDetail/types';
+import { useHuntRunState } from '@/Hunts/hooks/useHuntRunState';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { App } from 'antd';
-import { http, HttpResponse } from 'msw';
+import { delay, http, HttpResponse } from 'msw';
 import type { ReactElement, ReactNode } from 'react';
 import {
   afterAll,
@@ -72,6 +75,10 @@ const hunt: THuntDetailResponse = {
   enabled: true,
   auto_disabled_reason: '',
 };
+
+const RunStateTag = ({ hunt: detail }: { hunt: THuntDetailResponse }) => (
+  <HuntStateTag {...useHuntRunState(detail)} />
+);
 
 describe('HuntDetailActionMenu enable action', () => {
   it.each([
@@ -174,6 +181,49 @@ describe('HuntDetailActionMenu enable action', () => {
     expect(
       await screen.findByText('Hunt Windows audit enabled'),
     ).toBeInTheDocument();
+  });
+
+  it('raises the notice only after the refetch has cleared the stop', async () => {
+    let stopped = true;
+    server.use(
+      http.get('/api/v1/hunts/windows_audit', async () => {
+        if (!stopped) {
+          await delay(150);
+        }
+        return HttpResponse.json({
+          ...hunt,
+          auto_disabled_at: stopped ? 1_763_300_000 : null,
+          auto_disabled_reason: stopped ? 'resource_limit:241' : '',
+        });
+      }),
+      http.put('/api/v1/hunts/windows_audit', () => {
+        stopped = false;
+        return HttpResponse.json(hunt);
+      }),
+    );
+    const StoppedHunt = () => {
+      const { data } = useFetchHuntDetail({ name: 'windows_audit' });
+      if (!data) {
+        return null;
+      }
+      return (
+        <>
+          <RunStateTag hunt={data} />
+          <HuntDetailActionMenu hunt={data} />
+        </>
+      );
+    };
+    render(<StoppedHunt />, { wrapper });
+    expect(await screen.findByText('Auto-disabled')).toBeInTheDocument();
+
+    await userEvent.click(
+      await screen.findByRole('button', { name: 'Re-enable Hunt' }),
+    );
+
+    expect(
+      await screen.findByText('Hunt Windows audit enabled'),
+    ).toBeInTheDocument();
+    expect(screen.queryByText('Auto-disabled')).toBeNull();
   });
 
   it('reports a failed fresh read and sends no update', async () => {

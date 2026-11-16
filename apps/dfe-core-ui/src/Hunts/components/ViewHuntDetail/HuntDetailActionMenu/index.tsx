@@ -41,6 +41,7 @@ const ToggleHuntEnabled = ({
   onSuccess: (hunt: THuntUpdateResponse) => void;
 }) => {
   const { notification } = App.useApp();
+  const queryClient = useQueryClient();
   const { enabled, autoDisabledAt } = useHuntRunState(hunt);
   const autoDisabled = autoDisabledAt != null;
   const turnOn = autoDisabled || enabled === false;
@@ -65,8 +66,12 @@ const ToggleHuntEnabled = ({
 
   const { mutate, isPending } = useUpdateHunt({
     name: hunt.name,
-    onSuccess: (response) => {
+    onSuccess: async (response) => {
       onSuccess(response);
+      // The notice waits for the refetch, so the row, header and menu no longer say Auto-disabled when it shows.
+      await queryClient.invalidateQueries({
+        queryKey: QUERY_KEYS.hunts.default(),
+      });
       notification.success({
         title: `Hunt ${huntLabel} ${sent.current ? 'enabled' : 'disabled'}`,
         placement: 'bottomLeft',

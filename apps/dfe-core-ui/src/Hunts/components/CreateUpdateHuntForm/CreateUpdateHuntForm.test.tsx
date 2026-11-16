@@ -275,22 +275,55 @@ describe('CreateUpdateHuntForm runner stop', () => {
       { wrapper },
     );
 
-  test('says when and why the runner stopped the hunt', () => {
-    renderForm({
-      autoDisabled: { at: 1_763_300_000, reason: 'resource_limit:241' },
-    });
+  test.each([
+    {
+      case: 'with a reason',
+      reason: 'resource_limit:241',
+      copy: /^The runner stopped this hunt on .+ after repeated ClickHouse resource-limit failures \(resource_limit:241\)\.$/,
+    },
+    {
+      case: 'without a reason',
+      reason: '',
+      copy: /^The runner stopped this hunt on .+ after repeated ClickHouse resource-limit failures\.$/,
+    },
+  ])(
+    'says when and why the runner stopped the hunt $case',
+    ({ reason, copy }) => {
+      renderForm({ autoDisabled: { at: 1_763_300_000, reason } });
 
-    expect(
-      screen.getByText(
-        /The runner stopped this hunt on .+ \(resource_limit:241\)\./,
-      ),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText(
-        'Saving leaves it stopped. Use Re-enable Hunt in the actions menu to start it again.',
-      ),
-    ).toBeInTheDocument();
-  });
+      expect(screen.getByText(copy)).toBeInTheDocument();
+      expect(
+        screen.getByText(
+          'Saving leaves it stopped. Use Re-enable Hunt in the actions menu to start it again.',
+        ),
+      ).toBeInTheDocument();
+    },
+  );
+
+  test.each([
+    {
+      case: 'stopped by the runner',
+      autoDisabled: { at: 1_763_300_000, reason: 'resource_limit:241' },
+      shown:
+        'On in the saved configuration, but the runner has stopped it. Re-enable Hunt in the actions menu starts it again.',
+      hidden: 'A disabled hunt keeps its configuration and fires nothing.',
+    },
+    {
+      case: 'not stopped',
+      autoDisabled: null,
+      shown: 'A disabled hunt keeps its configuration and fires nothing.',
+      hidden:
+        'On in the saved configuration, but the runner has stopped it. Re-enable Hunt in the actions menu starts it again.',
+    },
+  ])(
+    'describes the Enabled switch for a hunt $case',
+    ({ autoDisabled, shown, hidden }) => {
+      renderForm({ autoDisabled });
+
+      expect(screen.getByText(shown)).toBeInTheDocument();
+      expect(screen.queryByText(hidden)).toBeNull();
+    },
+  );
 
   test.each([
     { case: 'is not passed', autoDisabled: undefined },

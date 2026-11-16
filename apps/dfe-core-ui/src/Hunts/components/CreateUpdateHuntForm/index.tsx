@@ -206,7 +206,7 @@ export const CreateUpdateHuntForm = ({
           type="warning"
           showIcon
           className="mb-4"
-          title={`The runner stopped this hunt on ${formatEpochSecondsLocal(autoDisabled.at)}${autoDisabled.reason ? ` (${autoDisabled.reason})` : ''}.`}
+          title={`The runner stopped this hunt on ${formatEpochSecondsLocal(autoDisabled.at)} after repeated ClickHouse resource-limit failures${autoDisabled.reason ? ` (${autoDisabled.reason})` : ''}.`}
           description="Saving leaves it stopped. Use Re-enable Hunt in the actions menu to start it again."
         />
       )}
@@ -214,7 +214,11 @@ export const CreateUpdateHuntForm = ({
         name="enabled"
         label="Enabled"
         valuePropName="checked"
-        extra="A disabled hunt keeps its configuration and fires nothing."
+        extra={
+          autoDisabled
+            ? 'On in the saved configuration, but the runner has stopped it. Re-enable Hunt in the actions menu starts it again.'
+            : 'A disabled hunt keeps its configuration and fires nothing.'
+        }
       >
         <Switch />
       </Form.Item>
