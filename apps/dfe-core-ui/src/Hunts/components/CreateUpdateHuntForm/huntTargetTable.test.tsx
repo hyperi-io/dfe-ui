@@ -98,6 +98,8 @@ const hunt: THuntDetailResponse = {
   global_source_table_name: 'windows_audit',
   customers: ['acme'],
   rules: [{ rule_name: 'brute_force' }],
+  enabled: true,
+  auto_disabled_reason: '',
 };
 
 /** Records the body of the one write the form sends, and answers it. */
@@ -237,6 +239,108 @@ describe('Edit Hunt target and source table', () => {
       expect(sent.body).toMatchObject({
         global_source_table_name: 'windows_audit',
       });
+    },
+  );
+});
+
+describe('Add Hunt enabled', () => {
+  test.each([
+    { case: 'left on', clicks: 0, sent: true },
+    { case: 'turned off', clicks: 1, sent: false },
+  ])(
+    'opens with the switch on and sends enabled: $sent when $case',
+    { timeout: TEST_TIMEOUT_MS },
+    async ({ clicks, sent: expected }) => {
+      const sent = captureWrite('post', '/api/v1/hunts');
+      render(<CreateHuntDrawer />, { wrapper });
+      const drawer = await openDrawer('Add Hunt');
+      const toggle = drawer.getByRole('switch', { name: 'Enabled' });
+
+      expect(toggle).toBeChecked();
+      await fillNewHunt(drawer, { source: 'windows_audit', target: '' });
+      for (let i = 0; i < clicks; i++) {
+        await userEvent.click(toggle);
+      }
+      await userEvent.click(drawer.getByRole('button', { name: 'Add Hunt' }));
+
+      await waitFor(() => expect(sent.body).toBeDefined());
+      expect(sent.body).toMatchObject({ enabled: expected });
+    },
+  );
+});
+
+describe('Edit Hunt enabled', () => {
+  test.each([
+    { case: 'an enabled hunt left alone', stored: true, clicks: 0 },
+    { case: 'a disabled hunt left alone', stored: false, clicks: 0 },
+    {
+      case: 'an enabled hunt switched off',
+      stored: true,
+      clicks: 1,
+      sent: false,
+    },
+    {
+      case: 'a disabled hunt switched on',
+      stored: false,
+      clicks: 1,
+      sent: true,
+    },
+  ])(
+    'names enabled only when it changed: $case',
+    { timeout: TEST_TIMEOUT_MS },
+    async ({ stored, clicks, sent: expected }) => {
+      const sent = captureWrite('put', '/api/v1/hunts/windows_audit');
+      render(<UpdateHuntDrawer hunt={{ ...hunt, enabled: stored }} />, {
+        wrapper,
+      });
+      const drawer = await openDrawer('Edit Hunt');
+      const toggle = drawer.getByRole('switch', { name: 'Enabled' });
+
+      expect(toggle.getAttribute('aria-checked')).toBe(String(stored));
+      for (let i = 0; i < clicks; i++) {
+        await userEvent.click(toggle);
+      }
+      await userEvent.click(drawer.getByRole('button', { name: 'Edit Hunt' }));
+
+      await waitFor(() => expect(sent.body).toBeDefined());
+      if (expected === undefined) {
+        expect(sent.body).not.toHaveProperty('enabled');
+      } else {
+        expect(sent.body).toMatchObject({ enabled: expected });
+      }
+    },
+  );
+});
+
+describe('Edit Hunt runner stop', () => {
+  test(
+    'shows the stop from the detail and saves without naming enabled',
+    { timeout: TEST_TIMEOUT_MS },
+    async () => {
+      const sent = captureWrite('put', '/api/v1/hunts/windows_audit');
+      render(
+        <UpdateHuntDrawer
+          hunt={{
+            ...hunt,
+            auto_disabled_at: 1_763_300_000,
+            auto_disabled_reason: 'resource_limit:241',
+          }}
+        />,
+        { wrapper },
+      );
+      const drawer = await openDrawer('Edit Hunt');
+
+      expect(
+        drawer.getByText(
+          /Auto-disabled by the hunt runner on .+ after hitting ClickHouse's memory limit repeatedly\./,
+        ),
+      ).toBeInTheDocument();
+      // The switch shows the effective state, off, and an untouched switch names nothing.
+      expect(drawer.getByRole('switch', { name: 'Enabled' })).not.toBeChecked();
+      await userEvent.click(drawer.getByRole('button', { name: 'Edit Hunt' }));
+
+      await waitFor(() => expect(sent.body).toBeDefined());
+      expect(sent.body).not.toHaveProperty('enabled');
     },
   );
 });
