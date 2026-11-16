@@ -192,6 +192,7 @@ const RuleOrderList = ({
         ordered={ordered}
         titleOf={titleOf}
         isPending={isPending}
+        changed={isDirty}
         onMove={(from, to) => {
           reset();
           setDraft(moveId(draftIds, from, to));
@@ -247,12 +248,14 @@ const RbacOrderList = ({
   ordered,
   titleOf,
   isPending,
+  changed,
   onMove,
 }: {
   label: string;
   ordered: TRuleBlock[];
   titleOf: (block: TRuleBlock) => string;
   isPending: boolean;
+  changed: boolean;
   onMove: (from: number, to: number) => void;
 }) => {
   const { isAuthorized } = RbacProtected.useRbac({
@@ -264,6 +267,7 @@ const RbacOrderList = ({
       label={label}
       itemName={titleOf}
       disabled={!isAuthorized || isPending}
+      changed={changed}
       onMove={onMove}
       renderItem={(block) => <BlockRow block={block} title={titleOf(block)} />}
     />

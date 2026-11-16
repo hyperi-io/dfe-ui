@@ -9,7 +9,7 @@ import {
   IconGripVertical,
   IconPin,
 } from '@repo/dfe-icons';
-import { Button, Dropdown, Select } from 'antd';
+import { Button, Dropdown, Select, Tag } from 'antd';
 import { useEffect, useId, useRef, useState } from 'react';
 
 export type SortableRuleItem = {
@@ -22,6 +22,10 @@ type Control = 'handle' | 'up' | 'down' | 'menu';
 
 /** Where a dragged row lands: before the row under the pointer, or after it. */
 type DropTarget = { index: number; after: boolean };
+
+const sameIds = (left: string[], right: string[]) =>
+  left.length === right.length &&
+  left.every((id, index) => id === right[index]);
 
 /**
  * A first-match list whose order is edited by drag, by keyboard and by menu.
@@ -40,6 +44,7 @@ export function SortableRuleList<T extends SortableRuleItem>({
   renderItem,
   onMove,
   disabled = false,
+  changed = false,
 }: {
   items: T[];
   /** The list's accessible name. */
@@ -49,6 +54,8 @@ export function SortableRuleList<T extends SortableRuleItem>({
   renderItem: (item: T, position: number) => React.ReactNode;
   onMove: (from: number, to: number) => void;
   disabled?: boolean;
+  /** True while this order differs from the saved one. Tags compare against the order held before this became true. */
+  changed?: boolean;
 }) {
   const instructionsId = useId();
   // The count re-keys the message, so a repeat of the same words is announced again.
@@ -58,6 +65,12 @@ export function SortableRuleList<T extends SortableRuleItem>({
   const [dropTarget, setDropTarget] = useState<DropTarget | null>(null);
   const pendingFocus = useRef<{ id: string; control: Control } | null>(null);
   const controls = useRef(new Map<string, HTMLElement | null>());
+  // The saved order. An edit leaves it in place; while nothing is edited it follows the list.
+  const itemIds = items.map((item) => item.id);
+  const [baseline, setBaseline] = useState(itemIds);
+  if (!changed && !sameIds(baseline, itemIds)) {
+    setBaseline(itemIds);
+  }
 
   const movableCount = items.filter((item) => !item.pinned).length;
   const movable = (index: number) =>
@@ -140,6 +153,10 @@ export function SortableRuleList<T extends SortableRuleItem>({
         {items.map((item, index) => {
           const name = itemName(item);
           const canMove = movable(index);
+          const savedAt = baseline.indexOf(item.id);
+          const places = savedAt >= 0 ? Math.abs(savedAt - index) : 0;
+          const moved =
+            changed && places > 0 ? (index < savedAt ? 'up' : 'down') : null;
           const showLineBefore =
             dragIndex !== null &&
             dropTarget?.index === index &&
@@ -231,6 +248,23 @@ export function SortableRuleList<T extends SortableRuleItem>({
               <div className="min-w-0 flex-1">
                 {renderItem(item, index + 1)}
               </div>
+              {moved && (
+                <Tag
+                  className="m-0 flex items-center gap-1"
+                  variant="filled"
+                  color={moved === 'up' ? 'purple' : 'orange'}
+                >
+                  {moved === 'up' ? (
+                    <>
+                      <IconArrowUp /> {places}
+                    </>
+                  ) : (
+                    <>
+                      <IconArrowDown /> {places}
+                    </>
+                  )}
+                </Tag>
+              )}
               {canMove && (
                 <div className="flex shrink-0 items-center">
                   <Tooltip title="Move up">

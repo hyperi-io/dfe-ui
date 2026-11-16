@@ -16,11 +16,20 @@ const ROWS: Row[] = [
   { id: 'default', name: 'Default', pinned: true },
 ];
 
-const Harness = ({ disabled = false }: { disabled?: boolean }) => {
+const Harness = ({
+  disabled = false,
+  trackChanges = false,
+}: {
+  disabled?: boolean;
+  trackChanges?: boolean;
+}) => {
   const [rows, setRows] = useState(ROWS);
+  const changed =
+    trackChanges && rows.some((row, index) => row.id !== ROWS[index]?.id);
   return (
     <SortableRuleList
       items={rows}
+      changed={changed}
       label="Source rules order"
       itemName={(row) => row.name}
       disabled={disabled}
@@ -93,6 +102,42 @@ describe('SortableRuleList', () => {
     expect(within(pinned).getByRole('img', { name: 'Default is pinned' }));
     expect(within(pinned).queryAllByRole('button')).toHaveLength(0);
     expect(pinned).not.toHaveAttribute('draggable', 'true');
+  });
+
+  it('tags how far a row moved, purple when up and orange when down', async () => {
+    const user = userEvent.setup();
+    render(<Harness trackChanges />, { wrapper });
+
+    expect(document.querySelector('.ant-tag')).toBeNull();
+
+    await user.click(screen.getByRole('button', { name: 'Move charlie up' }));
+
+    expect(
+      within(screen.getByTestId('rule-block-c')).getByText('1', {
+        selector: '.ant-tag',
+      }),
+    ).toHaveClass('ant-tag-purple');
+    expect(
+      within(screen.getByTestId('rule-block-b')).getByText('1', {
+        selector: '.ant-tag',
+      }),
+    ).toHaveClass('ant-tag-orange');
+    expect(
+      screen.getByTestId('rule-block-a').querySelector('.ant-tag'),
+    ).toBeNull();
+
+    await user.click(screen.getByRole('button', { name: 'Move charlie up' }));
+
+    expect(
+      within(screen.getByTestId('rule-block-c')).getByText('2', {
+        selector: '.ant-tag',
+      }),
+    ).toHaveClass('ant-tag-purple');
+
+    await user.click(screen.getByRole('button', { name: 'Move charlie down' }));
+    await user.click(screen.getByRole('button', { name: 'Move charlie down' }));
+
+    expect(document.querySelector('.ant-tag')).toBeNull();
   });
 
   it('moves with the up button and keeps focus on it', async () => {

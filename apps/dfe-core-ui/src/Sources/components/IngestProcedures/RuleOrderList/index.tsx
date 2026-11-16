@@ -161,6 +161,7 @@ export const RuleOrderList = ({
           ordered={ordered}
           titleOf={titleOf}
           isPending={isPending}
+          changed={isDirty}
           onMove={(from, to) => {
             reset();
             setDraft(moveId(draftIds, from, to));
