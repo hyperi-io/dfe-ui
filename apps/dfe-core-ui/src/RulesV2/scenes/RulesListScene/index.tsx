@@ -1,7 +1,7 @@
 'use client';
 
-import { ListRulesTree } from '@/Rules/components/ListRulesTree';
-import { ViewRuleDetail } from '@/Rules/components/ViewRuleDetail';
+import { ListRulesTree } from '@/RulesV2/components/ListRulesTree';
+import { ViewRuleDetail } from '@/RulesV2/components/ViewRuleDetail';
 import { MainContentCard } from '@/core/components/ContentCard';
 import { RbacProtected } from '@/core/components/RbacProtected';
 import { Splitter } from '@/core/components/Splitter';

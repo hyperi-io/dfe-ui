@@ -5,6 +5,7 @@ import { useFetchInfiniteFilteredGroupsProps } from '@/core/hooks/useFetchInfini
 import { UseFetchInfiniteFilteredHuntsProps } from '@/core/hooks/useFetchInfiniteFilteredHunts/types';
 import { UseFetchInfiniteFilteredOrganisationsProps } from '@/core/hooks/useFetchInfiniteFilteredOrganisations/types';
 import { UseFetchInfiniteFilteredRulesProps } from '@/core/hooks/useFetchInfiniteFilteredRules/types';
+import { UseFetchInfiniteFilteredRulesProps as UseFetchInfiniteFilteredRulesV2Props } from '@/core/hooks/useFetchInfiniteFilteredRulesV2/types';
 import { UseFetchInfiniteFilteredSchemasProps } from '@/core/hooks/useFetchInfiniteFilteredSchemas/types';
 import { UseFetchInfiniteFilteredSourceCatalogueTagsProps } from '@/core/hooks/useFetchInfiniteFilteredSourceCatalogueTags/types';
 import { UseFetchInfiniteFilteredSourcesProps } from '@/core/hooks/useFetchInfiniteFilteredSources/types';
@@ -174,6 +175,28 @@ export const QUERY_KEYS = Object.freeze({
       ...(search ? ['search', search] : []),
       ...(severity ? ['severity', severity] : []),
       ...(source ? ['source', source] : []),
+      ...(sort_by ? ['sort_by', sort_by] : []),
+      ...(sort_order ? ['sort_order', sort_order] : []),
+      ...(page_size ? ['page_size', page_size] : []),
+    ],
+    validate: () => ['rules', 'validate'],
+    rule: ({ name }: { name?: string | null } = {}) => [
+      'rules',
+      '{name}',
+      ...(name ? [name] : []),
+    ],
+  },
+  rulesV2: {
+    default: ({
+      search,
+      severity,
+      sort_by,
+      sort_order,
+      page_size,
+    }: UseFetchInfiniteFilteredRulesV2Props = {}) => [
+      'rules',
+      ...(search ? ['search', search] : []),
+      ...(severity ? ['severity', severity] : []),
       ...(sort_by ? ['sort_by', sort_by] : []),
       ...(sort_order ? ['sort_order', sort_order] : []),
       ...(page_size ? ['page_size', page_size] : []),

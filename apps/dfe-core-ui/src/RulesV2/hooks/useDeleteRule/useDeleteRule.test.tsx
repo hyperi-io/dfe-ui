@@ -57,7 +57,7 @@ describe('.useDeleteRule', () => {
 
   describe('onError', () => {
     beforeEach(() => {
-      server.use(API_CONFIG_MOCKS.rules.rule.delete.error());
+      server.use(API_CONFIG_MOCKS.rulesV2.rule.delete.error());
     });
     test('should call onError', async () => {
       const onSuccess = vi.fn();

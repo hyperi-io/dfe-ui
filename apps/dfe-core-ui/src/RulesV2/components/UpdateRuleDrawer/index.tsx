@@ -1,8 +1,8 @@
 import { Drawer } from '@/core/components/Drawer';
 import { RbacProtected } from '@/core/components/RbacProtected';
-import { ruleSaveNotice } from '@/core/components/RuleSaveNotice';
-import { TRuleDetail } from '@/Rules/hooks/useFetchRuleDetail/types';
-import { TRuleUpdateResponse } from '@/Rules/hooks/useUpdateRule/types';
+import { ruleSaveNotice } from '@/RulesV2/components/RuleSaveNotice';
+import { TRuleDetail } from '@/RulesV2/hooks/useFetchRuleDetail/types';
+import { TRuleUpdateResponse } from '@/RulesV2/hooks/useUpdateRule/types';
 import { IconEdit } from '@repo/dfe-icons';
 import { Button, ButtonProps, notification } from 'antd';
 import { cloneElement, useState } from 'react';

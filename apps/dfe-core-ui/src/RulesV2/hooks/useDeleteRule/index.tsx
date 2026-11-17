@@ -14,10 +14,10 @@ export const useDeleteRule = ({
     mutationFn: (name: string) => deleteRule({ pathParams: { name } }),
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: QUERY_KEYS.rules.default(),
+        queryKey: QUERY_KEYS.rulesV2.default(),
       });
       queryClient.invalidateQueries({
-        queryKey: QUERY_KEYS.rules.rule(),
+        queryKey: QUERY_KEYS.rulesV2.rule(),
       });
       onSuccess?.();
     },

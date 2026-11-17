@@ -21,10 +21,10 @@ export const useUpdateRule = ({
       }),
     onSuccess: (data) => {
       queryClient.invalidateQueries({
-        queryKey: QUERY_KEYS.rules.default(),
+        queryKey: QUERY_KEYS.rulesV2.default(),
       });
       queryClient.invalidateQueries({
-        queryKey: QUERY_KEYS.rules.rule({ name }),
+        queryKey: QUERY_KEYS.rulesV2.rule({ name }),
       });
       onSuccess?.(data);
     },
