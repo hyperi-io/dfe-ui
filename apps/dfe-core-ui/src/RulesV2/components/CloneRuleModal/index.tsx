@@ -1,0 +1,181 @@
+import { Form } from '@/core/components/Form';
+
+import { DEFAULT_ESTIMATE_COST } from '@/core/components/CreateUpdateRuleForm/defaults';
+import { FormNotification } from '@/core/components/FormNotification';
+import { Modal } from '@/core/components/Modal';
+import { RbacProtected } from '@/core/components/RbacProtected';
+import { useCreateRule } from '@/core/hooks/useCreateRule';
+import { TRuleCreateResponse } from '@/core/hooks/useCreateRule/types';
+import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
+import { RULE_HUNT_NAME_VALIDATOR } from '@/core/validationSchemas/utils';
+import { TRuleDetail } from '@/Rules/hooks/useFetchRuleDetail/types';
+import { IconCopy } from '@repo/dfe-icons';
+import { Button, ButtonProps, Input } from 'antd';
+import { cloneElement, useState } from 'react';
+import z from 'zod';
+
+const formSchema = z.object({
+  name: z
+    .string()
+    .min(1, { message: 'Name is required' })
+    .refine((v) => RULE_HUNT_NAME_VALIDATOR.regex.test(v), {
+      message: RULE_HUNT_NAME_VALIDATOR.message('Name'),
+    }),
+});
+
+type FormData = z.infer<typeof formSchema>;
+
+interface CloneRuleModalProps {
+  rule: TRuleDetail;
+  onSuccess?: (data: TRuleCreateResponse) => void;
+  onError?: (error: Error) => void;
+  trigger?: React.ReactElement<ButtonProps>;
+}
+export const CloneRuleModal = ({
+  rule,
+  onSuccess: onSuccessProp,
+  onError,
+  trigger,
+}: CloneRuleModalProps) => {
+  const [form] = Form.useForm<FormData>();
+  const formValidation = useAntdZodResolver<FormData>(formSchema);
+  const [open, setOpen] = useState(false);
+
+  const onSuccess = (data: TRuleCreateResponse) => {
+    onSuccessProp?.(data);
+    setOpen(false);
+  };
+
+  const {
+    mutate: createRuleMutation,
+    isPending,
+    error,
+  } = useCreateRule({
+    onSuccess,
+    onError,
+  });
+  const handleCloneRule = (values: FormData) => {
+    createRuleMutation({
+      source_type: 'raw',
+      user_sql: rule.original_sql,
+      severity: rule.severity,
+      cel_filter: rule.cel_filter,
+      hunt_name: rule.hunt_name,
+      source: rule.source,
+      estimate_cost: DEFAULT_ESTIMATE_COST,
+      cost_window_minutes: 0,
+      name: values.name,
+    });
+  };
+
+  const handleOpen = () => {
+    setOpen(true);
+  };
+
+  const copyName = RULE_HUNT_NAME_VALIDATOR.copyName(rule.name);
+
+  return (
+    <>
+      <RbacProtected action={RbacProtected.rbacActions.rule_write}>
+        <RbacProtected.Unrestricted>
+          {trigger ? (
+            cloneElement(trigger, {
+              ...trigger.props,
+              onClick: (event: React.MouseEvent<HTMLElement>) => {
+                handleOpen();
+                trigger.props.onClick?.(event);
+              },
+            })
+          ) : (
+            <Button
+              type="default"
+              shape="circle"
+              size="small"
+              aria-label={`Clone ${rule.display_name ?? rule.name}`}
+              icon={<IconCopy />}
+              onClick={handleOpen}
+            />
+          )}
+        </RbacProtected.Unrestricted>
+        <RbacProtected.Restricted
+          className="justify-start opacity-100"
+          tooltip={{ show: true, placement: 'left' }}
+        >
+          {trigger ? (
+            cloneElement(trigger, {
+              ...trigger.props,
+              disabled: true,
+              onClick: (event: React.MouseEvent<HTMLElement>) => {
+                handleOpen();
+                trigger.props.onClick?.(event);
+              },
+            })
+          ) : (
+            <span className="bg-white rounded-full">
+              <Button
+                type="default"
+                shape="circle"
+                disabled
+                size="small"
+                aria-label={`Clone ${rule.display_name ?? rule.name}`}
+                icon={<IconCopy />}
+                onClick={handleOpen}
+              />
+            </span>
+          )}
+        </RbacProtected.Restricted>
+      </RbacProtected>
+
+      <Modal
+        title={`Clone ${rule.display_name ?? rule.name}`}
+        open={open}
+        onCancel={() => setOpen(false)}
+        footer={null}
+        destroyOnHidden
+      >
+        <Form
+          form={form}
+          onFinish={handleCloneRule}
+          initialValues={{
+            name: copyName,
+            display_name: `Copy: ${rule.display_name ?? rule.name}`,
+            user_sql: rule.original_sql,
+            severity: rule.severity,
+            cel_filter: rule.cel_filter,
+            hunt_name: rule.hunt_name,
+            source: rule.source,
+          }}
+        >
+          <Form.Item
+            name="name"
+            label="Name"
+            rules={[formValidation]}
+            className="w-full mb-2"
+          >
+            <Input placeholder={copyName} />
+          </Form.Item>
+
+          {error && <FormNotification text={error.message} type="error" />}
+          <div className="flex justify-end gap-x-2">
+            <Button
+              loading={isPending}
+              disabled={isPending}
+              type="default"
+              onClick={() => setOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              loading={isPending}
+              disabled={isPending}
+              htmlType="submit"
+              type="primary"
+            >
+              Clone
+            </Button>
+          </div>
+        </Form>
+      </Modal>
+    </>
+  );
+};
