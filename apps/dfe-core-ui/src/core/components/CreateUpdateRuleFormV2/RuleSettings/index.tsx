@@ -63,6 +63,15 @@ export const RuleSettings = ({
               ]}
             />
           </Form.Item>
+          <Form.Item
+            label="Description"
+            name="description"
+            className="m-0! grow text-sm w-full"
+            layout="vertical"
+            rules={[formValidation]}
+          >
+            <Input.TextArea />
+          </Form.Item>
         </div>
         {children}
       </ContentCard>
