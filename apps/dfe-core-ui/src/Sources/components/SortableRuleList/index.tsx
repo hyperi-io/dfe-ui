@@ -242,7 +242,7 @@ export function SortableRuleList<T extends SortableRuleItem>({
                   </span>
                 </Tooltip>
               )}
-              <span className="flex items-center justify-center gap-1 w-6 shrink-0 text-center text-sm tabular-nums text-foreground/50 dark:text-dark-foreground/50">
+              <span className="flex items-center justify-center gap-1 min-w-6 shrink-0 text-center text-sm tabular-nums text-foreground/50 dark:text-dark-foreground/50">
                 {index + 1}
                 {canMove && (
                   <SortableDropdown
