@@ -1,4 +1,7 @@
-import { CreateRuleDrawer } from '@/core/components/CreateRuleDrawer';
+'use client';
+
+import { ButtonLinkSavedSearch } from '@/core/components/ButtonLinkSavedSearch';
+import { CreateCustomRuleDrawer } from '@/core/components/CreateCustomRuleDrawer';
 import { RbacProtected } from '@/core/components/RbacProtected';
 import { UseFetchInfiniteFilteredRulesProps } from '@/core/hooks/useFetchInfiniteFilteredRules/types';
 import { cn } from '@/core/utils/style';
@@ -44,7 +47,21 @@ export const EmptyList = ({
           Clear Filters
         </Button>
       ) : (
-        <CreateRuleDrawer />
+        canCreate && (
+          <>
+            <ButtonLinkSavedSearch />
+            <p className="text-foreground-muted dark:text-dark-foreground-muted inline-block items-center">
+              Or manually insert filters and conditions:
+              <CreateCustomRuleDrawer
+                classNames={{
+                  button: {
+                    root: 'p-0.5 ml-0.5 h-6 text-foreground-muted dark:text-dark-foreground-muted ',
+                  },
+                }}
+              />
+            </p>
+          </>
+        )
       )}
     </div>
   );

@@ -1,4 +1,4 @@
-import { CreateRuleDrawer } from '@/core/components/CreateRuleDrawer';
+import { CreateCustomRuleDrawer } from '@/core/components/CreateCustomRuleDrawer';
 import { RbacProtected } from '@/core/components/RbacProtected';
 import { ListRulesProvider } from '@/core/contexts/ListRulesContext';
 import { useFetchInfiniteFilteredRules } from '@/core/hooks/useFetchInfiniteFilteredRules';
@@ -50,11 +50,13 @@ export const RuleSelect = ({ value, ...props }: SelectProps) => {
             mode="tags"
           />
           <ListRulesProvider>
-            <CreateRuleDrawer
+            <CreateCustomRuleDrawer
               onSuccess={(response) => {
                 handleChange([...(ruleValue ?? []), response.rule.name]);
               }}
               redirectOnCreate={false}
+              button={{ type: 'default' }}
+              showCreateFromSearch={true}
             />
           </ListRulesProvider>
         </div>
