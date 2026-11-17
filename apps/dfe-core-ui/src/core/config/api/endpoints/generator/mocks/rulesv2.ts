@@ -1,8 +1,7 @@
-import { TRuleCreateResponse } from '@/core/hooks/useCreateRule/types';
-import { TRuleListResponse } from '@/core/hooks/useFetchInfiniteFilteredRules/types';
-import { TSqlValidationResponse } from '@/core/hooks/useValidateRule/types';
-import { TRuleDetail } from '@/Rules/hooks/useFetchRuleDetail/types';
-import { TRuleUpdateResponse } from '@/Rules/hooks/useUpdateRule/types';
+import { TRuleCreateResponse } from '@/core/hooks/useCreateRuleV2/types';
+import { TRuleListResponse as TRuleListResponseV2 } from '@/core/hooks/useFetchInfiniteFilteredRulesV2/types';
+import { TRuleDetail } from '@/RulesV2/hooks/useFetchRuleDetail/types';
+import { TRuleUpdateResponse } from '@/RulesV2/hooks/useUpdateRule/types';
 import { http, HttpResponse } from 'msw';
 import {
   DEFAULT_VALIDATION_ERROR,
@@ -18,13 +17,9 @@ export const rulesV2 = {
           name: 'string',
           display_name: 'string',
           severity: 'string',
-          source: 'string',
-          source_db: 'string',
-          source_table: 'string',
+          description: 'string',
           where_clause: 'string',
           cel_filter: 'string',
-          original_sql: 'string',
-          hunt_name: 'string',
           created_at: 'string',
         },
         name = 'name',
@@ -57,14 +52,9 @@ export const rulesV2 = {
             name: 'string',
             display_name: 'string',
             severity: 'string',
-            source_db: 'string',
-            source_table: 'string',
+            description: 'string',
             where_clause: 'string',
             cel_filter: 'string',
-            original_sql: 'string',
-            hunt_name: 'string',
-            source: 'string',
-            warnings: ['string'],
             created_at: 'string',
           },
           sanitize_summary: {
@@ -78,15 +68,6 @@ export const rulesV2 = {
               suggestion: 'string',
             },
           ],
-          cost_estimate: {
-            estimated_rows: 0,
-            rows_in_window: 0,
-            projected_per_day: 0,
-            match_ratio: 0,
-            band: 'ok',
-            window_minutes: 60,
-            warnings: ['string'],
-          },
         },
         name = 'name',
       }: {
@@ -148,10 +129,7 @@ export const rulesV2 = {
               name: 'string',
               display_name: 'string',
               severity: 'string',
-              source: 'string',
-              source_db: 'string',
-              source_table: 'string',
-              hunt_name: 'string',
+              description: 'string',
               created_at: 'string',
             },
           ],
@@ -159,7 +137,7 @@ export const rulesV2 = {
           next_page_token: null,
         },
       }: {
-        mockedResponse?: TRuleListResponse;
+        mockedResponse?: TRuleListResponseV2;
       } = {}) => {
         return http.get(rulesV2.default.mockedUrl, () => {
           return HttpResponse.json(mockedResponse);
@@ -184,14 +162,9 @@ export const rulesV2 = {
             name: 'string',
             display_name: 'string',
             severity: 'string',
-            source_db: 'string',
-            source_table: 'string',
+            description: 'string',
             where_clause: 'string',
             cel_filter: 'string',
-            original_sql: 'string',
-            hunt_name: 'string',
-            source: 'string',
-            warnings: ['string'],
             created_at: 'string',
           },
           sanitize_summary: {
@@ -204,15 +177,6 @@ export const rulesV2 = {
               suggestion: 'string',
             },
           ],
-          cost_estimate: {
-            estimated_rows: 0,
-            rows_in_window: 0,
-            projected_per_day: 0,
-            match_ratio: 0,
-            band: 'ok',
-            window_minutes: 60,
-            warnings: ['string'],
-          },
         },
       }: {
         mockedResponse?: TRuleCreateResponse;
@@ -235,33 +199,8 @@ export const rulesV2 = {
   validate: {
     mockedUrl: '/api/v1/rules-v2/validate',
     post: {
-      success: ({
-        mockedResponse = {
-          valid: true,
-          errors: [
-            {
-              message: 'string',
-              position: 0,
-              suggestion: 'string',
-            },
-          ],
-        },
-      }: {
-        mockedResponse?: TSqlValidationResponse;
-      } = {}) =>
-        http.post(rulesV2.validate.mockedUrl, () => {
-          return HttpResponse.json(mockedResponse);
-        }),
-      error: ({
-        mockedResponse = DEFAULT_VALIDATION_ERROR,
-        status = 422,
-      }: {
-        mockedResponse?: TValidationError;
-        status?: number;
-      } = {}) =>
-        http.post(rulesV2.validate.mockedUrl, () => {
-          return HttpResponse.json(mockedResponse, { status });
-        }),
+      success: () => console.error('Not implemented'),
+      error: () => console.error('Not implemented'),
     },
   },
 };

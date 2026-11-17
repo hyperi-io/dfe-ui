@@ -47,10 +47,10 @@ describe('.useCreateRule', () => {
         rule: {
           name: 'string',
           display_name: 'string',
+          description: 'string',
           severity: 'string',
           where_clause: 'string',
           cel_filter: 'string',
-          warnings: ['string'],
           created_at: 'string',
         },
         sanitize_summary: {
@@ -87,7 +87,7 @@ describe('.useCreateRule', () => {
 
   describe('onError', () => {
     beforeEach(() => {
-      server.use(API_CONFIG_MOCKS.rules.default.post.error());
+      server.use(API_CONFIG_MOCKS.rulesV2.default.post.error());
     });
     test('should call onError', async () => {
       const onSuccess = vi.fn();
