@@ -17,7 +17,7 @@ export const useCreateRule = ({
     mutationFn: (rule: TRuleCreateRequest) => createRule({ body: rule }),
     onSuccess: (data) => {
       queryClient.invalidateQueries({
-        queryKey: QUERY_KEYS.rules.default(),
+        queryKey: QUERY_KEYS.rulesV2.default(),
       });
       onSuccess?.(data);
     },
