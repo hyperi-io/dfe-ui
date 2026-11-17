@@ -1,10 +1,10 @@
 'use client';
 
 import { ButtonLinkSavedSearch } from '@/core/components/ButtonLinkSavedSearch';
-import { CreateCustomRuleDrawer } from '@/core/components/CreateCustomRuleDrawer';
 import { Toolbar } from '@/core/components/Toolbar';
-import { ListRulesProvider } from '@/core/contexts/ListRulesContext';
+import { ListRulesProvider } from '@/core/contexts/ListRulesContextV2';
 import { cn } from '@/core/utils/style';
+import { CreateCustomRuleDrawer } from '@/RulesV2/components/CreateCustomRuleDrawerV2';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 

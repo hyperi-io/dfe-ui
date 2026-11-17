@@ -1,5 +1,5 @@
 import { ActionsMenu } from '@/core/components/ActionsMenu';
-import { useListRulesContext } from '@/core/contexts/ListRulesContext';
+import { useListRulesContext } from '@/core/contexts/ListRulesContextV2';
 import { TRuleCreateResponse } from '@/core/hooks/useCreateRuleV2/types';
 import { CloneRuleModal } from '@/RulesV2/components/CloneRuleModal';
 import { DeleteRuleModal } from '@/RulesV2/components/DeleteRuleModal';

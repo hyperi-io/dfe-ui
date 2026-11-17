@@ -1,6 +1,6 @@
 import { SimpleCollapse } from '@/core/components/SimpleCollapse';
 import { Tooltip } from '@/core/components/Tooltip';
-import { useListRulesContext } from '@/core/contexts/ListRulesContext';
+import { useListRulesContext } from '@/core/contexts/ListRulesContextV2';
 import { Tag } from 'antd';
 import { ListRulesFilterForm } from './ListRulesFilterForm';
 

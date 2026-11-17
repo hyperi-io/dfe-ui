@@ -1,12 +1,12 @@
 'use client';
 
 import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
+import { useFetchInfiniteFilteredRules } from '@/core/hooks/useFetchInfiniteFilteredRulesV2';
 import type {
   TRuleListItem,
   TRuleListResponse,
   UseFetchInfiniteFilteredRulesProps,
-} from '@/core/hooks/useFetchInfiniteFilteredRules/types';
-import { useFetchInfiniteFilteredRules } from '@/core/hooks/useFetchInfiniteFilteredRulesV2';
+} from '@/core/hooks/useFetchInfiniteFilteredRulesV2/types';
 
 import { useQueryClient } from '@tanstack/react-query';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
@@ -37,21 +37,17 @@ const parseFiltersFromParams = (
   const severityParam = params.get('severity');
   const severity =
     severityParam === null || severityParam === '' ? undefined : severityParam;
-  const sourceParam = params.get('source');
-  const source =
-    sourceParam === null || sourceParam === '' ? undefined : sourceParam;
   const sort_by = params.get('sort_by') ?? undefined;
   const sort_order = params.get('sort_order') ?? undefined;
   const page_sizeParam = params.get('page_size');
   const page_size = page_sizeParam ? parseInt(page_sizeParam, 10) : undefined;
-  return { search, severity, source, sort_by, sort_order, page_size };
+  return { search, severity, sort_by, sort_order, page_size };
 };
 
 const filtersToSearchString = (f: ListRulesQueryParams): string => {
   const params = new URLSearchParams();
   if (f.search) params.set('search', f.search);
   if (f.severity) params.set('severity', f.severity);
-  if (f.source) params.set('source', f.source);
   if (f.sort_by) params.set('sort_by', f.sort_by);
   if (f.sort_order) params.set('sort_order', f.sort_order);
   if (f.page_size) params.set('page_size', String(f.page_size));
@@ -63,7 +59,7 @@ const hasSortFilters = (f: ListRulesQueryParams) =>
   f.sort_by !== undefined || f.sort_order !== undefined;
 
 const hasSearchFilters = (f: ListRulesQueryParams) =>
-  f.search !== undefined || f.severity !== undefined || f.source !== undefined;
+  f.search !== undefined || f.severity !== undefined;
 const hasAnyFilters = (f: ListRulesQueryParams) =>
   hasSearchFilters(f) || hasSortFilters(f);
 

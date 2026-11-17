@@ -2,7 +2,7 @@ import { CustomScrollbar } from '@/core/components/CustomScrollbar';
 import { EmptyDetail } from '@/core/components/EmptyDetail';
 import { GenericErrorCard } from '@/core/components/GenericError';
 import { NotificationCard } from '@/core/components/NotificationCard';
-import { useListRulesContext } from '@/core/contexts/ListRulesContext';
+import { useListRulesContext } from '@/core/contexts/ListRulesContextV2';
 import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
 import { useFetchRuleDetail } from '@/RulesV2/hooks/useFetchRuleDetail';
 import { IconAlertCircle } from '@repo/dfe-icons';
