@@ -61,7 +61,7 @@ export const CloneHuntModal = ({
       global_target_table_name: hunt.global_target_table_name,
       global_source_table_name: hunt.global_source_table_name,
       customers: hunt.customers ?? [],
-      rules: hunt.rules.map((rule) => rule.rule_name),
+      rules: hunt?.rules?.map((rule) => rule.rule_name) ?? [],
       enabled: hunt.enabled,
       ...values,
     });
@@ -143,7 +143,7 @@ export const CloneHuntModal = ({
             global_target_table_name: hunt.global_target_table_name,
             global_source_table_name: hunt.global_source_table_name,
             customers: hunt.customers,
-            rules: hunt.rules.map((rule) => rule.rule_name),
+            rules: hunt?.rules?.map((rule) => rule.rule_name) ?? [],
           }}
         >
           <Form.Item

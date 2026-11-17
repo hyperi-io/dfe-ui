@@ -44,7 +44,7 @@ export const ConfigurationDetailsTabContent = ({
         <dd>{customers ? customers.join(', ') : <EmptyData />}</dd>
         <dt className={dataListTermStyle}>Rules:</dt>
         <dd>
-          {rulesList.length > 0 ? (
+          {rulesList && rulesList.length > 0 ? (
             <>
               <ul className="flex flex-wrap items-center gap-1">
                 {rulesList.map((rule) => (
