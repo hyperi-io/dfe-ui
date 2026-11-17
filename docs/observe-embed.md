@@ -15,41 +15,6 @@ The Observe page frames dfe-hyperdx inside the console, and is one part of [dfe-
 The page keeps the frame's theme in step with the console by posting it when the frame loads and on every toggle.
 
 ```mermaid
----
-config:
-  theme: base
-  look: neo
-  fontFamily: Inter, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif
-  themeVariables:
-    fontSize: 15px
-    lineColor: "#64748B"
-    primaryTextColor: "#0F172A"
-    edgeLabelBackground: "#FFFFFF"
-    actorBkg: "#FFFFFF"
-    actorBorder: "#94A3B8"
-    actorTextColor: "#0F172A"
-    actorLineColor: "#94A3B8"
-    signalColor: "#64748B"
-    signalTextColor: "#0F172A"
-    sequenceNumberColor: "#FFFFFF"
-    noteBkgColor: "#FFFFFF"
-    noteBorderColor: "#94A3B8"
-    noteTextColor: "#0F172A"
-    labelBoxBkgColor: "#FFFFFF"
-    labelBoxBorderColor: "#94A3B8"
-    labelTextColor: "#0F172A"
-    loopTextColor: "#0F172A"
-  themeCSS: >-
-    p{margin:0}
-    .labelBkg{background:transparent!important}
-    span.edgeLabel{display:inline-block;background:#FFFFFF!important;color:#1E293B;border:1px solid #94A3B8;border-radius:999px;padding:2px 10px;font-size:12px;font-weight:500}
-    span.edgeLabel p{background:transparent!important}
-    .messageText{fill:#0F172A;stroke:#FFFFFF;stroke-width:4px;paint-order:stroke;stroke-linejoin:round}
-    .loopText,.loopText tspan{fill:#0F172A;stroke:#FFFFFF;stroke-width:4px;paint-order:stroke;stroke-linejoin:round}
-    .loopLine{stroke:#64748B}
-    .actor{rx:10px;ry:10px;filter:drop-shadow(0 1px 2px rgba(15,23,42,.10)) drop-shadow(0 6px 14px rgba(15,23,42,.10))}
-    .actor-line{stroke-dasharray:4 4}
----
 sequenceDiagram
   accTitle: L4 Detail -- Observe embed
   accDescr: The Observe page loads dfe-hyperdx in a frame with embed and theme in the URL. When the frame has loaded, and on every theme toggle, the page posts a DFE_SET_THEME message to it.
