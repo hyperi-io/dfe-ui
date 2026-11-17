@@ -21,6 +21,7 @@ import { orgs } from './mocks/orgs';
 import { repository } from './mocks/repository';
 import { roles } from './mocks/roles';
 import { rules } from './mocks/rules';
+import { rulesV2 } from './mocks/rulesv2';
 import { schemas } from './mocks/schemas';
 import { sources } from './mocks/sources';
 import { system } from './mocks/system';
@@ -50,6 +51,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
   repository,
   roles,
   rules,
+  rulesV2,
   schemas,
   sources,
   system,

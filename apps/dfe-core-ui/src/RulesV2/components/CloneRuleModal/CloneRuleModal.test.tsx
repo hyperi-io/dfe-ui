@@ -6,7 +6,7 @@ import {
   NAME_RULE_TEST_TIMEOUT_MS,
 } from '@/core/utils/test-utils/expectNameRule';
 import { RULE_HUNT_NAME_VALIDATOR } from '@/core/validationSchemas/utils';
-import { TRuleDetail } from '@/Rules/hooks/useFetchRuleDetail/types';
+import { TRuleDetail } from '@/RulesV2/hooks/useFetchRuleDetail/types';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { http, HttpResponse } from 'msw';
@@ -23,13 +23,8 @@ const rule: TRuleDetail = {
   name: 'brute_force',
   display_name: 'Brute force',
   severity: 'high',
-  source: 'windows-audit',
-  source_db: 'dfe',
-  source_table: 'windows_audit',
   where_clause: '1',
   cel_filter: '',
-  original_sql: 'SELECT * FROM dfe.windows_audit WHERE 1',
-  hunt_name: 'windows_audit',
   created_at: '2026-01-01T00:00:00Z',
 };
 
@@ -68,7 +63,7 @@ describe('CloneRuleModal name', () => {
       let sent: unknown;
       server.use(
         http.post(
-          API_CONFIG_MOCKS.rules.default.mockedUrl,
+          API_CONFIG_MOCKS.rulesV2.default.mockedUrl,
           async ({ request }) => {
             sent = await request.json();
             return HttpResponse.json({ rule: { ...rule, name: copy } });

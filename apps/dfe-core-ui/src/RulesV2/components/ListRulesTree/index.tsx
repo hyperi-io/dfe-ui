@@ -1,4 +1,4 @@
-import { ListRulesFilters } from '@/Rules/components/ListRulesFilters';
+import { ListRulesFilters } from '@/RulesV2/components/ListRulesFilters';
 import { useState } from 'react';
 import { RulesList } from './RulesList';
 

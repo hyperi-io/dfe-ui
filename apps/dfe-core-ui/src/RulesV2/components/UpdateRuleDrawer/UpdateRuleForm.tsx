@@ -1,14 +1,13 @@
 import {
   CreateUpdateRuleForm,
   CreateUpdateRuleFormData,
-  DEFAULT_ESTIMATE_COST,
-} from '@/core/components/CreateUpdateRuleForm';
+} from '@/core/components/CreateUpdateRuleFormV2';
 import { CustomScrollbar } from '@/core/components/CustomScrollbar';
 import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
 import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
-import { TRuleDetail } from '@/Rules/hooks/useFetchRuleDetail/types';
-import { useUpdateRule } from '@/Rules/hooks/useUpdateRule';
-import { TRuleUpdateResponse } from '@/Rules/hooks/useUpdateRule/types';
+import { TRuleDetail } from '@/RulesV2/hooks/useFetchRuleDetail/types';
+import { useUpdateRule } from '@/RulesV2/hooks/useUpdateRule';
+import { TRuleUpdateResponse } from '@/RulesV2/hooks/useUpdateRule/types';
 import { useQueryClient } from '@tanstack/react-query';
 
 interface UpdateRuleFormProps {
@@ -31,7 +30,7 @@ export const UpdateRuleForm = ({ rule, onSuccess }: UpdateRuleFormProps) => {
   } = useUpdateRule({
     onSuccess: (response) => {
       queryClient.invalidateQueries({
-        queryKey: QUERY_KEYS.rules.rule({ name: rule.name }),
+        queryKey: QUERY_KEYS.rulesV2.rule({ name: rule.name }),
       });
       onSuccess?.(response);
     },
@@ -41,10 +40,6 @@ export const UpdateRuleForm = ({ rule, onSuccess }: UpdateRuleFormProps) => {
   const handleUpdateRule = (values: CreateUpdateRuleFormData) => {
     updateRule({
       ...values,
-      estimate_cost: values.estimate_cost ?? DEFAULT_ESTIMATE_COST,
-      cost_window_minutes: values.cost_window_minutes
-        ? Number(values.cost_window_minutes)
-        : 0,
     });
   };
 
@@ -57,11 +52,8 @@ export const UpdateRuleForm = ({ rule, onSuccess }: UpdateRuleFormProps) => {
         }}
         initialValues={{
           ...rule,
-          user_sql: rule.original_sql,
           severity: rule.severity as 'low' | 'medium' | 'high' | 'critical',
           cel_filter: rule.cel_filter ?? undefined,
-          hunt_name: rule.hunt_name ?? undefined,
-          source: rule.source ?? undefined,
         }}
         onFinish={handleUpdateRule}
         onValuesChange={resetUpdateRule}

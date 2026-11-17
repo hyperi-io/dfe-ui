@@ -9,7 +9,7 @@ import { fetchRuleDetail } from './api';
  */
 export const useFetchRuleDetail = ({ name }: { name: string | null }) => {
   const { data, isLoading, error } = useQuery({
-    queryKey: QUERY_KEYS.rules.rule({ name }),
+    queryKey: QUERY_KEYS.rulesV2.rule({ name }),
     queryFn: ({ signal }) =>
       fetchRuleDetail({
         pathParams: { name: name ?? '' },

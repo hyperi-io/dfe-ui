@@ -1,5 +1,5 @@
-import { useDeleteRule } from '@/Rules/hooks/useDeleteRule';
-import { TRuleDetail } from '@/Rules/hooks/useFetchRuleDetail/types';
+import { useDeleteRule } from '@/RulesV2/hooks/useDeleteRule';
+import { TRuleDetail } from '@/RulesV2/hooks/useFetchRuleDetail/types';
 
 import { FormNotification } from '@/core/components/FormNotification';
 import { Modal } from '@/core/components/Modal';

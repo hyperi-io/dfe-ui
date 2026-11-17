@@ -1,11 +1,10 @@
-import { AceEditor } from '@/core/components/AceEditor';
 import { CustomScrollbar } from '@/core/components/CustomScrollbar';
 import { EmptyDetail } from '@/core/components/EmptyDetail';
 import { GenericErrorCard } from '@/core/components/GenericError';
 import { NotificationCard } from '@/core/components/NotificationCard';
 import { useListRulesContext } from '@/core/contexts/ListRulesContext';
 import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
-import { useFetchRuleDetail } from '@/Rules/hooks/useFetchRuleDetail';
+import { useFetchRuleDetail } from '@/RulesV2/hooks/useFetchRuleDetail';
 import { IconAlertCircle } from '@repo/dfe-icons';
 import { Spin } from 'antd';
 import { RuleDetailActionMenu } from './RuleDetailActionMenu';
@@ -72,14 +71,6 @@ export const ViewRuleDetail = () => {
           <dd>{ruleDetail.name}</dd>
           <dt className={dataListTermStyle}>Severity:</dt>
           <dd>{ruleDetail.severity}</dd>
-          <dt className={dataListTermStyle}>Source:</dt>
-          <dd>{ruleDetail.source || <EmptyData />}</dd>
-          <dt className={dataListTermStyle}>Source Table:</dt>
-          <dd>{ruleDetail.source_table || <EmptyData />}</dd>
-          <dt className={dataListTermStyle}>Source DB:</dt>
-          <dd>{ruleDetail.source_db || <EmptyData />}</dd>
-          <dt className={dataListTermStyle}>Hunt Name:</dt>
-          <dd>{ruleDetail.hunt_name || <EmptyData />}</dd>
           <dt className={dataListTermStyle}>Where Clause:</dt>
           <dd>{ruleDetail.where_clause || <EmptyData />}</dd>
           <dt className={dataListTermStyle}>CEL Filter:</dt>
@@ -126,12 +117,6 @@ export const ViewRuleDetail = () => {
           type="error"
         />
       )}
-      <AceEditor
-        value={ruleDetail.original_sql}
-        mode="sql"
-        height="300px"
-        readOnly
-      />
     </CustomScrollbar>
   );
 };

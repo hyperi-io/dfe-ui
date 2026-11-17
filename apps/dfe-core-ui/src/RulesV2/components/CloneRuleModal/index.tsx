@@ -1,14 +1,13 @@
 import { Form } from '@/core/components/Form';
 
-import { DEFAULT_ESTIMATE_COST } from '@/core/components/CreateUpdateRuleForm/defaults';
 import { FormNotification } from '@/core/components/FormNotification';
 import { Modal } from '@/core/components/Modal';
 import { RbacProtected } from '@/core/components/RbacProtected';
-import { useCreateRule } from '@/core/hooks/useCreateRule';
-import { TRuleCreateResponse } from '@/core/hooks/useCreateRule/types';
+import { useCreateRule } from '@/core/hooks/useCreateRuleV2';
+import { TRuleCreateResponse } from '@/core/hooks/useCreateRuleV2/types';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
 import { RULE_HUNT_NAME_VALIDATOR } from '@/core/validationSchemas/utils';
-import { TRuleDetail } from '@/Rules/hooks/useFetchRuleDetail/types';
+import { TRuleDetail } from '@/RulesV2/hooks/useFetchRuleDetail/types';
 import { IconCopy } from '@repo/dfe-icons';
 import { Button, ButtonProps, Input } from 'antd';
 import { cloneElement, useState } from 'react';
@@ -56,14 +55,8 @@ export const CloneRuleModal = ({
   });
   const handleCloneRule = (values: FormData) => {
     createRuleMutation({
-      source_type: 'raw',
-      user_sql: rule.original_sql,
       severity: rule.severity,
       cel_filter: rule.cel_filter,
-      hunt_name: rule.hunt_name,
-      source: rule.source,
-      estimate_cost: DEFAULT_ESTIMATE_COST,
-      cost_window_minutes: 0,
       name: values.name,
     });
   };
@@ -139,11 +132,8 @@ export const CloneRuleModal = ({
           initialValues={{
             name: copyName,
             display_name: `Copy: ${rule.display_name ?? rule.name}`,
-            user_sql: rule.original_sql,
             severity: rule.severity,
             cel_filter: rule.cel_filter,
-            hunt_name: rule.hunt_name,
-            source: rule.source,
           }}
         >
           <Form.Item

@@ -1,11 +1,11 @@
 import { ActionsMenu } from '@/core/components/ActionsMenu';
 import { useListRulesContext } from '@/core/contexts/ListRulesContext';
-import { TRuleCreateResponse } from '@/core/hooks/useCreateRule/types';
-import { CloneRuleModal } from '@/Rules/components/CloneRuleModal';
-import { DeleteRuleModal } from '@/Rules/components/DeleteRuleModal';
-import { UpdateRuleDrawer } from '@/Rules/components/UpdateRuleDrawer';
-import { TRuleDetail } from '@/Rules/hooks/useFetchRuleDetail/types';
-import { TRuleUpdateResponse } from '@/Rules/hooks/useUpdateRule/types';
+import { TRuleCreateResponse } from '@/core/hooks/useCreateRuleV2/types';
+import { CloneRuleModal } from '@/RulesV2/components/CloneRuleModal';
+import { DeleteRuleModal } from '@/RulesV2/components/DeleteRuleModal';
+import { UpdateRuleDrawer } from '@/RulesV2/components/UpdateRuleDrawer';
+import { TRuleDetail } from '@/RulesV2/hooks/useFetchRuleDetail/types';
+import { TRuleUpdateResponse } from '@/RulesV2/hooks/useUpdateRule/types';
 import { IconCopy, IconEdit, IconTrash } from '@repo/dfe-icons';
 import { App, Button } from 'antd';
 

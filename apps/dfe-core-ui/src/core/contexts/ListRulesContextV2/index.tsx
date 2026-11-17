@@ -1,0 +1,222 @@
+'use client';
+
+import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
+import type {
+  TRuleListItem,
+  TRuleListResponse,
+  UseFetchInfiniteFilteredRulesProps,
+} from '@/core/hooks/useFetchInfiniteFilteredRules/types';
+import { useFetchInfiniteFilteredRules } from '@/core/hooks/useFetchInfiniteFilteredRulesV2';
+
+import { useQueryClient } from '@tanstack/react-query';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import {
+  createContext,
+  startTransition,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from 'react';
+
+interface ListRulesQueryParams extends Omit<
+  UseFetchInfiniteFilteredRulesProps,
+  'page'
+> {
+  name?: string;
+}
+
+const parseFiltersFromParams = (
+  params: URLSearchParams,
+): UseFetchInfiniteFilteredRulesProps => {
+  const searchParam = params.get('search');
+  const search =
+    searchParam === null || searchParam === '' ? undefined : searchParam;
+  const severityParam = params.get('severity');
+  const severity =
+    severityParam === null || severityParam === '' ? undefined : severityParam;
+  const sourceParam = params.get('source');
+  const source =
+    sourceParam === null || sourceParam === '' ? undefined : sourceParam;
+  const sort_by = params.get('sort_by') ?? undefined;
+  const sort_order = params.get('sort_order') ?? undefined;
+  const page_sizeParam = params.get('page_size');
+  const page_size = page_sizeParam ? parseInt(page_sizeParam, 10) : undefined;
+  return { search, severity, source, sort_by, sort_order, page_size };
+};
+
+const filtersToSearchString = (f: ListRulesQueryParams): string => {
+  const params = new URLSearchParams();
+  if (f.search) params.set('search', f.search);
+  if (f.severity) params.set('severity', f.severity);
+  if (f.source) params.set('source', f.source);
+  if (f.sort_by) params.set('sort_by', f.sort_by);
+  if (f.sort_order) params.set('sort_order', f.sort_order);
+  if (f.page_size) params.set('page_size', String(f.page_size));
+  if (f.name) params.set('name', f.name);
+  return params.toString();
+};
+
+const hasSortFilters = (f: ListRulesQueryParams) =>
+  f.sort_by !== undefined || f.sort_order !== undefined;
+
+const hasSearchFilters = (f: ListRulesQueryParams) =>
+  f.search !== undefined || f.severity !== undefined || f.source !== undefined;
+const hasAnyFilters = (f: ListRulesQueryParams) =>
+  hasSearchFilters(f) || hasSortFilters(f);
+
+export interface ListRulesContextValue {
+  data: TRuleListResponse;
+  filters: UseFetchInfiniteFilteredRulesProps;
+  hasFilters: boolean;
+  setFilters: (filters: UseFetchInfiniteFilteredRulesProps) => void;
+  isLoading: boolean;
+  isError: boolean;
+  error: Error | null;
+  fetchNextPage: () => void;
+  hasNextPage: boolean;
+  loadMoreRef: React.RefObject<HTMLDivElement | null>;
+  isFetchingNextPage: boolean;
+  selectedRuleName: string | null;
+  setSelectedRuleName: (name: string | null) => void;
+}
+
+const DEFAULT_RULE_LIST_RESPONSE: TRuleListResponse = {
+  items: [] as TRuleListItem[],
+  total_size: 0,
+  next_page_token: null,
+};
+
+const ListRulesContext = createContext<ListRulesContextValue | null>(null);
+
+export interface ListRulesProviderProps {
+  children: ReactNode;
+  defaultFilters?: UseFetchInfiniteFilteredRulesProps;
+}
+
+export const ListRulesProvider = ({
+  children,
+  defaultFilters = {},
+}: ListRulesProviderProps) => {
+  const queryClient = useQueryClient();
+  const [selectedRuleName, setSelectedRuleName] = useState<string | null>(null);
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
+
+  const filters = useMemo<UseFetchInfiniteFilteredRulesProps>(() => {
+    const urlFilters = parseFiltersFromParams(searchParams);
+    // page_size is not a search filter, and it still has to reach the list
+    // when it is the only query parameter.
+    if (hasAnyFilters(urlFilters) || urlFilters.page_size !== undefined) {
+      return urlFilters;
+    }
+    return defaultFilters;
+  }, [searchParams, defaultFilters]);
+
+  useEffect(() => {
+    const name = searchParams.get('name');
+    startTransition(() =>
+      setSelectedRuleName(name && name !== '' ? name : null),
+    );
+  }, [searchParams]);
+
+  const hasFilters = useMemo(() => hasSearchFilters(filters), [filters]);
+
+  const {
+    data = DEFAULT_RULE_LIST_RESPONSE,
+    isLoading,
+    isError,
+    error,
+    fetchNextPage,
+    hasNextPage,
+    loadMoreRef,
+    isFetchingNextPage,
+  } = useFetchInfiniteFilteredRules({
+    search: filters.search,
+    severity: filters.severity,
+    sort_by: filters.sort_by,
+    sort_order: filters.sort_order,
+    page_size: filters.page_size,
+  });
+
+  const handleSetFilters = useCallback(
+    (newFilters: UseFetchInfiniteFilteredRulesProps) => {
+      void queryClient.cancelQueries({
+        queryKey: QUERY_KEYS.rulesV2.default(),
+      });
+
+      const updated: ListRulesQueryParams = {
+        ...filters,
+        ...newFilters,
+        name: selectedRuleName ?? undefined,
+      };
+      const query = filtersToSearchString(updated);
+      router.replace(query ? `${pathname}?${query}` : pathname);
+    },
+    [queryClient, router, pathname, filters, selectedRuleName],
+  );
+
+  const handleSetSelectedRuleName = useCallback(
+    (name: string | null) => {
+      setSelectedRuleName(name);
+      const query = filtersToSearchString({
+        ...filters,
+        name: name ?? '',
+      });
+      router.replace(query ? `${pathname}?${query}` : pathname);
+    },
+    [router, pathname, filters],
+  );
+
+  const value = useMemo<ListRulesContextValue>(
+    () => ({
+      data,
+      filters,
+      hasFilters,
+      setFilters: handleSetFilters,
+      isLoading,
+      isError,
+      error: error ?? null,
+      fetchNextPage,
+      hasNextPage,
+      loadMoreRef,
+      isFetchingNextPage,
+      selectedRuleName,
+      setSelectedRuleName: handleSetSelectedRuleName,
+    }),
+    [
+      data,
+      filters,
+      hasFilters,
+      handleSetFilters,
+      isLoading,
+      isError,
+      error,
+      fetchNextPage,
+      hasNextPage,
+      loadMoreRef,
+      isFetchingNextPage,
+      selectedRuleName,
+      handleSetSelectedRuleName,
+    ],
+  );
+
+  return (
+    <ListRulesContext.Provider value={value}>
+      {children}
+    </ListRulesContext.Provider>
+  );
+};
+
+export const useListRulesContext = () => {
+  const context = useContext(ListRulesContext);
+  if (!context) {
+    throw new Error(
+      'useListRulesContext must be used within a ListRulesProvider',
+    );
+  }
+  return context;
+};
