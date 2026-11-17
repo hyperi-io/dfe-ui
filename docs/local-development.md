@@ -54,23 +54,58 @@ The browser fetches the engine cross-origin (CORS), the Next server calls it ser
 Locally the browser calls the engine directly, beside the calls `next dev` makes for it.
 
 ```mermaid
+---
+config:
+  theme: base
+  look: neo
+  fontFamily: Inter, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif
+  themeVariables:
+    fontSize: 15px
+    lineColor: "#64748B"
+    primaryTextColor: "#0F172A"
+    edgeLabelBackground: "#FFFFFF"
+    actorBkg: "#FFFFFF"
+    actorBorder: "#94A3B8"
+    actorTextColor: "#0F172A"
+    actorLineColor: "#94A3B8"
+    signalColor: "#64748B"
+    signalTextColor: "#0F172A"
+    sequenceNumberColor: "#FFFFFF"
+    noteBkgColor: "#FFFFFF"
+    noteBorderColor: "#94A3B8"
+    noteTextColor: "#0F172A"
+    labelBoxBkgColor: "#FFFFFF"
+    labelBoxBorderColor: "#94A3B8"
+    labelTextColor: "#0F172A"
+    loopTextColor: "#0F172A"
+  themeCSS: >-
+    p{margin:0}
+    .labelBkg{background:transparent!important}
+    span.edgeLabel{display:inline-block;background:#FFFFFF!important;color:#1E293B;border:1px solid #94A3B8;border-radius:999px;padding:2px 10px;font-size:12px;font-weight:500}
+    span.edgeLabel p{background:transparent!important}
+    .messageText{fill:#0F172A;stroke:#FFFFFF;stroke-width:4px;paint-order:stroke;stroke-linejoin:round}
+    .loopText,.loopText tspan{fill:#0F172A;stroke:#FFFFFF;stroke-width:4px;paint-order:stroke;stroke-linejoin:round}
+    .loopLine{stroke:#64748B}
+    .actor{rx:10px;ry:10px;filter:drop-shadow(0 1px 2px rgba(15,23,42,.10)) drop-shadow(0 6px 14px rgba(15,23,42,.10))}
+    .actor-line{stroke-dasharray:4 4}
+---
 sequenceDiagram
-    accTitle: L4 Detail -- Local console and engine
-    accDescr: The browser loads the login page from next dev, which asks the engine for the setup status. Sign-in goes through NextAuth to the engine. After that the browser calls the engine cross-origin, and an embedded dfe-hyperdx checks the dfe_token cookie against the engine's keys.
-    autonumber
-    participant browser as Browser
-    participant ui as dfe-ui next dev 3000
-    participant engine as dfe-engine 8003
-    participant hdx as dfe-hyperdx
-    browser->>ui: GET /login
-    ui->>engine: GET setup-status
-    browser->>ui: Sign in
-    ui->>engine: POST /auth/login, GET /auth/me
-    browser->>engine: API calls, CORS
-    opt Observe configured
-        browser->>hdx: Frame, dfe_token cookie
-        hdx->>engine: GET /.well-known/jwks.json
-    end
+  accTitle: L4 Detail -- Local console and engine
+  accDescr: The browser loads the login page from next dev, which asks the engine for the setup status. Sign-in goes through NextAuth to the engine. After that the browser calls the engine cross-origin, and an embedded dfe-hyperdx checks the dfe_token cookie against the engine's keys.
+  autonumber
+  participant browser as Browser
+  participant ui as dfe-ui next dev 3000
+  participant engine as dfe-engine 8003
+  participant hdx as dfe-hyperdx
+  browser->>ui: GET /login
+  ui->>engine: GET setup-status
+  browser->>ui: Sign in
+  ui->>engine: POST /auth/login, GET /auth/me
+  browser->>engine: API calls, CORS
+  opt Observe configured
+    browser->>hdx: Frame, dfe_token cookie
+    hdx->>engine: GET /.well-known/jwks.json
+  end
 ```
 
 *Figure 1. L4 Detail -- Local console and engine.* Up: [dfe-ui documentation](README.md).

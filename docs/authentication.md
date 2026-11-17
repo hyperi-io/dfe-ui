@@ -9,23 +9,58 @@ A local account signs in on the login form, which posts to the engine's local lo
 For OIDC the engine is the relying party, and the console signs in with the token the engine re-mints, never the provider's.
 
 ```mermaid
+---
+config:
+  theme: base
+  look: neo
+  fontFamily: Inter, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif
+  themeVariables:
+    fontSize: 15px
+    lineColor: "#64748B"
+    primaryTextColor: "#0F172A"
+    edgeLabelBackground: "#FFFFFF"
+    actorBkg: "#FFFFFF"
+    actorBorder: "#94A3B8"
+    actorTextColor: "#0F172A"
+    actorLineColor: "#94A3B8"
+    signalColor: "#64748B"
+    signalTextColor: "#0F172A"
+    sequenceNumberColor: "#FFFFFF"
+    noteBkgColor: "#FFFFFF"
+    noteBorderColor: "#94A3B8"
+    noteTextColor: "#0F172A"
+    labelBoxBkgColor: "#FFFFFF"
+    labelBoxBorderColor: "#94A3B8"
+    labelTextColor: "#0F172A"
+    loopTextColor: "#0F172A"
+  themeCSS: >-
+    p{margin:0}
+    .labelBkg{background:transparent!important}
+    span.edgeLabel{display:inline-block;background:#FFFFFF!important;color:#1E293B;border:1px solid #94A3B8;border-radius:999px;padding:2px 10px;font-size:12px;font-weight:500}
+    span.edgeLabel p{background:transparent!important}
+    .messageText{fill:#0F172A;stroke:#FFFFFF;stroke-width:4px;paint-order:stroke;stroke-linejoin:round}
+    .loopText,.loopText tspan{fill:#0F172A;stroke:#FFFFFF;stroke-width:4px;paint-order:stroke;stroke-linejoin:round}
+    .loopLine{stroke:#64748B}
+    .actor{rx:10px;ry:10px;filter:drop-shadow(0 1px 2px rgba(15,23,42,.10)) drop-shadow(0 6px 14px rgba(15,23,42,.10))}
+    .actor-line{stroke-dasharray:4 4}
+---
 sequenceDiagram
-    accTitle: L4 Detail -- OIDC sign-in
-    accDescr: The login page asks the engine for the provider's authorisation URL, with a return URL that has a nonce. The browser signs in at the identity provider, and the engine's callback returns it to the console with the engine token. The console checks the nonce and NextAuth checks the token with the engine.
-    autonumber
-    participant page as Login page
-    participant auth as NextAuth routes
-    participant engine as dfe-engine API
-    participant idp as Identity provider
-    page->>engine: OIDC login, return_to with nonce
-    engine-->>page: Authorisation URL
-    page->>idp: Sign in
-    idp->>engine: Redirect to callback
-    engine-->>page: 303 to /login/oidc, token in fragment
-    page->>auth: Sign in, oidc-token provider
-    auth->>engine: GET /api/v1/auth/me
-    engine-->>auth: User and roles
-    auth-->>page: Session
+  accTitle: L4 Detail -- OIDC sign-in
+  accDescr: The login page asks the engine for the provider's authorisation URL, with a return URL that has a nonce. The browser signs in at the identity provider, and the engine's callback returns it to the console with the engine token. The console checks the nonce and NextAuth checks the token with the engine.
+  autonumber
+  participant page as Login page
+  participant auth as NextAuth routes
+  participant engine as dfe-engine API
+  participant idp as Identity provider
+  page->>engine: OIDC login, return_to with nonce
+  engine-->>page: Authorisation URL
+  page->>idp: Sign in
+  idp->>engine: Redirect to callback
+  engine-->>page: 303 to /login/oidc, token in fragment
+  page->>auth: Sign in, oidc-token provider
+  auth->>engine: GET /api/v1/auth/me
+  engine-->>auth: User and roles
+  auth-->>page: Session
 ```
 
 *Figure 1. L4 Detail -- OIDC sign-in. Solid arrows are requests, dashed arrows are answers.* Up: [L3 Components -- dfe-ui](architecture.md#the-console-is-five-parts).
