@@ -5,7 +5,7 @@ import { ViewRuleDetail } from '@/RulesV2/components/ViewRuleDetail';
 import { MainContentCard } from '@/core/components/ContentCard';
 import { RbacProtected } from '@/core/components/RbacProtected';
 import { Splitter } from '@/core/components/Splitter';
-import { ListRulesProvider } from '@/core/contexts/ListRulesContext';
+import { ListRulesProvider } from '@/core/contexts/ListRulesContextV2';
 
 export const RulesListScene = () => {
   return (

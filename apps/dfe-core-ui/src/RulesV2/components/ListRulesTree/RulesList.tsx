@@ -1,6 +1,6 @@
 import { CustomScrollbar } from '@/core/components/CustomScrollbar';
-import { useListRulesContext } from '@/core/contexts/ListRulesContext';
-import { TRuleListItem } from '@/core/hooks/useFetchInfiniteFilteredRules/types';
+import { useListRulesContext } from '@/core/contexts/ListRulesContextV2';
+import { TRuleListItem } from '@/core/hooks/useFetchInfiniteFilteredRulesV2/types';
 import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
 import { cn } from '@/core/utils/style';
 import { Spin } from 'antd';
@@ -54,7 +54,6 @@ export const RulesList = ({
           ...filters,
           search: undefined,
           severity: undefined,
-          source: undefined,
         }}
       />
     );
@@ -82,7 +81,6 @@ export const RulesList = ({
                   </dt>
                   <dd className="text-sm text-gray-500 capitalize truncate dark:text-gray-400">
                     {rule.severity}
-                    {rule.hunt_name ? ` · ${rule.hunt_name}` : ''}
                   </dd>
                 </dl>
               </button>

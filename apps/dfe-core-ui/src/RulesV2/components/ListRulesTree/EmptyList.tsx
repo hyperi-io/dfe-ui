@@ -1,10 +1,10 @@
 'use client';
 
 import { ButtonLinkSavedSearch } from '@/core/components/ButtonLinkSavedSearch';
-import { CreateCustomRuleDrawer } from '@/core/components/CreateCustomRuleDrawer';
 import { RbacProtected } from '@/core/components/RbacProtected';
-import { UseFetchInfiniteFilteredRulesProps } from '@/core/hooks/useFetchInfiniteFilteredRules/types';
+import { UseFetchInfiniteFilteredRulesProps } from '@/core/hooks/useFetchInfiniteFilteredRulesV2/types';
 import { cn } from '@/core/utils/style';
+import { CreateCustomRuleDrawer } from '@/RulesV2/components/CreateCustomRuleDrawerV2';
 import { IconInfoCircle } from '@repo/dfe-icons';
 import { Button } from 'antd';
 

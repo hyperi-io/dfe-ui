@@ -1,7 +1,6 @@
 import { Form } from '@/core/components/Form';
 import { SortActions } from '@/core/components/SortActions';
-import { SourceSelect } from '@/core/components/SourceSelect';
-import { useListRulesContext } from '@/core/contexts/ListRulesContext';
+import { useListRulesContext } from '@/core/contexts/ListRulesContextV2';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
 import { Button, Input, Select } from 'antd';
 import { useEffect, useId } from 'react';
@@ -29,11 +28,10 @@ export const ListRulesFilterForm = ({
   const formValidation = useAntdZodResolver<FormData>(formSchema);
 
   const handleApplyFilters = (values: FormData) => {
-    const { severity, search, source } = values;
+    const { severity, search } = values;
     setFilters({
       severity: severity ?? undefined,
       search: search ?? undefined,
-      source: source ?? undefined,
     });
     onSuccess?.();
   };
@@ -43,7 +41,6 @@ export const ListRulesFilterForm = ({
     setFilters({
       severity: undefined,
       search: undefined,
-      source: undefined,
     });
     onClose?.();
   };
@@ -52,15 +49,14 @@ export const ListRulesFilterForm = ({
     form.setFieldsValue({
       severity: filters.severity ?? undefined,
       search: filters.search ?? '',
-      source: filters.source,
     });
-  }, [form, filters.severity, filters.search, filters.source]);
+  }, [form, filters.severity, filters.search]);
 
   const sortBySelectId = useId();
 
   return (
     <Form
-      key={`${filters.search ?? ''}-${filters.severity ?? ''}-${filters.source ?? ''}`}
+      key={`${filters.search ?? ''}-${filters.severity ?? ''}`}
       form={form}
       onFinish={handleApplyFilters}
     >
@@ -117,15 +113,6 @@ export const ListRulesFilterForm = ({
         />
       </Form.Item>
 
-      <Form.Item
-        name="source"
-        label="Source"
-        rules={[formValidation]}
-        layout="horizontal"
-      >
-        <SourceSelect size="small" />
-      </Form.Item>
-
       <Form.Item className="flex justify-end">
         <Button
           className="mr-2 mb-2 text-xs"
@@ -133,7 +120,7 @@ export const ListRulesFilterForm = ({
           htmlType="button"
           size="small"
           onClick={handleResetFilters}
-          disabled={!filters.severity && !filters.search && !filters.source}
+          disabled={!filters.severity && !filters.search}
         >
           Clear Filters
         </Button>
