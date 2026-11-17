@@ -1,4 +1,14 @@
-# The /observe embed - the Observe explore surface
+# Observe page
+
+The Observe page frames dfe-hyperdx inside the console, and is one part of [dfe-ui](architecture.md).
+
+| Fact       | Value |
+| ---------- | ----- |
+| Repo       | `hyperi-io/dfe-ui`, `apps/dfe-core-ui/src/app/(auth)/observe/[[...feature]]/page.tsx` |
+| Image      | `ghcr.io/hyperi-io/dfe-ui`, with the thin chart built from `deploy/contract.json` |
+| Config     | `HYPERDX_URL` or `HYPERDX_PORT`, and `DFE_COOKIE_DOMAIN` for the shared cookie |
+| Endpoints  | `/observe`, `/observe/dashboards`, `/observe/hunt-results` |
+| Metrics    | the app's process metrics on `/metrics`, port 3000. Nothing specific to this part |
 
 `/observe/[[...feature]]` (`apps/dfe-core-ui/src/app/(auth)/observe/[[...feature]]/page.tsx`) frames dfe-hyperdx in chromeless mode (`?embed=1`), so the dfe-ui shell owns navigation and dfe-hyperdx provides search, charts and dashboards over the data in ClickHouse. The page maps its path to the dfe-hyperdx route (`/observe` to `/search`, `/observe/dashboards` to `/dashboards/list`, `/observe/hunt-results` to `/search?source=hunts`) and passes its query parameters on. The dashboards page shows the usage headline above the frame.
 
@@ -54,7 +64,7 @@ sequenceDiagram
   end
 ```
 
-*Figure 1. L4 Detail -- Observe embed. Solid arrows are requests, the dashed arrow is the load event.* Up: [L3 Components -- dfe-ui](architecture.md#the-console-is-five-parts).
+*Figure 1. L4 Detail -- Observe embed. Solid arrows are requests, the dashed arrow is the load event.* Up: [L3 Components -- dfe-ui](architecture.md).
 
 The frame signs in from the `dfe_token` cookie the proxy plants ([authentication.md](authentication.md#sessions-renew-and-end-at-the-engine)).
 

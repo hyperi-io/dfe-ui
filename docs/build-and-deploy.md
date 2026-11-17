@@ -50,21 +50,37 @@ config:
     .ui .label-icon{color:#D9480F}
     .ext .label-icon{color:#64748B}
 ---
-flowchart LR
+flowchart TB
   accTitle: L4 Detail -- Build and deploy
   accDescr: hyperi-ci builds the dfe-ui repo into a container image and a thin chart. dfe-infra deploys the chart with its values and the image tag and digest it pins, and the result is the dfe-ui pod.
-  repo("<b>dfe-ui repo</b><br/><span>the source</span>")
-  ci("<b>hyperi-ci release</b><br/><span>builds and publishes</span>")
-  image[("<b>Container image</b><br/><span>ghcr.io/hyperi-io/dfe-ui</span>")]
-  chart[("<b>Thin chart</b><br/><span>from the deployment contract</span>")]
-  infra("<b>dfe-infra deploy</b><br/><span>pins the tag and digest</span>")
-  pod("<b>dfe-ui pod</b><br/><span>the running console</span>")
-  repo --> ci
-  ci -->|push| image
-  ci -->|publish| chart
-  image -->|tag, digest| infra
-  chart -->|chart| infra
-  infra --> pod
+  subgraph build["Build"]
+    direction LR
+    repo("<b>dfe-ui repo</b><br/><span>the source</span>")
+    ci("<b>hyperi-ci release</b><br/><span>builds and publishes</span>")
+    repo --> ci
+  end
+  subgraph pub["Published"]
+    direction LR
+    image[("<b>Container image</b><br/><span>ghcr.io/hyperi-io/dfe-ui</span>")]
+    chart[("<b>Thin chart</b><br/><span>from the deployment contract</span>")]
+    image ~~~ chart
+  end
+  subgraph deploy["Deploy"]
+    direction LR
+    infra("<b>dfe-infra deploy</b><br/><span>pins the tag and digest</span>")
+    pod("<b>dfe-ui pod</b><br/><span>the running console</span>")
+    infra --> pod
+  end
+  build -->|push, publish| pub
+  pub -->|tag, digest, chart| deploy
+  class repo,image,chart store
+  class ci ext
+  class infra control
+  class pod ui
+  class repo,image,chart store
+  class ci ext
+  class infra control
+  class pod ui
   classDef ext fill:#F4F6F8,stroke:#94A3B8,stroke-width:1.5px,stroke-dasharray:5 4,color:#0F172A
   classDef ingest fill:#FFFFFF,stroke:#0E8A7D,stroke-width:3px,color:#0F172A
   classDef xform fill:#FFFFFF,stroke:#7B4FB0,stroke-width:3px,color:#0F172A
@@ -76,10 +92,9 @@ flowchart LR
   classDef error fill:#FFFFFF,stroke:#C2410C,stroke-width:3px,color:#0F172A
   classDef control fill:#FFFFFF,stroke:#334155,stroke-width:3px,color:#0F172A
   classDef part fill:#FFFFFF,stroke:#94A3B8,stroke-width:1.5px,color:#0F172A
-  class repo,image,chart store
-  class ci ext
-  class infra control
-  class pod ui
+  style build fill:none,stroke:#0072B2,stroke-width:1.5px,stroke-dasharray:6 4
+  style pub fill:none,stroke:#0072B2,stroke-width:1.5px,stroke-dasharray:6 4
+  style deploy fill:none,stroke:#0072B2,stroke-width:1.5px,stroke-dasharray:6 4
 ```
 
 *Figure 1. L4 Detail -- Build and deploy. The container image is the one artifact this repo ships.* Up: [dfe-ui documentation](README.md).
