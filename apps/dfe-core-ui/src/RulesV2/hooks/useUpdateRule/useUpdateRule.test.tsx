@@ -50,11 +50,22 @@ describe('.useUpdateRule', () => {
         rule: {
           display_name: 'string',
           name: 'string',
+          description: 'string',
           severity: 'string',
           where_clause: 'string',
           cel_filter: 'string',
           created_at: 'string',
         },
+        sanitize_summary: {
+          additionalProp1: {},
+        },
+        sql_errors: [
+          {
+            message: 'string',
+            position: 0,
+            suggestion: 'string',
+          },
+        ],
       };
 
       await waitFor(() => {
