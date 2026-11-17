@@ -17,7 +17,7 @@ const ALL_ITEMS = Array.from({ length: TOTAL_ITEMS }, () => ({
 }));
 
 function createPaginatedRulesHandler() {
-  return http.get(API_CONFIG_MOCKS.rules.default.mockedUrl, ({ request }) => {
+  return http.get(API_CONFIG_MOCKS.rulesV2.default.mockedUrl, ({ request }) => {
     return HttpResponse.json(pageOf(ALL_ITEMS, request));
   });
 }

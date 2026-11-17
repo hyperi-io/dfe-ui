@@ -265,7 +265,7 @@ describe('useFetchInfiniteFilteredRules', () => {
 
   describe('error handling', () => {
     it('should handle error state correctly', async () => {
-      server.use(API_CONFIG_MOCKS.rules.default.get.error());
+      server.use(API_CONFIG_MOCKS.rulesV2.default.get.error());
 
       const { result } = renderHook(
         () => useFetchInfiniteFilteredRules(DEFAULT_HOOK_PROPS),
@@ -414,7 +414,7 @@ describe('useFetchInfiniteFilteredRules', () => {
   describe('empty results', () => {
     it('should handle empty searches array', async () => {
       server.use(
-        API_CONFIG_MOCKS.rules.default.get.success({
+        API_CONFIG_MOCKS.rulesV2.default.get.success({
           mockedResponse: {
             items: [],
             total_size: 0,
