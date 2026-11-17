@@ -30,6 +30,7 @@ describe('.useFetchRuleDetail', () => {
         display_name: 'string',
         name: 'string',
         severity: 'string',
+        description: 'string',
         where_clause: 'string',
         cel_filter: 'string',
         created_at: 'string',
