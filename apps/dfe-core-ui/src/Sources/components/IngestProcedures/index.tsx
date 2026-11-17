@@ -79,7 +79,7 @@ export const IngestProcedures = () => {
         />
       )}
 
-      <div className="grid grid-cols-[auto_auto] gap-12">
+      <div className="grid grid-cols-2 gap-12">
         {data ? (
           <RuleOrderList
             componentHeight={{
