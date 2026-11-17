@@ -21,41 +21,6 @@ Paths are relative to the component directory.
 An uploaded row is valid or invalid from import, and submit is blocked while any row is invalid.
 
 ```mermaid
----
-config:
-  theme: base
-  look: neo
-  fontFamily: Inter, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif
-  themeVariables:
-    fontSize: 15px
-    lineColor: "#64748B"
-    primaryTextColor: "#0F172A"
-    edgeLabelBackground: "#FFFFFF"
-    actorBkg: "#FFFFFF"
-    actorBorder: "#94A3B8"
-    actorTextColor: "#0F172A"
-    actorLineColor: "#94A3B8"
-    signalColor: "#64748B"
-    signalTextColor: "#0F172A"
-    sequenceNumberColor: "#FFFFFF"
-    noteBkgColor: "#FFFFFF"
-    noteBorderColor: "#94A3B8"
-    noteTextColor: "#0F172A"
-    labelBoxBkgColor: "#FFFFFF"
-    labelBoxBorderColor: "#94A3B8"
-    labelTextColor: "#0F172A"
-    loopTextColor: "#0F172A"
-  themeCSS: >-
-    p{margin:0}
-    .labelBkg{background:transparent!important}
-    span.edgeLabel{display:inline-block;background:#FFFFFF!important;color:#1E293B;border:1px solid #94A3B8;border-radius:999px;padding:2px 10px;font-size:12px;font-weight:500}
-    span.edgeLabel p{background:transparent!important}
-    .messageText{fill:#0F172A;stroke:#FFFFFF;stroke-width:4px;paint-order:stroke;stroke-linejoin:round}
-    .loopText,.loopText tspan{fill:#0F172A;stroke:#FFFFFF;stroke-width:4px;paint-order:stroke;stroke-linejoin:round}
-    .loopLine{stroke:#64748B}
-    .actor{rx:10px;ry:10px;filter:drop-shadow(0 1px 2px rgba(15,23,42,.10)) drop-shadow(0 6px 14px rgba(15,23,42,.10))}
-    .actor-line{stroke-dasharray:4 4}
----
 stateDiagram-v2
   direction LR
   accTitle: L4 Detail -- Uploaded row lifecycle
@@ -67,9 +32,7 @@ stateDiagram-v2
   Invalid --> [*]: removed
   Valid --> Submitted: none invalid
   Submitted --> [*]
-  classDef error fill:#FFFFFF,stroke:#C2410C,stroke-width:3px,color:#0F172A
-  classDef part fill:#FFFFFF,stroke:#94A3B8,stroke-width:1.5px,color:#0F172A
-  class Imported,Valid,Submitted part
+  classDef error fill:#FBE3D6,stroke:#C2410C,stroke-width:1px,color:#4A1A05
   class Invalid error
 ```
 
