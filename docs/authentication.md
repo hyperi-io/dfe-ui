@@ -1,12 +1,16 @@
 # Authentication
 
+Authentication signs an operator in, renews the session and signs out, all against the engine, and is one part of [dfe-ui](architecture.md).
+
+| Fact       | Value |
+| ---------- | ----- |
+| Repo       | `hyperi-io/dfe-ui`, `apps/dfe-core-ui/src/app/api/auth/[...nextauth]/route.ts` and `apps/dfe-core-ui/src/core/config/auth.ts` |
+| Image      | `ghcr.io/hyperi-io/dfe-ui`, with the thin chart built from `deploy/contract.json` |
+| Config     | `NEXTAUTH_URL`, `NEXTAUTH_SECRET`, `INTERNAL_API_URL` and `DFE_COOKIE_DOMAIN` |
+| Endpoints  | `/api/auth/*`, the NextAuth routes, outside the proxy |
+| Metrics    | the app's process metrics on `/metrics`, port 3000. Nothing specific to this part |
+
 Two ways to sign in, both wired through NextAuth. The console never runs an identity provider handshake itself: identity always comes from the engine.
-
-## Sign-in goes through the engine
-
-A local account signs in on the login form, which posts to the engine's local login (`POST /api/v1/auth/login`) and then reads the roles from `GET /api/v1/auth/me`. The console forwards the browser's `X-Forwarded-For`, so the engine's audit trail can name the client.
-
-For OIDC the engine is the relying party, and the console signs in with the token the engine re-mints, never the provider's.
 
 ```mermaid
 ---
@@ -63,7 +67,13 @@ sequenceDiagram
   auth-->>page: Session
 ```
 
-*Figure 1. L4 Detail -- OIDC sign-in. Solid arrows are requests, dashed arrows are answers.* Up: [L3 Components -- dfe-ui](architecture.md#the-console-is-five-parts).
+*Figure 1. L4 Detail -- OIDC sign-in. Solid arrows are requests, dashed arrows are answers.* Up: [L3 Components -- dfe-ui](architecture.md).
+
+## Sign-in goes through the engine
+
+A local account signs in on the login form, which posts to the engine's local login (`POST /api/v1/auth/login`) and then reads the roles from `GET /api/v1/auth/me`. The console forwards the browser's `X-Forwarded-For`, so the engine's audit trail can name the client.
+
+For OIDC the engine is the relying party, and the console signs in with the token the engine re-mints, never the provider's.
 
 The login page stores a nonce in `sessionStorage` before it leaves for the provider, and the return URL has the same nonce as `login_nonce`. The console rejects the token unless the two match, so a crafted link with someone else's token cannot sign a browser in. A login the engine rejects comes back the same way with the refusal's code instead (`#error=no_role_granted`), and the sign-in form says why. The code picks fixed words in `apps/dfe-core-ui/src/core/config/loginRefusal.ts`, so a link cannot put text on the page.
 

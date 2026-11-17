@@ -1,4 +1,14 @@
-# How the console maps to the flow
+# Console pages
+
+The console pages are the screens an operator works in, one feature directory per domain, and are one part of [dfe-ui](architecture.md).
+
+| Fact       | Value |
+| ---------- | ----- |
+| Repo       | `hyperi-io/dfe-ui`, `apps/dfe-core-ui/src/app` and `apps/dfe-core-ui/src/{Sources,Schemas,Rules,...}` |
+| Image      | `ghcr.io/hyperi-io/dfe-ui`, with the thin chart built from `deploy/contract.json` |
+| Config     | none of their own: each domain reads the engine through the API client |
+| Endpoints  | route group `(auth)` for the signed-in app, `(no-auth)` for login, setup, the forced password change and the engine-unavailable page |
+| Metrics    | the app's process metrics on `/metrics`, port 3000. Nothing specific to this part |
 
 A record enters DFE, is optionally transformed, and lands in a table. The console's menu groups follow that flow: Data flow defines what comes in, Detect what to look for in it, Observe is where the landed data is read, and Stack is what is running.
 
@@ -74,7 +84,7 @@ flowchart LR
   class stack,dataflow,observe,detect part
 ```
 
-*Figure 1. L4 Detail -- Console menu groups. The dotted arrow is Stack running and tuning the apps, not data moving.* Up: [L3 Components -- dfe-ui](architecture.md#the-console-is-five-parts).
+*Figure 1. L4 Detail -- Console menu groups. The dotted arrow is Stack running and tuning the apps, not data moving.* Up: [L3 Components -- dfe-ui](architecture.md).
 
 Each group is one RBAC family: a heading appears when at least one destination under it is the signed-in user's. The sidebar lists Observe first, then Data flow, Detect and Stack (`apps/dfe-core-ui/src/core/components/SidebarMenu/SidebarMenu/constants.tsx`).
 
@@ -147,8 +157,8 @@ flowchart LR
   input("<b>Input</b><br/><span>where records come from</span>")
   transform("<b>Transform</b><br/><span>shapes the records</span>")
   output("<b>Output</b><br/><span>where records land</span>")
-  input -->|carrier, target| transform
-  transform -->|carrier, target| output
+  input --> transform
+  transform --> output
   classDef ext fill:#F4F6F8,stroke:#94A3B8,stroke-width:1.5px,stroke-dasharray:5 4,color:#0F172A
   classDef ingest fill:#FFFFFF,stroke:#0E8A7D,stroke-width:3px,color:#0F172A
   classDef xform fill:#FFFFFF,stroke:#7B4FB0,stroke-width:3px,color:#0F172A
@@ -164,7 +174,7 @@ flowchart LR
   class transform xform
 ```
 
-*Figure 2. L4 Detail -- Source flow card.* Up: [L3 Components -- dfe-ui](architecture.md#the-console-is-five-parts).
+*Figure 2. L4 Detail -- Source flow card.* Up: [L3 Components -- dfe-ui](architecture.md).
 
 | Stage     | Shows                                                                                                                                                 |
 | --------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |

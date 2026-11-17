@@ -1,8 +1,14 @@
-# Engine API client - one typed client for every engine call
+# API client
 
-Feature code reaches the engine through one typed client generated from the engine's OpenAPI spec. The endpoint map is compile-time checked against the generated types, so a route that disappears from the spec fails the build, not the user.
+The API client is the one typed client every engine call from feature code goes through, and is one part of [dfe-ui](architecture.md).
 
-## The spec becomes typed calls
+| Fact       | Value |
+| ---------- | ----- |
+| Repo       | `hyperi-io/dfe-ui`, `apps/dfe-core-ui/src/core/config/api` |
+| Image      | `ghcr.io/hyperi-io/dfe-ui`, with the thin chart built from `deploy/contract.json` |
+| Config     | `NEXT_PUBLIC_API_URL` for the browser and `INTERNAL_API_URL` for the server |
+| Endpoints  | none of its own. It calls the dfe-engine API |
+| Metrics    | the app's process metrics on `/metrics`, port 3000. Nothing specific to this part |
 
 The endpoint map sits between the generated types and the client, so a route the spec drops fails compilation there.
 
@@ -52,18 +58,27 @@ config:
     .ui .label-icon{color:#D9480F}
     .ext .label-icon{color:#64748B}
 ---
-flowchart LR
-  accTitle: L4 Detail -- Engine API client
+flowchart TB
+  accTitle: L4 Detail -- API client
   accDescr: openapi-typescript turns the copied engine spec into the paths types. The endpoint map is checked against those types, the API client sends requests from the map, and the TanStack Query hooks in each feature directory call the client.
-  spec[("<b>Engine spec copy</b><br/><span>the OpenAPI document</span>")]
-  types("<b>Paths types</b><br/><span>from openapi-typescript</span>")
-  map("<b>Endpoint map</b><br/><span>checked against the types</span>")
-  client("<b>API client</b><br/><span>sends requests from the map</span>")
-  hooks("<b>Query hooks</b><br/><span>TanStack Query, per feature</span>")
-  spec --> types
-  types --> map
-  map -->|routes| client
-  client -->|typed calls| hooks
+  subgraph gen["Generated at build"]
+    direction LR
+    spec[("<b>Engine spec copy</b><br/><span>OpenAPI document</span>")]
+    types("<b>Paths types</b><br/><span>from openapi-typescript</span>")
+    spec --> types
+  end
+  subgraph run["Called at runtime"]
+    direction LR
+    map("<b>Endpoint map</b><br/><span>checked against types</span>")
+    client("<b>API client</b><br/><span>sends from the map</span>")
+    hooks("<b>Query hooks</b><br/><span>one per feature</span>")
+    map -->|routes| client -->|calls| hooks
+  end
+  gen -->|types| run
+  class spec store
+  class types,map,client,hooks part
+  class spec store
+  class types,map,client,hooks part
   classDef ext fill:#F4F6F8,stroke:#94A3B8,stroke-width:1.5px,stroke-dasharray:5 4,color:#0F172A
   classDef ingest fill:#FFFFFF,stroke:#0E8A7D,stroke-width:3px,color:#0F172A
   classDef xform fill:#FFFFFF,stroke:#7B4FB0,stroke-width:3px,color:#0F172A
@@ -75,11 +90,15 @@ flowchart LR
   classDef error fill:#FFFFFF,stroke:#C2410C,stroke-width:3px,color:#0F172A
   classDef control fill:#FFFFFF,stroke:#334155,stroke-width:3px,color:#0F172A
   classDef part fill:#FFFFFF,stroke:#94A3B8,stroke-width:1.5px,color:#0F172A
-  class spec store
-  class types,map,client,hooks part
+  style gen fill:none,stroke:#0072B2,stroke-width:1.5px,stroke-dasharray:6 4
+  style run fill:none,stroke:#0072B2,stroke-width:1.5px,stroke-dasharray:6 4
 ```
 
-*Figure 1. L4 Detail -- Engine API client. Feature code calls the engine through the client alone.* Up: [L3 Components -- dfe-ui](architecture.md#the-console-is-five-parts).
+*Figure 1. L4 Detail -- API client. Feature code calls the engine through the client alone.* Up: [L3 Components -- dfe-ui](architecture.md).
+
+Feature code reaches the engine through one typed client generated from the engine's OpenAPI spec. The endpoint map is compile-time checked against the generated types, so a route that disappears from the spec fails the build, not the user.
+
+## The spec becomes typed calls
 
 - Engine spec: `packages/dfe-engine-types/specs/openapi.json` and `openapi.e2e.json`, committed byte copies of dfe-engine's `openapi/openapi.json` and `openapi/openapi.e2e.json`.
 - Generated code: `yarn workspace @repo/dfe-engine-types generate` runs openapi-typescript over both specs (`types/index.d.ts`, `types/e2e.d.ts`) and writes the scope and limit constants (`scopes/index.ts`, `limits/index.ts`).
