@@ -1,4 +1,19 @@
 import ace from '@/core/config/AceEditor/init';
+import { celErrorPosition, checkCel } from './checkCel';
+
+type CelSession = {
+  getValue: () => string;
+  setAnnotations: (
+    annotations: Array<{
+      row: number;
+      column: number;
+      text: string;
+      type: string;
+    }>,
+  ) => void;
+  on: (event: 'change', callback: () => void) => void;
+  off: (event: 'change', callback: () => void) => void;
+};
 
 type AceRequire = (id: string) => {
   inherits: (child: object, parent: object) => void;
@@ -107,11 +122,42 @@ define('ace/mode/cel', [
     this.HighlightRules = CelHighlightRules;
   } as unknown as {
     new (): object;
-    prototype: { $id: string; lineCommentStart: string };
+    prototype: {
+      $id: string;
+      lineCommentStart: string;
+      createWorker: (session: CelSession) => { terminate: () => void };
+    };
   };
 
   oop.inherits(Mode, TextMode);
   Mode.prototype.$id = 'ace/mode/cel';
   Mode.prototype.lineCommentStart = '//';
+  Mode.prototype.createWorker = (session) => {
+    const mark = () => {
+      const source = session.getValue();
+      const error = checkCel(source);
+      if (!error) {
+        session.setAnnotations([]);
+        return;
+      }
+      const position = celErrorPosition(source, error.span.start);
+      session.setAnnotations([
+        {
+          row: position.row,
+          column: position.column,
+          text: error.message,
+          type: 'error',
+        },
+      ]);
+    };
+    session.on('change', mark);
+    mark();
+    return {
+      terminate: () => {
+        session.off('change', mark);
+        session.setAnnotations([]);
+      },
+    };
+  };
   exports.Mode = Mode;
 });
