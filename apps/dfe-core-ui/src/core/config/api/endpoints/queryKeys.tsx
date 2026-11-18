@@ -208,10 +208,6 @@ export const QUERY_KEYS = Object.freeze({
       ...(name ? [name] : []),
     ],
   },
-  transforms: {
-    compile: () => ['transforms', 'compile'],
-    test: () => ['transforms', 'test'],
-  },
   schemas: {
     default: ({
       search,
