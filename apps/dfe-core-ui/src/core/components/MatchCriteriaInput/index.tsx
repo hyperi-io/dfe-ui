@@ -8,18 +8,20 @@ type MatchCriteriaType = 'conditions' | 'expression' | 'sql';
 
 interface MatchCriteriaInputProps {
   onChange?: (value?: string) => void;
-  onTypeChange?: (type: MatchCriteriaType) => void;
+  onModeChange?: (mode: MatchCriteriaType) => void;
+  modes?: MatchCriteriaType[];
 }
 
 export const MatchCriteriaInput = ({
   onChange,
-  onTypeChange,
+  onModeChange,
+  modes = ['conditions', 'expression', 'sql'],
 }: MatchCriteriaInputProps) => {
   const [matchMode, setMatchMode] = useState<MatchCriteriaType>('conditions');
 
-  const handleTypeChange = (type: MatchCriteriaType) => {
-    setMatchMode(type);
-    onTypeChange?.(type);
+  const handleModeChange = (mode: MatchCriteriaType) => {
+    setMatchMode(mode);
+    onModeChange?.(mode);
   };
 
   return (
@@ -32,11 +34,17 @@ export const MatchCriteriaInput = ({
           { label: 'CEL Fast expression', value: 'expression' },
           { label: 'SQL', value: 'sql' },
         ]}
-        onChange={(e) => handleTypeChange(e.target.value as MatchCriteriaType)}
+        onChange={(e) => handleModeChange(e.target.value as MatchCriteriaType)}
       />
-      {matchMode === 'conditions' && <WhenMatch onChange={onChange} />}
-      {matchMode === 'expression' && <CelExpressionMatch onChange={onChange} />}
-      {matchMode === 'sql' && <SqlMatch onChange={onChange} />}
+      {modes.includes('conditions') && matchMode === 'conditions' && (
+        <WhenMatch onChange={onChange} />
+      )}
+      {modes.includes('expression') && matchMode === 'expression' && (
+        <CelExpressionMatch onChange={onChange} />
+      )}
+      {modes.includes('sql') && matchMode === 'sql' && (
+        <SqlMatch onChange={onChange} />
+      )}
     </div>
   );
 };
