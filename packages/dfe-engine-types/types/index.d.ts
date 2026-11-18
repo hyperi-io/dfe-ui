@@ -887,8 +887,8 @@ export interface paths {
          * List Orgs
          * @description List organisations visible to the caller, paginated.
          *
-         *     System-scope org:read holders see every org. Org-scope holders see
-         *     only the orgs their grants cover.
+         *     Platform holders of org:read at system scope see every org. Org-scope holders,
+         *     and a system-bound ``scoped`` role, see only the orgs their grants cover.
          */
         get: operations["orgs.list"];
         put?: never;
@@ -2616,7 +2616,8 @@ export interface paths {
          *
          *     Run state comes from ONE ClickHouse read across every listed hunt: the watermark
          *     (last run), the lease (running now), hunt_state (too aggressive) and hunt_run
-         *     (rows the last run wrote). Next due is derived, not stored.
+         *     (rows the last run wrote). Next due is derived, not stored. A hunt naming a rule
+         *     with no stored rule file carries ``missing_rules`` and an ``error``.
          */
         get: operations["hunts.list"];
         put?: never;
@@ -2645,6 +2646,8 @@ export interface paths {
         /**
          * Get Hunt
          * @description Get full hunt configuration by file name, with the runner's stop on it if any.
+         *
+         *     A hunt naming a rule with no stored rule file carries ``missing_rules`` and an ``error``.
          */
         get: operations["hunts.get"];
         /**
@@ -2653,7 +2656,8 @@ export interface paths {
          *
          *     A production+team write is routed to a review branch instead of the branch the
          *     runner git-syncs, and the ``X-DFE-Review-Required`` header says so. 422
-         *     ``unknown_org`` when a customer names no registered org.
+         *     ``unknown_org`` when a customer names no registered org, 422 ``unknown_rule`` when a
+         *     rule newly named has no stored rule file.
          */
         put: operations["hunts.apply"];
         post?: never;
@@ -9749,6 +9753,17 @@ export interface components {
              * @default
              */
             auto_disabled_reason: string;
+            /**
+             * Missing Rules
+             * @description Rules the hunt names that no stored rule file backs, so it cannot fire
+             */
+            missing_rules?: string[];
+            /**
+             * Error
+             * @description Why the runner cannot fire the hunt; empty when nothing stops it
+             * @default
+             */
+            error: string;
         };
         /**
          * HuntEngineStatus
@@ -9911,6 +9926,17 @@ export interface components {
              * @default
              */
             auto_disabled_reason: string;
+            /**
+             * Missing Rules
+             * @description Rules the hunt names that no stored rule file backs, so it cannot fire
+             */
+            missing_rules?: string[];
+            /**
+             * Error
+             * @description Why the runner cannot fire the hunt; empty when nothing stops it
+             * @default
+             */
+            error: string;
         };
         /**
          * HuntWriteRequest
