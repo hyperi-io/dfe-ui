@@ -8,6 +8,7 @@ import ReactAceEditor from 'react-ace';
 
 import { cn } from '@/core/utils/style';
 import { useEffect, useRef } from 'react';
+import '@/core/config/AceEditor/customModes/celExpression';
 import 'ace-builds/src-noconflict/ext-beautify';
 import 'ace-builds/src-noconflict/ext-language_tools';
 import 'ace-builds/src-noconflict/mode-json';
