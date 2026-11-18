@@ -200,4 +200,8 @@ export const API_CONFIG = Object.freeze({
     default: '/api/v1/auth/api-keys',
     apiKey: '/api/v1/auth/api-keys/{short_token}',
   },
+  cel: {
+    check: '/api/v1/cel/check',
+    checkBatch: '/api/v1/cel/check-batch',
+  },
 } as const satisfies Record<string, Record<string, keyof paths>>);

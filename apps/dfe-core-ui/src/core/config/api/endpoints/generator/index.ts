@@ -4,6 +4,7 @@ import { apiKeys } from './mocks/apiKeys';
 import { apps } from './mocks/apps';
 import { auth } from './mocks/auth';
 import { backingServices } from './mocks/backingServices';
+import { cel } from './mocks/cel';
 import { clientConfig } from './mocks/clientConfig';
 import { deployment } from './mocks/deployment';
 import { fieldMaps } from './mocks/fieldMaps';
@@ -28,6 +29,7 @@ import { system } from './mocks/system';
 import { usage } from './mocks/usage';
 
 export const API_CONFIG_MOCKS = Object.freeze({
+  cel,
   accounts,
   alerts,
   apiKeys,

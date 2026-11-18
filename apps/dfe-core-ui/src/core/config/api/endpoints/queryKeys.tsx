@@ -934,6 +934,10 @@ export const QUERY_KEYS = Object.freeze({
     ],
     apiKey: () => ['auth', 'api-keys', '{short_token}'],
   },
+  cel: {
+    check: () => ['cel', 'check'],
+    checkBatch: () => ['cel', 'check-batch'],
+  },
 } as const satisfies Record<
   string,
   Record<string, () => (string | number | true)[]>
