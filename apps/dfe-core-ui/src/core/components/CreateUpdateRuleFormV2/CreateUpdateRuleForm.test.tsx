@@ -9,6 +9,11 @@ import userEvent from '@testing-library/user-event';
 import { describe, expect, test, vi } from 'vitest';
 import { CreateUpdateRuleForm, CreateUpdateRuleFormData } from '.';
 
+// Ace's beautify extension reads a global that only the app shell sets.
+vi.mock('@/core/components/AceEditor', () => ({
+  AceEditor: () => null,
+}));
+
 const { wrapper } = buildTestWrapper().withTheme().withReactQuery();
 
 const initialValues: CreateUpdateRuleFormData = {
@@ -31,13 +36,18 @@ const renderForm = (onFinish = vi.fn()) =>
   );
 
 describe('CreateUpdateRuleForm', () => {
-  test('saves the CEL filter with the rule', async () => {
+  test('saves the rule with its match criteria', async () => {
     const onFinish = vi.fn();
     renderForm(onFinish);
 
-    expect(screen.getByLabelText('CEL Filter')).toHaveValue(
-      'event.action == "login"',
-    );
+    expect(
+      screen.getByRole('radio', { name: 'Conditions' }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('radio', { name: 'CEL Fast expression' }),
+    ).toBeInTheDocument();
+    expect(screen.getByRole('radio', { name: 'SQL' })).toBeInTheDocument();
+    expect(screen.getByText('WhenMatch')).toBeInTheDocument();
 
     await userEvent.click(screen.getByRole('button', { name: 'Save Rule' }));
 
@@ -47,7 +57,6 @@ describe('CreateUpdateRuleForm', () => {
         name: 'suspicious_logins',
         display_name: 'Suspicious logins',
         description: 'Repeated failed logins',
-        cel_filter: 'event.action == "login"',
         severity: 'high',
       }),
     );

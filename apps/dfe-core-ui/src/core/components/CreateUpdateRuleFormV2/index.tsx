@@ -1,15 +1,14 @@
 import { ApiErrorNotification } from '@/core/components/ApiErrorNotification';
-import { ContentCard } from '@/core/components/ContentCard';
 import { Form } from '@/core/components/Form';
+import { MatchCriteriaInput } from '@/core/components/MatchCriteriaInput';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
 import { RULE_HUNT_NAME_VALIDATOR } from '@/core/validationSchemas/utils';
 import { IconDeviceFloppy } from '@repo/dfe-icons';
-import { Button, FormProps, Input } from 'antd';
+import { Button, FormProps, Input, Select } from 'antd';
 import { useEffect, useMemo } from 'react';
 import z from 'zod';
 import { DEFAULT_ESTIMATE_COST } from './defaults';
 import { ResponseModal } from './ResponseModal';
-import { RuleSettings } from './RuleSettings';
 
 const requiredName = z.string().min(1, { message: 'Name is required' });
 
@@ -80,35 +79,72 @@ const CreateUpdateRuleFormBase = ({
       initialValues={{ estimate_cost: DEFAULT_ESTIMATE_COST, ...initialValues }}
       {...props}
     >
-      <RuleSettings
-        formValidation={formValidation}
-        disabledFields={disabledFields}
-      />
-
-      <ContentCard className="flex flex-col gap-y-2">
+      <div className="flex gap-x-2">
         <Form.Item
-          label="CEL Filter"
-          name="cel_filter"
-          className="m-0! grow"
+          name="name"
+          label="Name"
+          className="m-0! grow text-sm w-full"
           layout="vertical"
           rules={[formValidation]}
         >
-          <Input.TextArea className="w-full" />
+          <Input disabled={disabledFields?.name} className="w-full" />
         </Form.Item>
-        {error && <ApiErrorNotification error={error} />}
 
-        <div className="flex gap-x-2 ml-auto! mt-2">
-          <Button
-            loading={isPending}
-            htmlType="submit"
-            type="primary"
-            icon={<IconDeviceFloppy className="size-4" />}
-            disabled={isPending}
-          >
-            {buttonLabel}
-          </Button>
-        </div>
-      </ContentCard>
+        <Form.Item
+          name="display_name"
+          label="Display Name"
+          className="m-0! grow text-sm w-full"
+          layout="vertical"
+          rules={[formValidation]}
+        >
+          <Input disabled={disabledFields?.name} className="w-full" />
+        </Form.Item>
+        <Form.Item
+          label="Severity"
+          name="severity"
+          className="m-0! grow text-sm w-full"
+          layout="vertical"
+          rules={[formValidation]}
+        >
+          <Select
+            className="w-full"
+            options={[
+              { label: 'Low', value: 'low' },
+              { label: 'Medium', value: 'medium' },
+              { label: 'High', value: 'high' },
+              { label: 'Critical', value: 'critical' },
+            ]}
+          />
+        </Form.Item>
+      </div>
+
+      <Form.Item
+        label="Description"
+        name="description"
+        className="m-0! grow text-sm w-full"
+        layout="vertical"
+        rules={[formValidation]}
+      >
+        <Input.TextArea />
+      </Form.Item>
+
+      <Form.Item label="Match Criteria">
+        <MatchCriteriaInput />
+      </Form.Item>
+
+      {error && <ApiErrorNotification error={error} />}
+
+      <div className="flex gap-x-2 ml-auto! mt-2">
+        <Button
+          loading={isPending}
+          htmlType="submit"
+          type="primary"
+          icon={<IconDeviceFloppy className="size-4" />}
+          disabled={isPending}
+        >
+          {buttonLabel}
+        </Button>
+      </div>
     </Form>
   );
 };
