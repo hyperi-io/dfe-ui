@@ -1,6 +1,9 @@
 import { AceEditor } from '@/core/components/AceEditor';
+import { FormNotification } from '@/core/components/FormNotification';
+import { useValidateRule } from '@/core/hooks/useValidateRule';
+import { IconCheck, IconX } from '@repo/dfe-icons';
 import type { Editor } from 'ace-builds';
-import { Tag } from 'antd';
+import { Button, Tag } from 'antd';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 interface SqlMatchProps {
@@ -12,7 +15,7 @@ interface SqlMatchProps {
 const READONLY_LINES = 3;
 
 const SQL_PREFIX = `SELECT *
-FROM {{source}}
+FROM {source}
 WHERE`;
 
 const documentFor = (whereClause: string) => `${SQL_PREFIX}\n${whereClause}`;
@@ -88,11 +91,27 @@ export const SqlMatch = ({ value, onChange, ...props }: SqlMatchProps) => {
   const [notice, setNotice] = useState<NoticePoint | null>(null);
   const hideNotice = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  const [sql, setSql] = useState(value ?? '');
+  const editorRef = useRef<Editor | null>(null);
+  const {
+    data,
+    mutate: checkSql,
+    isPending,
+    error,
+    reset: resetCheckSql,
+  } = useValidateRule();
+
   const showNotice = useCallback((editor: Editor) => {
     setNotice(noticeAtCursor(editor));
     if (hideNotice.current) clearTimeout(hideNotice.current);
     hideNotice.current = setTimeout(() => setNotice(null), 1500);
   }, []);
+
+  const handleSqlChange = (value: string) => {
+    resetCheckSql();
+    setSql(value);
+    onChange?.(value);
+  };
 
   useEffect(
     () => () => {
@@ -101,8 +120,25 @@ export const SqlMatch = ({ value, onChange, ...props }: SqlMatchProps) => {
     [],
   );
 
+  useEffect(() => {
+    const editor = editorRef.current;
+    const errors = (data?.errors ?? []).filter(
+      (error) => error.message.length > 0,
+    );
+    if (!editor || data?.valid !== false || errors.length === 0) return;
+    editor.session.setAnnotations(
+      errors.map((error) => ({
+        row: 0,
+        column: 0,
+        suggestion: error.suggestion,
+        text: error.message,
+        type: 'error',
+      })),
+    );
+  }, [data]);
+
   return (
-    <div className="relative">
+    <div className="flex flex-col gap-2">
       {notice && (
         <Tag
           className="pointer-events-none absolute z-10 m-0"
@@ -111,14 +147,49 @@ export const SqlMatch = ({ value, onChange, ...props }: SqlMatchProps) => {
           Read only
         </Tag>
       )}
+
+      <div className="flex justify-end absolute top-12 right-2 z-10">
+        <Button
+          icon={data ? data?.valid ? <IconCheck /> : <IconX /> : null}
+          danger={data ? !data?.valid : false}
+          type="default"
+
+          loading={isPending}
+          htmlType="button"
+          onClick={() => checkSql({ sql: documentFor(value ?? '') })}
+        >
+          {data
+            ? data?.valid
+              ? 'SQL is valid'
+              : 'SQL is invalid'
+            : 'Check SQL'}
+        </Button>
+      </div>
       <AceEditor
         {...props}
-        value={documentFor(value ?? '')}
+        value={documentFor(sql)}
         height="200px"
         mode="sql"
-        onChange={onChange}
-        onLoad={(editor) => lockSqlPrefix(editor, () => showNotice(editor))}
+        onChange={handleSqlChange}
+        onLoad={(editor) => {
+          editorRef.current = editor;
+          return lockSqlPrefix(editor, () => showNotice(editor));
+        }}
       />
+      {data && !data?.valid && (
+        <FormNotification
+          title="SQL is invalid"
+          text={data?.errors?.map((error) => error.message).join(', ')}
+          type="error"
+        />
+      )}
+      {error && (
+        <FormNotification
+          title="Error checking SQL"
+          text={error.message}
+          type="error"
+        />
+      )}
     </div>
   );
 };

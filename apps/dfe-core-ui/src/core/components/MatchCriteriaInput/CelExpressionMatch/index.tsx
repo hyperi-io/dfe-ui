@@ -9,11 +9,13 @@ import { useEffect, useRef, useState } from 'react';
 const EXAMPLE = "data_stream.dataset == 'okta.system'";
 
 export const CelExpressionMatch = ({
+  value,
   onChange,
 }: {
   onChange?: (value?: string) => void;
+  value?: string;
 }) => {
-  const [expression, setExpression] = useState('');
+  const [expression, setExpression] = useState(value ?? '');
   const editorRef = useRef<Editor | null>(null);
 
   const {
@@ -71,7 +73,7 @@ export const CelExpressionMatch = ({
           editorRef.current = editor;
         }}
       />
-      {!data?.valid && (
+      {data && !data?.valid && (
         <FormNotification
           title="Expression is invalid"
           text={data?.errors?.join(', ')}
