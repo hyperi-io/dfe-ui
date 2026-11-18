@@ -2,8 +2,9 @@ import { AceEditor } from '@/core/components/AceEditor';
 import { FormNotification } from '@/core/components/FormNotification';
 import { useCheckCel } from '@/core/hooks/useCelCheck';
 import { IconCheck, IconX } from '@repo/dfe-icons';
+import type { Editor } from 'ace-builds';
 import { Button } from 'antd';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 const EXAMPLE = "data_stream.dataset == 'okta.system'";
 
@@ -13,6 +14,7 @@ export const CelExpressionMatch = ({
   onChange?: (value?: string) => void;
 }) => {
   const [expression, setExpression] = useState('');
+  const editorRef = useRef<Editor | null>(null);
 
   const {
     data,
@@ -28,20 +30,32 @@ export const CelExpressionMatch = ({
     onChange?.(value);
   };
 
+  useEffect(() => {
+    const editor = editorRef.current;
+    const errors = (data?.errors ?? []).filter((message) => message.length > 0);
+    if (!editor || data?.valid !== false || errors.length === 0) return;
+    editor.session.setAnnotations(
+      errors.map((text) => ({ row: 0, column: 0, text, type: 'error' })),
+    );
+  }, [data]);
+
   return (
     <div className="flex flex-col gap-2">
       <div className="flex justify-end absolute top-12 right-2 z-10">
         <Button
-          disabled={data?.valid}
-          icon={data?.valid ? <IconCheck /> : <IconX />}
-          danger={!data?.valid}
-          type={data?.valid ? 'primary' : 'default'}
-          color={data?.valid ? 'green' : 'blue'}
+          icon={data ? data?.valid ? <IconCheck /> : <IconX /> : null}
+          danger={data ? !data?.valid : false}
+          type="default"
+
           loading={isPending}
           htmlType="button"
           onClick={() => checkCel({ expression, check_profile: true })}
         >
-          Check Expression
+          {data
+            ? data?.valid
+              ? 'Expression is valid'
+              : 'Expression is invalid'
+            : 'Check Expression'}
         </Button>
       </div>
 
@@ -53,9 +67,16 @@ export const CelExpressionMatch = ({
         maxLines={8}
         value={expression}
         onChange={handleExpressionChange}
+        onLoad={(editor) => {
+          editorRef.current = editor;
+        }}
       />
       {!data?.valid && (
-        <FormNotification text={data?.errors?.join(', ')} type="error" />
+        <FormNotification
+          title="Expression is invalid"
+          text={data?.errors?.join(', ')}
+          type="error"
+        />
       )}
       {error && (
         <FormNotification
