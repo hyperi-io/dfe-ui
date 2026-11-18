@@ -18,6 +18,7 @@ export const CelExpressionMatch = ({
   return (
     <div className="flex flex-col gap-2">
       <AceEditor
+        mode="cel"
         placeholder={EXAMPLE}
         minLines={2}
         maxLines={8}
