@@ -893,6 +893,7 @@ export const QUERY_KEYS = Object.freeze({
   },
   clientConfig: {
     default: () => ['config', 'client'],
+    features: () => ['config', 'features'],
   },
   system: {
     version: () => ['system', 'version'],
