@@ -1,49 +1,25 @@
 'use client';
 
 import { MainContentCard } from '@/core/components/ContentCard';
-import {
-  CreateUpdateRuleForm,
-  CreateUpdateRuleFormData,
-} from '@/core/components/CreateUpdateRuleFormV2';
+import { FeatureFlag } from '@/core/components/FeatureFlag';
 import { RbacProtected } from '@/core/components/RbacProtected';
-import { useCreateRule } from '@/core/hooks/useCreateRuleV2';
+import { RuleV2FeatureOff } from './RuleV2FeatureOff';
+import { RuleV2FeatureOn } from './RuleV2FeatureOn';
 
 export const CreateRuleScene = () => {
-  const {
-    data: createRuleResponse,
-    mutate: createRule,
-    reset: resetCreateRule,
-    isPending,
-    error: createRuleError,
-  } = useCreateRule();
-
-  const handleCreateCustomRule = (values: CreateUpdateRuleFormData) => {
-    createRule({
-      ...values,
-    });
-  };
-
   return (
     <>
       <MainContentCard className="p-0">
         <RbacProtected action={RbacProtected.rbacActions.rule_write}>
           <RbacProtected.Unrestricted>
-            <CreateUpdateRuleForm
-              onFinish={handleCreateCustomRule}
-              isPending={isPending}
-              error={createRuleError}
-              initialValues={{
-                name: '',
-                user_sql: '',
-                severity: 'medium',
-                source_type: 'raw',
-                cel_filter: '',
-                hunt_name: '',
-              }}
-            />
-            {createRuleResponse != null && (
-              <CreateUpdateRuleForm.ResponseModal onClose={resetCreateRule} />
-            )}
+            <FeatureFlag feature="rules_v2">
+              <FeatureFlag.On>
+                <RuleV2FeatureOn />
+              </FeatureFlag.On>
+              <FeatureFlag.Off>
+                <RuleV2FeatureOff />
+              </FeatureFlag.Off>
+            </FeatureFlag>
           </RbacProtected.Unrestricted>
           <RbacProtected.Restricted tooltip={{ show: true, placement: 'top' }}>
             <RbacProtected.RestrictedRoute />
