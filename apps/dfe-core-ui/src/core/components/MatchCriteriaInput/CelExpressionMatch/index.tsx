@@ -6,7 +6,7 @@ import type { Editor } from 'ace-builds';
 import { Button } from 'antd';
 import { useEffect, useRef, useState } from 'react';
 
-const EXAMPLE = "data_stream.dataset == 'okta.system'";
+const EXAMPLE = "// eg: data_stream.dataset == 'okta.system'";
 
 export const CelExpressionMatch = ({
   value,
@@ -15,7 +15,7 @@ export const CelExpressionMatch = ({
   onChange?: (value?: string) => void;
   value?: string;
 }) => {
-  const [expression, setExpression] = useState(value ?? '');
+  const [expression, setExpression] = useState(value ?? EXAMPLE);
   const editorRef = useRef<Editor | null>(null);
 
   const {
@@ -64,7 +64,6 @@ export const CelExpressionMatch = ({
       <AceEditor
         mode="cel"
         className="min-h-14"
-        placeholder={EXAMPLE}
         minLines={2}
         maxLines={8}
         value={expression}
