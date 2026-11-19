@@ -5,6 +5,7 @@ import { IconCheck, IconX } from '@repo/dfe-icons';
 import type { Editor } from 'ace-builds';
 import { Button, Tag } from 'antd';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { getNormalisedSql } from './SqlMatch.helpers';
 
 interface SqlMatchProps {
   value?: string;
@@ -15,10 +16,13 @@ interface SqlMatchProps {
 const READONLY_LINES = 3;
 
 const SQL_PREFIX = `SELECT *
-FROM {source}
+FROM {{source}}
 WHERE`;
 
 const documentFor = (whereClause: string) => `${SQL_PREFIX}\n${whereClause}`;
+
+const whereClauseOf = (document: string) =>
+  document.split('\n').slice(READONLY_LINES).join('\n');
 
 const NOTICE_COMMANDS = new Set(['insertstring', 'backspace']);
 
@@ -34,9 +38,10 @@ const noticeAtCursor = (editor: Editor): NoticePoint => {
   };
   const point = renderer.textToScreenCoordinates(cursor.row, cursor.column);
   const host = editor.container.getBoundingClientRect();
+  const lineHeight = editor.renderer.lineHeight;
   return {
-    top: Math.max(point.pageY - host.top - 28, 4),
-    left: Math.min(Math.max(point.pageX - host.left, 4), host.width - 96),
+    top: point.pageY - host.top + (lineHeight - 22) / 2,
+    left: Math.min(Math.max(point.pageX - host.left + 8, 4), host.width - 96),
   };
 };
 
@@ -58,12 +63,17 @@ const lockSqlPrefix = (editor: Editor, onBlocked: () => void) => {
     editor.session.getDocument().revertDelta(delta);
     undo.lastDeltas?.pop();
     restoring = false;
-    if (delta.action === 'remove') onBlocked();
   });
 
   editor.commands.on('exec', (event) => {
     if (event.command.readOnly) return;
-    if (editor.getSelectionRange().start.row >= READONLY_LINES) return;
+    const range = editor.getSelectionRange();
+    const boundaryBackspace =
+      event.command.name === 'backspace' &&
+      range.isEmpty() &&
+      range.start.row === READONLY_LINES &&
+      range.start.column === 0;
+    if (range.start.row >= READONLY_LINES && !boundaryBackspace) return;
     (event as { preventDefault?: () => void }).preventDefault?.();
     if (NOTICE_COMMANDS.has(event.command.name ?? '')) onBlocked();
   });
@@ -107,10 +117,19 @@ export const SqlMatch = ({ value, onChange, ...props }: SqlMatchProps) => {
     hideNotice.current = setTimeout(() => setNotice(null), 1500);
   }, []);
 
-  const handleSqlChange = (value: string) => {
+  const handleCheckSql = () => {
+    const normalisedSql = getNormalisedSql(documentFor(sql));
+    checkSql({ sql: normalisedSql });
+  };
+
+  const handleSqlChange = (document: string) => {
+    const clause = whereClauseOf(document);
+    // A blocked edit of the prefix shifts the lines. The lock puts them back,
+    // so this document is not the one to keep.
+    if (document !== documentFor(clause)) return;
     resetCheckSql();
-    setSql(value);
-    onChange?.(value);
+    setSql(clause);
+    onChange?.(documentFor(clause));
   };
 
   useEffect(
@@ -139,15 +158,6 @@ export const SqlMatch = ({ value, onChange, ...props }: SqlMatchProps) => {
 
   return (
     <div className="flex flex-col gap-2">
-      {notice && (
-        <Tag
-          className="pointer-events-none absolute z-10 m-0"
-          style={{ top: notice.top, left: notice.left }}
-        >
-          Read only
-        </Tag>
-      )}
-
       <div className="flex justify-end absolute top-12 right-2 z-10">
         <Button
           icon={data ? data?.valid ? <IconCheck /> : <IconX /> : null}
@@ -156,7 +166,7 @@ export const SqlMatch = ({ value, onChange, ...props }: SqlMatchProps) => {
 
           loading={isPending}
           htmlType="button"
-          onClick={() => checkSql({ sql: documentFor(value ?? '') })}
+          onClick={handleCheckSql}
         >
           {data
             ? data?.valid
@@ -165,17 +175,27 @@ export const SqlMatch = ({ value, onChange, ...props }: SqlMatchProps) => {
             : 'Check SQL'}
         </Button>
       </div>
-      <AceEditor
-        {...props}
-        value={documentFor(sql)}
-        height="200px"
-        mode="sql"
-        onChange={handleSqlChange}
-        onLoad={(editor) => {
-          editorRef.current = editor;
-          return lockSqlPrefix(editor, () => showNotice(editor));
-        }}
-      />
+      <div className="relative">
+        {notice && (
+          <Tag
+            className="pointer-events-none absolute z-10 m-0"
+            style={{ top: notice.top, left: notice.left }}
+          >
+            Read only
+          </Tag>
+        )}
+        <AceEditor
+          {...props}
+          value={documentFor(sql)}
+          height="200px"
+          mode="sql"
+          onChange={handleSqlChange}
+          onLoad={(editor) => {
+            editorRef.current = editor;
+            return lockSqlPrefix(editor, () => showNotice(editor));
+          }}
+        />
+      </div>
       {data && !data?.valid && (
         <FormNotification
           title="SQL is invalid"
