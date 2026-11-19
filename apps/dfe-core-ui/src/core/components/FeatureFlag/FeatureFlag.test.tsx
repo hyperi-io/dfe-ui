@@ -1,8 +1,16 @@
 import { render, screen } from '@testing-library/react';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { FeatureFlag } from './FeatureFlag';
 import { Off } from './Off';
 import { On } from './On';
+
+vi.mock('@/core/hooks/useFetchFeatureFlags', () => ({
+  useFetchFeatureFlags: () => ({
+    data: undefined,
+    isLoading: false,
+    error: null,
+  }),
+}));
 
 const TestFeatureFlag = () => (
   <>
