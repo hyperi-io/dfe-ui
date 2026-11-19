@@ -7,6 +7,7 @@ import { TSystemDefaultsResponse } from '@/core/hooks/useFetchDefaults/types';
 import { TSystemDeploymentResponse } from '@/core/hooks/useFetchDeployment/types';
 import { TSystemSettingsResponse } from '@/core/hooks/useFetchSystemSettings/types';
 import { TSystemVersionResponse } from '@/core/hooks/useFetchSystemVersion/types';
+import { TYourOrganisation } from '@/core/hooks/useFetchYourOrganisation/types';
 import { http, HttpResponse } from 'msw';
 import {
   DEFAULT_VALIDATION_ERROR,
@@ -86,6 +87,53 @@ export const system = {
     put: {
       success: () => {
         console.error('Not implemented');
+      },
+    },
+  },
+  organisation: {
+    mockedUrl: '/api/v1/system/organisation',
+    get: {
+      success: ({
+        mockedResponse = { name: 'acme', display_name: 'Acme' },
+      }: {
+        mockedResponse?: TYourOrganisation;
+      } = {}) => {
+        return http.get(system.organisation.mockedUrl, () => {
+          return HttpResponse.json(mockedResponse);
+        });
+      },
+      error: ({
+        mockedResponse = DEFAULT_VALIDATION_ERROR,
+        status = 503,
+      }: {
+        mockedResponse?: TValidationError;
+        status?: number;
+      } = {}) => {
+        return http.get(system.organisation.mockedUrl, () => {
+          return HttpResponse.json(mockedResponse, { status });
+        });
+      },
+    },
+    put: {
+      success: ({
+        mockedResponse = { name: 'acme', display_name: 'Acme' },
+      }: {
+        mockedResponse?: TYourOrganisation;
+      } = {}) => {
+        return http.put(system.organisation.mockedUrl, () => {
+          return HttpResponse.json(mockedResponse);
+        });
+      },
+      error: ({
+        mockedResponse = DEFAULT_VALIDATION_ERROR,
+        status = 422,
+      }: {
+        mockedResponse?: TValidationError;
+        status?: number;
+      } = {}) => {
+        return http.put(system.organisation.mockedUrl, () => {
+          return HttpResponse.json(mockedResponse, { status });
+        });
       },
     },
   },

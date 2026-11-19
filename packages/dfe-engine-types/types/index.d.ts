@@ -887,8 +887,8 @@ export interface paths {
          * List Orgs
          * @description List organisations visible to the caller, paginated.
          *
-         *     System-scope org:read holders see every org. Org-scope holders see
-         *     only the orgs their grants cover.
+         *     Platform holders of org:read at system scope see every org. Org-scope holders,
+         *     and a system-bound ``scoped`` role, see only the orgs their grants cover.
          */
         get: operations["orgs.list"];
         put?: never;
@@ -966,8 +966,8 @@ export interface paths {
          *     rather than reading the rows the org left behind. A production+team posture
          *     routes that hunt change to review, and the ``X-DFE-Review-Required`` header says so.
          *
-         *     The reserved ``default`` org cannot be deleted, nor can an org another org's
-         *     ingest credential binds or a fetched source names: each answers 409.
+         *     Your org cannot be deleted, nor can an org another org's ingest credential binds
+         *     or a fetched source names: each answers 409.
          */
         delete: operations["orgs.delete"];
         options?: never;
@@ -1014,7 +1014,8 @@ export interface paths {
          *     ``If-None-Match: *`` creates it and answers 201 with the token, once.
          *     ``If-Match: <etag>`` updates its orgs, default org and listeners and keeps its
          *     token. A credential id is unique across every org, so creating one another org
-         *     holds answers 409 ``credential_id_taken``. A binding the receiver could not
+         *     holds answers 409 ``credential_id_taken``, as does the engine's own
+         *     ``dfe-engine-synthetic-data``. A binding the receiver could not
          *     hold answers 422 ``invalid_binding`` with a field error for each problem. A write
          *     another one got to first answers 412 where its precondition no longer holds, else
          *     409 ``conflict``, and changes nothing.
@@ -2371,6 +2372,34 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/system/organisation": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Organisation
+         * @description Your org, the organisation running this deployment. The ETag is absent while none is named.
+         */
+        get: operations["system.organisation.get"];
+        /**
+         * Put Organisation
+         * @description Name a registered, enabled org as yours, the organisation running this deployment.
+         *
+         *     ``If-None-Match: *`` names the first, or replaces a doc that cannot be read or names an org no longer registered, and ``If-Match`` changes it. With gitops on this
+         *     is a direct commit to the deploy repo's ``governance/settings/organisation.yaml``,
+         *     else that file under the config directory.
+         */
+        put: operations["system.organisation.apply"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/system/defaults": {
         parameters: {
             query?: never;
@@ -2616,7 +2645,8 @@ export interface paths {
          *
          *     Run state comes from ONE ClickHouse read across every listed hunt: the watermark
          *     (last run), the lease (running now), hunt_state (too aggressive) and hunt_run
-         *     (rows the last run wrote). Next due is derived, not stored.
+         *     (rows the last run wrote). Next due is derived, not stored. A hunt naming a rule
+         *     with no stored rule file carries ``missing_rules`` and an ``error``.
          */
         get: operations["hunts.list"];
         put?: never;
@@ -2645,6 +2675,8 @@ export interface paths {
         /**
          * Get Hunt
          * @description Get full hunt configuration by file name, with the runner's stop on it if any.
+         *
+         *     A hunt naming a rule with no stored rule file carries ``missing_rules`` and an ``error``.
          */
         get: operations["hunts.get"];
         /**
@@ -2653,7 +2685,8 @@ export interface paths {
          *
          *     A production+team write is routed to a review branch instead of the branch the
          *     runner git-syncs, and the ``X-DFE-Review-Required`` header says so. 422
-         *     ``unknown_org`` when a customer names no registered org.
+         *     ``unknown_org`` when a customer names no registered org, 422 ``unknown_rule`` when a
+         *     rule newly named has no stored rule file.
          */
         put: operations["hunts.apply"];
         post?: never;
@@ -2998,6 +3031,9 @@ export interface paths {
         /**
          * Start Stream
          * @description Start a stream task that posts generated events to an ingest URL.
+         *
+         *     The stream presents the engine's own ingest credential, minted for the primary org
+         *     on the first stream, unless the request's ``headers`` carry an ``Authorization``.
          */
         post: operations["synthetic-data.stream"];
         delete?: never;
@@ -6116,7 +6152,7 @@ export interface components {
             name: string;
             /**
              * Org
-             * @description The registered org the account belongs to, which its sessions carry as org_id. Empty binds it to none, so it reads no org-bound view. The binding grants nothing itself: such a view also needs the org among those its groups grant.
+             * @description The registered org the account belongs to, which its sessions carry as org_id. Empty makes it a root account, bound to your org (GET /system/organisation), or to none while no org is yours. The binding grants nothing itself: an org-bound view also needs the org among those its groups grant.
              * @default
              */
             org: string;
@@ -8130,7 +8166,7 @@ export interface components {
             name: string;
             /**
              * Org
-             * @description The registered org the account belongs to, which its sessions carry as org_id. Empty binds it to none, so it reads no org-bound view. The binding grants nothing itself: such a view also needs the org among those its groups grant.
+             * @description The registered org the account belongs to, which its sessions carry as org_id. Empty makes it a root account, bound to your org (GET /system/organisation), or to none while no org is yours. The binding grants nothing itself: an org-bound view also needs the org among those its groups grant.
              * @default
              */
             org: string;
@@ -8947,7 +8983,7 @@ export interface components {
             credential_ref?: string | null;
             /**
              * Org
-             * @description The registered org the records belong to; null is the default org
+             * @description The registered org the records belong to; null is the unassigned tenant
              */
             org?: string | null;
             /**
@@ -9749,6 +9785,17 @@ export interface components {
              * @default
              */
             auto_disabled_reason: string;
+            /**
+             * Missing Rules
+             * @description Rules the hunt names that no stored rule file backs, so it cannot fire
+             */
+            missing_rules?: string[];
+            /**
+             * Error
+             * @description Why the runner cannot fire the hunt; empty when nothing stops it
+             * @default
+             */
+            error: string;
         };
         /**
          * HuntEngineStatus
@@ -9911,6 +9958,17 @@ export interface components {
              * @default
              */
             auto_disabled_reason: string;
+            /**
+             * Missing Rules
+             * @description Rules the hunt names that no stored rule file backs, so it cannot fire
+             */
+            missing_rules?: string[];
+            /**
+             * Error
+             * @description Why the runner cannot fire the hunt; empty when nothing stops it
+             * @default
+             */
+            error: string;
         };
         /**
          * HuntWriteRequest
@@ -14373,9 +14431,11 @@ export interface components {
             oidc_providers?: (components["schemas"]["OIDCProviderSummary"] | components["schemas"]["OIDCProviderLoginOption"])[];
             /**
              * Organisations
-             * @description The organisation registry, bar the reserved default org. Empty once setup is complete.
+             * @description The organisation registry. Empty once setup is complete.
              */
             organisations?: components["schemas"]["Org"][];
+            /** @description Your organisation, the deployment's own. Null while none is named, and once setup is complete. */
+            your_org?: components["schemas"]["Org"] | null;
             /** @description Durability of the LOCAL ADMIN account in the deploy repo (the field name predates the separate breakglass recovery account): enabled/auto_merge/committed/merged. committed without merged means a change is still waiting on a merge, and pending then names its review branch and, with no forge configured, the command that merges it. pending.pr_url is only in the reset-password response. */
             break_glass?: components["schemas"]["AccountGitState"] | null;
             /**
@@ -14988,7 +15048,7 @@ export interface components {
             credential_ref?: string | null;
             /**
              * Org
-             * @description The registered org the pipeline's records belong to. Unset is the default org. A record carrying any other _org_id lands here, unless allowed_org_ids lists it
+             * @description The registered org the pipeline's records belong to. Unset is the unassigned tenant. A record carrying any other _org_id lands here, unless allowed_org_ids lists it
              */
             org?: string | null;
             /**
@@ -15041,7 +15101,7 @@ export interface components {
             routes?: components["schemas"]["FetcherRoute"][];
             /**
              * Org
-             * @description The registered org every fetched record belongs to: the fetcher stamps its first tenant id as _org_id. Unset is the default org
+             * @description The registered org every fetched record belongs to: the fetcher stamps its first tenant id as _org_id. Unset is the unassigned tenant
              */
             org?: string | null;
         };
@@ -15546,7 +15606,7 @@ export interface components {
             credential_ref?: string | null;
             /**
              * Org
-             * @description The registered org the pipeline's records belong to. Unset is the default org. A record carrying any other _org_id lands here, unless allowed_org_ids lists it
+             * @description The registered org the pipeline's records belong to. Unset is the unassigned tenant. A record carrying any other _org_id lands here, unless allowed_org_ids lists it
              */
             org?: string | null;
             /**
@@ -15923,8 +15983,11 @@ export interface components {
         StatusResponse: {
             /** Telemetry Name */
             telemetry_name: string;
-            /** Reporting */
-            reporting: boolean;
+            /**
+             * Reporting
+             * @description Whether the instance is reporting. Null for an app that emits no scalo telemetry (telemetry: none in the app manifest), whose state is unknown rather than not reporting.
+             */
+            reporting: boolean | null;
             /** Last Seen Epoch */
             last_seen_epoch?: number | null;
             /** Started Epoch */
@@ -16536,7 +16599,7 @@ export interface components {
             name?: string | null;
             /**
              * Org
-             * @description Replace the org binding. The registered org the account belongs to, which its sessions carry as org_id. Empty binds it to none, so it reads no org-bound view. The binding grants nothing itself: such a view also needs the org among those its groups grant.
+             * @description Replace the org binding. The registered org the account belongs to, which its sessions carry as org_id. Empty makes it a root account, bound to your org (GET /system/organisation), or to none while no org is yours. The binding grants nothing itself: an org-bound view also needs the org among those its groups grant.
              */
             org?: string | null;
         };
@@ -17382,6 +17445,33 @@ export interface components {
             source_hint?: string | null;
         };
         /**
+         * YourOrganisation
+         * @description The org the deployment names as its own.
+         */
+        YourOrganisation: {
+            /**
+             * Name
+             * @description Your org's name. Null while none is named.
+             */
+            name: string | null;
+            /**
+             * Display Name
+             * @description Its display name. Null while none is named or the org is gone.
+             */
+            display_name: string | null;
+        };
+        /**
+         * YourOrganisationUpdate
+         * @description The registered org to name as yours.
+         */
+        YourOrganisationUpdate: {
+            /**
+             * Name
+             * @description A registered, enabled org's name.
+             */
+            name: string;
+        };
+        /**
          * AttributesRequest
          * @description Full-replace body for a group's attribute blob (non-sensitive or sensitive).
          */
@@ -18203,6 +18293,8 @@ export interface operations {
                 search?: string | null;
                 /** @description Exact match on the OIDC provider name last used to log the account in */
                 oidc_id?: string | null;
+                /** @description Exact match on the org the account belongs to, where your org also matches the root accounts naming none. Empty matches only the root accounts. */
+                org?: string | null;
                 /** @description Filter by blocked status. Omitted returns every account. */
                 blocked?: boolean | null;
                 /** @description Include the local admin and break-glass recovery accounts. */
@@ -25545,6 +25637,159 @@ export interface operations {
                 };
             };
             /** @description not_configured: gitops is off, so there is nowhere to store the value */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+        };
+    };
+    "system.organisation.get": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    /** @description The current entity-tag, for If-Match */
+                    ETag?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["YourOrganisation"];
+                };
+            };
+            /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description home_org_unreadable: the doc cannot be read, PUT replaces it */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+        };
+    };
+    "system.organisation.apply": {
+        parameters: {
+            query?: {
+                /** @description Validate and report the change without committing it */
+                dry_run?: boolean;
+            };
+            header?: {
+                /** @description The current ETag: the write fails with 412 if it has changed */
+                "If-Match"?: string | null;
+                /** @description `*` to create: the write fails with 412 if the resource exists */
+                "If-None-Match"?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["YourOrganisationUpdate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["YourOrganisation"];
+                };
+            };
+            /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description A precondition failed: your org changed, or one is already named */
+            412: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description unknown_org: no enabled org of that name is registered */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description precondition_required: send If-None-Match: * or If-Match */
+            428: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description not_configured: this engine holds no organisations */
             503: {
                 headers: {
                     [name: string]: unknown;

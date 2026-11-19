@@ -19,15 +19,18 @@ test.describe(
       expect((await call(undefined, 'GET', '/api/v1/orgs')).status).toBe(401);
 
       const admin = await adminApi();
+      const yours = await admin('GET', '/api/v1/system/organisation');
+      expect(yours.status).toBe(200);
+      expect(yours.json.name).toBeTruthy();
       const orgs = await admin('GET', '/api/v1/orgs');
       expect(orgs.status).toBe(200);
       expect(orgs.json.items.map((o: { name: string }) => o.name)).toContain(
-        'default',
+        yours.json.name,
       );
       expect(orgs.json.total_size).toBe(orgs.json.items.length);
-      const fallback = await admin('GET', '/api/v1/orgs/default');
-      expect(fallback.status).toBe(200);
-      expect(fallback.json.enabled).toBe(true);
+      const home = await admin('GET', `/api/v1/orgs/${yours.json.name}`);
+      expect(home.status).toBe(200);
+      expect(home.json.enabled).toBe(true);
     });
   },
 );

@@ -19,7 +19,7 @@ import {
   vi,
 } from 'vitest';
 import { server } from './CreateUpdateOrganisationForm.mocks';
-import { CreateUpdateOrganisationForm } from './index';
+import { CreateUpdateOrganisationForm, withLinkedTag } from './index';
 
 class MockIntersectionObserver {
   observe = vi.fn();
@@ -115,6 +115,121 @@ describe('CreateUpdateOrganisationForm', () => {
   );
 });
 
+describe('withLinkedTag', () => {
+  test.each([
+    { ids: [], previous: '', next: 'a', expected: ['a'] },
+    { ids: ['a'], previous: 'a', next: 'ac', expected: ['ac'] },
+    { ids: ['x', 'ac'], previous: 'ac', next: 'acme', expected: ['acme', 'x'] },
+    { ids: ['acme', 'x'], previous: 'acme', next: '', expected: ['x'] },
+    {
+      ids: ['acme', 'x'],
+      previous: 'acm',
+      next: 'acme',
+      expected: ['acme', 'x'],
+    },
+  ])('$previous -> $next over $ids', ({ ids, previous, next, expected }) => {
+    expect(withLinkedTag(ids, previous, next)).toEqual(expected);
+  });
+});
+
+describe('CreateUpdateOrganisationForm organisation IDs', () => {
+  const orgIdTags = () =>
+    Array.from(
+      document.querySelectorAll('.ant-select-selection-item-content'),
+    ).map((tag) => tag.textContent);
+
+  const renderCreate = (onFinish = vi.fn()) =>
+    render(
+      <CreateUpdateOrganisationForm
+        initialValues={{ name: '', display_name: '', org_ids: [] }}
+        onFinish={onFinish}
+        buttonLabel="Create"
+      />,
+      { wrapper },
+    );
+
+  test('keeps the IDs under Advanced Settings until opened', async () => {
+    const user = userEvent.setup();
+    renderCreate();
+    const item = screen
+      .getByText('Organisation IDs')
+      .closest<HTMLElement>('.ant-form-item');
+
+    expect(item).toHaveClass('ant-form-item-hidden');
+    await user.click(screen.getByRole('button', { name: 'Advanced Settings' }));
+    expect(item).not.toHaveClass('ant-form-item-hidden');
+  });
+
+  test('sends the name as the first ID while it is linked', async () => {
+    const user = userEvent.setup();
+    const onFinish = vi.fn();
+    renderCreate(onFinish);
+
+    await user.type(screen.getByPlaceholderText('Enter name'), 'Acme');
+    await user.type(screen.getByPlaceholderText('Enter display name'), 'Acme');
+    await user.click(screen.getByRole('button', { name: 'Create' }));
+
+    await waitFor(() => expect(onFinish).toHaveBeenCalledTimes(1));
+    expect(onFinish).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'acme', org_ids: ['acme'] }),
+    );
+  });
+
+  test('stops following the name once its ID is removed', async () => {
+    const user = userEvent.setup();
+    const onFinish = vi.fn();
+    renderCreate(onFinish);
+    const name = screen.getByPlaceholderText('Enter name');
+
+    await user.type(name, 'acme');
+    await user.click(screen.getByRole('button', { name: 'Advanced Settings' }));
+    expect(orgIdTags()).toEqual(['acme']);
+    const remove = document.querySelector<HTMLElement>(
+      '.ant-select-selection-item-remove',
+    );
+    if (!remove) throw new Error('no remove control on the linked ID');
+    await user.click(remove);
+    await user.type(name, '-corp');
+
+    expect(orgIdTags()).toEqual([]);
+  });
+
+  test('refuses unassigned as a name', async () => {
+    const user = userEvent.setup();
+    const onFinish = vi.fn();
+    renderCreate(onFinish);
+
+    await user.type(screen.getByPlaceholderText('Enter name'), 'unassigned');
+    await user.type(screen.getByPlaceholderText('Enter display name'), 'U');
+    await user.click(screen.getByRole('button', { name: 'Create' }));
+
+    expect(
+      await screen.findAllByText(/no organisation may use it/),
+    ).not.toHaveLength(0);
+    expect(onFinish).not.toHaveBeenCalled();
+  });
+
+  test('links nothing while the name is locked', async () => {
+    const user = userEvent.setup();
+    render(
+      <CreateUpdateOrganisationForm
+        initialValues={{
+          name: 'acme',
+          display_name: 'Acme',
+          org_ids: ['acme-1'],
+        }}
+        onFinish={vi.fn()}
+        disabledFields={{ name: true }}
+      />,
+      { wrapper },
+    );
+
+    await user.click(screen.getByRole('button', { name: 'Advanced Settings' }));
+
+    expect(orgIdTags()).toEqual(['acme-1']);
+  });
+});
+
 describe('CreateUpdateOrganisationForm refusals', () => {
   const heldRefusal = (
     held: {
@@ -200,6 +315,7 @@ describe('CreateUpdateOrganisationForm refusals', () => {
     enabled: true,
     auto_disabled_at: null,
     auto_disabled_reason: '',
+    error: '',
   };
   const oldOrg = {
     name: 'oldco',

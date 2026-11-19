@@ -10,7 +10,11 @@ import {
 import { loginAs } from '@e2e/config/login.helpers';
 import { TAGS } from '@e2e/config/tags.constants';
 
-import { apiCreateRule, engineClient } from './detection.helpers';
+import {
+  apiCreateRule,
+  apiPrimaryOrganisation,
+  engineClient,
+} from './detection.helpers';
 
 prepareJourneyStack();
 
@@ -42,13 +46,14 @@ test.beforeAll(async ({ playwright }) => {
   if (have.total_size === COUNT) return;
   await api.del(`/rules/${RULE}`);
   await apiCreateRule(api, RULE);
+  const primary = await apiPrimaryOrganisation(api);
   for (let i = 0; i < COUNT; i += 1) {
     await api.del(`/hunts/${nameOf(i)}`);
     const res = await api.post('/hunts', {
       name: nameOf(i),
       display_name: displayOf(i),
       cron: '*/15 * * * *',
-      customers: ['default'],
+      customers: [primary.name],
       global_source_table_name: 'main',
       rules: [RULE],
     });

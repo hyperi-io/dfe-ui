@@ -9,13 +9,15 @@ import { TOrganisationListSummary } from '@/core/hooks/useFetchInfiniteFilteredO
 import { useUpdateOrganisation } from '@/Settings/hooks/organisations/useUpdateOrganisation';
 import { IconEdit } from '@repo/dfe-icons';
 import { useQueryClient } from '@tanstack/react-query';
-import { Button, notification } from 'antd';
+import { Button, ButtonProps, notification } from 'antd';
 import { useState } from 'react';
 
 export const EditOrganisationDrawer = ({
   organisation,
+  buttonType = 'text',
 }: {
   organisation: TOrganisationListSummary;
+  buttonType?: ButtonProps['type'];
 }) => {
   const [open, setOpen] = useState(false);
   const [api, contextHolder] = notification.useNotification();
@@ -55,7 +57,7 @@ export const EditOrganisationDrawer = ({
       <RbacProtected action={RbacProtected.rbacActions.org_write}>
         <RbacProtected.Unrestricted>
           <Button
-            type="text"
+            type={buttonType}
             aria-label={`Edit ${organisation.display_name}`}
             icon={<IconEdit />}
             onClick={() => setOpen(true)}
@@ -65,7 +67,7 @@ export const EditOrganisationDrawer = ({
         </RbacProtected.Unrestricted>
         <RbacProtected.Restricted tooltip={{ show: true }}>
           <Button
-            type="text"
+            type={buttonType}
             htmlType="button"
             icon={<IconEdit />}
             disabled
@@ -82,7 +84,13 @@ export const EditOrganisationDrawer = ({
         onClose={() => setOpen(false)}
       >
         <CreateUpdateOrganisationForm
-          initialValues={organisation}
+          initialValues={{
+            ...organisation,
+            // The engine stamps an org with no IDs with its name, so show that.
+            org_ids: organisation.org_ids?.length
+              ? organisation.org_ids
+              : [organisation.name],
+          }}
           onFinish={handleUpdateOrganisation}
           error={error}
           isPending={isPending}

@@ -875,6 +875,7 @@ export const QUERY_KEYS = Object.freeze({
     version: () => ['system', 'version'],
     settings: () => ['system', 'settings'],
     retention: () => ['system', 'retention'],
+    organisation: () => ['system', 'organisation'],
     clickhouseCloud: () => ['system', 'clickhouse-cloud'],
     clickhouseCloudStart: () => ['system', 'clickhouse-cloud', 'start'],
     clickhouseCloudStop: () => ['system', 'clickhouse-cloud', 'stop'],

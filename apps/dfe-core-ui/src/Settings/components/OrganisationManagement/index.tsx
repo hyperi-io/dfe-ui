@@ -6,12 +6,14 @@ import { NotificationCard } from '@/core/components/NotificationCard';
 import { RbacProtected } from '@/core/components/RbacProtected';
 import { SectionCard } from '@/core/components/SectionCard';
 import { useFetchInfiniteFilteredOrganisations } from '@/core/hooks/useFetchInfiniteFilteredOrganisations';
+import { useFetchYourOrganisation } from '@/core/hooks/useFetchYourOrganisation';
 import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
 import { CreateOrganisationDrawer } from '@/Settings/components/OrganisationManagement/CreateOrganisationDrawer';
 import { IconInfoCircle } from '@repo/dfe-icons';
 import { Input, Spin } from 'antd';
 import { useState } from 'react';
 import { OrganisationCard } from './OrganisationCard';
+import { YourOrganisationBanner } from './YourOrganisationBanner';
 
 export const OrganisationManagement = () => {
   const [search, setSearch] = useState('');
@@ -22,6 +24,11 @@ export const OrganisationManagement = () => {
     isLoading,
     error,
   } = useFetchInfiniteFilteredOrganisations({ search, page_size: 12 });
+  const { data: yourOrganisation } = useFetchYourOrganisation();
+  // Your organisation has its own banner, so the grid holds the ones you serve.
+  const servedOrganisations = organisations.filter(
+    (organisation) => organisation.name !== yourOrganisation?.name,
+  );
   const { componentHeight: outerComponentHeight } = useSetComponentHeight({
     offset: 100,
   });
@@ -32,6 +39,7 @@ export const OrganisationManagement = () => {
 
   return (
     <CustomScrollbar height={outerComponentHeight}>
+      <YourOrganisationBanner />
       <SectionCard
         title="Configure a new organisation"
         description="Create and configure a new organisation and manage user, role defaults and more."
@@ -66,17 +74,17 @@ export const OrganisationManagement = () => {
                 />
               </>
             )}
-            {!isLoading && !error && organisations?.length === 0 && (
+            {!isLoading && !error && servedOrganisations.length === 0 && (
               <NotificationCard
                 className="w-full"
                 description="No organisations found"
                 icon={<IconInfoCircle />}
               />
             )}
-            {organisations && organisations?.length > 0 && (
+            {servedOrganisations.length > 0 && (
               <CustomScrollbar height={innerComponentHeight}>
                 <ul className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-                  {organisations?.map((organisation) => (
+                  {servedOrganisations.map((organisation) => (
                     <li key={organisation.name}>
                       <OrganisationCard
                         key={organisation.name}

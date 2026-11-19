@@ -43,6 +43,7 @@ vi.mock('@/Hunts/contexts/ListHuntsContext', () => ({
           name: 'windows_audit',
           auto_disabled_at: listed.autoDisabledAt,
           auto_disabled_reason: 'resource_limit:241',
+          error: '',
         },
       ],
     },
@@ -74,6 +75,7 @@ const hunt: THuntDetailResponse = {
   rules: [{ rule_name: 'brute_force' }],
   enabled: true,
   auto_disabled_reason: '',
+  error: '',
 };
 
 const RunStateTag = ({ hunt: detail }: { hunt: THuntDetailResponse }) => (
@@ -194,6 +196,7 @@ describe('HuntDetailActionMenu enable action', () => {
           ...hunt,
           auto_disabled_at: stopped ? 1_763_300_000 : null,
           auto_disabled_reason: stopped ? 'resource_limit:241' : '',
+          error: '',
         });
       }),
       http.put('/api/v1/hunts/windows_audit', () => {

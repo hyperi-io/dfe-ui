@@ -4,10 +4,6 @@ import { ViewOrganisationDrawer } from '@/Settings/components/OrganisationManage
 import { PopoverMenu } from '@/core/components/PopoverMenu';
 import { TOrganisationListSummary } from '@/core/hooks/useFetchInfiniteFilteredOrganisations/types';
 
-const DEFAULT_ORGANISATION_NAME = 'default';
-const DEFAULT_ORGANISATION_DELETE_REASON =
-  'This organisation is reserved: every record that names no organisation lands in it.';
-
 export const OrganisationCard = ({
   organisation,
 }: {
@@ -35,11 +31,6 @@ export const OrganisationCard = ({
             key="delete-organisation"
             org_name={organisation.name}
             display_name={organisation.display_name}
-            disabledReason={
-              organisation.name === DEFAULT_ORGANISATION_NAME
-                ? DEFAULT_ORGANISATION_DELETE_REASON
-                : undefined
-            }
           />,
         ]}
       />

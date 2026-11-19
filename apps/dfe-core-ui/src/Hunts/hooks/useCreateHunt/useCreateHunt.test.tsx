@@ -83,6 +83,7 @@ describe('.useCreateHunt', () => {
         min_interval_seconds: 0,
         enabled: true,
         auto_disabled_reason: '',
+        error: '',
         explain_queries: false,
       };
 
