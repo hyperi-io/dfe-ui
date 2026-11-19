@@ -2,12 +2,13 @@ import { Radio } from 'antd';
 import { useState } from 'react';
 import { CelExpressionMatch } from './CelExpressionMatch';
 import { SqlMatch } from './SqlMatch';
-import { WhenMatch } from './WhenMatch';
+import { MatchConditionsEditor } from './WhenMatch/index';
+import { TMatchFormNode } from './WhenMatch/WhenMatch.types';
 
 type MatchCriteriaType = 'conditions' | 'expression' | 'sql';
 
 interface MatchCriteriaInputProps {
-  onChange?: (value?: string) => void;
+  onChange?: (value?: string | TMatchFormNode) => void;
   onModeChange?: (mode: MatchCriteriaType) => void;
   modes?: MatchCriteriaType[];
 }
@@ -37,7 +38,10 @@ export const MatchCriteriaInput = ({
         onChange={(e) => handleModeChange(e.target.value as MatchCriteriaType)}
       />
       {modes.includes('conditions') && matchMode === 'conditions' && (
-        <WhenMatch onChange={onChange} />
+        <MatchConditionsEditor
+          value={null}
+          onChange={(next) => onChange?.(next ?? undefined)}
+        />
       )}
       {modes.includes('expression') && matchMode === 'expression' && (
         <CelExpressionMatch onChange={onChange} />
