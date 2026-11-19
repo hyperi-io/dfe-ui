@@ -182,6 +182,7 @@ export const API_CONFIG = Object.freeze({
   },
   clientConfig: {
     default: '/api/v1/config/client',
+    features: '/api/v1/config/features',
   },
   system: {
     version: '/api/v1/system/version',
