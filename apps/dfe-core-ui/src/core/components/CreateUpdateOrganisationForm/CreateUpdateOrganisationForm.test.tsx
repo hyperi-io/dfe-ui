@@ -200,6 +200,7 @@ describe('CreateUpdateOrganisationForm refusals', () => {
     enabled: true,
     auto_disabled_at: null,
     auto_disabled_reason: '',
+    error: '',
   };
   const oldOrg = {
     name: 'oldco',

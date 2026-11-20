@@ -31,6 +31,7 @@ const huntDetail: THuntDetailResponse = {
   explain_queries: null,
   enabled: true,
   auto_disabled_reason: '',
+  error: '',
 };
 
 describe('transformHuntDetailToFormData', () => {

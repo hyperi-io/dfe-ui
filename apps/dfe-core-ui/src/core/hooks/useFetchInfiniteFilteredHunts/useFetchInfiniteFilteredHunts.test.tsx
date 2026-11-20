@@ -76,6 +76,7 @@ describe('useFetchInfiniteFilteredHunts', () => {
         enabled: true,
         auto_disabled_at: null,
         auto_disabled_reason: '',
+        error: '',
       };
 
       expect(result.current.data).toBeDefined();
