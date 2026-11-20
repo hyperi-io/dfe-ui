@@ -20,6 +20,9 @@ beforeAll(() =>
     onUnhandledRequest: 'error',
   }),
 );
+beforeEach(() => {
+  useFeatureFlagStore.getState().reset();
+});
 afterEach(() => {
   server.resetHandlers();
   useFeatureFlagStore.getState().reset();
