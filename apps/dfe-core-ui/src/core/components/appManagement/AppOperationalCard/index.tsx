@@ -93,6 +93,16 @@ const logsHref = (telemetryName: string) =>
     source: 'otel_logs',
   }).toString()}`;
 
+/** Null is an app that emits no scalo telemetry, so its state is unknown. */
+const ReportingTag = ({ reporting }: { reporting?: boolean | null }) => {
+  if (reporting === null) return <Tag>no telemetry</Tag>;
+  return reporting ? (
+    <Tag color="green">reporting</Tag>
+  ) : (
+    <Tag color="red">not reporting</Tag>
+  );
+};
+
 type TMetricTag = { description?: string; key: string; text: string };
 
 const byText = (a: TMetricTag, b: TMetricTag) => a.text.localeCompare(b.text);
@@ -331,11 +341,7 @@ export const AppOperationalCard = ({
           {`Telemetry name: ${status?.telemetry_name ?? '-'}`}
         </p>
         <div className="flex flex-wrap items-center gap-2">
-          {status?.reporting ? (
-            <Tag color="green">reporting</Tag>
-          ) : (
-            <Tag color="red">not reporting</Tag>
-          )}
+          <ReportingTag reporting={status?.reporting} />
           <Tooltip
             title={
               startTime == null
