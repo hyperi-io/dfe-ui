@@ -87,6 +87,7 @@ describe('.useUpdateHunt', () => {
         min_interval_seconds: 0,
         enabled: true,
         auto_disabled_reason: '',
+        error: '',
       };
 
       await waitFor(() => {

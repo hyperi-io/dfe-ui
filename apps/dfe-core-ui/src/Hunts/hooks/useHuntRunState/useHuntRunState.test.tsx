@@ -22,6 +22,7 @@ const hunt: THuntDetailResponse = {
   name: 'windows_audit',
   display_name: 'Windows audit',
   auto_disabled_reason: '',
+  error: '',
   cron: '*/5 * * * *',
   log_buffer: 60,
   global_source_table_name: 'windows_audit',
