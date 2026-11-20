@@ -9,8 +9,8 @@ export const SingleCondition = ({
   value: TMatchFormNode | null;
   onChange: (value: TMatchFormNode | null) => void;
 }) => {
-  const value = valueProp || {};
-  const takesValue = operatorTakesValue(value?.operator);
+  const value = valueProp ?? {};
+  const takesValue = operatorTakesValue(value.operator);
 
   const handleChange = (next: TMatchFormNode | null) => {
     onChange(next);
@@ -19,28 +19,29 @@ export const SingleCondition = ({
   return (
     <div className="flex gap-x-2">
       <Input
-        value={value?.field ?? ''}
+        value={value.field ?? ''}
         onChange={(e) => handleChange({ ...value, field: e.target.value })}
         placeholder="Enter field"
       />
 
       <Select
         placeholder="Select operator"
-        value={value?.operator ?? ''}
+        value={value.operator ?? undefined}
         onChange={(val) => {
-          if (!value) return;
-          if (!operatorTakesValue(val as TMatchOperator)) {
-            handleChange({ ...value, value: '' });
+          const operator = val as TMatchOperator;
+          if (!operator || operator === value.operator) return;
+          if (!operatorTakesValue(operator)) {
+            handleChange({ ...value, operator, value: '' });
+            return;
           }
-          handleChange({ ...value, operator: val as TMatchOperator });
+          handleChange({ ...value, operator });
         }}
         options={OPERATOR_OPTIONS}
       />
 
       <Input
-        required={takesValue}
         disabled={!takesValue}
-        value={value?.value ?? ''}
+        value={value.value ?? ''}
         onChange={(e) => handleChange({ ...value, value: e.target.value })}
         placeholder="Enter value"
       />

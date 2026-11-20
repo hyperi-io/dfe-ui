@@ -28,17 +28,36 @@ export const ConditionRow = ({
       aria-label={name}
       className="grid grid-cols-[auto_minmax(0,1fr)_9rem_minmax(0,1fr)_auto] items-start gap-x-2"
     >
-      <Checkbox aria-label={`${name}: not`}>Not</Checkbox>
+      <Checkbox
+        aria-label={`${name}: not`}
+        checked={!!node.negate}
+        onChange={(event) =>
+          handleChange({ ...node, negate: event.target.checked })
+        }
+      >
+        Not
+      </Checkbox>
 
-      <Input aria-label={`${name} field`} placeholder="Field" />
+      <Input
+        aria-label={`${name} field`}
+        placeholder="Field"
+        value={node.field ?? ''}
+        onChange={(event) =>
+          handleChange({ ...node, field: event.target.value })
+        }
+      />
 
       <Select
         aria-label={`${name} operator`}
         placeholder="Operator"
+        value={node.operator ?? undefined}
         onChange={(value) => {
-          if (!operatorTakesValue(value)) {
-            handleChange({ ...node, operator: value as TMatchOperator });
-          }
+          const operator = value as TMatchOperator;
+          handleChange({
+            ...node,
+            operator,
+            value: operatorTakesValue(operator) ? node.value : '',
+          });
         }}
         options={OPERATOR_OPTIONS}
       />
@@ -47,6 +66,10 @@ export const ConditionRow = ({
         aria-label={`${name} value`}
         disabled={!takesValue}
         placeholder="Value"
+        value={node.value ?? ''}
+        onChange={(event) =>
+          handleChange({ ...node, value: event.target.value })
+        }
       />
 
       <Tooltip title={`Remove condition ${number}`}>
