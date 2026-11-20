@@ -19,6 +19,7 @@ build:
     - native
 release:
   enabled: true
+  candidates: true
   # A deployed app, not an npm library: only the container ships.
   destinations:
     npm: false
