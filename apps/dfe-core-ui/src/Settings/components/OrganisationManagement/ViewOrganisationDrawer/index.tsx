@@ -1,16 +1,18 @@
 import { Drawer } from '@/core/components/Drawer';
 import { RbacProtected } from '@/core/components/RbacProtected';
 import { IconEye } from '@repo/dfe-icons';
-import { Button } from 'antd';
+import { Button, ButtonProps } from 'antd';
 import { useState } from 'react';
 import { ViewOrganisationDetail } from './ViewOrganisationDetail';
 
 export const ViewOrganisationDrawer = ({
   org_name,
   display_name,
+  buttonType = 'text',
 }: {
   org_name: string;
   display_name: string;
+  buttonType?: ButtonProps['type'];
 }) => {
   const [open, setOpen] = useState(false);
 
@@ -19,7 +21,7 @@ export const ViewOrganisationDrawer = ({
       <RbacProtected action={RbacProtected.rbacActions.org_read}>
         <RbacProtected.Unrestricted>
           <Button
-            type="text"
+            type={buttonType}
             aria-label={`View ${display_name} details`}
             icon={<IconEye />}
             onClick={() => setOpen(true)}
@@ -28,7 +30,12 @@ export const ViewOrganisationDrawer = ({
           </Button>
         </RbacProtected.Unrestricted>
         <RbacProtected.Restricted tooltip={{ show: true }}>
-          <Button type="text" htmlType="button" icon={<IconEye />} disabled>
+          <Button
+            type={buttonType}
+            htmlType="button"
+            icon={<IconEye />}
+            disabled
+          >
             View Organisation Details
           </Button>
         </RbacProtected.Restricted>

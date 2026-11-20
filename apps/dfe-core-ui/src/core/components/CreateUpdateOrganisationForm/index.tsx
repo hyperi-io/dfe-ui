@@ -5,9 +5,10 @@ import { useFetchInfiniteFilteredHunts } from '@/core/hooks/useFetchInfiniteFilt
 import { useFetchInfiniteFilteredOrganisations } from '@/core/hooks/useFetchInfiniteFilteredOrganisations';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
 import { ORG_NAME_VALIDATOR } from '@/core/validationSchemas/utils';
+import { IconChevronDown, IconChevronUp } from '@repo/dfe-icons';
 import { Button, Input, Select } from 'antd';
 import Link from 'next/link';
-import { useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import z from 'zod';
 import {
   getHeldOrgIds,
@@ -17,15 +18,26 @@ import {
   ORG_IDS_FIELD,
 } from './orgIdRefusals';
 
+/** The tenant id the engine stamps on records that name no organisation, which no organisation may hold. */
+const UNASSIGNED_ORG_ID = 'unassigned';
+const UNASSIGNED_MESSAGE =
+  "'unassigned' holds records that name no organisation, so no organisation may use it";
+
 const formSchema = z.object({
   name: z
     .string()
     .min(1, { message: 'Name is required' })
     .refine((v) => ORG_NAME_VALIDATOR.regex.test(v), {
       message: ORG_NAME_VALIDATOR.message('Name'),
-    }),
+    })
+    .refine((v) => v !== UNASSIGNED_ORG_ID, { message: UNASSIGNED_MESSAGE }),
   display_name: z.string().min(1, { message: 'Display name is required' }),
-  org_ids: z.array(z.string()).optional(),
+  org_ids: z
+    .array(z.string())
+    .optional()
+    .refine((ids) => !ids?.includes(UNASSIGNED_ORG_ID), {
+      message: UNASSIGNED_MESSAGE,
+    }),
 });
 
 export type CreateUpdateOrganisationFormData = z.infer<typeof formSchema>;
@@ -83,6 +95,16 @@ const HeldOrgIdsNotification = ({ held }: { held: HeldOrgIds[] }) => {
   );
 };
 
+/** *ids* with the tag that mirrors the name moved from *previous* to *next*, first. */
+export const withLinkedTag = (
+  ids: string[],
+  previous: string,
+  next: string,
+): string[] => {
+  const others = ids.filter((id) => id !== previous && id !== next);
+  return next ? [next, ...others] : others;
+};
+
 export const CreateUpdateOrganisationForm = ({
   initialValues,
   onFinish,
@@ -109,9 +131,34 @@ export const CreateUpdateOrganisationForm = ({
   const [form] = Form.useForm<CreateUpdateOrganisationFormData>();
   const formValidation =
     useAntdZodResolver<CreateUpdateOrganisationFormData>(formSchema);
+  const [showAdvanced, setShowAdvanced] = useState(false);
+  // One organisation ID follows the name while it can be typed, until it is removed.
+  const [linked, setLinked] = useState(!disabledFields?.name);
+  const linkedName = useRef(initialValues?.name ?? '');
 
   const handleFinish = (values: CreateUpdateOrganisationFormData) => {
     onFinish?.(values);
+  };
+
+  const handleValuesChange = (
+    changed: Partial<CreateUpdateOrganisationFormData>,
+    all: CreateUpdateOrganisationFormData,
+  ) => {
+    if (!linked) return;
+    if (changed.name !== undefined) {
+      form.setFieldValue(
+        ORG_IDS_FIELD,
+        withLinkedTag(all.org_ids ?? [], linkedName.current, changed.name),
+      );
+      linkedName.current = changed.name;
+    }
+    if (
+      changed.org_ids !== undefined &&
+      linkedName.current &&
+      !changed.org_ids.includes(linkedName.current)
+    ) {
+      setLinked(false);
+    }
   };
 
   useEffect(() => {
@@ -127,8 +174,16 @@ export const CreateUpdateOrganisationForm = ({
   const held = getHeldOrgIds(error);
   const refusalOnField = !hiddenFields?.org_ids && isOrgIdsRefusal(error);
 
+  // A refusal of the IDs keeps them in view.
+  const advancedOpen = showAdvanced || refusalOnField || held.length > 0;
+
   return (
-    <Form form={form} onFinish={handleFinish} initialValues={initialValues}>
+    <Form
+      form={form}
+      onFinish={handleFinish}
+      onValuesChange={handleValuesChange}
+      initialValues={initialValues}
+    >
       <div className="flex gap-2">
         <Form.Item
           className="flex-1"
@@ -151,9 +206,29 @@ export const CreateUpdateOrganisationForm = ({
         <Input placeholder="Enter display name" />
       </Form.Item>
       {!hiddenFields?.org_ids && (
+        <Button
+          type="text"
+          className="mb-2 p-0"
+          aria-expanded={advancedOpen}
+          onClick={() => setShowAdvanced(!advancedOpen)}
+          icon={
+            advancedOpen ? (
+              <IconChevronUp className="size-4" />
+            ) : (
+              <IconChevronDown className="size-4" />
+            )
+          }
+          iconPlacement="end"
+        >
+          Advanced Settings
+        </Button>
+      )}
+      {!hiddenFields?.org_ids && (
         <Form.Item
           name="org_ids"
           label="Organisation IDs"
+          hidden={!advancedOpen}
+          extra="Records whose _org_id is one of these belong to this organisation. With none, its name is used."
           rules={[formValidation]}
         >
           {/* Tenant IDs matched against the data's _org_id values - free

@@ -75,3 +75,6 @@ renovate.json
 CHANGELOG.md
 
 
+
+# hyperi-ci writes its reports here during `hyperi-ci check`.
+.hyperi-ci/

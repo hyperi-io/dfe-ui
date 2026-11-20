@@ -16,6 +16,17 @@ export const engineClient = (request: APIRequestContext, token: string) => {
   };
 };
 
+/** The primary organisation, which a hunt can always name as its customer. */
+export const apiPrimaryOrganisation = async (
+  api: ReturnType<typeof engineClient>,
+): Promise<{ name: string; display_name: string }> => {
+  const res = await api.get('/system/organisation');
+  expect(res.ok(), await res.text()).toBeTruthy();
+  const primary = await res.json();
+  expect(primary.name, 'no organisation is named as yours').toBeTruthy();
+  return primary;
+};
+
 /** Create the rule through the API and return its name. */
 export const apiCreateRule = async (
   api: ReturnType<typeof engineClient>,

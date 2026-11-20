@@ -5,6 +5,7 @@ import { join } from 'node:path';
 import { parse } from 'yaml';
 
 import { CONTAINER_PREFIX } from './engineApi.helpers';
+import { ingestToken } from './ingestToken.helpers';
 
 /**
  * The synthetic filebeat cases, in the shape a real shipper sends.
@@ -127,7 +128,10 @@ export const RECEIVER_URL =
 export const pushEnvelopes = async (events: unknown[]) => {
   const response = await fetch(`${RECEIVER_URL}/ingest`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      Authorization: `Bearer ${await ingestToken(RECEIVER_URL)}`,
+      'Content-Type': 'application/json',
+    },
     body: JSON.stringify(events),
   });
   if (!response.ok) {

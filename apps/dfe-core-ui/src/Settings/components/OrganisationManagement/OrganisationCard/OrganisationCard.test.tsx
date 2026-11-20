@@ -28,7 +28,6 @@ const openMenu = async (organisation: Partial<TOrganisationListSummary>) => {
     deleteButton: await screen.findByRole('button', {
       name: `Delete ${organisation.display_name}`,
     }),
-    user,
   };
 };
 
@@ -36,25 +35,13 @@ describe('OrganisationCard', () => {
   test.each([
     { name: 'acme', display_name: 'Acme', org_ids: ['acme'] },
     { name: 'bare', display_name: 'Bare', org_ids: [] },
-  ])('lets $name be deleted whatever its tenant ids', async (organisation) => {
-    const { deleteButton } = await openMenu(organisation);
+    { name: 'default', display_name: 'Default', org_ids: ['default'] },
+  ])(
+    'lets $name be deleted whatever its name or tenant ids',
+    async (organisation) => {
+      const { deleteButton } = await openMenu(organisation);
 
-    expect(deleteButton).toBeEnabled();
-  });
-
-  test('says why the reserved default organisation cannot be deleted', async () => {
-    const { deleteButton, user } = await openMenu({
-      name: 'default',
-      display_name: 'Default',
-      org_ids: ['default'],
-    });
-
-    expect(deleteButton).toBeDisabled();
-    await user.hover(deleteButton);
-    expect(
-      await screen.findByText(
-        /every record that names no organisation lands in it/,
-      ),
-    ).toBeInTheDocument();
-  });
+      expect(deleteButton).toBeEnabled();
+    },
+  );
 });

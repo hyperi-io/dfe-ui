@@ -8,11 +8,13 @@ import {
   shot,
 } from '@e2e/config/journey.helpers';
 import { RECEIVER_URL } from '@e2e/config/filebeatCorpus.helpers';
+import { ingestToken } from '@e2e/config/ingestToken.helpers';
 import { loginAs } from '@e2e/config/login.helpers';
 import { TAGS } from '@e2e/config/tags.constants';
 
 import {
   apiCreateRule,
+  apiPrimaryOrganisation,
   dropSource,
   ensureSource,
   engineClient,
@@ -40,6 +42,7 @@ test(
   async ({ page, request }) => {
     const api = engineClient(request, await engineToken());
     const madeSource = await ensureSource(api);
+    const primary = await apiPrimaryOrganisation(api);
     await api.del(`/hunts/${HUNT}`);
     await api.del(`/rules/${RULE}`);
     await apiCreateRule(api, RULE, {
@@ -59,7 +62,8 @@ test(
     await expect(async () => {
       await selects.nth(0).click();
       await page
-        .locator('.ant-select-item-option', { hasText: 'Default' })
+        .getByTitle(primary.display_name || primary.name, { exact: true })
+        .first()
         .click({ timeout: 8_000 });
     }).toPass({ timeout: 60_000 });
     await page.keyboard.press('Escape');
@@ -79,7 +83,7 @@ test(
     const made = await (await api.get(`/hunts/${HUNT}`)).json();
     expect(made.name).toBe(HUNT);
     expect(made.display_name).toBe('JDET Hunt Run');
-    expect(made.customers).toEqual(['default']);
+    expect(made.customers).toEqual([primary.name]);
     expect(made.global_source_table_name).toBe('main');
     expect(made.rules.map((r: { rule_name: string }) => r.rule_name)).toEqual([
       RULE,
@@ -96,6 +100,9 @@ test(
     // Events that arrive after the hunt exists: a hunt reads forward from its checkpoint.
     for (const n of [1, 2]) {
       const r = await request.post(`${RECEIVER_URL}/ingest`, {
+        headers: {
+          Authorization: `Bearer ${await ingestToken(RECEIVER_URL)}`,
+        },
         data: { jdet_kind: 'jdet', jdet_mark: MARK, jdet_n: n, level: 'high' },
       });
       expect(r.status()).toBe(202);
