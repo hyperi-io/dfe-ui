@@ -6,11 +6,13 @@ import { TAGS } from '@e2e/config/tags.constants';
 
 /**
  * Org files sort by name and the grid asks for 12 at a time.
- * The reserved default org sorts first, so `Searchable Organisation 0` is on
- * the first page and `Searchable Organisation 49` is not.
+ * Your organisation (`organisation`) sorts first and shows in its own banner,
+ * so the grid's first page holds 11 cards: `Searchable Organisation 0` is on it
+ * and `Searchable Organisation 49` is not.
  * Search matches the name or the display name.
  */
 const FIRST_PAGE = 12;
+const FIRST_PAGE_CARDS = FIRST_PAGE - 1;
 const MATCH = 'Searchable Organisation 49';
 const OTHER = 'Searchable Organisation 0';
 
@@ -93,7 +95,7 @@ test.describe('', { tag: [TAGS.core, TAGS.search, TAGS.pagination] }, () => {
     await openOrganisations(page);
     const section = organisationsSection(page);
 
-    await expect(cards(section)).toHaveCount(FIRST_PAGE);
+    await expect(cards(section)).toHaveCount(FIRST_PAGE_CARDS);
     await expect(orgName(section, OTHER)).toBeVisible();
     await expect(orgName(section, MATCH)).toHaveCount(0);
 

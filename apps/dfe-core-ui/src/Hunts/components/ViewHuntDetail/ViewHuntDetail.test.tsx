@@ -82,6 +82,7 @@ describe('ViewHuntDetail runner stop', () => {
         ...hunt,
         auto_disabled_at: 1_763_300_000,
         auto_disabled_reason: 'resource_limit:241',
+        error: '',
       },
       shown: /after hitting ClickHouse's memory limit repeatedly\.$/,
     },

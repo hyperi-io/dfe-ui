@@ -51,8 +51,9 @@ test(
     expect(accepted.body.name).toBe(`operations/${id}`);
     expect(accepted.body.metadata.kind).toBe('synthetic-data:stream');
 
+    /* A first stream retries for up to 90s while the receiver loads the credential the engine just minted. */
     await expect
-      .poll(async () => (await op(id)).done, { timeout: 30_000 })
+      .poll(async () => (await op(id)).done, { timeout: 120_000 })
       .toBe(true);
     const done = await op(id);
     const stream = (

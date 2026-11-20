@@ -1,6 +1,9 @@
 import { API_CONFIG_MOCKS } from '@/core/config/api/endpoints/generator';
 import { setupServer } from 'msw/node';
 
-const handlers = [API_CONFIG_MOCKS.orgs.default.post.success()];
+const handlers = [
+  API_CONFIG_MOCKS.orgs.default.post.success(),
+  API_CONFIG_MOCKS.system.organisation.put.success(),
+];
 
 export const server = setupServer(...handlers);

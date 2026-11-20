@@ -24,8 +24,7 @@ export default async function SetupStepPage({
     notFound();
   }
 
-  const { initial_setup, oidc_providers, organisations } =
-    await getSetupStatus();
+  const { initial_setup, oidc_providers, your_org } = await getSetupStatus();
   // The last step completes setup, so Complete has to outlive it. The others
   // close: a completed status redacts the registries they would render.
   if (initial_setup.complete && step !== 'complete') {
@@ -38,7 +37,7 @@ export default async function SetupStepPage({
   return (
     <SetupScene
       oidcProvider={oidc_providers?.[0] || null}
-      organisation={organisations?.[0] || null}
+      organisation={your_org ?? null}
       userCreated={userCreated}
       firstPendingStep={getFirstPendingWizardStep(initial_setup.pending_steps)}
       setupComplete={initial_setup.complete}
