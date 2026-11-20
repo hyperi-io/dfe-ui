@@ -74,6 +74,7 @@ const hunt: THuntDetailResponse = {
   rules: [{ rule_name: 'brute_force' }],
   enabled: true,
   auto_disabled_reason: '',
+  error: '',
 };
 
 const RunStateTag = ({ hunt: detail }: { hunt: THuntDetailResponse }) => (

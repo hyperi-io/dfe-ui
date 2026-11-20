@@ -30,6 +30,7 @@ export const hunts = {
               enabled: true,
               auto_disabled_at: null,
               auto_disabled_reason: '',
+              error: '',
             },
           ],
           total_size: 0,
@@ -81,6 +82,7 @@ export const hunts = {
           explain_queries: false,
           enabled: true,
           auto_disabled_reason: '',
+          error: '',
         },
       }: {
         mockedResponse?: THuntCreateResponse;
@@ -149,6 +151,7 @@ export const hunts = {
           min_interval_seconds: 0,
           enabled: true,
           auto_disabled_reason: '',
+          error: '',
         },
         name = 'name',
       }: {
@@ -186,6 +189,7 @@ export const hunts = {
           min_interval_seconds: 0,
           enabled: true,
           auto_disabled_reason: '',
+          error: '',
         },
         name = 'name',
       }: {
