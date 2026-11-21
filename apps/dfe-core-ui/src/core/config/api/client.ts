@@ -223,9 +223,13 @@ export function createApiClient(config: ApiClientConfig) {
         // and the status still has to reach the caller. An HTML page is the UI
         // host answering in the engine's place, and it is never the message.
         const contentType = res.headers.get('Content-Type');
-        detail = contentType?.includes('text/html')
-          ? invalidResponse(res.status, notJsonMessage(res.status, contentType))
-          : text;
+        detail =
+          isHtml(contentType) && text.trim() !== ''
+            ? invalidResponse(
+                res.status,
+                notJsonMessage(res.status, contentType),
+              )
+            : text;
       }
 
       if (res.status === 401) {
@@ -438,8 +442,15 @@ export class ApiTimeoutError extends Error {
  */
 export type ApiErrorResponseBody = components['schemas']['Problem'];
 
+/** Media types are case-insensitive (RFC 9110). */
+const isHtml = (contentType: string | null) =>
+  contentType?.toLowerCase().includes('text/html') === true;
+
+/** Short enough to follow "Usage could not be read: " on one dashboard line. */
 const notJsonMessage = (status: number, contentType: string | null) =>
-  `The API answered ${status} with ${contentType ?? 'no content type'} instead of JSON, so the request never reached the engine.`;
+  isHtml(contentType)
+    ? `The server answered ${status} with a web page, not data.`
+    : `The server answered ${status} with ${contentType ?? 'no content type'}, not data.`;
 
 /** A problem the client raises itself for an answer the engine did not send. */
 const invalidResponse = (

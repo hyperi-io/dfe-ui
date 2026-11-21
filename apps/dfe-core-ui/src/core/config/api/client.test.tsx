@@ -746,7 +746,7 @@ describe('a 2xx that is not JSON', () => {
     const write = client.post('/api/v1/orgs', { body: newOrg });
 
     await expect(write).rejects.toThrow(ApiError);
-    await expect(write).rejects.toThrow(/never reached the engine/);
+    await expect(write).rejects.toThrow(/with a web page, not data/);
   });
 
   // The browser follows the proxy's 307 itself and reports it on the response
@@ -799,18 +799,42 @@ describe('a refusal that is not JSON', () => {
   // page must never become the message the user reads.
   test.each([
     {
-      name: 'an HTML page names the status and content type',
+      name: 'an HTML page is a short message naming the status',
       response: () =>
         HttpResponse.html(nextPage, { status: 404, statusText: 'Not Found' }),
       status: 404,
-      message:
-        'The API answered 404 with text/html instead of JSON, so the request never reached the engine.',
+      message: 'The server answered 404 with a web page, not data.',
     },
     {
-      name: 'an empty 412 still carries its status',
-      response: () => new HttpResponse(null, { status: 412 }),
+      name: 'the media type is matched whatever its case',
+      response: () =>
+        new HttpResponse(nextPage, {
+          status: 503,
+          headers: { 'Content-Type': 'Text/HTML; charset=utf-8' },
+        }),
+      status: 503,
+      message: 'The server answered 503 with a web page, not data.',
+    },
+    {
+      name: 'an empty 412 carries its status and status text',
+      response: () =>
+        new HttpResponse(null, {
+          status: 412,
+          statusText: 'Precondition Failed',
+        }),
       status: 412,
-      message: '',
+      message: 'Precondition Failed',
+    },
+    {
+      name: 'an empty HTML body is empty, not a page',
+      response: () =>
+        new HttpResponse('', {
+          status: 412,
+          statusText: 'Precondition Failed',
+          headers: { 'Content-Type': 'text/html' },
+        }),
+      status: 412,
+      message: 'Precondition Failed',
     },
     {
       name: 'a plain-text 502 keeps its text',
@@ -848,9 +872,7 @@ describe('a refusal that is not JSON', () => {
     expect(error).toMatchObject({ status });
     const text = (error as ApiError).message;
     expect(text).not.toContain('<');
-    if (message !== '') {
-      expect(text).toBe(message);
-    }
+    expect(text).toBe(message);
   });
 });
 
