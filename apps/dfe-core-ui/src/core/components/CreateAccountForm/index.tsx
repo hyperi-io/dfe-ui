@@ -113,7 +113,12 @@ export const CreateAccountForm = ({
   const placement = placementOf({ choice, groups, org, role, username });
 
   const handleNext = async () => {
-    await form.validateFields(DETAIL_FIELDS);
+    try {
+      await form.validateFields(DETAIL_FIELDS);
+    } catch {
+      // The form already marks each failing field, so the step stays on Details.
+      return;
+    }
     setStep(1);
   };
 
