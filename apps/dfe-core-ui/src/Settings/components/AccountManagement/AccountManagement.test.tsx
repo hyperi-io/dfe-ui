@@ -264,7 +264,9 @@ describe('AccountManagement', () => {
 
     const marked = async (username: string) =>
       within(
-        await screen.findByRole('row', { name: new RegExp(username) }),
+        await screen.findByRole('row', {
+          name: (accessibleName) => accessibleName.includes(username),
+        }),
       ).queryAllByText('(your organisation)').length;
     await waitFor(async () => expect(await marked('bound-jo')).toBe(1));
     expect({
@@ -291,7 +293,9 @@ describe('AccountManagement', () => {
     // The crown sits inside the org tag, once your organisation's name has arrived.
     const crowned = (name: string) =>
       within(
-        screen.getByRole('row', { name: new RegExp(name) }),
+        screen.getByRole('row', {
+          name: (accessibleName) => accessibleName.includes(name),
+        }),
       ).queryAllByLabelText('Admin of every organisation').length;
     await screen.findByRole('row', { name: /Boss/ });
     await waitFor(() =>
@@ -341,7 +345,11 @@ describe('AccountManagement', () => {
     render(<AccountManagement />, { wrapper });
 
     const providerBadges = (username: string) =>
-      within(screen.getByRole('cell', { name: new RegExp(`^${username}`) }))
+      within(
+        screen.getByRole('cell', {
+          name: (accessibleName) => accessibleName.startsWith(username),
+        }),
+      )
         .queryAllByRole('img', { name: /^Signs in through/ })
         .map((badge) => badge.getAttribute('aria-label'));
     await screen.findByRole('row', { name: /okta-owned/ });
