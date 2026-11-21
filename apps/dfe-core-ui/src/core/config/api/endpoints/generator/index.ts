@@ -24,7 +24,6 @@ import { rules } from './mocks/rules';
 import { schemas } from './mocks/schemas';
 import { sources } from './mocks/sources';
 import { system } from './mocks/system';
-import { transforms } from './mocks/transforms';
 import { usage } from './mocks/usage';
 
 export const API_CONFIG_MOCKS = Object.freeze({
@@ -54,6 +53,5 @@ export const API_CONFIG_MOCKS = Object.freeze({
   schemas,
   sources,
   system,
-  transforms,
   usage,
 });

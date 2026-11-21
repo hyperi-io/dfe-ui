@@ -29,8 +29,8 @@ interface AnnotatedAceEditorProps extends React.ComponentProps<
 
 /**
  * An Ace editor with a collapsible annotation panel and a save-to-desktop
- * action. Shared by every authoring surface - the WASM transform compiler and
- * the per-instance file editors.
+ * action. Shared by every authoring surface, such as the per-instance file
+ * editors.
  */
 export const AnnotatedAceEditor = ({
   downloadFileName,
