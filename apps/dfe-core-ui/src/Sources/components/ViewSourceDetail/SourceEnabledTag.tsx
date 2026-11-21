@@ -107,7 +107,12 @@ export const SourceEnabledTag = ({
       onOpenChange={setOpen}
       placement="bottom"
     >
-      <Tooltip title={current === 'dormant' ? DORMANT_HINT : undefined}>
+      {/* The hint opens below the chip, where the popover's Enable button
+          sits, so it stays shut while the popover is open. */}
+      <Tooltip
+        title={current === 'dormant' ? DORMANT_HINT : undefined}
+        open={open ? false : undefined}
+      >
         <button type="button" className={chipClassName}>
           {chipBody}
         </button>

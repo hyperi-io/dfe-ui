@@ -1,5 +1,5 @@
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { http, HttpResponse } from 'msw';
 import { setupServer } from 'msw/node';
@@ -151,5 +151,29 @@ describe('SourceEnabledTag lifecycle state', () => {
     expect(
       await screen.findByRole('button', { name: 'Enable Source' }),
     ).toBeInTheDocument();
+  });
+
+  it('closes the hint while the menu is open, so it cannot cover Enable Source', async () => {
+    const user = userEvent.setup();
+    render(
+      <SourceEnabledTag
+        enabled={false}
+        state="dormant"
+        sourceName="fortinet"
+      />,
+      { wrapper },
+    );
+    const chip = screen.getByRole('button', { name: 'Dormant' });
+
+    await user.hover(chip);
+    expect(await screen.findByText(DORMANT_HINT)).toBeInTheDocument();
+    await user.click(chip);
+
+    expect(
+      await screen.findByRole('button', { name: 'Enable Source' }),
+    ).toBeInTheDocument();
+    await waitFor(() =>
+      expect(screen.queryByText(DORMANT_HINT)).not.toBeInTheDocument(),
+    );
   });
 });
