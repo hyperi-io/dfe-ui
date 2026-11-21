@@ -184,6 +184,28 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/auth/reauth": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Reauth
+         * @description Re-enter your password to earn a grant for editing one account, which every edit of it needs.
+         *
+         *     403 ``invalid_password`` on a wrong password, counted against the sign-in throttle. 409 ``reauth_via_idp`` for a caller with no local password, who re-signs in at its identity provider instead.
+         */
+        post: operations["auth.reauth"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/auth/oidc/{provider}/login": {
         parameters: {
             query?: never;
@@ -228,6 +250,50 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/auth/oidc/link": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Oidc Link
+         * @description Link the sign-in a ``link_required`` callback held to its local account, on that account's password, and sign it in.
+         *
+         *     Wrong passwords count against the account's sign-in throttle (``auth.login_throttle``), as a password login's do. The answer is the callback's, and from then on the sign-in reaches the account without a password.
+         */
+        post: operations["auth.oidc.link"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/oidc/reauth": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Oidc Reauth
+         * @description Start a fresh sign-in at your own identity provider, which earns a grant for changing one account or group.
+         *
+         *     The IdP is asked to take your credentials again (``prompt=login``, ``max_age=0``), and the callback answers with the grant instead of a session.
+         */
+        post: operations["auth.oidc.reauth"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/auth/accounts": {
         parameters: {
             query?: never;
@@ -237,15 +303,35 @@ export interface paths {
         };
         /**
          * List Accounts
-         * @description List accounts (admin only), paginated. No password hashes returned.
+         * @description List the accounts the caller administers, paginated: every account across orgs, else its orgs' own. No password hashes returned.
          */
         get: operations["auth.accounts.list"];
         put?: never;
         /**
          * Create Account
-         * @description Create a new local user account (admin only).
+         * @description Create a new local user account: an admin of an org other than yours creates it in that org only.
          */
         post: operations["auth.accounts.create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/accounts/availability": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Account Availability
+         * @description Whether a new account could take *username* and hold *email*, judged as account create judges them.
+         */
+        get: operations["auth.accounts.availability"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -293,7 +379,7 @@ export interface paths {
          * Get Account
          * @description Get a single account by username (admin only).
          *
-         *     Soft-deleted (anonymized) accounts answer 404 the same as a missing name.
+         *     Soft-deleted (anonymized) accounts, and those the caller does not administer, answer 404 the same as a missing name.
          */
         get: operations["auth.accounts.get"];
         /**
@@ -430,6 +516,28 @@ export interface paths {
         put?: never;
         post?: never;
         delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/accounts/{username}/identities/{key}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Unlink Identity
+         * @description Unlink an IdP sign-in from an account (admin only).
+         *
+         *     The sign-in's record becomes an account of its own, which its next sign-in judges on its own groups. Every session of the account ends, so one opened through the sign-in does not outlive the link. Taking away the groups the sign-in linked needs the roles they carry, as removing a group does.
+         */
+        delete: operations["auth.accounts.identities.delete"];
         options?: never;
         head?: never;
         patch?: never;
@@ -647,7 +755,7 @@ export interface paths {
          * Create Api Key
          * @description Create a new API key. Returns the full key exactly once.
          *
-         *     422 ``unknown_org`` when ``org`` names no registered org.
+         *     422 ``unknown_org`` when ``org`` names no registered org, ``org_role_only`` when a key bound to an org other than yours names a group outside that org's admin and viewer roles.
          */
         post: operations["auth.api-keys.create"];
         delete?: never;
@@ -757,7 +865,7 @@ export interface paths {
         };
         /**
          * List Providers
-         * @description List OIDC providers (admin only), paginated.
+         * @description List the OIDC providers the caller manages, paginated: every one across orgs, else its orgs' own.
          */
         get: operations["auth.oidc-providers.list"];
         put?: never;
@@ -783,14 +891,14 @@ export interface paths {
         };
         /**
          * Get Provider
-         * @description Get a single OIDC provider by name (admin only).
+         * @description Get a single OIDC provider by name, 404 for one of an org the caller does not manage.
          */
         get: operations["auth.oidc-providers.get"];
         /**
          * Update Provider
          * @description Update an OIDC provider configuration (admin only).
          *
-         *     A secret the body omits, value and env var name alike, keeps what the provider already holds, so an update that only flips ``enabled`` does not strand a stored credential. An empty env var name clears the name and keeps the stored copy. A secret the body names an env var for and sends no value for moves onto that env var and its stored copy is deleted once the update is saved, unless the name is the one already held with nothing stored. A move onto an env var the engine does not set is refused (``env_var_not_set``). Any update that touches more than ``enabled`` or ``display_name`` must leave the provider passing the field rules. Both are checked before a secret is written or deleted.
+         *     A secret the body omits, value and env var name alike, keeps what the provider already holds, so an update that only flips ``enabled`` does not strand a stored credential. An empty env var name clears the name and keeps the stored copy. A secret the body names an env var for and sends no value for moves onto that env var and its stored copy is deleted once the update is saved, unless the name is the one already held with nothing stored. A move onto an env var the engine does not set is refused (``env_var_not_set``). Any update that touches more than ``enabled``, ``display_name`` and ``trusted_email_domains`` must leave the provider passing the field rules. Both are checked before a secret is written or deleted.
          */
         put: operations["auth.oidc-providers.apply"];
         post?: never;
@@ -802,8 +910,9 @@ export interface paths {
          *     still set to the deleted provider name. Accounts owned by the provider
          *     (``source_provider``) or last logged in through it (``oidc_id``) are
          *     soft-deleted: disabled and renamed to ``{uuid}-deleted`` with contact fields
-         *     cleared. The provider's stored credentials ARE removed: nothing is left that
-         *     can authenticate as a detached provider.
+         *     cleared. A sign-in linked through it to another account is unlinked and that
+         *     account's sessions end, but the account stays. The provider's stored credentials
+         *     ARE removed: nothing is left that can authenticate as a detached provider.
          */
         delete: operations["auth.oidc-providers.delete"];
         options?: never;
@@ -2356,13 +2465,13 @@ export interface paths {
         get: operations["system.retention.get"];
         /**
          * Put Retention
-         * @description Store the override in the deploy repo, then apply it to every table that follows it.
+         * @description Store the override in the deploy repo and return, leaving the tables to a background pass.
          *
-         *     The engine's own tables and every deployed source's table are brought to the new
-         *     effective default in this request, with ``ALTER TABLE ... MODIFY TTL`` (or
-         *     ``REMOVE TTL`` for 0). A table that declares its own TTL is left alone. A
-         *     ClickHouse failure answers 502 with the override ALREADY committed. Sending the
-         *     same value again applies it.
+         *     The pass brings the engine's own tables and every deployed source's table to the
+         *     stored value with ``ALTER TABLE ... MODIFY TTL`` (or ``REMOVE TTL`` for 0). A table
+         *     that declares its own TTL is left alone. The pass runs again until every table
+         *     has it, so a ClickHouse that is down when the value is stored gets it once it is
+         *     back, and a restart does not lose it.
          */
         put: operations["system.retention.apply"];
         post?: never;
@@ -2424,7 +2533,8 @@ export interface paths {
          *     Omitted fields are left alone. null clears that override. Common-header type,
          *     version and engine are what a source inherits the next time it is deployed.
          *     This request does not rewrite them onto live tables. A patch that names
-         *     ttl_days stores it and then runs the same reconcile as PUT /retention.
+         *     ttl_days stores it and returns, and the same background pass as PUT /retention
+         *     applies it.
          */
         patch: operations["system.defaults.update"];
         trace?: never;
@@ -2765,7 +2875,8 @@ export interface paths {
          *     The ``org_id`` parameter is always injected from the authenticated
          *     user's context -- it cannot be overridden by the client. It is the org the
          *     session's account is bound to, and a view taking it runs only when the caller's
-         *     groups grant that org or it reads every org (``granted_bound_org``).
+         *     groups grant that org or it reads every org (``granted_bound_org``). Any other
+         *     view needs ``query:execute`` at system scope.
          */
         post: operations["queries.views.execute"];
         delete?: never;
@@ -6020,6 +6131,24 @@ export interface components {
             expired: boolean;
         };
         /**
+         * AccountAvailabilityResponse
+         * @description Why creating an account with these values would be refused, empty where it would not.
+         */
+        AccountAvailabilityResponse: {
+            /**
+             * Email
+             * @description Why the email cannot be used, empty when it can or none was given
+             * @default
+             */
+            email: string;
+            /**
+             * Username
+             * @description Why the username cannot be taken, empty when it can or none was given
+             * @default
+             */
+            username: string;
+        };
+        /**
          * AccountGitPending
          * @description What the operator must do to make a not-yet-merged change durable.
          */
@@ -6113,16 +6242,44 @@ export interface components {
              */
             org: string;
             /**
+             * Org Display Name
+             * @description The display name of the org the account is bound to, which for a root account is your org, else that org's name when it has none. Empty while it is bound to none.
+             * @default
+             */
+            org_display_name: string;
+            /**
              * External
              * @description True when the account authenticates through an identity provider
              */
             external: boolean;
+            /**
+             * Admin
+             * @description True when a system-wide group gives the account the admin role, so it has full access to every org. The account's own read reports false while password_change_required is set.
+             * @default false
+             */
+            admin: boolean;
             /**
              * Oidc Id
              * @description OIDC provider name last used to log this account in, empty if none
              * @default
              */
             oidc_id: string;
+            /**
+             * Oidc Type
+             * @description The type of the provider oidc_id names, empty when it names no registered provider
+             * @default
+             */
+            oidc_type: string;
+            /**
+             * Email Verified
+             * @description Whether the email is vouched for, so a first IdP sign-in with it links to this account: true when an admin set it or a trusted identity provider verified it, false when the account owner set it or the provider did not vouch, null when it was stored before this was recorded
+             */
+            email_verified?: boolean | null;
+            /**
+             * Identities
+             * @description IdP sign-ins linked to this account, each reaching it without a password
+             */
+            identities?: components["schemas"]["LinkedIdentityResponse"][];
             /**
              * Password Change Required
              * @description True until the account replaces an issued password. The account's own read reports no groups while it is set, as its session holds none.
@@ -8052,11 +8209,7 @@ export interface components {
         };
         /**
          * CreateAccountRequest
-         * @description What a console sends to create an account.
-         *
-         *     Only the credentials are required. The setup wizard creates the first user
-         *     from a form that collects no contact details, so a required field here is a
-         *     deployment that cannot get into its own console.
+         * @description What a console sends to create an account: the credentials and a display name, with the contact fields optional.
          */
         CreateAccountRequest: {
             /**
@@ -8089,7 +8242,6 @@ export interface components {
             /**
              * Name
              * @description Display name
-             * @default
              */
             name: string;
             /**
@@ -8236,6 +8388,12 @@ export interface components {
              */
             type: "generic" | "google" | "entra_id" | "okta";
             /**
+             * Org
+             * @description The org whose provider this is: a registered org's name, or empty for a platform provider. Its sign-ins land in that org as viewers and link only to that org's accounts. An admin of that org manages it.
+             * @default
+             */
+            org: string;
+            /**
              * Enabled
              * @description Whether the provider serves logins
              * @default true
@@ -8283,6 +8441,11 @@ export interface components {
              */
             scopes?: string[] | null;
             groups?: components["schemas"]["GroupResolutionRequest"];
+            /**
+             * Trusted Email Domains
+             * @description Email domains this provider vouches for, such as corp.com. A first sign-in whose verified email is in one of them links to the one account holding that email: at once for an account an identity provider owns, after the account's password for a local one. Stored lowercased. Empty links nothing.
+             */
+            trusted_email_domains?: string[];
         };
         /**
          * CreateRequest
@@ -9509,6 +9672,11 @@ export interface components {
             roles: string[];
             /** Members */
             members: string[];
+            /**
+             * Linked Members
+             * @description Accounts that hold the group through an IdP sign-in its link matches, beside the stored members. Read-only: writing members never sets them.
+             */
+            linked_members?: string[];
             /** Scope */
             scope: string;
             /** Source Id */
@@ -10498,6 +10666,49 @@ export interface components {
             outdated: boolean;
         };
         /**
+         * LinkedIdentityResponse
+         * @description An IdP sign-in linked to an account, which reaches it without a password.
+         */
+        LinkedIdentityResponse: {
+            /**
+             * Key
+             * @description The sign-in's key, which unlinking names
+             */
+            key: string;
+            /**
+             * Provider
+             * @description The OIDC provider it signs in through
+             */
+            provider: string;
+            /**
+             * Provider Type
+             * @description The provider's type (google, entra_id, okta or generic), empty once it is no longer registered
+             * @default
+             */
+            provider_type: string;
+            /**
+             * Subject
+             * @description The IdP subject (sub)
+             */
+            subject: string;
+            /**
+             * Email
+             * @description The email its IdP last asserted
+             * @default
+             */
+            email: string;
+            /**
+             * Linked At
+             * @default
+             */
+            linked_at: string;
+            /**
+             * Last Login At
+             * @default
+             */
+            last_login_at: string;
+        };
+        /**
          * LogEntryModel
          * @description One commit in the deploy repo's audit log.
          */
@@ -10585,7 +10796,7 @@ export interface components {
         LoginRequest: {
             /**
              * Username
-             * @description Account name (admin, operator, viewer)
+             * @description Account name, or the email of a local account
              */
             username: string;
             /**
@@ -11016,6 +11227,11 @@ export interface components {
              */
             type: "generic" | "google" | "entra_id" | "okta";
             /**
+             * Org
+             * @default
+             */
+            org: string;
+            /**
              * Enabled
              * @default true
              */
@@ -11056,6 +11272,8 @@ export interface components {
              */
             scopes: string;
             groups?: components["schemas"]["GroupResolutionConfig"];
+            /** Trusted Email Domains */
+            trusted_email_domains?: string[];
             /**
              * Created At
              * @default
@@ -11213,6 +11431,22 @@ export interface components {
             groups?: string[];
         };
         /**
+         * OidcLinkRequest
+         * @description Body for linking a held IdP sign-in to its local account with that account's password.
+         */
+        OidcLinkRequest: {
+            /**
+             * Password
+             * @description The local account's password
+             */
+            password: string;
+            /**
+             * Ticket
+             * @description The link_ticket a link_required callback answered with
+             */
+            ticket: string;
+        };
+        /**
          * OidcLoginResponse
          * @description JSON body for GET .../login when ``redirect=false``.
          */
@@ -11222,6 +11456,27 @@ export interface components {
              * @description IdP authorize URL for SPA clients (redirect=false). Omitted when redirect=true (302 to the IdP instead).
              */
             authorization_url?: string | null;
+        };
+        /**
+         * OidcReauthRequest
+         * @description The account or group you are about to change, and where the sign-in hands its grant back.
+         */
+        OidcReauthRequest: {
+            /**
+             * @description What the target names
+             * @default account
+             */
+            kind: components["schemas"]["ReauthKind"];
+            /**
+             * Return To
+             * @description Where the callback sends the browser, with the grant in the URL fragment (#reauth_grant=...&expires_in=...) or the refusal's code (#error=<code>&provider=...). A relative path, or an absolute URL on this API's origin or a CORS-allowed origin.
+             */
+            return_to: string;
+            /**
+             * Target
+             * @description The account, group, role, sign-in provider or API key you are about to change
+             */
+            target: string;
         };
         /** Operation[TaskInfo, Any] */
         Operation_TaskInfo_Any_: {
@@ -12287,6 +12542,11 @@ export interface components {
             name: string;
             /** Type */
             type: string;
+            /**
+             * Org
+             * @description The org whose provider this is: a registered org's name, or empty for a platform provider. Its sign-ins land in that org as viewers and link only to that org's accounts. An admin of that org manages it.
+             */
+            org: string;
             /** Enabled */
             enabled: boolean;
             /** Display Name */
@@ -12307,6 +12567,11 @@ export interface components {
              */
             scopes: string[];
             groups: components["schemas"]["GroupResolutionResponse"];
+            /**
+             * Trusted Email Domains
+             * @description Email domains this provider vouches for, such as corp.com. A first sign-in whose verified email is in one of them links to the one account holding that email: at once for an account an identity provider owns, after the account's password for a local one. Stored lowercased. Empty links nothing.
+             */
+            trusted_email_domains: string[];
             /** Created At */
             created_at: string;
             /** Last Sync At */
@@ -12484,6 +12749,45 @@ export interface components {
         };
         /** @enum {string} */
         RbacScope: "group:write" | "group:read" | "group:delete" | "group:add_member" | "group:remove_member" | "account:write" | "account:read" | "account:delete" | "accounts:reset_password" | "account:attributes:read" | "account:attributes:write" | "account:attributes:read_sensitive" | "account:attributes:write_sensitive" | "group:attributes:read" | "group:attributes:write" | "group:attributes:read_sensitive" | "group:attributes:write_sensitive" | "alert:read" | "alert:write" | "alert:delete" | "api_key:read" | "api_key:write" | "api_key:delete" | "cel:check" | "clickhouse_cloud:manage" | "dashboard:read" | "synthetic-data:read" | "synthetic-data:run" | "deployment:read" | "deployment:write" | "deployment:delete" | "deployment:admin_links:read" | "fieldmap:read" | "fieldmap:write" | "fieldmap:delete" | "hunt:read" | "hunt:write" | "hunt:delete" | "hunt:execute" | "oidc:read" | "oidc:write" | "oidc:delete" | "org:read" | "org:write" | "org:delete" | "org:ingest_credentials:write" | "pipeline:read" | "pipeline:write" | "query:read" | "query:execute" | "raw_query:execute" | "repository:read" | "repository:write" | "role:read" | "role:write" | "role:delete" | "role:scopes" | "rule:read" | "rule:write" | "rule:delete" | "rule:validate" | "sampler:read" | "schema:read" | "schema:write" | "schema:delete" | "service_surface:read" | "service_surface:write" | "service:read" | "service:write" | "service:delete" | "service:validate" | "sigma:read" | "sigma:write" | "sigma:admin" | "source:read" | "source:write" | "source:delete" | "source:deploy" | "system:read" | "system:write" | "task:read" | "task:write" | "transform:compile" | "transform:test" | "usage:read" | "governance:read" | "governance:write" | "helmvars:read" | "helmvars:write" | "dryrun:execute" | "library:read" | "library:write" | "lifecycle:read" | "config:write";
+        /** @enum {string} */
+        ReauthKind: "account" | "api_key" | "group" | "provider" | "role";
+        /**
+         * ReauthRequest
+         * @description Your own password, and the account you are about to edit.
+         */
+        ReauthRequest: {
+            /**
+             * @description What the target names
+             * @default account
+             */
+            kind: components["schemas"]["ReauthKind"];
+            /**
+             * Password
+             * @description Your own password
+             */
+            password: string;
+            /**
+             * Target
+             * @description The account, group, role, sign-in provider or API key you are about to change
+             */
+            target: string;
+        };
+        /**
+         * ReauthResponse
+         * @description A grant for editing one account.
+         */
+        ReauthResponse: {
+            /**
+             * Grant
+             * @description Send it as the X-DFE-Reauth header on every edit of that account
+             */
+            grant: string;
+            /**
+             * Expires In
+             * @description Seconds the grant stays valid
+             */
+            expires_in: number;
+        };
         /**
          * RelinkResult
          * @description The write result, with the links it moved.
@@ -12605,32 +12909,6 @@ export interface components {
             buckets: components["schemas"]["ResourceBucketModel"][];
         };
         /**
-         * RetentionReconcileSummary
-         * @description What applying the new default did to the live tables.
-         */
-        RetentionReconcileSummary: {
-            /**
-             * Core Tables Altered
-             * @description database.table: <old> -> <new> days, for each engine table whose TTL moved.
-             */
-            core_tables_altered: string[];
-            /**
-             * Source Tables Altered
-             * @description database.table for each deployed source's table the apply altered.
-             */
-            source_tables_altered: string[];
-            /**
-             * Sources Reconciled
-             * @description Deployed sources whose table was brought current.
-             */
-            sources_reconciled: number;
-            /**
-             * Sources Skipped
-             * @description Deployed sources left to their next deploy: table absent, build failed or ClickHouse refused.
-             */
-            sources_skipped: number;
-        };
-        /**
          * RetentionStatus
          * @description The default TTL a time-series table gets when it declares none, and where it comes from.
          */
@@ -12672,39 +12950,6 @@ export interface components {
              * @description Retention in days for every table that follows the default; 0 keeps rows forever. null clears the override, so deployment_default applies again.
              */
             default_ttl_days: number | null;
-        };
-        /**
-         * RetentionUpdateResponse
-         * @description The default TTL after the change, and what applying it did.
-         */
-        RetentionUpdateResponse: {
-            /**
-             * Default Ttl Days
-             * @description Effective retention in days for every table that follows the default; 0 = no TTL. The override when one is stored, else deployment_default.
-             */
-            default_ttl_days: number;
-            /**
-             * Stored
-             * @description The admin's override, committed in the deploy repo; null when none is set.
-             */
-            stored: number | null;
-            /**
-             * Origin
-             * @description override when the stored value wins, deployment when deployment_default does.
-             * @enum {string}
-             */
-            origin: "override" | "deployment";
-            /**
-             * Deployment Default
-             * @description DFE_ENGINE_CLICKHOUSE_DEFAULT_TTL_DAYS as deployed; applies whenever no override is set.
-             */
-            deployment_default: number;
-            /**
-             * Editable
-             * @description Whether this deployment can store an override. False without gitops, where a PUT answers 503.
-             */
-            editable: boolean;
-            reconcile: components["schemas"]["RetentionReconcileSummary"];
         };
         /**
          * ReviewRequest
@@ -16068,23 +16313,6 @@ export interface components {
             engine?: string | null;
         };
         /**
-         * SystemDefaultsUpdate
-         * @description The defaults after the patch. reconcile is set only when ttl_days was named.
-         */
-        SystemDefaultsUpdate: {
-            ttl_days: components["schemas"]["IntDefault"];
-            common_header_type: components["schemas"]["StrDefault"];
-            common_header_version: components["schemas"]["StrDefault"];
-            /** @description MergeTree-family variant, without the Replicated or Shared prefix. */
-            engine: components["schemas"]["StrDefault"];
-            /**
-             * Editable
-             * @description Whether this deployment can store an override. False without gitops.
-             */
-            editable: boolean;
-            reconcile?: components["schemas"]["RetentionReconcileSummary"] | null;
-        };
-        /**
          * SystemStatusResponse
          * @description Whether the engine is serving degraded, and why.
          */
@@ -16568,6 +16796,11 @@ export interface components {
          */
         UpdateProviderRequest: {
             /**
+             * Org
+             * @description Move the provider to another org. The org whose provider this is: a registered org's name, or empty for a platform provider. Its sign-ins land in that org as viewers and link only to that org's accounts. An admin of that org manages it.
+             */
+            org?: string | null;
+            /**
              * Enabled
              * @description Enable or disable the provider
              */
@@ -16609,6 +16842,11 @@ export interface components {
             scopes?: string[] | null;
             /** @description Group resolution config */
             groups?: components["schemas"]["GroupResolutionRequest"] | null;
+            /**
+             * Trusted Email Domains
+             * @description Replace the trusted email domains. Email domains this provider vouches for, such as corp.com. A first sign-in whose verified email is in one of them links to the one account holding that email: at once for an account an identity provider owns, after the account's password for a local one. Stored lowercased. Empty links nothing.
+             */
+            trusted_email_domains?: string[] | null;
         };
         /**
          * UpdateRoleRequest
@@ -18007,7 +18245,10 @@ export interface operations {
     "auth.setup.retire-admin": {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description The grant POST /auth/reauth returned for this change */
+                "X-DFE-Reauth"?: string;
+            };
             path?: never;
             cookie?: never;
         };
@@ -18033,6 +18274,75 @@ export interface operations {
             };
             /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+        };
+    };
+    "auth.reauth": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReauthRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReauthResponse"];
+                };
+            };
+            /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -18123,12 +18433,159 @@ export interface operations {
                     "application/json": components["schemas"]["OidcCallbackResponse"];
                 };
             };
-            /** @description Login started with return_to: redirect there with the engine token in the URL fragment, or with the refusal's code (#error=<code>&provider=...) when the login is refused. */
+            /** @description Login started with return_to: redirect there with the engine token in the URL fragment, or with the refusal's code (#error=<code>&provider=...) when the login is refused. A sign-in that links to a local account comes back with #error=link_required&link_ticket=...&account=...&provider=... instead. */
             303: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+            /** @description link_required: the sign-in's trusted email matches a local account. The body's link_ticket and that account's password go to POST /auth/oidc/link, and account names it. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+        };
+    };
+    "auth.oidc.link": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OidcLinkRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OidcCallbackResponse"];
+                };
+            };
+            /** @description link_ticket_invalid (expired or not this engine's), a wrong password, link_stale (the account or the sign-in changed since the ticket), or the account is disabled, blocked or would hold no role */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description The ticket's provider is no longer registered and enabled */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Too many failed attempts for this account or from this address; Retry-After gives the seconds to wait */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+        };
+    };
+    "auth.oidc.reauth": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OidcReauthRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OidcLoginResponse"];
+                };
+            };
+            /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description reauth_via_password: the caller has no identity-provider sign-in, so it confirms with its password at POST /auth/reauth */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
             };
             /** @description Validation Error */
             422: {
@@ -18169,7 +18626,7 @@ export interface operations {
                 page_token?: string | null;
                 /** @description Items to skip, after page_token */
                 skip?: number;
-                /** @description Ordering over created_at, updated_at, username, each optionally followed by desc */
+                /** @description Ordering over created_at, org, updated_at, username, each optionally followed by desc */
                 order_by?: string | null;
             };
             header?: never;
@@ -18228,7 +18685,10 @@ export interface operations {
     "auth.accounts.create": {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description The grant POST /auth/reauth returned for this change */
+                "X-DFE-Reauth"?: string;
+            };
             path?: never;
             cookie?: never;
         };
@@ -18245,6 +18705,67 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["AccountResponse"];
+                };
+            };
+            /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+        };
+    };
+    "auth.accounts.availability": {
+        parameters: {
+            query?: {
+                /** @description An email a new account would hold */
+                email?: string;
+                /** @description A name a new account would take */
+                username?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AccountAvailabilityResponse"];
                 };
             };
             /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */
@@ -18453,7 +18974,10 @@ export interface operations {
     "auth.accounts.apply": {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description The grant POST /auth/reauth returned for this change */
+                "X-DFE-Reauth"?: string;
+            };
             path: {
                 username: string;
             };
@@ -18524,7 +19048,10 @@ export interface operations {
     "auth.accounts.delete": {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description The grant POST /auth/reauth returned for this change */
+                "X-DFE-Reauth"?: string;
+            };
             path: {
                 username: string;
             };
@@ -18658,7 +19185,10 @@ export interface operations {
     "auth.accounts.reset-password": {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description The grant POST /auth/reauth returned for this change */
+                "X-DFE-Reauth"?: string;
+            };
             path: {
                 username: string;
             };
@@ -18720,7 +19250,10 @@ export interface operations {
     "auth.accounts.rotate-password": {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description The grant POST /auth/reauth returned for this change */
+                "X-DFE-Reauth"?: string;
+            };
             path: {
                 username: string;
             };
@@ -18837,6 +19370,84 @@ export interface operations {
             };
         };
     };
+    "auth.accounts.identities.delete": {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description The grant POST /auth/reauth returned for this change */
+                "X-DFE-Reauth"?: string;
+            };
+            path: {
+                username: string;
+                key: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description not_found: no such account, or it lists no sign-in under key */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description last_admin: the sign-in gives the last usable account its system admin role */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+        };
+    };
     "auth.accounts.attributes.get": {
         parameters: {
             query?: never;
@@ -18898,7 +19509,10 @@ export interface operations {
     "auth.accounts.attributes.apply": {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description The grant POST /auth/reauth returned for this change */
+                "X-DFE-Reauth"?: string;
+            };
             path: {
                 username: string;
             };
@@ -19018,7 +19632,10 @@ export interface operations {
     "auth.accounts.sensitive-attributes.apply": {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description The grant POST /auth/reauth returned for this change */
+                "X-DFE-Reauth"?: string;
+            };
             path: {
                 username: string;
             };
@@ -19147,7 +19764,10 @@ export interface operations {
     "auth.groups.create": {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description The grant POST /auth/reauth returned for this change */
+                "X-DFE-Reauth"?: string;
+            };
             path?: never;
             cookie?: never;
         };
@@ -19265,7 +19885,10 @@ export interface operations {
     "auth.groups.apply": {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description The grant POST /auth/reauth returned for this change */
+                "X-DFE-Reauth"?: string;
+            };
             path: {
                 name: string;
             };
@@ -19327,7 +19950,10 @@ export interface operations {
     "auth.groups.delete": {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description The grant POST /auth/reauth returned for this change */
+                "X-DFE-Reauth"?: string;
+            };
             path: {
                 name: string;
             };
@@ -19383,7 +20009,10 @@ export interface operations {
     "auth.groups.members.create": {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description The grant POST /auth/reauth returned for this change */
+                "X-DFE-Reauth"?: string;
+            };
             path: {
                 name: string;
             };
@@ -19445,7 +20074,10 @@ export interface operations {
     "auth.groups.members.delete": {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description The grant POST /auth/reauth returned for this change */
+                "X-DFE-Reauth"?: string;
+            };
             path: {
                 name: string;
                 username: string;
@@ -19562,7 +20194,10 @@ export interface operations {
     "auth.groups.attributes.apply": {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description The grant POST /auth/reauth returned for this change */
+                "X-DFE-Reauth"?: string;
+            };
             path: {
                 name: string;
             };
@@ -19682,7 +20317,10 @@ export interface operations {
     "auth.groups.sensitive-attributes.apply": {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description The grant POST /auth/reauth returned for this change */
+                "X-DFE-Reauth"?: string;
+            };
             path: {
                 name: string;
             };
@@ -19811,7 +20449,10 @@ export interface operations {
     "auth.api-keys.create": {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description The grant POST /auth/reauth returned for this change */
+                "X-DFE-Reauth"?: string;
+            };
             path?: never;
             cookie?: never;
         };
@@ -19871,7 +20512,10 @@ export interface operations {
     "auth.api-keys.delete": {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description The grant POST /auth/reauth returned for this change */
+                "X-DFE-Reauth"?: string;
+            };
             path: {
                 short_token: string;
             };
@@ -20061,7 +20705,10 @@ export interface operations {
     "auth.roles.create": {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description The grant POST /auth/reauth returned for this change */
+                "X-DFE-Reauth"?: string;
+            };
             path?: never;
             cookie?: never;
         };
@@ -20179,7 +20826,10 @@ export interface operations {
     "auth.roles.apply": {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description The grant POST /auth/reauth returned for this change */
+                "X-DFE-Reauth"?: string;
+            };
             path: {
                 name: string;
             };
@@ -20241,7 +20891,10 @@ export interface operations {
     "auth.roles.delete": {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description The grant POST /auth/reauth returned for this change */
+                "X-DFE-Reauth"?: string;
+            };
             path: {
                 name: string;
             };
@@ -20364,7 +21017,10 @@ export interface operations {
     "auth.oidc-providers.create": {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description The grant POST /auth/reauth returned for this change */
+                "X-DFE-Reauth"?: string;
+            };
             path?: never;
             cookie?: never;
         };
@@ -20482,7 +21138,10 @@ export interface operations {
     "auth.oidc-providers.apply": {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description The grant POST /auth/reauth returned for this change */
+                "X-DFE-Reauth"?: string;
+            };
             path: {
                 name: string;
             };
@@ -20544,7 +21203,10 @@ export interface operations {
     "auth.oidc-providers.delete": {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description The grant POST /auth/reauth returned for this change */
+                "X-DFE-Reauth"?: string;
+            };
             path: {
                 name: string;
             };
@@ -20602,7 +21264,10 @@ export interface operations {
     "auth.oidc-providers.sync": {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description The grant POST /auth/reauth returned for this change */
+                "X-DFE-Reauth"?: string;
+            };
             path: {
                 name: string;
             };
@@ -25461,7 +26126,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["RetentionUpdateResponse"];
+                    "application/json": components["schemas"]["RetentionStatus"];
                 };
             };
             /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */
@@ -25484,15 +26149,6 @@ export interface operations {
             };
             /** @description Validation Error */
             422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["Problem"];
-                };
-            };
-            /** @description reconcile_failed: the value is stored, and applying it to ClickHouse failed; sending the same value again applies it */
-            502: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -25739,7 +26395,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["SystemDefaultsUpdate"];
+                    "application/json": components["schemas"]["SystemDefaults"];
                 };
             };
             /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */
@@ -25762,15 +26418,6 @@ export interface operations {
             };
             /** @description validation_error: a named value cannot be stored */
             422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["Problem"];
-                };
-            };
-            /** @description reconcile_failed: ttl_days is stored, and applying it to ClickHouse failed; sending the same value again applies it */
-            502: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -29370,7 +30017,10 @@ export interface operations {
     "scim.v2.users.create": {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description The grant POST /auth/reauth returned for this change */
+                "X-DFE-Reauth"?: string;
+            };
             path?: never;
             cookie?: never;
         };
@@ -29396,6 +30046,15 @@ export interface operations {
             };
             /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -29475,7 +30134,10 @@ export interface operations {
     "scim.v2.users.apply": {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description The grant POST /auth/reauth returned for this change */
+                "X-DFE-Reauth"?: string;
+            };
             path: {
                 user_id: string;
             };
@@ -29533,7 +30195,10 @@ export interface operations {
     "scim.v2.users.delete": {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description The grant POST /auth/reauth returned for this change */
+                "X-DFE-Reauth"?: string;
+            };
             path: {
                 user_id: string;
             };
@@ -29591,7 +30256,10 @@ export interface operations {
     "scim.v2.users.update": {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description The grant POST /auth/reauth returned for this change */
+                "X-DFE-Reauth"?: string;
+            };
             path: {
                 user_id: string;
             };
@@ -29696,7 +30364,10 @@ export interface operations {
     "scim.v2.groups.create": {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description The grant POST /auth/reauth returned for this change */
+                "X-DFE-Reauth"?: string;
+            };
             path?: never;
             cookie?: never;
         };
@@ -29722,6 +30393,15 @@ export interface operations {
             };
             /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -29801,7 +30481,10 @@ export interface operations {
     "scim.v2.groups.apply": {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description The grant POST /auth/reauth returned for this change */
+                "X-DFE-Reauth"?: string;
+            };
             path: {
                 group_id: string;
             };
@@ -29859,7 +30542,10 @@ export interface operations {
     "scim.v2.groups.delete": {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description The grant POST /auth/reauth returned for this change */
+                "X-DFE-Reauth"?: string;
+            };
             path: {
                 group_id: string;
             };
@@ -29917,7 +30603,10 @@ export interface operations {
     "scim.v2.groups.update": {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description The grant POST /auth/reauth returned for this change */
+                "X-DFE-Reauth"?: string;
+            };
             path: {
                 group_id: string;
             };
