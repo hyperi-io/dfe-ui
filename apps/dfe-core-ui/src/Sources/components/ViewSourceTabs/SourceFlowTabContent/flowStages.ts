@@ -113,7 +113,7 @@ export const flowStages = (
         }
       : {
           stage: 'Transform',
-          title: 'None - records reach the loader as they arrived',
+          title: 'No transform. Records reach the loader as they arrived.',
           absent: true,
         };
 
