@@ -5,6 +5,7 @@ import { RESOURCE_TYPES } from '@/core/components/CreateSchemaForm/fieldType.con
 import { Tooltip } from '@/core/components/Tooltip';
 import { TSourceSummary } from '@/core/hooks/useFetchInfiniteFilteredSources/types';
 import { cn } from '@/core/utils/style';
+import { SOURCE_STATE_LABEL, sourceState } from '@/Sources/utils/sourceState';
 import {
   IconBucket,
   IconBucketDroplet,
@@ -12,6 +13,7 @@ import {
   IconCaptureOff,
   IconFolder,
   IconLock,
+  IconPlayerPause,
   IconQuestionMark,
   IconRocket,
   IconRocketOff,
@@ -263,6 +265,8 @@ const sourceSummaryToTreeData = ({
         const isCurrentSharedTable = source.current_table_topic_type === 'main';
         const isActiveChanges = isDeployed && !isCurrentDeployed;
         const isMainSource = source.name === 'main';
+        const state = sourceState(source);
+        const stateLabel = SOURCE_STATE_LABEL[state].toLowerCase();
         return (
           <TreeInteractiveLabel
             icon={originTooltipTag(source.origin ?? '')}
@@ -344,27 +348,29 @@ const sourceSummaryToTreeData = ({
                   )}
                 <Tooltip
                   destroyOnHidden
-                  title={
-                    source.enabled ? 'Source is enabled' : 'Source is disabled'
-                  }
+                  title={`Source is ${stateLabel}`}
                   placement="right"
                 >
                   <Button
                     type="default"
                     shape="circle"
                     size="small"
-                    aria-label={`${source.name}: ${
-                      source.enabled
-                        ? 'source is enabled'
-                        : 'source is disabled'
-                    }`}
+                    aria-label={`${source.name}: source is ${stateLabel}`}
                     className={cn(
                       'p-0.5',
                       source.enabled
                         ? 'text-success border-success bg-background dark:bg-dark-background'
                         : 'text-gray-500 border-gray-500 bg-background-muted dark:bg-dark-background-muted',
                     )}
-                    icon={source.enabled ? <IconCapture /> : <IconCaptureOff />}
+                    icon={
+                      state === 'dormant' ? (
+                        <IconPlayerPause />
+                      ) : source.enabled ? (
+                        <IconCapture />
+                      ) : (
+                        <IconCaptureOff />
+                      )
+                    }
                   />
                 </Tooltip>
               </div>

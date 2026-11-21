@@ -426,21 +426,27 @@ describe('useTransformSourceToTree', () => {
   });
 
   it.each([
-    ['an enabled source', true, 'pw/demo: source is enabled'],
-    ['a disabled source', false, 'pw/demo: source is disabled'],
-  ])('names the status button of %s', (_case, enabled, name) => {
-    const { result } = renderHook(() =>
-      useTransformSourceToTree({
-        sourceObjects: { items: [baseSource({ name: 'pw/demo', enabled })] },
-        setSelectedSource: vi.fn(),
-        selectedSourceName: null,
-        ...defaultSelection,
-      }),
-    );
+    ['an enabled source', true, 'active', 'pw/demo: source is enabled'],
+    ['a disabled source', false, 'disabled', 'pw/demo: source is disabled'],
+    ['a dormant source', false, 'dormant', 'pw/demo: source is dormant'],
+  ] as const)(
+    'names the status button of %s',
+    (_case, enabled, state, name) => {
+      const { result } = renderHook(() =>
+        useTransformSourceToTree({
+          sourceObjects: {
+            items: [baseSource({ name: 'pw/demo', enabled, state })],
+          },
+          setSelectedSource: vi.fn(),
+          selectedSourceName: null,
+          ...defaultSelection,
+        }),
+      );
 
-    const { getByRole } = renderSourceNodeTitle(result.current.tree[0]);
-    expect(getByRole('button', { name })).toBeInTheDocument();
-  });
+      const { getByRole } = renderSourceNodeTitle(result.current.tree[0]);
+      expect(getByRole('button', { name })).toBeInTheDocument();
+    },
+  );
 
   it('selects the source when its name is clicked, without reaching a row action', async () => {
     const setSelectedSource = vi.fn();
