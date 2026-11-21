@@ -46,6 +46,7 @@ export const scopes = {
   org_read: 'org:read',
   org_write: 'org:write',
   org_delete: 'org:delete',
+  org_ingest_credentials_write: 'org:ingest_credentials:write',
   pipeline_read: 'pipeline:read',
   pipeline_write: 'pipeline:write',
   query_read: 'query:read',
