@@ -791,6 +791,69 @@ describe('a 2xx that is not JSON', () => {
   });
 });
 
+describe('a refusal that is not JSON', () => {
+  const nextPage =
+    '<!DOCTYPE html><html><body>404: This page could not be found.</body></html>';
+
+  // The UI host answers an unrouted /api path with its own 404 page, and the
+  // page must never become the message the user reads.
+  test.each([
+    {
+      name: 'an HTML page names the status and content type',
+      response: () =>
+        HttpResponse.html(nextPage, { status: 404, statusText: 'Not Found' }),
+      status: 404,
+      message:
+        'The API answered 404 with text/html instead of JSON, so the request never reached the engine.',
+    },
+    {
+      name: 'an empty 412 still carries its status',
+      response: () => new HttpResponse(null, { status: 412 }),
+      status: 412,
+      message: '',
+    },
+    {
+      name: 'a plain-text 502 keeps its text',
+      response: () =>
+        new HttpResponse('upstream down', {
+          status: 502,
+          headers: { 'Content-Type': 'text/plain' },
+        }),
+      status: 502,
+      message: 'upstream down',
+    },
+    {
+      name: 'a problem+json body keeps its detail',
+      response: () =>
+        HttpResponse.json(
+          { title: 'Error', code: 'bad_request', detail: 'name is required' },
+          {
+            status: 400,
+            headers: { 'Content-Type': 'application/problem+json' },
+          },
+        ),
+      status: 400,
+      message: 'name is required',
+    },
+  ])('$name', async ({ response, status, message }) => {
+    server.use(http.get(`${BASE_URL}/api/v1/usage/overview`, response));
+
+    const client = createApiClient({ baseUrl: BASE_URL });
+    const error: unknown = await client.get('/api/v1/usage/overview').then(
+      () => undefined,
+      (e: unknown) => e,
+    );
+
+    expect(error).toBeInstanceOf(ApiError);
+    expect(error).toMatchObject({ status });
+    const text = (error as ApiError).message;
+    expect(text).not.toContain('<');
+    if (message !== '') {
+      expect(text).toBe(message);
+    }
+  });
+});
+
 describe('getApiErrorFieldMessages', () => {
   test('names the field each line belongs to', () => {
     const lines = getApiErrorFieldMessages(
