@@ -1,3 +1,4 @@
+import { useReauthGrant } from '@/core/hooks/useReauthGrant';
 import { Drawer } from '@/core/components/Drawer';
 import { RbacProtected } from '@/core/components/RbacProtected';
 import {
@@ -12,6 +13,9 @@ import { useState } from 'react';
 
 export const CreateGroupDrawer = () => {
   const [isOpen, setIsOpen] = useState(false);
+  // The grant names the group it creates, so it is asked for at submit.
+  const [newGroup, setNewGroup] = useState('');
+  const reauth = useReauthGrant(newGroup, 'group');
   const [api, contextHolder] = notification.useNotification();
 
   const {
@@ -20,8 +24,10 @@ export const CreateGroupDrawer = () => {
     error,
     reset: resetCreateGroup,
   } = useCreateGroup({
+    reauth: reauth.grant,
     onSuccess: () => {
       setIsOpen(false);
+      reauth.drop();
       api.success({
         title: 'Group created successfully',
         placement: 'bottomLeft',
@@ -35,7 +41,9 @@ export const CreateGroupDrawer = () => {
   };
 
   const handleCreateGroup = (values: CreateUpdateGroupFormData) => {
-    createGroup(createGroupTransformFormDataToRequest(values));
+    const body = createGroupTransformFormDataToRequest(values);
+    setNewGroup(body.name);
+    reauth.ask(() => createGroup(body));
   };
 
   return (
@@ -65,6 +73,7 @@ export const CreateGroupDrawer = () => {
         </RbacProtected.Restricted>
       </RbacProtected>
 
+      {reauth.modal}
       <Drawer title="Create Group" open={isOpen} onClose={closeDrawer}>
         <CreateUpdateGroupForm
           name="create-group-form"

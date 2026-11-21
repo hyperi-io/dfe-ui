@@ -86,6 +86,14 @@ const closeDrawer = async (user: UserEvent) => {
 
 const submit = async (user: UserEvent) => {
   await user.click(screen.getByRole('button', { name: 'Create Group' }));
+  // A form that passes asks for the password before it creates anything.
+  const password = await screen
+    .findByLabelText('Your password', {}, { timeout: 1000 })
+    .catch(() => undefined);
+  if (password) {
+    await user.type(password, 'pw');
+    await user.click(screen.getByRole('button', { name: 'Confirm' }));
+  }
 };
 
 describe('CreateGroupDrawer', { timeout: GROUP_DRAWER_TEST_TIMEOUT_MS }, () => {

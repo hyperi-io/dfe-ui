@@ -14,6 +14,7 @@ const { wrapper } = buildTestWrapper().withTheme().withReactQuery();
 
 const GOOGLE: TOidcProviderListItem = {
   name: 'google',
+  org: '',
   type: 'google',
   enabled: true,
   display_name: 'Google Workspace',
@@ -42,6 +43,7 @@ const GOOGLE: TOidcProviderListItem = {
   created_at: '2026-09-01T00:00:00Z',
   last_sync_at: '2026-10-10T08:30:00Z',
   last_sync_status: 'user_token',
+  trusted_email_domains: [],
   sync_error: '',
 };
 

@@ -1,3 +1,4 @@
+import { confirmReauth } from '@/core/utils/test-utils/confirmReauth';
 import {
   chooseCredentialSource,
   SOURCE_SWITCH_TEST_TIMEOUT_MS,
@@ -44,6 +45,7 @@ const NO_GROUPS: TOidcProviderListItem['groups'] = {
 
 const OKTA: TOidcProviderListItem = {
   name: 'okta',
+  org: '',
   type: 'okta',
   enabled: true,
   display_name: 'Okta',
@@ -63,6 +65,7 @@ const OKTA: TOidcProviderListItem = {
   created_at: '2026-09-01T00:00:00Z',
   last_sync_at: '',
   last_sync_status: '',
+  trusted_email_domains: [],
   sync_error: '',
 };
 
@@ -118,9 +121,11 @@ const groupsRequest = ({
 const onPut = vi.fn();
 
 const server = setupServer(
+  API_CONFIG_MOCKS.auth.reauth.post.success(),
   API_CONFIG_MOCKS.auth.me.get.success({
     mockedResponse: ADMIN_MOCKED_RESPONSE,
   }),
+  API_CONFIG_MOCKS.accounts.me.get.success(),
   http.put(
     API_CONFIG_MOCKS.oidcProviders.provider.mockedUrl.replace(
       '{name}',
@@ -163,6 +168,7 @@ const openEditDrawer = async (provider: TOidcProviderListItem) => {
       { timeout: 15_000 },
     ),
   );
+  await confirmReauth(user);
   await screen.findByRole('button', { hidden: true, name: 'Update' });
   return user;
 };

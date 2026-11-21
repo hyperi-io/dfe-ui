@@ -27,6 +27,7 @@ export const QUERY_KEYS = Object.freeze({
     logout: () => ['auth', 'logout'],
     me: () => ['auth', 'me'],
     permissions: () => ['auth', 'permissions'],
+    reauth: () => ['auth', 'reauth'],
   },
   sources: {
     default: ({
@@ -368,6 +369,7 @@ export const QUERY_KEYS = Object.freeze({
     default: ({
       search,
       oidc_id,
+      org,
       include_core,
       blocked,
       sort_by,
@@ -378,6 +380,7 @@ export const QUERY_KEYS = Object.freeze({
       'accounts',
       ...(search ? ['search', search] : []),
       ...(oidc_id ? ['oidc_id', oidc_id] : []),
+      ...(org ? ['org', org] : []),
       ...(include_core ? ['include_core', include_core] : []),
       ...(blocked ? ['blocked', blocked] : []),
       ...(sort_by ? ['sort_by', sort_by] : []),
@@ -390,6 +393,8 @@ export const QUERY_KEYS = Object.freeze({
       '{username}',
       ...(username ? [username] : []),
     ],
+    availability: () => ['auth', 'accounts', 'availability'],
+    identity: () => ['auth', 'accounts', '{username}', 'identities', '{key}'],
     resetPassword: () => ['auth', 'accounts', '{username}', 'reset-password'],
     resetCurrentUserPassword: () => ['auth', 'accounts', 'reset-password'],
     me: () => ['auth', 'accounts', 'me'],
@@ -457,6 +462,7 @@ export const QUERY_KEYS = Object.freeze({
       ...(returnTo ? [returnTo] : []),
     ],
     callback: () => ['auth', 'oidc', '{provider}', 'callback'],
+    reauth: () => ['auth', 'oidc', 'reauth'],
   },
   oidcProviders: {
     default: ({

@@ -1,4 +1,5 @@
 import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
+import { REAUTH_HEADER } from '@/core/hooks/useReauth';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { deleteAccount } from './api';
 
@@ -11,8 +12,10 @@ export const useDeleteAccount = ({
 }) => {
   const queryClient = useQueryClient();
   const { mutate, isPending, error } = useMutation({
-    mutationFn: (username: string) =>
+    // The re-auth grant for *username*, which the engine requires on a delete.
+    mutationFn: ({ reauth, username }: { reauth: string; username: string }) =>
       deleteAccount({
+        headerParams: { [REAUTH_HEADER]: reauth },
         pathParams: { username },
       }),
     onSuccess: () => {

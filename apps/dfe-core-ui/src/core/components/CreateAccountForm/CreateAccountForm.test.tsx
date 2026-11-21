@@ -24,7 +24,7 @@ import {
   listedOrgs,
   MockIntersectionObserver,
   signedInAs,
-} from '@/core/components/AccountOrgFormItem/AccountOrgFormItem.mocks';
+} from '@/core/components/OrgChoiceFormItem/OrgChoiceFormItem.mocks';
 import { CreateAccountForm } from '.';
 
 // The group picker reads RBAC and the groups list, and the password rule depends on neither.
@@ -35,7 +35,14 @@ vi.mock('@/core/components/AccountGroupSelect', () => ({
 // The organisation picker lists the organisations and starts on the signed-in user's own.
 vi.stubGlobal('IntersectionObserver', MockIntersectionObserver);
 
-const server = setupServer(signedInAs(''), listedOrgs);
+const server = setupServer(
+  signedInAs(''),
+  listedOrgs,
+  API_CONFIG_MOCKS.accounts.availability.get.success(),
+  API_CONFIG_MOCKS.system.organisation.get.success({
+    mockedResponse: { name: 'hyperi', display_name: 'HyperI' },
+  }),
+);
 // Only the writes, so a check that nothing went out ignores the pickers' reads.
 const sent: Request[] = [];
 
@@ -71,14 +78,36 @@ const SEVENTY_THREE_BYTES = `${'a'.repeat(71)}${ACCENTED}`;
 // Each emoji is one code point and two UTF-16 units, so six are 12 units long.
 const EMOJI = String.fromCodePoint(0x1f511);
 
-const submit = async (password: string) => {
-  const user = userEvent.setup();
-  render(<CreateAccount />, { wrapper });
+const OWN_ORG = /^Your organisation/;
+
+/** Fill the details step and go on, landing on the organisation step only when the details pass. */
+const fillDetails = async (
+  user: ReturnType<typeof userEvent.setup>,
+  password: string,
+  name = 'New User',
+) => {
   await user.type(screen.getByLabelText(/^Username/), 'new-user');
   await user.type(screen.getByLabelText(/^Email/), 'new-user@example.com');
+  if (name) {
+    await user.type(screen.getByLabelText(/^Name/), name);
+  }
   await user.click(screen.getByLabelText(/^Password/));
   await user.paste(password);
-  await user.click(screen.getByRole('button', { name: 'Create Account' }));
+  await user.click(screen.getByRole('button', { name: 'Next' }));
+};
+
+const submit = async (password: string, name = 'New User') => {
+  const user = userEvent.setup();
+  render(<CreateAccount />, { wrapper });
+  await fillDetails(user, password, name);
+  // Refused details keep the form on its first step, with nothing to create.
+  const own = await screen
+    .findByRole('radio', { name: OWN_ORG }, { timeout: 1000 })
+    .catch(() => undefined);
+  if (own) {
+    await user.click(own);
+    await user.click(screen.getByRole('button', { name: 'Create Account' }));
+  }
 };
 
 describe('CreateAccountForm password length', () => {
@@ -184,24 +213,39 @@ describe('CreateAccountForm password length', () => {
   });
 });
 
-const USERNAME_HELP =
-  "Username is used to identify the account. It needs to be unique and can't be updated later.";
+describe('CreateAccountForm name', () => {
+  test.each([
+    { name: '', label: 'missing' },
+    { name: '   ', label: 'blank' },
+  ])('refuses a $label name before any request goes out', async ({ name }) => {
+    server.use(API_CONFIG_MOCKS.accounts.default.post.success());
+
+    await submit(TWELVE_CHARS, name);
+
+    expect(await screen.findByText('Name is required')).toBeInTheDocument();
+    expect(sent).toEqual([]);
+  });
+
+  test('sends the name it was given', async () => {
+    server.use(API_CONFIG_MOCKS.accounts.default.post.success());
+
+    await submit(TWELVE_CHARS, '  New User ');
+
+    await waitFor(() => expect(sent).toHaveLength(1));
+    expect(await sent[0]?.json()).toMatchObject({ name: 'New User' });
+  });
+});
 
 describe('CreateAccountForm username', () => {
-  test('replaces the username hint while the field is invalid', async () => {
+  test('shows an invalid username until it is fixed', async () => {
     const user = userEvent.setup();
     render(<CreateAccount />, { wrapper });
-
-    expect(screen.getByText(USERNAME_HELP)).toBeInTheDocument();
 
     await user.type(screen.getByLabelText(/^Username/), '-user');
 
     expect(
       await screen.findByText(STORE_NAME_VALIDATOR.message('Username')),
     ).toBeInTheDocument();
-    await waitFor(() => {
-      expect(screen.queryByText(USERNAME_HELP)).not.toBeInTheDocument();
-    });
 
     await user.clear(screen.getByLabelText(/^Username/));
     await user.type(screen.getByLabelText(/^Username/), 'new-user');
@@ -211,7 +255,6 @@ describe('CreateAccountForm username', () => {
         screen.queryByText(STORE_NAME_VALIDATOR.message('Username')),
       ).not.toBeInTheDocument();
     });
-    expect(screen.getByText(USERNAME_HELP)).toBeInTheDocument();
   });
 
   test(
@@ -231,59 +274,91 @@ describe('CreateAccountForm username', () => {
 });
 
 describe('CreateAccountForm organisation', () => {
-  const fillAndSubmit = async (
-    user: ReturnType<typeof userEvent.setup>,
-    org?: { pick?: string; clear?: boolean },
-  ) => {
-    await user.type(screen.getByLabelText(/^Username/), 'new-user');
-    await user.type(screen.getByLabelText(/^Email/), 'new-user@example.com');
-    await user.click(screen.getByLabelText(/^Password/));
-    await user.paste(TWELVE_CHARS);
-    if (org?.clear) {
-      await user.click(await screen.findByLabelText('close-circle'));
-    }
-    if (org?.pick) {
-      await user.click(screen.getByRole('combobox', { name: 'Organisation' }));
-      await user.click(await screen.findByTitle(org.pick));
-    }
-    await user.click(screen.getByRole('button', { name: 'Create Account' }));
-  };
-
   test.each([
-    { name: 'the signed-in org', me: 'acme', org: undefined, sends: 'acme' },
+    { name: 'your organisation as a root account', pick: undefined, sends: '' },
     {
-      name: 'no org for a user bound to none',
-      me: '',
-      org: undefined,
-      sends: '',
-    },
-    {
-      name: 'the org picked',
-      me: 'acme',
-      org: { pick: 'Globex' },
+      name: 'the customer organisation picked',
+      pick: 'Globex',
       sends: 'globex',
     },
-    {
-      name: 'no org once cleared',
-      me: 'acme',
-      org: { clear: true },
-      sends: '',
-    },
-  ])('sends $name', async ({ me, org, sends }) => {
-    server.use(
-      signedInAs(me),
-      API_CONFIG_MOCKS.accounts.default.post.success(),
-    );
+  ])('sends $name', async ({ pick, sends }) => {
+    server.use(API_CONFIG_MOCKS.accounts.default.post.success());
     const user = userEvent.setup();
     render(<CreateAccount />, { wrapper });
-    if (me) {
-      expect(await screen.findByTitle('Acme Corp')).toBeInTheDocument();
-    }
+    await fillDetails(user, TWELVE_CHARS);
 
-    await fillAndSubmit(user, org);
+    if (pick) {
+      await user.click(
+        await screen.findByRole('radio', { name: 'Customer organisation' }),
+      );
+      await user.click(
+        screen.getByRole('combobox', { name: 'Organisation name' }),
+      );
+      await user.click(await screen.findByTitle(pick));
+    } else {
+      await user.click(await screen.findByRole('radio', { name: OWN_ORG }));
+    }
+    await user.click(screen.getByRole('button', { name: 'Create Account' }));
 
     await waitFor(() => expect(sent).toHaveLength(1));
     expect(await sent[0]?.json()).toMatchObject({ org: sends });
+  });
+
+  test('offers the role, not groups, the moment a customer organisation is chosen', async () => {
+    const user = userEvent.setup();
+    render(<CreateAccount />, { wrapper });
+    await fillDetails(user, TWELVE_CHARS);
+    const own = await screen.findByRole('radio', { name: OWN_ORG });
+    const offered = () => ({
+      groups: screen.queryByText('Groups') !== null,
+      role: screen.queryByRole('radio', { name: 'Viewer' }) !== null,
+    });
+
+    const unchosen = offered();
+    await user.click(own);
+    const ownOrg = offered();
+    await user.click(
+      screen.getByRole('radio', { name: 'Customer organisation' }),
+    );
+
+    expect({ customer: offered(), ownOrg, unchosen }).toEqual({
+      customer: { groups: false, role: true },
+      ownOrg: { groups: true, role: false },
+      unchosen: { groups: false, role: false },
+    });
+  });
+
+  test('creates nothing until an organisation is chosen', async () => {
+    const user = userEvent.setup();
+    render(<CreateAccount />, { wrapper });
+    await fillDetails(user, TWELVE_CHARS);
+
+    const create = await screen.findByRole('button', {
+      name: 'Create Account',
+    });
+
+    expect(create).toBeDisabled();
+    expect(
+      screen.queryByRole('radio', { checked: true, name: OWN_ORG }),
+    ).not.toBeInTheDocument();
+  });
+
+  test('names where the account lands before it is created', async () => {
+    const user = userEvent.setup();
+    render(<CreateAccount />, { wrapper });
+    await fillDetails(user, TWELVE_CHARS);
+
+    await user.click(
+      await screen.findByRole('radio', { name: 'Customer organisation' }),
+    );
+    await user.click(
+      screen.getByRole('combobox', { name: 'Organisation name' }),
+    );
+    await user.click(await screen.findByTitle('Globex'));
+
+    expect(
+      await screen.findByText('new-user is created in globex as Viewer.'),
+    ).toBeInTheDocument();
   });
 
   test('sends no org from the setup wizard, and asks for no signed-in user', async () => {
@@ -305,12 +380,84 @@ describe('CreateAccountForm organisation', () => {
     );
 
     expect(
-      screen.queryByRole('combobox', { name: 'Organisation' }),
+      screen.queryByRole('radio', { name: OWN_ORG }),
     ).not.toBeInTheDocument();
-    await fillAndSubmit(user);
+    await user.type(screen.getByLabelText(/^Username/), 'new-user');
+    await user.type(screen.getByLabelText(/^Email/), 'new-user@example.com');
+    await user.type(screen.getByLabelText(/^Name/), 'New User');
+    await user.click(screen.getByLabelText(/^Password/));
+    await user.paste(TWELVE_CHARS);
+    await user.click(screen.getByRole('button', { name: 'Create Account' }));
 
     await waitFor(() => expect(onFinish).toHaveBeenCalledTimes(1));
     expect(onFinish.mock.calls[0]?.[0]).toMatchObject({ org: '' });
     expect(reads).not.toContain(API_CONFIG_MOCKS.accounts.me.mockedUrl);
+  });
+});
+
+describe('CreateAccountForm availability', () => {
+  test.each([
+    {
+      field: /^Username/,
+      message: "Account 'kaz' already exists",
+      answer: { email: '', username: "Account 'kaz' already exists" },
+      value: 'kaz',
+    },
+    {
+      field: /^Email/,
+      message: 'Another account already uses this email',
+      answer: {
+        email: 'Another account already uses this email',
+        username: '',
+      },
+      value: 'kaz@example.test',
+    },
+  ])(
+    'shows "$message" while typing, before any request goes out',
+    async ({ answer, field, message, value }) => {
+      server.use(
+        API_CONFIG_MOCKS.accounts.availability.get.success({
+          mockedResponse: answer,
+        }),
+      );
+      const user = userEvent.setup();
+      render(<CreateAccount />, { wrapper });
+
+      await user.type(screen.getByLabelText(field), value);
+
+      expect(await screen.findByText(message)).toBeInTheDocument();
+      expect(sent).toEqual([]);
+    },
+  );
+});
+
+describe('CreateAccountForm organisation role', () => {
+  test('an organisation account takes a role instead of groups', async () => {
+    const user = userEvent.setup();
+    const onFinish = vi.fn();
+    render(
+      <CreateAccountForm onFinish={onFinish} error={null} isPending={false} />,
+      { wrapper },
+    );
+
+    await fillDetails(user, TWELVE_CHARS);
+    await user.click(
+      await screen.findByRole('radio', { name: 'Customer organisation' }),
+    );
+    await user.click(
+      screen.getByRole('combobox', { name: 'Organisation name' }),
+    );
+    await user.click(await screen.findByTitle('Globex'));
+    await user.click(await screen.findByRole('radio', { name: 'Admin' }));
+    await user.click(screen.getByRole('button', { name: 'Create Account' }));
+
+    await waitFor(() => expect(onFinish).toHaveBeenCalledTimes(1));
+    expect({
+      groupsField: screen.queryByText('Groups'),
+      sent: onFinish.mock.calls[0]?.[0],
+    }).toMatchObject({
+      groupsField: null,
+      sent: { org: 'globex', groups: ['globex-admins'] },
+    });
   });
 });

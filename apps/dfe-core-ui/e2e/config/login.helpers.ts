@@ -1,4 +1,4 @@
-import { Page, expect } from '@playwright/test';
+import { Locator, Page, expect } from '@playwright/test';
 import { BASE_URL } from './e2e.client';
 
 // The password the DEPLOYMENT under test actually has, never the product's own
@@ -71,7 +71,7 @@ export const completeForcedPasswordChange = async (
     name: 'Login with Local',
     exact: true,
   });
-  const username = textbox(page, 'Username');
+  const username = textbox(page, 'Username or Email');
   // Once the local tab is selected, the tab and the username field are both
   // present. Waiting for exactly one of them fails that page.
   await expect(localTab.or(username).first()).toBeVisible();
@@ -179,7 +179,7 @@ export const loginAs = async (
     name: 'Login with Local',
     exact: true,
   });
-  const username = textbox(page, 'Username');
+  const username = textbox(page, 'Username or Email');
   await expect(username.or(localTab)).toBeVisible();
   if (await localTab.isVisible()) {
     await localTab.click();
@@ -198,4 +198,17 @@ export const loginAs = async (
     await completeForcedPasswordChange(page, user);
   }
   await expectLanding(page, landing);
+};
+
+/** Re-enter the admin's password where a change to an account asks for it first. */
+export const confirmItsYou = async (page: Page) => {
+  const reauth = page.getByRole('dialog', { name: "Confirm it's you" });
+  await reauth.getByLabel('Your password').fill(adminPassword());
+  await reauth.getByRole('button', { name: 'Confirm', exact: true }).click();
+};
+
+/** Take an Invite user dialog on to its Organisation tab and place the account in your organisation. */
+export const chooseYourOrganisation = async (create: Locator) => {
+  await create.getByRole('button', { name: 'Next', exact: true }).click();
+  await create.getByRole('radio', { name: /^Your organisation/ }).check();
 };

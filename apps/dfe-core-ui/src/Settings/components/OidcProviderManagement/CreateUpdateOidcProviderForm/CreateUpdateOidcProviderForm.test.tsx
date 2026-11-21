@@ -11,6 +11,7 @@ import {
   MANUAL_MODE_HINT,
   PROVIDERS_MAP,
   SCOPES_PLACEHOLDER,
+  UNTRUSTED_DOMAINS_WARNING,
 } from '@/core/constants/oidcProviders.constants';
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
 import { expectFieldError } from '@/core/utils/test-utils/expectFieldError';
@@ -21,7 +22,7 @@ import userEvent, { type UserEvent } from '@testing-library/user-event';
 import { describe, expect, test, vi } from 'vitest';
 import { CreateUpdateOidcProviderForm } from '.';
 
-const { wrapper } = buildTestWrapper().withTheme();
+const { wrapper } = buildTestWrapper().withReactQuery().withTheme();
 
 type TType = 'google' | 'entra_id' | 'okta' | 'generic';
 type TMode = 'manual' | 'token_claim' | 'api';
@@ -284,10 +285,18 @@ describe(
     });
 
     test.each([
-      ['google', 'api', ['Type', 'Name', 'Issuer', 'Mode']],
-      ['okta', 'api', ['Type', 'Name', 'Issuer', 'Mode', 'Okta Domain']],
-      ['entra_id', 'api', ['Type', 'Name', 'Issuer', 'Mode']],
-      ['generic', 'token_claim', ['Type', 'Name', 'Issuer', 'Mode']],
+      ['google', 'api', ['Type', 'Organisation', 'Name', 'Issuer', 'Mode']],
+      [
+        'okta',
+        'api',
+        ['Type', 'Organisation', 'Name', 'Issuer', 'Mode', 'Okta Domain'],
+      ],
+      ['entra_id', 'api', ['Type', 'Organisation', 'Name', 'Issuer', 'Mode']],
+      [
+        'generic',
+        'token_claim',
+        ['Type', 'Organisation', 'Name', 'Issuer', 'Mode'],
+      ],
     ] as const)(
       'Type = %s in %s mode marks only what the engine requires',
       async (type, mode, required) => {
@@ -382,6 +391,73 @@ describe(
         await screen.findByText(/must start with a letter or number/),
       ).toBeInTheDocument();
       expect(onFinish).not.toHaveBeenCalled();
+    });
+
+    test('a trusted email domain that is not a bare domain is refused before it is sent', async () => {
+      const user = userEvent.setup();
+      const onFinish = vi.fn();
+      renderForm('google', undefined, onFinish);
+
+      await user.type(
+        screen.getByLabelText('Trusted Email Domains'),
+        'jane@corp.com{enter}',
+      );
+      await user.click(screen.getByRole('button', { name: 'Create' }));
+
+      expect(
+        await screen.findByText(
+          'Each domain must be a bare domain, such as corp.com',
+        ),
+      ).toBeInTheDocument();
+      expect(onFinish).not.toHaveBeenCalled();
+    });
+
+    test.each([
+      { trusted: [], warned: true },
+      { trusted: ['corp.com'], warned: false },
+    ])(
+      'warns about untrusted sign-ins while the trusted domains are $trusted',
+      ({ trusted, warned }) => {
+        renderEdit({
+          ...initialValuesFor('okta'),
+          trusted_email_domains: trusted,
+        });
+
+        expect(screen.queryByText(UNTRUSTED_DOMAINS_WARNING) !== null).toBe(
+          warned,
+        );
+      },
+    );
+
+    test('the warning offers the suggested domain, which fills the list and clears it', async () => {
+      const user = userEvent.setup();
+      const onFinish = vi.fn();
+      render(
+        <CreateUpdateOidcProviderForm
+          isPending={false}
+          error={null}
+          onFinish={onFinish}
+          initialValues={initialValuesFor('google')}
+          suggestedDomain="hyperi.io"
+        />,
+        { wrapper },
+      );
+
+      await user.click(screen.getByRole('button', { name: 'Trust hyperi.io' }));
+
+      expect(screen.getByTitle('hyperi.io')).toBeInTheDocument();
+      expect(
+        screen.queryByText(UNTRUSTED_DOMAINS_WARNING),
+      ).not.toBeInTheDocument();
+    });
+
+    test('without a suggested domain the warning offers nothing', () => {
+      renderForm('google');
+
+      expect(screen.getByText(UNTRUSTED_DOMAINS_WARNING)).toBeInTheDocument();
+      expect(
+        screen.queryByRole('button', { name: /^Trust / }),
+      ).not.toBeInTheDocument();
     });
 
     test('Okta in API mode needs a domain and a token before it is sent', async () => {

@@ -1,3 +1,5 @@
+import { http, HttpResponse } from 'msw';
+
 export const oidc = {
   login: {
     mockedUrl: '/api/v1/auth/oidc/{provider}/login',
@@ -13,6 +15,21 @@ export const oidc = {
       success: () => {
         console.error('Not implemented');
       },
+    },
+  },
+  reauth: {
+    mockedUrl: '/api/v1/auth/oidc/reauth',
+    post: {
+      success: ({
+        mockedResponse = {
+          authorization_url: 'https://idp.example/authorize?state=test',
+        },
+      }: {
+        mockedResponse?: { authorization_url: string };
+      } = {}) =>
+        http.post(oidc.reauth.mockedUrl, () =>
+          HttpResponse.json(mockedResponse),
+        ),
     },
   },
 };

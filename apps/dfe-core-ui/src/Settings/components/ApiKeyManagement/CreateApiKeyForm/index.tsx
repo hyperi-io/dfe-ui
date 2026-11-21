@@ -1,8 +1,14 @@
+import { useReauthGrant } from '@/core/hooks/useReauthGrant';
 import { AccountGroupSelect } from '@/core/components/AccountGroupSelect';
-import { AccountOrgFormItem } from '@/core/components/AccountOrgFormItem';
 import { Form } from '@/core/components/Form';
 import { FormNotification } from '@/core/components/FormNotification';
 import { NotificationCard } from '@/core/components/NotificationCard';
+import {
+  chosenOrg,
+  OrgChoiceFormItem,
+  type TOrgChoice,
+} from '@/core/components/OrgChoiceFormItem';
+import { useFetchYourOrganisation } from '@/core/hooks/useFetchYourOrganisation';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
 import { STORE_NAME_VALIDATOR } from '@/core/validationSchemas/utils';
 import { useCreateApiKey } from '@/Settings/hooks/apiKeys/useCreateApiKey';
@@ -10,11 +16,13 @@ import { TApiKeyCreateResponse } from '@/Settings/hooks/apiKeys/useCreateApiKey/
 import { Button, Card, DatePicker, Input, Tag } from 'antd';
 import dayjs, { type Dayjs } from 'dayjs';
 import utc from 'dayjs/plugin/utc';
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import z from 'zod';
 import { ApiKeyHiddenCopy } from './ApiKeyHiddenCopy';
 
 dayjs.extend(utc);
+
+const KEY_ORG_CHOICES: readonly TOrgChoice[] = ['none', 'own', 'customer'];
 
 const expiryAtEndOfSelectedDay = (val: unknown): unknown => {
   if (val == null || val === '') {
@@ -48,6 +56,7 @@ const createApiKeyFormSchema = z.object({
     .min(1, { message: 'Description is required' }),
   groups: z.array(z.string()).optional(),
   org: z.string().optional().nullable(),
+  org_choice: z.enum(['none', 'own', 'customer']).optional(),
   expires_at: z.preprocess(
     expiryAtEndOfSelectedDay,
     z
@@ -76,6 +85,9 @@ export const CreateApiKeyForm = ({
   onSuccess?: (data: TApiKeyCreateResponse) => void;
   onAccept?: () => void;
 }) => {
+  // The grant names the key it creates, so it is asked for at submit.
+  const [reauthTarget, setReauthTarget] = useState('');
+  const reauth = useReauthGrant(reauthTarget, 'api_key');
   const {
     data,
     mutate: generateApiKey,
@@ -83,7 +95,9 @@ export const CreateApiKeyForm = ({
     isPending,
     reset,
   } = useCreateApiKey({
+    reauth: reauth.grant,
     onSuccess: (data) => {
+      reauth.drop();
       onSuccess?.(data);
     },
   });
@@ -91,6 +105,7 @@ export const CreateApiKeyForm = ({
   const formValidation = useAntdZodResolver(createApiKeyFormSchema);
 
   const [form] = Form.useForm<CreateApiKeyFormSchema>();
+  const { data: yourOrg } = useFetchYourOrganisation();
 
   const handleAccept = useCallback(() => {
     form.resetFields();
@@ -98,18 +113,29 @@ export const CreateApiKeyForm = ({
     onAccept?.();
   }, [form, reset, onAccept]);
 
-  const handleOnFinish = (values: CreateApiKeyFormSchema) => {
-    generateApiKey({
+  const handleOnFinish = ({
+    org_choice,
+    ...values
+  }: CreateApiKeyFormSchema) => {
+    const body = {
       ...values,
-      org: values.org ?? '',
+      // A key bound to your organisation names it, unlike a root account.
+      org: chosenOrg({
+        choice: org_choice,
+        org: values.org,
+        ownOrg: yourOrg?.name ?? '',
+      }),
       expires_at: values.expires_at
         ? dayjs(values.expires_at).toISOString()
         : null,
-    });
+    };
+    setReauthTarget(values.name);
+    reauth.ask(() => generateApiKey(body));
   };
 
   return (
     <>
+      {reauth.modal}
       {data && (
         <div className="flex flex-col gap-2">
           <Card
@@ -166,7 +192,10 @@ export const CreateApiKeyForm = ({
             <AccountGroupSelect />
           </Form.Item>
 
-          <AccountOrgFormItem />
+          <OrgChoiceFormItem
+            choices={KEY_ORG_CHOICES}
+            noneLabel="No organisation: it runs no single-organisation view"
+          />
 
           <Form.Item name="expires_at" label="Expires" rules={[formValidation]}>
             <DatePicker

@@ -1,9 +1,11 @@
+import { REAUTH_HEADER } from '@/core/hooks/useReauth';
 import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { updateRole } from './api';
 import { TRoleUpdateRequest, UseUpdateRoleProps } from './types';
 
 export const useUpdateRole = ({
+  reauth,
   role_name,
   onSuccess,
   onError,
@@ -12,6 +14,7 @@ export const useUpdateRole = ({
   const { data, mutate, isPending, error } = useMutation({
     mutationFn: (role: TRoleUpdateRequest) =>
       updateRole({
+        headerParams: { [REAUTH_HEADER]: reauth?.() },
         body: role,
         pathParams: { name: role_name },
       }),

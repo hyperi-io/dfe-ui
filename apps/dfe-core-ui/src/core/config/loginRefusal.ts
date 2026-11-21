@@ -18,9 +18,34 @@ const LOGIN_REFUSALS: Record<string, TLoginRefusal> = {
     description:
       'Your DFE account is blocked. Ask a DFE administrator to unblock it.',
   },
+  email_held: {
+    title: 'Email already in use',
+    description:
+      "Another DFE account already uses your email and this identity provider isn't trusted to sign in to it. Ask a DFE administrator to add your email domain to the provider's trusted domains.",
+  },
+  email_untrusted: {
+    title: 'Email domain not trusted',
+    description:
+      "Your identity provider didn't send a verified email in a domain DFE trusts it for. Ask a DFE administrator to add your email domain to the provider's trusted domains.",
+  },
   service_unavailable: {
     title: 'Sign-in not recorded',
     description: 'DFE could not record the sign-in. Try again in a moment.',
+  },
+  link_required: {
+    title: 'Link your sign-in',
+    description:
+      'Your identity provider email matches a DFE account. Sign in again through your identity provider from this page to link them.',
+  },
+  link_ticket_invalid: {
+    title: 'Link expired',
+    description:
+      'The link to your DFE account expired. Sign in again through your identity provider.',
+  },
+  link_stale: {
+    title: 'Account changed',
+    description:
+      'The DFE account changed while you were linking it. Sign in again through your identity provider.',
   },
 };
 

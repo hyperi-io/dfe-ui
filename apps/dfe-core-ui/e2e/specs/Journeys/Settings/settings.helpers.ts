@@ -3,7 +3,7 @@ import { Browser, Locator, Page, expect } from '@playwright/test';
 import { BASE_URL } from '@e2e/config/e2e.client';
 import { engineToken } from '@e2e/config/engineApi.helpers';
 import { JOURNEY_USER, Reply, call, shot } from '@e2e/config/journey.helpers';
-import { loginAs, textbox } from '@e2e/config/login.helpers';
+import { adminPassword, loginAs, textbox } from '@e2e/config/login.helpers';
 
 export { call, shot };
 export type { Reply };
@@ -34,14 +34,59 @@ export type Caller = (
   body?: unknown,
 ) => Promise<Reply>;
 
+// Each collection whose writes need a re-auth grant, the kind it names and the body field a create names it by.
+const GATED = [
+  { field: 'username', kind: 'account', prefix: '/api/v1/auth/accounts' },
+  { field: 'name', kind: 'api_key', prefix: '/api/v1/auth/api-keys' },
+  { field: 'name', kind: 'group', prefix: '/api/v1/auth/groups' },
+  { field: 'name', kind: 'provider', prefix: '/api/v1/auth/oidc-providers' },
+  { field: 'name', kind: 'role', prefix: '/api/v1/auth/roles' },
+] as const;
+
+// Routes under accounts that change the caller's own account, which needs no grant.
+const OWN_ACCOUNT = ['me', 'reset-password'];
+
+/** The kind and target a write to *path* needs a re-auth grant for, or undefined when it needs none. */
+const grantFor = (method: string, path: string, body: unknown) => {
+  if (method === 'GET') return undefined;
+  const bare = path.split('?')[0] ?? '';
+  const gated = GATED.find(
+    ({ prefix }) => bare === prefix || bare.startsWith(`${prefix}/`),
+  );
+  if (!gated) return undefined;
+  const named = bare.slice(gated.prefix.length + 1).split('/')[0] ?? '';
+  if (gated.kind === 'account' && OWN_ACCOUNT.includes(named)) return undefined;
+  const target = named
+    ? decodeURIComponent(named)
+    : String(
+        (body as Record<string, unknown> | undefined)?.[gated.field] ?? '',
+      );
+  return { kind: gated.kind, target };
+};
+
+/** Calls as *token*. With *password*, an access change first earns the re-auth grant it needs. */
 export const callerFor =
-  (token: string): Caller =>
-  (method, path, body) =>
-    call(token, method, path, body);
+  (token: string, password?: string): Caller =>
+  async (method, path, body) => {
+    const grant =
+      password === undefined ? undefined : grantFor(method, path, body);
+    if (!grant) return call(token, method, path, body);
+    const earned = await call(token, 'POST', '/api/v1/auth/reauth', {
+      ...grant,
+      password,
+    });
+    expect(
+      earned.status,
+      `re-auth for ${grant.kind} ${grant.target}: ${JSON.stringify(earned.json)}`,
+    ).toBe(200);
+    return call(token, method, path, body, {
+      'X-DFE-Reauth': (earned.json as { grant: string }).grant,
+    });
+  };
 
 /** The engine as the journey account, through the token the other e2e helpers hold. */
 export const adminApi = async (): Promise<Caller> =>
-  callerFor(await engineToken());
+  callerFor(await engineToken(), adminPassword());
 
 /** Sign a user in through the login form of the given page. */
 export const formLogin = async (
@@ -54,7 +99,7 @@ export const formLogin = async (
     name: 'Login with Local',
     exact: true,
   });
-  const user = textbox(page, 'Username');
+  const user = textbox(page, 'Username or Email');
   await expect(user.or(localTab)).toBeVisible();
   if (await localTab.isVisible()) {
     await localTab.click();

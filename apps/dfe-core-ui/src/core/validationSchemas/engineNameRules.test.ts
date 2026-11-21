@@ -40,6 +40,8 @@ const CONSOLE_RULES: Record<string, Validator> = {
   'CreateOrgRequest.name': ORG_NAME_VALIDATOR,
   'CreateProviderRequest.name': STORE_NAME_VALIDATOR,
   'CreateRoleRequest.name': STORE_NAME_VALIDATOR,
+  'OidcReauthRequest.target': STORE_NAME_VALIDATOR,
+  'ReauthRequest.target': STORE_NAME_VALIDATOR,
   'HuntCreateRequest.name': RULE_HUNT_NAME_VALIDATOR,
   'RuleCreateRequest.name': RULE_HUNT_NAME_VALIDATOR,
 };

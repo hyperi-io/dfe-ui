@@ -1,49 +1,59 @@
-import { AccountGroupSelect } from '@/core/components/AccountGroupSelect';
 import { Form } from '@/core/components/Form';
 import { FormNotification } from '@/core/components/FormNotification';
+import { AccountDetailFields } from '@/core/components/AccountFields';
 import { GenericErrorCard } from '@/core/components/GenericError';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
+import { accountNameSchema } from '@/core/validationSchemas/accountName.schema';
 import { useFetchAccountDetail } from '@/Settings/hooks/accounts/useFetchAccountDetail';
 import { TAccountUpdateRequestBody } from '@/Settings/hooks/accounts/useUpdateAccount/types';
-import { Button, Input, Spin } from 'antd';
+import { Button, Spin } from 'antd';
+import { type ReactNode, useMemo } from 'react';
 import z from 'zod';
 
-const formSchema = z.object({
-  username: z.string().min(1, { message: 'Username is required' }),
-  groups: z.array(z.string()).optional(),
-  email: z.email({ message: 'Valid email is required' }),
-  phone: z.string().optional().nullable(),
-  name: z.string().optional().nullable(),
-});
+const buildFormSchema = (nameRequired: boolean) =>
+  z.object({
+    username: z.string().min(1, { message: 'Username is required' }),
+    email: z.email({ message: 'Valid email is required' }),
+    phone: z.string().optional().nullable(),
+    name: accountNameSchema(nameRequired),
+  });
 
-type UpdateAccountFormValues = z.infer<typeof formSchema>;
+type UpdateAccountFormValues = z.infer<ReturnType<typeof buildFormSchema>>;
 
 export const UpdateAccountForm = ({
+  actions,
   username,
   onFinish,
   error,
   isPending,
 }: {
+  /** Buttons shown beside Update Account, such as Reset Password. */
+  actions?: ReactNode;
   username: string;
   onFinish: (values: TAccountUpdateRequestBody) => void;
   error: Error | null;
   isPending: boolean;
 }) => {
   const [form] = Form.useForm<UpdateAccountFormValues>();
-  const formValidation =
-    useAntdZodResolver<UpdateAccountFormValues>(formSchema);
-
   const {
     data: accountDetail,
     isLoading,
     error: fetchError,
   } = useFetchAccountDetail({ username });
+  const nameRequired = Boolean(accountDetail?.name?.trim());
+  const formSchema = useMemo(
+    () => buildFormSchema(nameRequired),
+    [nameRequired],
+  );
+  const formValidation =
+    useAntdZodResolver<UpdateAccountFormValues>(formSchema);
 
-  const handleFinish = (values: UpdateAccountFormValues) => {
-    onFinish({
-      ...values,
-      groups: values.groups ?? [],
-    });
+  // Groups and the organisation are set on the Organisation tab, on their own. The username is shown, never sent.
+  const handleFinish = ({
+    username: _username,
+    ...values
+  }: UpdateAccountFormValues) => {
+    onFinish(values);
   };
 
   if (isLoading) {
@@ -74,21 +84,7 @@ export const UpdateAccountForm = ({
       onFinish={handleFinish}
       initialValues={{ ...accountDetail }}
     >
-      <Form.Item name="email" label="Email" rules={[formValidation]}>
-        <Input type="email" placeholder="Enter email" />
-      </Form.Item>
-
-      <Form.Item name="name" label="Name" rules={[formValidation]}>
-        <Input placeholder="Enter name" />
-      </Form.Item>
-
-      <Form.Item name="phone" label="Phone" rules={[formValidation]}>
-        <Input placeholder="Enter phone" />
-      </Form.Item>
-
-      <Form.Item name="groups" label="Groups" rules={[formValidation]}>
-        <AccountGroupSelect />
-      </Form.Item>
+      <AccountDetailFields isNew={false} rule={formValidation} />
 
       {error && (
         <Form.Item>
@@ -97,14 +93,17 @@ export const UpdateAccountForm = ({
       )}
 
       <Form.Item className="flex justify-end">
-        <Button
-          loading={isPending}
-          disabled={isPending}
-          type="primary"
-          htmlType="submit"
-        >
-          Update Account
-        </Button>
+        <div className="flex gap-2">
+          {actions}
+          <Button
+            loading={isPending}
+            disabled={isPending}
+            type="primary"
+            htmlType="submit"
+          >
+            Update Account
+          </Button>
+        </div>
       </Form.Item>
     </Form>
   );

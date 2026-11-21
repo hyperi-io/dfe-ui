@@ -1,9 +1,10 @@
+import { useReauthGrant } from '@/core/hooks/useReauthGrant';
 import { Drawer } from '@/core/components/Drawer';
 import { RbacProtected } from '@/core/components/RbacProtected';
 import { toUpdateOidcProviderBody } from '@/core/helpers/oidcProviders.helpers';
 import { useUpdateOidcProvider } from '@/core/hooks/useUpdateOidcProvider';
 import { CreateUpdateOidcProviderFormData } from '@/core/validationSchemas/oidcProviders.schema';
-import { CreateUpdateOidcProviderForm } from '@/Settings/components/OidcProviderManagement/CreateUpdateOidcProviderForm';
+import { OidcProviderDrawerForm } from '@/Settings/components/OidcProviderManagement/CreateUpdateOidcProviderForm';
 import { TOidcProviderListItem } from '@/Settings/hooks/oidcProviders/useFetchInfiniteFilteredOidcProviders/types';
 import { IconEdit } from '@repo/dfe-icons';
 import { Button, notification } from 'antd';
@@ -14,6 +15,7 @@ export const UpdateOidcProviderDrawer = ({
 }: {
   oidcProvider: TOidcProviderListItem;
 }) => {
+  const reauth = useReauthGrant(oidcProvider.name, 'provider');
   const [open, setOpen] = useState(false);
   const [api, contextHolder] = notification.useNotification();
 
@@ -22,8 +24,10 @@ export const UpdateOidcProviderDrawer = ({
     isPending,
     error,
   } = useUpdateOidcProvider({
+    reauth: reauth.grant,
     name: oidcProvider.name,
     onSuccess: (response) => {
+      reauth.drop();
       api.success({
         title: (
           <>
@@ -44,6 +48,7 @@ export const UpdateOidcProviderDrawer = ({
   };
   return (
     <>
+      {reauth.modal}
       {contextHolder}
       <RbacProtected action={RbacProtected.rbacActions.oidc_write}>
         <RbacProtected.Unrestricted>
@@ -51,7 +56,7 @@ export const UpdateOidcProviderDrawer = ({
             type="text"
             aria-label={`Edit ${oidcProvider.display_name}`}
             icon={<IconEdit />}
-            onClick={() => setOpen(true)}
+            onClick={() => reauth.ask(() => setOpen(true))}
           >
             Edit OIDC Provider
           </Button>
@@ -68,7 +73,7 @@ export const UpdateOidcProviderDrawer = ({
         open={open}
         onClose={() => setOpen(false)}
       >
-        <CreateUpdateOidcProviderForm
+        <OidcProviderDrawerForm
           initialValues={oidcProvider}
           onFinish={handleUpdateOidcProvider}
           error={error}

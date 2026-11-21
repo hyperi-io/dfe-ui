@@ -2,7 +2,8 @@ import { API_CONFIG_MOCKS } from '@/core/config/api/endpoints/generator';
 import { TFetchSetupStatusResponse } from '@/core/hooks/useFetchSetupStatus/types';
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
 import { TAccountsResponse } from '@/Settings/hooks/accounts/useFetchInfiniteFilteredAccounts/types';
-import { render, screen, within } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { http, HttpResponse } from 'msw';
 import {
   afterAll,
@@ -45,6 +46,8 @@ const accounts = (): TAccountsResponse => ({
       disabled_at: '',
       blocked_at: '',
       external: false,
+      email_verified: false,
+      identities: [],
       password_change_required: false,
       groups: ['dfe-admins'],
       created_at: 'string',
@@ -54,6 +57,9 @@ const accounts = (): TAccountsResponse => ({
       name: 'string',
       org: '',
       oidc_id: 'string',
+      oidc_type: 'string',
+      admin: false,
+      org_display_name: '',
     },
     {
       username: 'alice',
@@ -62,6 +68,8 @@ const accounts = (): TAccountsResponse => ({
       disabled_at: '',
       blocked_at: '',
       external: false,
+      email_verified: false,
+      identities: [],
       password_change_required: false,
       groups: ['dfe-admins'],
       created_at: 'string',
@@ -71,6 +79,9 @@ const accounts = (): TAccountsResponse => ({
       name: 'string',
       org: '',
       oidc_id: 'string',
+      oidc_type: 'string',
+      admin: false,
+      org_display_name: '',
     },
   ],
   total_size: 2,
@@ -140,7 +151,7 @@ describe('AccountManagement', () => {
     expect(screen.queryByText('Retired')).not.toBeInTheDocument();
   });
 
-  test('shows the name and email beside the username', async () => {
+  test('leads with the org and stacks the email under the name', async () => {
     server.use(
       accountsHandler({
         ...accounts(),
@@ -154,9 +165,14 @@ describe('AccountManagement', () => {
             email: 'dfe-test@dfe-oidc.test',
             phone: '',
             name: 'DFE dfe-test',
-            org: '',
+            org: 'acme',
+            org_display_name: 'Acme',
             oidc_id: 'string',
+            oidc_type: 'string',
+            admin: false,
             external: false,
+            email_verified: false,
+            identities: [],
             password_change_required: false,
             blocked: false,
             disabled_at: '',
@@ -173,7 +189,12 @@ describe('AccountManagement', () => {
             name: '',
             org: '',
             oidc_id: 'string',
+            oidc_type: 'string',
+            admin: false,
+            org_display_name: 'HyperI',
             external: false,
+            email_verified: false,
+            identities: [],
             password_change_required: false,
             blocked: false,
             disabled_at: '',
@@ -187,22 +208,193 @@ describe('AccountManagement', () => {
 
     const oidcRow = await screen.findByRole('row', { name: /DFE dfe-test/ });
     expect(
-      screen.getByRole('columnheader', { name: 'Name' }),
-    ).toBeInTheDocument();
+      screen.getAllByRole('columnheader').map((header) => header.textContent),
+    ).toEqual(['Org', 'User', 'Username', 'Groups', 'Status', 'Actions']);
+    const userCell = within(oidcRow).getByRole('cell', {
+      name: /^DFE dfe-test/,
+    });
     expect(
-      screen.getByRole('columnheader', { name: 'Email' }),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole('columnheader', { name: 'Username' }),
-    ).toBeInTheDocument();
-    expect(
-      within(oidcRow).getByText('dfe-test@dfe-oidc.test'),
+      within(userCell).getByText('dfe-test@dfe-oidc.test'),
     ).toBeInTheDocument();
     expect(
       within(oidcRow).getByText('00u15mxs3ecygt7oj698'),
     ).toBeInTheDocument();
 
     const localRow = screen.getByRole('row', { name: /admin/ });
-    expect(within(localRow).getAllByText('None')).toHaveLength(2);
+    expect(within(localRow).getAllByText('None')).toHaveLength(1);
+    // Your organisation's tag waits for its name, so the cells settle once it arrives.
+    await waitFor(() =>
+      expect(
+        [oidcRow, localRow].map(
+          (row) => within(row).getAllByRole('cell')[0]?.textContent,
+        ),
+      ).toEqual(['Acme', 'HyperI (your organisation)']),
+    );
+  });
+
+  test('marks your organisation, root accounts included', async () => {
+    const [, base] = accounts().items;
+    server.use(
+      accountsHandler({
+        ...accounts(),
+        items: [
+          {
+            ...base,
+            username: 'root-kim',
+            org: '',
+            org_display_name: 'HyperI',
+          },
+          {
+            ...base,
+            username: 'bound-jo',
+            org: 'hyperi',
+            org_display_name: 'HyperI',
+          },
+          {
+            ...base,
+            username: 'acme-amy',
+            org: 'acme',
+            org_display_name: 'Acme',
+          },
+        ],
+      }),
+    );
+
+    render(<AccountManagement />, { wrapper });
+
+    const marked = async (username: string) =>
+      within(
+        await screen.findByRole('row', { name: new RegExp(username) }),
+      ).queryAllByText('(your organisation)').length;
+    await waitFor(async () => expect(await marked('bound-jo')).toBe(1));
+    expect({
+      acme: await marked('acme-amy'),
+      bound: await marked('bound-jo'),
+      root: await marked('root-kim'),
+    }).toEqual({ acme: 0, bound: 1, root: 1 });
+  });
+
+  test('crowns only the accounts holding the admin role', async () => {
+    const [, base] = accounts().items;
+    server.use(
+      accountsHandler({
+        ...accounts(),
+        items: [
+          { ...base, username: 'boss', name: 'Boss', admin: true },
+          { ...base, username: 'worker', name: 'Worker', admin: false },
+        ],
+      }),
+    );
+
+    render(<AccountManagement />, { wrapper });
+
+    // The crown sits inside the org tag, once your organisation's name has arrived.
+    const crowned = (name: string) =>
+      within(
+        screen.getByRole('row', { name: new RegExp(name) }),
+      ).queryAllByLabelText('Admin of every organisation').length;
+    await screen.findByRole('row', { name: /Boss/ });
+    await waitFor(() =>
+      expect({ boss: crowned('Boss'), worker: crowned('Worker') }).toEqual({
+        boss: 1,
+        worker: 0,
+      }),
+    );
+  });
+
+  test('shows a badge beside the username for each identity provider that reaches the account', async () => {
+    const [local, base] = accounts().items;
+    server.use(
+      accountsHandler({
+        ...accounts(),
+        items: [
+          { ...base, username: 'local-only', external: false },
+          {
+            ...base,
+            username: 'okta-owned',
+            external: true,
+            oidc_id: 'okta',
+            oidc_type: 'okta',
+            admin: false,
+            org_display_name: '',
+          },
+          {
+            ...local,
+            username: 'linked-kaz',
+            enabled: true,
+            identities: [
+              {
+                email: 'kaz@example.test',
+                key: 'corp-kaz',
+                last_login_at: '',
+                linked_at: '',
+                provider: 'corp',
+                provider_type: 'google',
+                subject: 'corp-kaz',
+              },
+            ],
+          },
+        ],
+      }),
+    );
+
+    render(<AccountManagement />, { wrapper });
+
+    const providerBadges = (username: string) =>
+      within(screen.getByRole('cell', { name: new RegExp(`^${username}`) }))
+        .queryAllByRole('img', { name: /^Signs in through/ })
+        .map((badge) => badge.getAttribute('aria-label'));
+    await screen.findByRole('row', { name: /okta-owned/ });
+    expect({
+      local: providerBadges('local-only'),
+      linked: providerBadges('linked-kaz'),
+      owned: providerBadges('okta-owned'),
+    }).toEqual({
+      local: [],
+      linked: ['Signs in through corp'],
+      owned: ['Signs in through okta'],
+    });
+  });
+
+  test("lists root accounts first, then only the chosen organisation's", async () => {
+    const user = userEvent.setup();
+    const requests: { org: string | null; order_by: string | null }[] = [];
+    server.use(
+      http.get(API_CONFIG_MOCKS.accounts.default.mockedUrl, ({ request }) => {
+        const params = new URL(request.url).searchParams;
+        if (params.get('blocked') !== 'true') {
+          requests.push({
+            org: params.get('org'),
+            order_by: params.get('order_by'),
+          });
+        }
+        return HttpResponse.json(accounts());
+      }),
+      API_CONFIG_MOCKS.orgs.default.get.success({
+        mockedResponse: {
+          items: [
+            {
+              name: 'acme',
+              display_name: 'Acme',
+              org_ids: ['acme'],
+              enabled: true,
+              created_at: 'string',
+              updated_at: 'string',
+            },
+          ],
+          total_size: 1,
+          next_page_token: null,
+        },
+      }),
+    );
+
+    render(<AccountManagement />, { wrapper });
+
+    await user.click(
+      await screen.findByRole('combobox', { name: 'Filter by organisation' }),
+    );
+    await user.click(await screen.findByTitle('Acme'));
+    await waitFor(() => expect(requests.at(-1)?.org).toBe('acme'));
+    expect(requests[0]).toEqual({ org: null, order_by: 'org' });
   });
 });

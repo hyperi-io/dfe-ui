@@ -73,6 +73,20 @@ export const ViewOidcProviderDetail = ({
             <EmptyData />
           )}
         </dd>
+        <dt className={dataListTermStyle}>Trusted Email Domains:</dt>
+        <dd>
+          {oidcProvider?.trusted_email_domains?.length ? (
+            <ul className="flex flex-col">
+              {oidcProvider.trusted_email_domains.map((domain) => (
+                <li key={domain} className="break-all">
+                  {domain}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <EmptyData />
+          )}
+        </dd>
         <dt className={dataListTermStyle}>Client ID:</dt>
         <dd>
           {oidcProvider?.client_id ? oidcProvider.client_id : <EmptyData />}

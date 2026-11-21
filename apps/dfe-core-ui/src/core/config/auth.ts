@@ -1,3 +1,4 @@
+import { oidcLinkProvider } from '@/core/auth/oidcLinkProvider';
 import { oidcTokenProvider } from '@/core/auth/oidcTokenProvider';
 import { ApiTimeoutError } from '@/core/config/api/client';
 import {
@@ -112,7 +113,11 @@ export const authOptions: NextAuthOptions = {
     warn: (code) => authLogger.warn(code),
     debug: (code, metadata) => authLogger.debug(code, { metadata }),
   },
-  providers: [credentialsProvider, oidcTokenProvider(baseUrl)],
+  providers: [
+    credentialsProvider,
+    oidcTokenProvider(baseUrl),
+    oidcLinkProvider(baseUrl, forwardedForHeader),
+  ],
   callbacks: {
     async jwt({ token, user, trigger }) {
       if (user) {

@@ -14,6 +14,7 @@ import {
   test,
   vi,
 } from 'vitest';
+import { REMEMBER_LABEL, type TLoginChoice } from './loginChoice';
 import { LoginWithOidcForm } from './LoginWithOidcForm';
 
 const PROVIDERS = [
@@ -49,13 +50,21 @@ const blockStorage = () =>
     throw new DOMException('The operation is insecure.', 'SecurityError');
   });
 
+const CHOICE_KEY = 'dfe_login_choice';
+
+const remember = (choice: TLoginChoice) =>
+  window.localStorage.setItem(CHOICE_KEY, JSON.stringify(choice));
+
+const rememberedChoice = () =>
+  JSON.parse(window.localStorage.getItem(CHOICE_KEY) ?? 'null');
+
 const renderForm = () =>
   render(<LoginWithOidcForm oidc_providers={PROVIDERS} />, { wrapper });
 
 const loginRemembering = async () => {
   const user = userEvent.setup();
   await user.click(
-    await screen.findByRole('checkbox', { name: 'Remember Selected Provider' }),
+    await screen.findByRole('checkbox', { name: REMEMBER_LABEL }),
   );
   await user.click(screen.getByRole('button', { name: 'Login' }));
 };
@@ -66,12 +75,70 @@ describe('LoginWithOidcForm', () => {
     window.localStorage.clear();
   });
 
-  test('offers the remembered provider first', async () => {
-    window.localStorage.setItem('dfe_provider', 'partner-idp');
+  test.each<{
+    when: string;
+    stored: TLoginChoice | null;
+    title: string;
+    ticked: boolean;
+  }>([
+    {
+      when: 'nothing is remembered',
+      stored: null,
+      title: 'Corporate SSO',
+      ticked: false,
+    },
+    {
+      when: 'local sign-in is remembered',
+      stored: { method: 'local' },
+      title: 'Corporate SSO',
+      ticked: false,
+    },
+    {
+      when: 'a configured provider is remembered',
+      stored: { method: 'oidc', provider: 'partner-idp' },
+      title: 'Partner IdP',
+      ticked: true,
+    },
+    {
+      when: 'the remembered provider is no longer configured',
+      stored: { method: 'oidc', provider: 'retired-idp' },
+      title: 'Corporate SSO',
+      ticked: false,
+    },
+  ])(
+    'offers $title with remember ticked $ticked when $when',
+    async ({ stored, ticked, title }) => {
+      if (stored !== null) {
+        remember(stored);
+      }
 
+      renderForm();
+
+      expect(await screen.findByTitle(title)).toBeInTheDocument();
+      expect(
+        screen.getByRole('checkbox', {
+          name: REMEMBER_LABEL,
+          checked: ticked,
+        }),
+      ).toBeInTheDocument();
+    },
+  );
+
+  test('forgets the remembered provider when logging in unticked', async () => {
+    remember({ method: 'oidc', provider: 'partner-idp' });
     renderForm();
+    const user = userEvent.setup();
 
-    expect(await screen.findByTitle('Partner IdP')).toBeInTheDocument();
+    await user.click(
+      await screen.findByRole('checkbox', {
+        name: REMEMBER_LABEL,
+        checked: true,
+      }),
+    );
+    await user.click(screen.getByRole('button', { name: 'Login' }));
+
+    await waitFor(() => expect(requestedProviders).toEqual(['partner-idp']));
+    expect(rememberedChoice()).toBeNull();
   });
 
   test('remembers the provider it logs in with', async () => {
@@ -80,7 +147,10 @@ describe('LoginWithOidcForm', () => {
     await loginRemembering();
 
     await waitFor(() => expect(requestedProviders).toEqual(['corp-sso']));
-    expect(window.localStorage.getItem('dfe_provider')).toBe('corp-sso');
+    expect(rememberedChoice()).toEqual({
+      method: 'oidc',
+      provider: 'corp-sso',
+    });
   });
 
   test('renders with the first provider when the browser blocks storage', async () => {

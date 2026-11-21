@@ -2,6 +2,7 @@ import { PopoverMenu } from '@/core/components/PopoverMenu';
 import { Tooltip } from '@/core/components/Tooltip';
 import { formatDateXAgo } from '@/core/helpers/date.helpers';
 import { groupModeLabel } from '@/core/helpers/oidcProviderFieldRules';
+import { useAdministeredOrg } from '@/core/hooks/useAdministeredOrg';
 import { cn } from '@/core/utils/style';
 import { DeleteOidcProviderModal } from '@/Settings/components/OidcProviderManagement/DeleteOidcProviderModal';
 import { OidcSyncStatusTag } from '@/Settings/components/OidcProviderManagement/OidcSyncStatusTag';
@@ -18,8 +19,9 @@ export const OidcProviderCard = ({
 }: {
   oidcProvider: TOidcProviderListItem;
 }) => {
-  // Only an api-mode provider has a directory to sync groups from.
-  const canSyncGroups = oidcProvider.groups.mode === 'api';
+  const administeredOrg = useAdministeredOrg();
+  // Only an api-mode provider has a directory to sync groups from, and the sync writes system groups an org admin may not.
+  const canSyncGroups = oidcProvider.groups.mode === 'api' && !administeredOrg;
   const enabledStatus = oidcProvider.enabled
     ? 'Provider is enabled'
     : 'Provider is disabled';
@@ -80,6 +82,8 @@ export const OidcProviderCard = ({
           </span>
         </h3>
         <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-sm">
+          <dt className={dataListTermStyle}>Organisation:</dt>
+          <dd>{oidcProvider.org || 'Platform provider'}</dd>
           <dt className={dataListTermStyle}>Type:</dt>
           <dd>{oidcProvider.type}</dd>
           <dt className={dataListTermStyle}>Mode:</dt>

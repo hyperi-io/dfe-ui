@@ -1,3 +1,4 @@
+import { confirmReauth } from '@/core/utils/test-utils/confirmReauth';
 import {
   chooseCredentialSource,
   SOURCE_SWITCH_TEST_TIMEOUT_MS,
@@ -31,6 +32,7 @@ import {
 
 const CREATED: TCreateOidcProviderResponse = {
   name: 'google',
+  org: '',
   type: 'google',
   enabled: true,
   display_name: 'Google',
@@ -59,14 +61,20 @@ const CREATED: TCreateOidcProviderResponse = {
   created_at: '2026-09-01T00:00:00Z',
   last_sync_at: '',
   last_sync_status: '',
+  trusted_email_domains: [],
   sync_error: '',
 };
 
 const onPost = vi.fn();
 
 const server = setupServer(
+  API_CONFIG_MOCKS.auth.reauth.post.success(),
   API_CONFIG_MOCKS.auth.me.get.success({
     mockedResponse: ADMIN_MOCKED_RESPONSE,
+  }),
+  API_CONFIG_MOCKS.accounts.me.get.success(),
+  API_CONFIG_MOCKS.system.organisation.get.success({
+    mockedResponse: { name: 'hyperi', display_name: 'HyperI' },
   }),
   http.post(
     API_CONFIG_MOCKS.oidcProviders.default.mockedUrl,
@@ -116,11 +124,19 @@ const chooseOkta = async (user: UserEvent) => {
   await fillField(user, 'API Token', 'okta-token');
 };
 
-const clickCreate = (user: UserEvent) =>
-  user.click(screen.getByRole('button', { hidden: true, name: 'Create' }));
+// The organisation is picked on purpose, never defaulted, so every create picks the platform.
+const clickCreate = async (user: UserEvent) => {
+  await user.click(
+    screen.getByRole('radio', { hidden: true, name: /^Platform provider/ }),
+  );
+  await user.click(
+    screen.getByRole('button', { hidden: true, name: 'Create' }),
+  );
+};
 
 const submitAndReadBody = async (user: UserEvent) => {
   await clickCreate(user);
+  await confirmReauth(user);
   await waitFor(() => expect(onPost).toHaveBeenCalledTimes(1), {
     timeout: 15_000,
   });
