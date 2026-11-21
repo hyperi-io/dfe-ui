@@ -1,3 +1,4 @@
+import { useReauthGrant } from '@/core/hooks/useReauthGrant';
 import { Modal } from '@/core/components/Modal';
 import { NotificationCard } from '@/core/components/NotificationCard';
 import { RbacProtected } from '@/core/components/RbacProtected';
@@ -19,9 +20,13 @@ export const BlockUnblockAccount = ({
   const actionTitle = isBlocked ? 'Unblock Account' : 'Block Account';
   const isEnabled = !isBlocked;
 
+  // Every change asks for the password again.
+  const reauth = useReauthGrant(username);
   const { mutate, isPending, error, reset } = useUpdateAccount({
+    reauth: reauth.grant,
     username,
     onSuccess: () => {
+      reauth.drop();
       notification.success({
         title: isBlocked ? 'Account unblocked' : 'Account blocked',
         placement: 'bottomLeft',
@@ -33,7 +38,7 @@ export const BlockUnblockAccount = ({
   const isCurrentUser = currentUsername === username;
 
   const handleBlockUnblockAccount = () => {
-    mutate({ blocked: !isBlocked, enabled: !isEnabled });
+    reauth.ask(() => mutate({ blocked: !isBlocked, enabled: !isEnabled }));
   };
 
   const handleClick = () => {
@@ -62,6 +67,7 @@ export const BlockUnblockAccount = ({
         >
           {actionTitle}
         </Button>
+        {reauth.modal}
         <Modal
           title="Confirm Action"
           open={isConfirming || !!error}

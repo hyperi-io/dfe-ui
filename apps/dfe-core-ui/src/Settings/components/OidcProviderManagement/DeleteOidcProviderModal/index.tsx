@@ -1,3 +1,4 @@
+import { useReauthGrant } from '@/core/hooks/useReauthGrant';
 import { Modal } from '@/core/components/Modal';
 import { RbacProtected } from '@/core/components/RbacProtected';
 import { useDeleteOidcProvider } from '@/Settings/hooks/oidcProviders/useDeleteOidcProvider';
@@ -20,11 +21,14 @@ export const DeleteOidcProviderModal = ({
   onSuccess,
   disabled,
 }: DeleteOidcProviderModalProps) => {
+  const reauth = useReauthGrant(oidcProviderName, 'provider');
   const [open, setOpen] = useState(false);
   const { notification } = App.useApp();
 
   const { mutate, isPending, error } = useDeleteOidcProvider({
+    reauth: reauth.grant,
     onSuccess: () => {
+      reauth.drop();
       onSuccess?.();
       setOpen(false);
       notification.success({
@@ -44,6 +48,7 @@ export const DeleteOidcProviderModal = ({
 
   return (
     <>
+      {reauth.modal}
       <RbacProtected action={RbacProtected.rbacActions.oidc_delete}>
         <RbacProtected.Unrestricted>
           <Button
@@ -51,7 +56,7 @@ export const DeleteOidcProviderModal = ({
             className="hover:text-error hover:bg-error/5"
             aria-label={`Delete ${oidcProviderName}`}
             icon={<IconTrash />}
-            onClick={() => setOpen(true)}
+            onClick={() => reauth.ask(() => setOpen(true))}
             disabled={disabled}
           >
             Delete OIDC Provider
@@ -63,7 +68,7 @@ export const DeleteOidcProviderModal = ({
             className="hover:text-error hover:bg-error/5"
             aria-label={`Delete ${oidcProviderName}`}
             icon={<IconTrash />}
-            onClick={() => setOpen(true)}
+            onClick={() => reauth.ask(() => setOpen(true))}
             disabled
           >
             Delete OIDC Provider

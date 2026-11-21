@@ -11,6 +11,8 @@ const ACCOUNT_ITEM: TAccountsItemSummary = {
   disabled_at: '',
   blocked_at: '',
   external: false,
+  email_verified: false,
+  identities: [],
   password_change_required: false,
   groups: ['string'],
   created_at: '2021-01-01',
@@ -20,6 +22,9 @@ const ACCOUNT_ITEM: TAccountsItemSummary = {
   name: 'string',
   org: '',
   oidc_id: 'string',
+  oidc_type: 'string',
+  admin: false,
+  org_display_name: '',
 };
 
 const TOTAL_ITEMS = 25;

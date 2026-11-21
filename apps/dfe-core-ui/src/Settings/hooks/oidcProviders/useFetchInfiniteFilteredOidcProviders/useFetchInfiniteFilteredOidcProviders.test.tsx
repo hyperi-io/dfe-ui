@@ -72,12 +72,14 @@ describe('useFetchInfiniteFilteredOidcProviders', () => {
       });
       const responseItem: TOidcProviderListItem = {
         name: 'string',
+        org: '',
         type: 'string',
         enabled: true,
         display_name: 'string',
         issuer: 'string',
         client_id_env: 'string',
         client_secret_env: 'string',
+        trusted_email_domains: [],
         sync_error: 'string',
         created_at: 'string',
         last_sync_at: 'string',

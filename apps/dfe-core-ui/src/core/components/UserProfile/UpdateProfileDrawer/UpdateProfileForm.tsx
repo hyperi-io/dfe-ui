@@ -4,16 +4,19 @@ import { GenericErrorCard } from '@/core/components/GenericError';
 import { useFetchCurrentUser } from '@/core/hooks/useFetchCurrentUser';
 import { useUpdateCurrentUser } from '@/core/hooks/useUpdateCurrentUser';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
+import { accountNameSchema } from '@/core/validationSchemas/accountName.schema';
 import { App, Button, Input, Spin } from 'antd';
+import { useMemo } from 'react';
 import z from 'zod';
 
-const formSchema = z.object({
-  email: z.email({ message: 'Valid email is required' }),
-  phone: z.string().optional().nullable(),
-  name: z.string().optional().nullable(),
-});
+const buildFormSchema = (nameRequired: boolean) =>
+  z.object({
+    email: z.email({ message: 'Valid email is required' }),
+    phone: z.string().optional().nullable(),
+    name: accountNameSchema(nameRequired),
+  });
 
-type UpdateCurrentUserFormValues = z.infer<typeof formSchema>;
+type UpdateCurrentUserFormValues = z.infer<ReturnType<typeof buildFormSchema>>;
 
 export const UpdateProfileForm = ({
   onSuccess,
@@ -22,14 +25,18 @@ export const UpdateProfileForm = ({
 }) => {
   const { notification } = App.useApp();
   const [form] = Form.useForm<UpdateCurrentUserFormValues>();
-  const formValidation =
-    useAntdZodResolver<UpdateCurrentUserFormValues>(formSchema);
-
   const {
     data: accountDetail,
     isLoading,
     error: fetchError,
   } = useFetchCurrentUser();
+  const nameRequired = Boolean(accountDetail?.name?.trim());
+  const formSchema = useMemo(
+    () => buildFormSchema(nameRequired),
+    [nameRequired],
+  );
+  const formValidation =
+    useAntdZodResolver<UpdateCurrentUserFormValues>(formSchema);
 
   const {
     mutate: updateCurrentUser,

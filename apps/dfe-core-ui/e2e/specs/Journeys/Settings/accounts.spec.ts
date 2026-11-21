@@ -1,3 +1,7 @@
+import {
+  chooseYourOrganisation,
+  confirmItsYou,
+} from '@e2e/config/login.helpers';
 import { expect, test } from '@playwright/test';
 
 import { TAGS } from '@e2e/config/tags.constants';
@@ -45,9 +49,11 @@ test.describe(
       await create.getByPlaceholder('Enter name').fill('Jset User');
       await create.getByPlaceholder('Enter password').fill(PASSWORD);
       await shot(page, 'acct-create-dialog');
+      await chooseYourOrganisation(create);
       await create
         .getByRole('button', { name: 'Create Account', exact: true })
         .click();
+      await confirmItsYou(page);
       await expect(
         page.getByText('Account created successfully'),
       ).toBeVisible();
@@ -73,6 +79,7 @@ test.describe(
       expect(okUi.path).not.toBe('/login');
 
       await userAction(page, row, `Edit ${user}`);
+      await confirmItsYou(page);
       const edit = page.getByRole('dialog', { name: `Edit ${user}` });
       await edit.getByPlaceholder('Enter name').fill('Jset User Renamed');
       await edit
@@ -87,6 +94,7 @@ test.describe(
       expect((await admin('GET', acct)).json.name).toBe('Jset User Renamed');
 
       await userAction(page, row, 'Block Account');
+      await confirmItsYou(page);
       await expect(page.getByText('Account blocked')).toBeVisible();
       await expect(row).toHaveCount(0);
       const blocked = section(page, 'Blocked accounts');
@@ -105,12 +113,14 @@ test.describe(
       expect(blockedUi.path).toBe('/login');
 
       await userAction(page, rowIn(blocked, user), 'Unblock Account');
+      await confirmItsYou(page);
       await expect(page.getByText('Account unblocked')).toBeVisible();
       expect((await admin('GET', acct)).json.blocked).toBe(false);
       expect((await loginToken(user, PASSWORD)).status).toBe(200);
 
       await existing.getByPlaceholder('Search accounts').fill(user);
       await userAction(page, row, 'Deactivate Account');
+      await confirmItsYou(page);
       await expect(page.getByText('Account deactivated')).toBeVisible();
       await expect(row.getByText('Inactive', { exact: true })).toBeVisible();
       await shot(page, 'acct-deactivated-list');
@@ -126,6 +136,7 @@ test.describe(
       expect(offUi.path).toBe('/login');
 
       await userAction(page, row, `Delete ${user}`);
+      await confirmItsYou(page);
       const remove = page.getByRole('dialog', { name: 'Delete Account' });
       await remove.getByPlaceholder('Enter username to be deleted').fill(user);
       await remove.getByRole('button', { name: 'Delete', exact: true }).click();

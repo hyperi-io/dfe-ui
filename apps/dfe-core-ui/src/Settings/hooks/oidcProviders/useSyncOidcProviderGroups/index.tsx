@@ -1,15 +1,19 @@
+import { REAUTH_HEADER } from '@/core/hooks/useReauth';
 import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { updateOidcProviderGroups } from './api';
 import { TSyncOidcProviderGroupsResponse } from './types';
 
 interface UseSyncOidcProviderGroupsProps {
+  /** The re-auth grant the engine requires on this change, read when the request goes out. */
+  reauth?: () => string | undefined;
   onSuccess?: (data: TSyncOidcProviderGroupsResponse) => void;
   onError?: (error: Error) => void;
   name: string;
 }
 
 export const useSyncOidcProviderGroups = ({
+  reauth,
   onSuccess,
   onError,
   name,
@@ -19,6 +23,7 @@ export const useSyncOidcProviderGroups = ({
   const { data, mutate, isPending, error } = useMutation({
     mutationFn: () =>
       updateOidcProviderGroups({
+        headerParams: { [REAUTH_HEADER]: reauth?.() },
         pathParams: { name },
       }),
     onSuccess: (data) => {

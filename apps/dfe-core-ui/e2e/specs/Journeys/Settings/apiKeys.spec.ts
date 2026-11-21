@@ -2,6 +2,7 @@ import { expect, test } from '@playwright/test';
 
 import { TAGS } from '@e2e/config/tags.constants';
 import { prepareJourneyStack } from '@e2e/config/journey.helpers';
+import { confirmItsYou } from '@e2e/config/login.helpers';
 
 import {
   ADMIN,
@@ -41,6 +42,7 @@ test.describe('jset: API keys', { tag: [TAGS.core, TAGS.settings] }, () => {
       .click();
     await shot(page, 'key-create-dialog');
     await dlg.getByRole('button', { name: 'Generate', exact: true }).click();
+    await confirmItsYou(page);
 
     const done = page.getByRole('dialog', { name: 'API Key Generated' });
     await expect(done).toBeVisible();

@@ -8,6 +8,7 @@ export const API_CONFIG = Object.freeze({
     logout: '/api/v1/auth/logout',
     me: '/api/v1/auth/me',
     permissions: '/api/v1/auth/permissions',
+    reauth: '/api/v1/auth/reauth',
   },
   sources: {
     default: '/api/v1/sources',
@@ -79,6 +80,8 @@ export const API_CONFIG = Object.freeze({
   accounts: {
     default: '/api/v1/auth/accounts',
     account: '/api/v1/auth/accounts/{username}',
+    availability: '/api/v1/auth/accounts/availability',
+    identity: '/api/v1/auth/accounts/{username}/identities/{key}',
     resetPassword: '/api/v1/auth/accounts/{username}/reset-password',
     resetCurrentUserPassword: '/api/v1/auth/accounts/reset-password',
     me: '/api/v1/auth/accounts/me',
@@ -97,6 +100,7 @@ export const API_CONFIG = Object.freeze({
   oidc: {
     login: '/api/v1/auth/oidc/{provider}/login',
     callback: '/api/v1/auth/oidc/{provider}/callback',
+    reauth: '/api/v1/auth/oidc/reauth',
   },
   oidcProviders: {
     default: '/api/v1/auth/oidc-providers',

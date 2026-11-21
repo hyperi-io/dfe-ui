@@ -10,10 +10,23 @@ import { TCreateOidcProviderRequest } from '@/core/hooks/useCreateOidcProvider/t
 import { TOidcProviderUpdateRequestBody } from '@/core/hooks/useUpdateOidcProvider/types';
 import {
   CreateUpdateOidcProviderFormData,
+  EMAIL_DOMAIN,
   TGroupResolutionFormData,
 } from '@/core/validationSchemas/oidcProviders.schema';
 
 type TScopes = string | readonly string[] | null | undefined;
+
+/** The domain of `email`, lowercased, when it is a bare domain a provider can trust. */
+export const trustableEmailDomain = (
+  email: string | null | undefined,
+): string | undefined => {
+  if (!email?.includes('@')) return undefined;
+  const domain = email
+    .slice(email.lastIndexOf('@') + 1)
+    .trim()
+    .toLowerCase();
+  return EMAIL_DOMAIN.test(domain) ? domain : undefined;
+};
 
 const splitScopes = (value: string): string[] =>
   value.split(/\s+/).filter(Boolean);
@@ -55,6 +68,7 @@ type TGroupsRequest = NonNullable<TOidcProviderUpdateRequestBody['groups']>;
 /** A saved provider as the provider list, the setup status or a create response carries it. */
 interface TStoredOidcProvider {
   type: string;
+  org?: string;
   scopes?: TScopes;
   client_id?: string;
   client_id_env?: string;
@@ -75,7 +89,27 @@ interface TStoredOidcProvider {
     api_token_path?: string;
     okta_domain?: string;
   };
+  trusted_email_domains?: readonly string[];
 }
+
+/** The org an edit sends: only one that differs from the stored one, a cleared choice moving it to the platform. */
+const toOrgRequest = (
+  values: { org?: string },
+  stored: string | undefined,
+): { org?: string } => {
+  if (!Object.hasOwn(values, 'org')) return {};
+  const org = values.org ?? '';
+  return org === (stored ?? '') ? {} : { org };
+};
+
+/** The trusted email domains an edit sends: only a list that differs from the stored one. */
+const toDomainsRequest = (
+  domains: readonly string[] | undefined,
+  stored: readonly string[] | undefined,
+): { trusted_email_domains?: string[] } =>
+  domains === undefined || domains.join(' ') === (stored ?? []).join(' ')
+    ? {}
+    : { trusted_email_domains: [...domains] };
 
 /** The form submits only the fields it rendered, so any of them may be absent. */
 type TUpdateOidcProviderFormValues = Partial<
@@ -247,6 +281,7 @@ export const toUpdateOidcProviderBody = (
   return {
     enabled: values.enabled,
     display_name: values.display_name,
+    ...toOrgRequest(values, stored.org),
     ...(clientId.value === undefined ? {} : { client_id: clientId.value }),
     ...(clientId.env === undefined ? {} : { client_id_env: clientId.env }),
     ...(clientSecret.value === undefined
@@ -256,6 +291,10 @@ export const toUpdateOidcProviderBody = (
       ? {}
       : { client_secret_env: clientSecret.env }),
     ...toScopesRequest(values.scopes, stored.scopes),
+    ...toDomainsRequest(
+      values.trusted_email_domains,
+      stored.trusted_email_domains,
+    ),
     ...(merged
       ? {
           groups: isOidcProviderType(type)

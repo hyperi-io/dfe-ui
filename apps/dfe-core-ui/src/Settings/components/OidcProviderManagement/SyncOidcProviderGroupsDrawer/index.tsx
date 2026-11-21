@@ -1,3 +1,4 @@
+import { useReauthGrant } from '@/core/hooks/useReauthGrant';
 import { Drawer } from '@/core/components/Drawer';
 import { FormNotification } from '@/core/components/FormNotification';
 import { NotificationCard } from '@/core/components/NotificationCard';
@@ -83,6 +84,7 @@ export const SyncOidcProviderGroupsDrawer = ({
   oidcProviderName: string;
 }) => {
   const [open, setOpen] = useState(false);
+  const reauth = useReauthGrant(oidcProviderName, 'provider');
 
   const {
     data,
@@ -91,15 +93,19 @@ export const SyncOidcProviderGroupsDrawer = ({
     error,
   } = useSyncOidcProviderGroups({
     name: oidcProviderName,
+    reauth: reauth.grant,
   });
 
   const handleSyncOidcProvider = () => {
-    syncOidcProvider();
-    setOpen(true);
+    reauth.ask(() => {
+      syncOidcProvider();
+      setOpen(true);
+    });
   };
 
   return (
     <>
+      {reauth.modal}
       <RbacProtected action={RbacProtected.rbacActions.oidc_write}>
         <RbacProtected.Unrestricted>
           <Button

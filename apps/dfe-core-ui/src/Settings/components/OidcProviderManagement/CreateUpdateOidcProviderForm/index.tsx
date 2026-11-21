@@ -1,6 +1,13 @@
 import { ApiErrorNotification } from '@/core/components/ApiErrorNotification';
 import { Form } from '@/core/components/Form';
 import {
+  chosenOrg,
+  ORG_CHOICE_NAME,
+  OrgChoiceFormItem,
+  orgChoiceOf,
+  type TOrgChoice,
+} from '@/core/components/OrgChoiceFormItem';
+import {
   OidcGroupFields,
   OidcLoginFields,
   useOidcProviderTypeChange,
@@ -10,7 +17,9 @@ import {
   PROVIDERS,
   PROVIDERS_MAP,
 } from '@/core/constants/oidcProviders.constants';
+import { trustableEmailDomain } from '@/core/helpers/oidcProviders.helpers';
 import { useApiFieldErrors } from '@/core/hooks/useApiFieldErrors';
+import { useFetchCurrentUser } from '@/core/hooks/useFetchCurrentUser';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
 import {
   buildOidcProviderSchema,
@@ -30,7 +39,11 @@ interface CreateUpdateOidcProviderFormProps extends FormProps {
   isPending: boolean;
   error: Error | null;
   onFinish: (values: CreateUpdateOidcProviderFormData) => void;
+  /** A domain to offer while Trusted Email Domains is empty. */
+  suggestedDomain?: string;
 }
+
+const PROVIDER_ORG_CHOICES: readonly TOrgChoice[] = ['none', 'customer'];
 
 export const CreateUpdateOidcProviderForm = ({
   disabledFields,
@@ -40,6 +53,7 @@ export const CreateUpdateOidcProviderForm = ({
   isPending = false,
   error,
   initialValues,
+  suggestedDomain,
   ...props
 }: CreateUpdateOidcProviderFormProps) => {
   const [form] = Form.useForm();
@@ -61,8 +75,14 @@ export const CreateUpdateOidcProviderForm = ({
   );
   const formValidation = useAntdZodResolver(schema);
 
-  const handleFinish = (values: CreateUpdateOidcProviderFormData) => {
-    onFinish?.(values);
+  const handleFinish = ({
+    org_choice,
+    ...values
+  }: CreateUpdateOidcProviderFormData & { org_choice?: TOrgChoice }) => {
+    onFinish?.({
+      ...values,
+      org: chosenOrg({ choice: org_choice, org: values.org, ownOrg: '' }),
+    });
   };
 
   return (
@@ -75,6 +95,16 @@ export const CreateUpdateOidcProviderForm = ({
         client_secret_env: '',
         ...PROVIDERS_MAP['google']?.initialValues,
         ...initialValues,
+        // A new provider's organisation is picked on purpose, never defaulted.
+        ...(initialValues?.name
+          ? {
+              [ORG_CHOICE_NAME]: orgChoiceOf({
+                allowsNone: true,
+                org: initialValues.org,
+                yourOrg: undefined,
+              }),
+            }
+          : {}),
       }}
       onFinish={handleFinish}
     >
@@ -104,12 +134,18 @@ export const CreateUpdateOidcProviderForm = ({
         </Form.Item>
       </div>
 
+      <OrgChoiceFormItem
+        choices={PROVIDER_ORG_CHOICES}
+        noneLabel="Platform provider: signs in your organisation's accounts"
+      />
+
       <div className="grid grid-cols-2 gap-4">
         <OidcLoginFields
           rule={formValidation}
           issuerBuilder={issuerBuilder}
           disabledFields={disabledFields}
           hasStoredScopes={!!initialValues?.scopes?.length}
+          suggestedDomain={suggestedDomain}
         />
       </div>
 
@@ -146,5 +182,18 @@ export const CreateUpdateOidcProviderForm = ({
         </Button>
       </Form.Item>
     </Form>
+  );
+};
+
+/** The provider form a drawer shows, offering the signed-in account's email domain as a trusted domain. */
+export const OidcProviderDrawerForm = (
+  props: Omit<CreateUpdateOidcProviderFormProps, 'suggestedDomain'>,
+) => {
+  const { data: currentUser } = useFetchCurrentUser();
+  return (
+    <CreateUpdateOidcProviderForm
+      {...props}
+      suggestedDomain={trustableEmailDomain(currentUser?.email)}
+    />
   );
 };

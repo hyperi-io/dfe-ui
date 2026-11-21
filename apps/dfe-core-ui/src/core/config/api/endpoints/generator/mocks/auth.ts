@@ -181,4 +181,35 @@ export const auth = {
       },
     },
   },
+  reauth: {
+    mockedUrl: '/api/v1/auth/reauth',
+    post: {
+      success: ({
+        mockedResponse = { grant: 'reauth-grant', expires_in: 600 },
+      }: {
+        mockedResponse?: { grant: string; expires_in: number };
+      } = {}) => {
+        return http.post(auth.reauth.mockedUrl, () => {
+          return HttpResponse.json(mockedResponse);
+        });
+      },
+      error: ({
+        mockedResponse = {
+          type: 'about:blank',
+          title: 'Forbidden',
+          status: 403,
+          detail: 'Invalid password',
+          code: 'invalid_password',
+        },
+        status = 403,
+      }: {
+        mockedResponse?: Record<string, unknown>;
+        status?: number;
+      } = {}) => {
+        return http.post(auth.reauth.mockedUrl, () => {
+          return HttpResponse.json(mockedResponse, { status });
+        });
+      },
+    },
+  },
 };

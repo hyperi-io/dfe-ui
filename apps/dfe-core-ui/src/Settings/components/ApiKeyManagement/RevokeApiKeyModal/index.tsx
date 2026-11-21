@@ -1,3 +1,4 @@
+import { useReauthGrant } from '@/core/hooks/useReauthGrant';
 import { FormNotification } from '@/core/components/FormNotification';
 import { Modal } from '@/core/components/Modal';
 import { NotificationCard } from '@/core/components/NotificationCard';
@@ -14,6 +15,7 @@ export const RevokeApiKeyModal = ({
   shortToken: string;
   name: string;
 }) => {
+  const reauth = useReauthGrant(shortToken, 'api_key');
   const [open, setOpen] = useState(false);
 
   const {
@@ -21,7 +23,9 @@ export const RevokeApiKeyModal = ({
     isPending,
     error,
   } = useRevokeApiKey({
+    reauth: reauth.grant,
     onSuccess: () => {
+      reauth.drop();
       setOpen(false);
     },
   });
@@ -31,6 +35,7 @@ export const RevokeApiKeyModal = ({
   };
   return (
     <>
+      {reauth.modal}
       <RbacProtected action={RbacProtected.rbacActions.api_key_delete}>
         <RbacProtected.Unrestricted>
           <Button
@@ -39,7 +44,7 @@ export const RevokeApiKeyModal = ({
             shape="circle"
             aria-label="Revoke API Key"
             icon={<IconTrash />}
-            onClick={() => setOpen(true)}
+            onClick={() => reauth.ask(() => setOpen(true))}
             danger
           />
         </RbacProtected.Unrestricted>

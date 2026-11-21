@@ -1,3 +1,4 @@
+import { useReauthGrant } from '@/core/hooks/useReauthGrant';
 import { Drawer } from '@/core/components/Drawer';
 import { RbacProtected } from '@/core/components/RbacProtected';
 import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
@@ -10,6 +11,8 @@ import { UpdateGroupForm, UpdateGroupFormData } from './UpdateGroupForm';
 
 export const EditGroupDrawer = ({ group_name }: { group_name: string }) => {
   const [open, setOpen] = useState(false);
+  // Held only while the drawer is open, so every change asks for the password again.
+  const reauth = useReauthGrant(group_name, 'group');
   const [api, contextHolder] = notification.useNotification();
 
   const queryClient = useQueryClient();
@@ -20,9 +23,11 @@ export const EditGroupDrawer = ({ group_name }: { group_name: string }) => {
     error,
     reset: resetUpdateGroup,
   } = useUpdateGroup({
+    reauth: reauth.grant,
     group_name,
     onSuccess: () => {
       setOpen(false);
+      reauth.drop();
       api.success({
         title: 'Group updated successfully',
         placement: 'bottomLeft',
@@ -36,6 +41,7 @@ export const EditGroupDrawer = ({ group_name }: { group_name: string }) => {
 
   const closeDrawer = () => {
     setOpen(false);
+    reauth.drop();
     resetUpdateGroup();
   };
 
@@ -48,7 +54,11 @@ export const EditGroupDrawer = ({ group_name }: { group_name: string }) => {
       {contextHolder}
       <RbacProtected action={RbacProtected.rbacActions.group_write}>
         <RbacProtected.Unrestricted>
-          <Button type="text" icon={<IconEdit />} onClick={() => setOpen(true)}>
+          <Button
+            type="text"
+            icon={<IconEdit />}
+            onClick={() => reauth.ask(() => setOpen(true))}
+          >
             Edit Group
           </Button>
         </RbacProtected.Unrestricted>
@@ -57,13 +67,14 @@ export const EditGroupDrawer = ({ group_name }: { group_name: string }) => {
             disabled
             type="text"
             icon={<IconEdit />}
-            onClick={() => setOpen(true)}
+            onClick={() => reauth.ask(() => setOpen(true))}
           >
             Edit Group
           </Button>
         </RbacProtected.Restricted>
       </RbacProtected>
 
+      {reauth.modal}
       <Drawer title="Edit Group" open={open} onClose={closeDrawer}>
         <UpdateGroupForm
           onFinish={handleUpdateGroup}

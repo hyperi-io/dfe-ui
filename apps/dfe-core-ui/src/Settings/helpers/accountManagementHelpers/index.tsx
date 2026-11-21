@@ -1,5 +1,7 @@
 import { Tooltip } from '@/core/components/Tooltip';
+import { AccountOrg } from '@/Settings/components/AccountManagement/AccountOrg';
 import { RowActions } from '@/Settings/components/AccountManagement/RowActions';
+import { SignInProviders } from '@/Settings/components/AccountManagement/SignInProviders';
 import { TAccountsItemSummary } from '@/Settings/hooks/accounts/useFetchInfiniteFilteredAccounts/types';
 import { Tag } from 'antd';
 
@@ -15,27 +17,66 @@ export const renderColumns = ({
   renderActions?: boolean;
 }) => [
   {
-    title: 'Name',
-    dataIndex: 'name',
-    key: 'name',
-    render: (name: string) => name?.trim() || <EmptyText />,
+    title: 'Org',
+    dataIndex: 'org',
+    key: 'org',
+    width: 130,
+    render: (_: unknown, record: TAccountsItemSummary) => (
+      <AccountOrg
+        admin={record.admin}
+        displayName={record.org_display_name}
+        groups={record.groups}
+        org={record.org}
+      />
+    ),
   },
   {
-    title: 'Email',
-    dataIndex: 'email',
-    key: 'email',
-    render: (email: string) => email?.trim() || <EmptyText />,
+    title: 'User',
+    key: 'user',
+    render: (_: unknown, record: TAccountsItemSummary) => (
+      <span className="flex flex-col">
+        <span className="flex items-center gap-2">
+          {record.name?.trim() || <EmptyText />}
+        </span>
+        {record.email?.trim() && (
+          <span className="text-xs text-foreground/50 dark:text-dark-foreground/50">
+            {record.email.trim()}
+          </span>
+        )}
+      </span>
+    ),
   },
   {
     title: 'Username',
     dataIndex: 'username',
     key: 'username',
+    width: 280,
+    render: (username: string, record: TAccountsItemSummary) => (
+      <span className="flex items-center gap-2">
+        {username}
+        <SignInProviders account={record} />
+      </span>
+    ),
+  },
+  {
+    title: 'Groups',
+    dataIndex: 'groups',
+    key: 'groups',
+    width: 120,
+    render: (groups: string[]) =>
+      groups?.length ? (
+        <Tooltip destroyOnHidden title={groups.join(', ')}>
+          <Tag>
+            {groups.length} Group{groups.length > 1 ? 's' : ''}
+          </Tag>
+        </Tooltip>
+      ) : null,
   },
   {
     title: 'Status',
     dataIndex: 'enabled',
     key: 'enabled',
-    width: 120,
+    width: 110,
     render: (enabled: boolean, record: TAccountsItemSummary) =>
       isRetiredAdmin(record) ? (
         <Tooltip
@@ -49,19 +90,6 @@ export const renderColumns = ({
           {enabled ? 'Active' : 'Inactive'}
         </Tag>
       ),
-  },
-  {
-    title: 'Groups',
-    dataIndex: 'groups',
-    key: 'groups',
-    render: (groups: string[]) =>
-      groups?.length ? (
-        <Tooltip destroyOnHidden title={groups.join(', ')}>
-          <Tag>
-            {groups.length} Group{groups.length > 1 ? 's' : ''}
-          </Tag>
-        </Tooltip>
-      ) : null,
   },
   ...(renderActions
     ? [

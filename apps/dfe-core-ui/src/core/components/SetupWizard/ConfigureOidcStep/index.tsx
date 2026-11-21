@@ -1,3 +1,4 @@
+import { useReauthGrant } from '@/core/hooks/useReauthGrant';
 import { Form } from '@/core/components/Form';
 import { SkipForNow } from '@/core/components/SetupWizard/SkipForNow';
 import {
@@ -34,11 +35,15 @@ export const ConfigureOidcStep = ({
   const effectiveOidcProvider = oidcProvider ?? createdOidcProvider;
   const [isOidcTested, setIsOidcTested] = useState(false);
   const [form] = Form.useForm();
+  // The grant names the provider it changes, so it is asked for at submit.
+  const [reauthTarget, setReauthTarget] = useState('');
+  const reauth = useReauthGrant(reauthTarget, 'provider');
   const {
     mutate: createOidcProvider,
     isPending: isCreateOidcProviderPending,
     error: createOidcProviderError,
   } = useCreateOidcProvider({
+    reauth: reauth.grant,
     onSuccess: (data) => {
       setCreatedOidcProvider(data);
       router.refresh();
@@ -51,6 +56,7 @@ export const ConfigureOidcStep = ({
     error: updateOidcProviderError,
   } = useUpdateOidcProvider({
     name: effectiveOidcProvider?.name ?? '',
+    reauth: reauth.grant,
   });
 
   // Setup status carries scopes as one string, a created provider as a list.
@@ -63,17 +69,19 @@ export const ConfigureOidcStep = ({
     if (effectiveOidcProvider?.name) {
       const storedType =
         'type' in effectiveOidcProvider ? effectiveOidcProvider.type : '';
-      updateOidcProvider(
-        toUpdateOidcProviderBody(values, {
-          ...effectiveOidcProvider,
-          type: storedType,
-          scopes: initialScopes ?? [],
-        }),
-      );
+      const changes = toUpdateOidcProviderBody(values, {
+        ...effectiveOidcProvider,
+        type: storedType,
+        scopes: initialScopes ?? [],
+      });
+      setReauthTarget(effectiveOidcProvider.name);
+      reauth.ask(() => updateOidcProvider(changes));
       return;
     }
 
-    createOidcProvider(toCreateOidcProviderBody(values));
+    const body = toCreateOidcProviderBody(values);
+    setReauthTarget(body.name);
+    reauth.ask(() => createOidcProvider(body));
   };
   return (
     <Card
@@ -83,6 +91,7 @@ export const ConfigureOidcStep = ({
       }}
     >
       <h1 className="text-2xl font-light">Configure OIDC Provider</h1>
+      {reauth.modal}
 
       <>
         <ConfigureOIDCForm

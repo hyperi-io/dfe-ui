@@ -16,6 +16,7 @@ test.describe('jset: live tokens', { tag: [TAGS.core, TAGS.settings] }, () => {
       (
         await admin('POST', '/api/v1/auth/accounts', {
           username: user,
+          name: 'Jset Live User',
           password: pw,
           email: `${user}@example.com`,
           groups: ['dfe-viewers'],
