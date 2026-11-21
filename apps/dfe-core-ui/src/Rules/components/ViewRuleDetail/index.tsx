@@ -9,12 +9,8 @@ import { useFetchRuleDetail } from '@/Rules/hooks/useFetchRuleDetail';
 import { IconAlertCircle } from '@repo/dfe-icons';
 import { Spin } from 'antd';
 import { RuleDetailActionMenu } from './RuleDetailActionMenu';
+import { RuleDetailFields } from './RuleDetailFields';
 
-const dataListTermStyle =
-  'font-medium text-foreground/40 dark:text-dark-foreground/40';
-const EmptyData = () => (
-  <span className="text-foreground/40 dark:text-dark-foreground/40">None</span>
-);
 export const ViewRuleDetail = () => {
   const { selectedRuleName } = useListRulesContext();
   const {
@@ -67,24 +63,7 @@ export const ViewRuleDetail = () => {
         <RuleDetailActionMenu rule={ruleDetail} />
       </div>
       <div className="flex flex-col gap-4">
-        <dl className="grid grid-cols-[140px_1fr_140px_1fr] gap-x-6 gap-y-1">
-          <dt className={dataListTermStyle}>Name:</dt>
-          <dd>{ruleDetail.name}</dd>
-          <dt className={dataListTermStyle}>Severity:</dt>
-          <dd>{ruleDetail.severity}</dd>
-          <dt className={dataListTermStyle}>Source:</dt>
-          <dd>{ruleDetail.source || <EmptyData />}</dd>
-          <dt className={dataListTermStyle}>Source Table:</dt>
-          <dd>{ruleDetail.source_table || <EmptyData />}</dd>
-          <dt className={dataListTermStyle}>Source DB:</dt>
-          <dd>{ruleDetail.source_db || <EmptyData />}</dd>
-          <dt className={dataListTermStyle}>Hunt Name:</dt>
-          <dd>{ruleDetail.hunt_name || <EmptyData />}</dd>
-          <dt className={dataListTermStyle}>Where Clause:</dt>
-          <dd>{ruleDetail.where_clause || <EmptyData />}</dd>
-          <dt className={dataListTermStyle}>CEL Filter:</dt>
-          <dd>{ruleDetail.cel_filter || <EmptyData />}</dd>
-        </dl>
+        <RuleDetailFields rule={ruleDetail} />
       </div>
 
       {ruleDetail.warnings && ruleDetail.warnings.length > 0 && (

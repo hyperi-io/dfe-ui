@@ -65,6 +65,9 @@ describe('flowStages', () => {
     const { stages, arrows } = flowStages({ ...busFlow, transform: null });
 
     expect(stages[1].absent).toBe(true);
+    expect(stages[1].title).toBe(
+      'No transform. Records reach the loader as they arrived.',
+    );
     expect(arrows[0]).toBeUndefined();
   });
 
