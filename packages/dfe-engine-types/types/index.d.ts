@@ -2560,52 +2560,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/transforms/compile": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Compile Transform
-         * @description Compile user source code to a WASM binary.
-         *
-         *     Proxies to the dfe-transform-compiler service. The response includes
-         *     a base64-encoded WASM binary that can be passed directly to /test.
-         */
-        post: operations["transforms.compile"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/transforms/test": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Test Transform
-         * @description Run a compiled WASM transform against sample records.
-         *
-         *     Proxies to the dfe-transform-wasm service's /test endpoint.
-         *     The wasm_base64 field should come directly from /compile.
-         */
-        post: operations["transforms.test"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/api/v1/hunts/status": {
         parameters: {
             query?: never;
@@ -4688,7 +4642,9 @@ export interface paths {
          *     setting directly under either never needs one.
          *
          *     409 where the deployment already decides the value: a config path the chart
-         *     derives, or an `extraEnv` name the chart sets for this app.
+         *     derives, or an `extraEnv` name the chart sets for this app. 409 `env_not_delivered`
+         *     for an `extraEnv` value on a Docker deployment that names no app environment
+         *     directory, because nothing would carry it to the container.
          */
         put: operations["apps.config.put"];
         post?: never;
@@ -7822,34 +7778,6 @@ export interface components {
             profiles: components["schemas"]["CompatBinding"][];
         };
         /**
-         * CompileRequest
-         * @description Body for compiling transform source to WASM.
-         */
-        CompileRequest: {
-            /**
-             * Language
-             * @enum {string}
-             */
-            language: "rust" | "go" | "assemblyscript";
-            /**
-             * Files
-             * @description Source files. Key = filename, value = source content.
-             */
-            files: {
-                [key: string]: string;
-            };
-        };
-        /**
-         * CompileResponse
-         * @description The compiled WASM module, base64-encoded.
-         */
-        CompileResponse: {
-            /** Wasm Base64 */
-            wasm_base64: string;
-            /** Wasm Bytes */
-            wasm_bytes: number;
-        };
-        /**
          * ConfigFieldModel
          * @description One option the app declares, and what this instance would run for it.
          */
@@ -8920,20 +8848,6 @@ export interface components {
             truncated: boolean;
             /** Events */
             events?: components["schemas"]["DryRunEventModel"][];
-        };
-        /**
-         * EmittedRecord
-         * @description One record a transform emitted.
-         */
-        EmittedRecord: {
-            /** Key */
-            key: string;
-            /** Value */
-            value: string;
-            /** Headers */
-            headers?: {
-                [key: string]: string;
-            };
         };
         /**
          * ExternalConnectionModel
@@ -12569,7 +12483,7 @@ export interface components {
             options?: components["schemas"]["QueryOptions"] | null;
         };
         /** @enum {string} */
-        RbacScope: "group:write" | "group:read" | "group:delete" | "group:add_member" | "group:remove_member" | "account:write" | "account:read" | "account:delete" | "accounts:reset_password" | "account:attributes:read" | "account:attributes:write" | "account:attributes:read_sensitive" | "account:attributes:write_sensitive" | "group:attributes:read" | "group:attributes:write" | "group:attributes:read_sensitive" | "group:attributes:write_sensitive" | "alert:read" | "alert:write" | "alert:delete" | "api_key:read" | "api_key:write" | "api_key:delete" | "cel:check" | "clickhouse_cloud:manage" | "dashboard:read" | "synthetic-data:read" | "synthetic-data:run" | "deployment:read" | "deployment:write" | "deployment:delete" | "deployment:admin_links:read" | "fieldmap:read" | "fieldmap:write" | "fieldmap:delete" | "hunt:read" | "hunt:write" | "hunt:delete" | "hunt:execute" | "oidc:read" | "oidc:write" | "oidc:delete" | "org:read" | "org:write" | "org:delete" | "pipeline:read" | "pipeline:write" | "query:read" | "query:execute" | "raw_query:execute" | "repository:read" | "repository:write" | "role:read" | "role:write" | "role:delete" | "role:scopes" | "rule:read" | "rule:write" | "rule:delete" | "rule:validate" | "sampler:read" | "schema:read" | "schema:write" | "schema:delete" | "service_surface:read" | "service_surface:write" | "service:read" | "service:write" | "service:delete" | "service:validate" | "sigma:read" | "sigma:write" | "sigma:admin" | "source:read" | "source:write" | "source:delete" | "source:deploy" | "system:read" | "system:write" | "task:read" | "task:write" | "transform:compile" | "transform:test" | "usage:read" | "governance:read" | "governance:write" | "helmvars:read" | "helmvars:write" | "dryrun:execute" | "library:read" | "library:write" | "lifecycle:read" | "config:write";
+        RbacScope: "group:write" | "group:read" | "group:delete" | "group:add_member" | "group:remove_member" | "account:write" | "account:read" | "account:delete" | "accounts:reset_password" | "account:attributes:read" | "account:attributes:write" | "account:attributes:read_sensitive" | "account:attributes:write_sensitive" | "group:attributes:read" | "group:attributes:write" | "group:attributes:read_sensitive" | "group:attributes:write_sensitive" | "alert:read" | "alert:write" | "alert:delete" | "api_key:read" | "api_key:write" | "api_key:delete" | "cel:check" | "clickhouse_cloud:manage" | "dashboard:read" | "synthetic-data:read" | "synthetic-data:run" | "deployment:read" | "deployment:write" | "deployment:delete" | "deployment:admin_links:read" | "fieldmap:read" | "fieldmap:write" | "fieldmap:delete" | "hunt:read" | "hunt:write" | "hunt:delete" | "hunt:execute" | "oidc:read" | "oidc:write" | "oidc:delete" | "org:read" | "org:write" | "org:delete" | "org:ingest_credentials:write" | "pipeline:read" | "pipeline:write" | "query:read" | "query:execute" | "raw_query:execute" | "repository:read" | "repository:write" | "role:read" | "role:write" | "role:delete" | "role:scopes" | "rule:read" | "rule:write" | "rule:delete" | "rule:validate" | "sampler:read" | "schema:read" | "schema:write" | "schema:delete" | "service_surface:read" | "service_surface:write" | "service:read" | "service:write" | "service:delete" | "service:validate" | "sigma:read" | "sigma:write" | "sigma:admin" | "source:read" | "source:write" | "source:delete" | "source:deploy" | "system:read" | "system:write" | "task:read" | "task:write" | "transform:compile" | "transform:test" | "usage:read" | "governance:read" | "governance:write" | "helmvars:read" | "helmvars:write" | "dryrun:execute" | "library:read" | "library:write" | "lifecycle:read" | "config:write";
         /**
          * RelinkResult
          * @description The write result, with the links it moved.
@@ -13426,28 +13340,6 @@ export interface components {
          * @enum {string}
          */
         SampleMode: "recent" | "random" | "smart" | "anomaly";
-        /**
-         * SampleRecord
-         * @description One input record for a transform test.
-         */
-        SampleRecord: {
-            /**
-             * Key
-             * @default
-             */
-            key: string;
-            /** Value */
-            value: string;
-            /**
-             * Timestamp
-             * @default 0
-             */
-            timestamp: number;
-            /** Headers */
-            headers?: {
-                [key: string]: string;
-            };
-        };
         /**
          * SampleRequest
          * @description A request to sample a source.
@@ -16299,20 +16191,14 @@ export interface components {
          */
         TaskStatus: "pending" | "running" | "completed" | "failed" | "cancelled";
         /**
-         * TestRequest
-         * @description Body for running a compiled transform over sample records.
+         * TestResponse
+         * @description Whether the provider answered the connection test.
          */
-        TestRequest: {
-            /**
-             * Wasm Base64
-             * @description Base64-encoded WASM binary from /compile
-             */
-            wasm_base64: string;
-            /**
-             * Records
-             * @description Sample input records
-             */
-            records: components["schemas"]["SampleRecord"][];
+        TestResponse: {
+            /** Success */
+            success: boolean;
+            /** Message */
+            message: string;
         };
         /**
          * TokenResponse
@@ -17614,16 +17500,6 @@ export interface components {
             status: "ok" | "partial" | "error" | "not_configured" | "user_token" | "skipped";
         };
         /**
-         * TestResponse
-         * @description Whether the provider answered the connection test.
-         */
-        dfe_engine__api__v1__oidc_providers__TestResponse: {
-            /** Success */
-            success: boolean;
-            /** Message */
-            message: string;
-        };
-        /**
          * SchemaBuildResult
          * @description Result of building a schema from a source.
          */
@@ -17758,18 +17634,6 @@ export interface components {
              * @description Number of sources seeded
              */
             seeded: number;
-        };
-        /**
-         * TestResponse
-         * @description What a transform emitted, and the time and memory it used.
-         */
-        dfe_engine__api__v1__transforms__TestResponse: {
-            /** Emitted */
-            emitted: components["schemas"]["EmittedRecord"][];
-            /** Duration Ms */
-            duration_ms: number;
-            /** Wasm Memory Bytes */
-            wasm_memory_bytes: number;
         };
         /**
          * SchemaColumn
@@ -20810,7 +20674,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["dfe_engine__api__v1__oidc_providers__TestResponse"];
+                    "application/json": components["schemas"]["TestResponse"];
                 };
             };
             /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */
@@ -26209,126 +26073,6 @@ export interface operations {
             };
             /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
             403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["Problem"];
-                };
-            };
-            /** @description Problem details (RFC 9457) */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["Problem"];
-                };
-            };
-        };
-    };
-    "transforms.compile": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CompileRequest"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CompileResponse"];
-                };
-            };
-            /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["Problem"];
-                };
-            };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["Problem"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["Problem"];
-                };
-            };
-            /** @description Problem details (RFC 9457) */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["Problem"];
-                };
-            };
-        };
-    };
-    "transforms.test": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["TestRequest"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["dfe_engine__api__v1__transforms__TestResponse"];
-                };
-            };
-            /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["Problem"];
-                };
-            };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["Problem"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
                 headers: {
                     [name: string]: unknown;
                 };
