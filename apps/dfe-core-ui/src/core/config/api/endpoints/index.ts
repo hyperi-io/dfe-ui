@@ -53,10 +53,6 @@ export const API_CONFIG = Object.freeze({
     destinations: '/api/v1/alerts/destinations',
     destination: '/api/v1/alerts/destinations/{name}',
   },
-  transforms: {
-    compile: '/api/v1/transforms/compile',
-    test: '/api/v1/transforms/test',
-  },
   schemas: {
     default: '/api/v1/schemas',
     schemaVersions: '/api/v1/schemas/definitions/{schema_path}/versions',
