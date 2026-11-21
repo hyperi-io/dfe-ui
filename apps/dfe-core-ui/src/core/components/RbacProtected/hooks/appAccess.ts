@@ -21,6 +21,8 @@ export const APP_ACCESS_ACTIONS: readonly UI_DISPLAY_ACTIONS_TYPE[] = [
   UI_DISPLAY_ACTIONS.rule_read,
   // Hunts.
   UI_DISPLAY_ACTIONS.hunt_read,
+  // Field maps.
+  UI_DISPLAY_ACTIONS.fieldmap_read,
   // Services.
   UI_DISPLAY_ACTIONS.service_read,
   // Settings.
