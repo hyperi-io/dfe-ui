@@ -2,6 +2,7 @@ import { RbacProtected } from '@/core/components/RbacProtected';
 import type { UI_DISPLAY_ACTIONS_TYPE } from '@/core/components/RbacProtected/hooks/rbac.constants';
 import {
   IconArrowBounce,
+  IconArrowsExchange,
   IconBookmark,
   IconBooks,
   IconChartDots,
@@ -148,6 +149,16 @@ export const buildSidebarMenuGroups = (
           rbacActions.hunt_read,
           rbacActions.hunt_write,
           rbacActions.hunt_delete,
+        ],
+      },
+      {
+        key: '/field-maps',
+        label: 'Field Maps',
+        icon: <IconArrowsExchange />,
+        actions: [
+          rbacActions.fieldmap_read,
+          rbacActions.fieldmap_write,
+          rbacActions.fieldmap_delete,
         ],
       },
     ],
