@@ -2,6 +2,7 @@ import { expect, test } from '@playwright/test';
 
 import { TAGS } from '@e2e/config/tags.constants';
 import { prepareJourneyStack } from '@e2e/config/journey.helpers';
+import { confirmItsYou } from '@e2e/config/login.helpers';
 
 import {
   ADMIN,
@@ -50,6 +51,7 @@ test.describe(
       await rd
         .getByRole('button', { name: 'Create Role', exact: true })
         .click();
+      await confirmItsYou(page);
       await expect(page.getByText('Role created successfully')).toBeVisible();
       const r = await admin('GET', `/api/v1/auth/roles/${role}`);
       expect(r.json.permissions.sort()).toEqual([...SCOPES].sort());
@@ -78,11 +80,13 @@ test.describe(
       const ad = page.getByRole('dialog', { name: 'Create Account' });
       await ad.getByPlaceholder('Enter username').fill(user);
       await ad.getByPlaceholder('Enter email').fill(`${user}@example.com`);
+      await ad.getByPlaceholder('Enter name').fill('Jset Role User');
       await ad.getByPlaceholder('Enter password').fill(PASSWORD);
       await choose(page, ad, 'Select groups', group);
       await ad
         .getByRole('button', { name: 'Create Account', exact: true })
         .click();
+      await confirmItsYou(page);
       await expect(
         page.getByText('Account created successfully'),
       ).toBeVisible();

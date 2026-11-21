@@ -1,7 +1,7 @@
 import { Locator, Page, expect, test } from '@playwright/test';
 
 import { BASE_URL, e2eClient } from '@e2e/config/e2e.client';
-import { loginAs } from '@e2e/config/login.helpers';
+import { confirmItsYou, loginAs } from '@e2e/config/login.helpers';
 import { TAGS } from '@e2e/config/tags.constants';
 
 /**
@@ -90,6 +90,7 @@ const deleteRole = async (page: Page, name: string) => {
   // the page, and that scroll closes the menu.
   await expect(removeAction).toBeVisible();
   await removeAction.click();
+  await confirmItsYou(page);
   const remove = page.getByRole('dialog', { name: 'Delete Role' });
   await remove.getByPlaceholder('Enter role name to be deleted').fill(name);
   await remove.getByRole('button', { name: 'Delete', exact: true }).click();
@@ -129,6 +130,7 @@ test.describe(
       await create
         .getByRole('button', { name: 'Create Role', exact: true })
         .click();
+      await confirmItsYou(page);
 
       await expect(page.getByText('Role created successfully')).toBeVisible();
       // Custom roles show three at a time. Searching keeps this role and its copy on the page.
@@ -158,6 +160,7 @@ test.describe(
       await page
         .getByRole('button', { name: 'Edit Role', exact: true })
         .click();
+      await confirmItsYou(page);
       const edit = page.getByRole('dialog', { name: 'Edit Role' });
       await expect(edit.getByPlaceholder('Enter name')).toHaveValue(ROLE);
       await expect(edit.getByPlaceholder('Enter name')).toBeDisabled();
@@ -186,6 +189,7 @@ test.describe(
       await clone
         .getByRole('button', { name: 'Clone Role', exact: true })
         .click();
+      await confirmItsYou(page);
 
       await expect(
         page.getByText(`Role ${ROLE} cloned successfully`),
@@ -226,6 +230,7 @@ test.describe(
       await clone
         .getByRole('button', { name: 'Clone Role', exact: true })
         .click();
+      await confirmItsYou(page);
 
       await expect(
         page.getByText(`Role ${CORE_ROLE} cloned successfully`),

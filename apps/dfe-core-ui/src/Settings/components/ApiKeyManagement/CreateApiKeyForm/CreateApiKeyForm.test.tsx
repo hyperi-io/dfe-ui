@@ -1,3 +1,4 @@
+import { confirmReauth } from '@/core/utils/test-utils/confirmReauth';
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
 import {
   expectNameRule,
@@ -8,7 +9,7 @@ import {
   listedOrgs,
   MockIntersectionObserver,
   signedInAs,
-} from '@/core/components/AccountOrgFormItem/AccountOrgFormItem.mocks';
+} from '@/core/components/OrgChoiceFormItem/OrgChoiceFormItem.mocks';
 import { API_CONFIG_MOCKS } from '@/core/config/api/endpoints/generator';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -32,14 +33,24 @@ vi.mock('@/core/components/AccountGroupSelect', () => ({
 
 vi.stubGlobal('IntersectionObserver', MockIntersectionObserver);
 
-const server = setupServer(signedInAs(''), listedOrgs);
+const server = setupServer(
+  API_CONFIG_MOCKS.auth.reauth.post.success(),
+  signedInAs(''),
+  listedOrgs,
+  API_CONFIG_MOCKS.system.organisation.get.success({
+    mockedResponse: { name: 'hyperi', display_name: 'HyperI' },
+  }),
+);
 const sent: Request[] = [];
 
 beforeAll(() => server.listen({ onUnhandledRequest: 'error' }));
 beforeEach(() => {
   sent.length = 0;
   server.events.on('request:start', ({ request }) => {
-    if (request.method !== 'GET') sent.push(request.clone());
+    // The re-auth request earns the grant; only the key itself is sent.
+    if (request.method !== 'GET' && !request.url.endsWith('/auth/reauth')) {
+      sent.push(request.clone());
+    }
   });
 });
 afterEach(() => {
@@ -69,31 +80,56 @@ describe('CreateApiKeyForm name', () => {
 
 describe('CreateApiKeyForm organisation', () => {
   test.each([
-    { name: 'the signed-in org', me: 'acme', pick: undefined, sends: 'acme' },
     {
-      name: 'no org for a user bound to none',
-      me: '',
+      name: 'no organisation',
+      choice: /^No organisation/,
       pick: undefined,
       sends: '',
     },
-    { name: 'the org picked', me: 'acme', pick: 'Globex', sends: 'globex' },
-  ])('sends $name', async ({ me, pick, sends }) => {
-    server.use(signedInAs(me), API_CONFIG_MOCKS.apiKeys.default.post.success());
+    {
+      name: 'your organisation by name',
+      choice: /^Your organisation/,
+      pick: undefined,
+      sends: 'hyperi',
+    },
+    {
+      name: 'the customer organisation picked',
+      choice: /^Customer organisation/,
+      pick: 'Globex',
+      sends: 'globex',
+    },
+  ])('sends $name', async ({ choice, pick, sends }) => {
+    server.use(API_CONFIG_MOCKS.apiKeys.default.post.success());
     const user = userEvent.setup();
     render(<CreateApiKeyForm />, { wrapper });
-    if (me) {
-      expect(await screen.findByTitle('Acme Corp')).toBeInTheDocument();
-    }
 
     await user.type(screen.getByLabelText(/^Name/), 'ci-deploy');
     await user.type(screen.getByLabelText(/^Description/), 'CI deploys');
+    await user.click(await screen.findByRole('radio', { name: choice }));
     if (pick) {
-      await user.click(screen.getByRole('combobox', { name: 'Organisation' }));
+      await user.click(
+        screen.getByRole('combobox', { name: 'Organisation name' }),
+      );
       await user.click(await screen.findByTitle(pick));
     }
     await user.click(screen.getByRole('button', { name: 'Generate' }));
+    await confirmReauth(user);
 
     await waitFor(() => expect(sent).toHaveLength(1));
     expect(await sent[0]?.json()).toMatchObject({ org: sends });
+  });
+
+  test('generates nothing until an organisation is chosen', async () => {
+    const user = userEvent.setup();
+    render(<CreateApiKeyForm />, { wrapper });
+
+    await user.type(screen.getByLabelText(/^Name/), 'ci-deploy');
+    await user.type(screen.getByLabelText(/^Description/), 'CI deploys');
+    await user.click(screen.getByRole('button', { name: 'Generate' }));
+
+    expect(
+      await screen.findByText('Choose an organisation'),
+    ).toBeInTheDocument();
+    expect(sent).toEqual([]);
   });
 });

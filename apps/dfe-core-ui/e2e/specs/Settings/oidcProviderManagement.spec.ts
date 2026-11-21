@@ -1,7 +1,7 @@
 import { Locator, Page, expect, test } from '@playwright/test';
 
 import { BASE_URL, e2eClient } from '@e2e/config/e2e.client';
-import { loginAs } from '@e2e/config/login.helpers';
+import { confirmItsYou, loginAs } from '@e2e/config/login.helpers';
 import { rx } from '@e2e/config/regex.helpers';
 import { TAGS } from '@e2e/config/tags.constants';
 
@@ -100,6 +100,7 @@ const createProvider = async (
   await fillCredentialValue(page, create, 'Client ID', CLIENT_ID);
   await fillCredentialValue(page, create, 'Client Secret', CLIENT_SECRET);
   await create.getByRole('button', { name: 'Create', exact: true }).click();
+  await confirmItsYou(page);
 
   await expect(
     page.getByText('OIDC provider created successfully'),
@@ -149,6 +150,7 @@ test.describe('', { tag: [TAGS.core, TAGS.settings] }, () => {
     await page
       .getByRole('button', { name: `Edit ${displayName}`, exact: true })
       .click();
+    await confirmItsYou(page);
     const edit = page.getByRole('dialog', { name: 'Edit OIDC Provider' });
     await expect(
       edit.getByRole('textbox', { name: 'Name', exact: true }),

@@ -1,16 +1,18 @@
+import { useReauthGrant } from '@/core/hooks/useReauthGrant';
 import { Drawer } from '@/core/components/Drawer';
-import { NotificationCard } from '@/core/components/NotificationCard';
 import { RbacProtected } from '@/core/components/RbacProtected';
+import { Tooltip } from '@/core/components/Tooltip';
 import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
 import { useFetchCurrentUser } from '@/core/hooks/useFetchCurrentUser';
 import { UpdateAccountForm } from '@/Settings/components/AccountManagement/UpdateAccountForm';
+import { UpdateAccountOrgForm } from '@/Settings/components/AccountManagement/UpdateAccountOrgForm';
 import { useUpdateAccount } from '@/Settings/hooks/accounts/useUpdateAccount';
 import { IconEdit } from '@repo/dfe-icons';
 import { useQueryClient } from '@tanstack/react-query';
-import { Button, Divider, notification } from 'antd';
-import Link from 'next/link';
+import { Button, notification, Tabs } from 'antd';
+import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { ResetAccountPasswordProgressiveDisclosure } from './ResetAccountPasswordProgressiveDisclosure';
+import { ResetAccountPasswordDrawer } from './ResetAccountPasswordDrawer';
 
 export const EditAccountDrawer = ({
   username,
@@ -21,31 +23,57 @@ export const EditAccountDrawer = ({
 }) => {
   const { data: currentUser } = useFetchCurrentUser();
   const [open, setOpen] = useState(false);
+  // Held only while the drawer is open, so every edit asks for the password again.
+  const reauth = useReauthGrant(username);
   const [api, contextHolder] = notification.useNotification();
   const title = `Edit ${username}`;
 
   const queryClient = useQueryClient();
 
+  const handleClose = () => {
+    setOpen(false);
+    reauth.drop();
+  };
+
+  const onSuccess = () => {
+    handleClose();
+
+    api.success({
+      title: 'Account updated successfully',
+      placement: 'bottomLeft',
+    });
+    void queryClient.invalidateQueries({
+      queryKey: QUERY_KEYS.accounts.account({ username }),
+    });
+  };
   const {
     mutate: updateAccount,
     isPending,
     error,
-  } = useUpdateAccount({
-    username,
-    onSuccess: () => {
-      setOpen(false);
+  } = useUpdateAccount({ reauth: reauth.grant, username, onSuccess });
+  // Its own mutation, so a failed org change shows only on the Organisation tab.
+  const {
+    mutate: updateOrg,
+    isPending: isOrgPending,
+    error: orgError,
+  } = useUpdateAccount({ reauth: reauth.grant, username, onSuccess });
 
-      api.success({
-        title: 'Account updated successfully',
-        placement: 'bottomLeft',
-      });
-      void queryClient.invalidateQueries({
-        queryKey: QUERY_KEYS.accounts.account({ username }),
-      });
-    },
-  });
-
-  const isEditingOwnAccountPassword = username === currentUser?.username;
+  const router = useRouter();
+  // Your own password changes on your profile, which asks for the current one.
+  const resetPassword =
+    username === currentUser?.username ? (
+      <Button onClick={() => router.push('/account?reset_password=true')}>
+        Reset Password
+      </Button>
+    ) : isExternal ? (
+      <Tooltip title="Its identity provider holds this account's password">
+        <span>
+          <Button disabled>Reset Password</Button>
+        </span>
+      </Tooltip>
+    ) : (
+      <ResetAccountPasswordDrawer reauth={reauth.grant()} username={username} />
+    );
 
   return (
     <>
@@ -56,7 +84,7 @@ export const EditAccountDrawer = ({
             aria-label={title}
             type="text"
             icon={<IconEdit />}
-            onClick={() => setOpen(true)}
+            onClick={() => reauth.ask(() => setOpen(true))}
           >
             Edit Account
           </Button>
@@ -67,64 +95,45 @@ export const EditAccountDrawer = ({
             type="text"
             disabled
             icon={<IconEdit />}
-            onClick={() => setOpen(true)}
+            onClick={() => reauth.ask(() => setOpen(true))}
           >
             Edit Account
           </Button>
         </RbacProtected.Restricted>
       </RbacProtected>
 
-      <Drawer title={title} open={open} onClose={() => setOpen(false)}>
-        <div className="flex flex-col gap-2">
-          {isEditingOwnAccountPassword ? (
-            <>
-              <h3 className="text-base font-semibold">Reset password</h3>
-              <NotificationCard
-                description={
-                  <div className="flex gap-2">
-                    <p>Please update your password from your user profile.</p>
-                    <Link href={`/account`}>Go to profile</Link>
-                  </div>
-                }
-              />
-            </>
-          ) : (
-            <RbacProtected
-              action={RbacProtected.rbacActions.accounts_reset_password}
-            >
-              <RbacProtected.Unrestricted>
-                {!isExternal && (
-                  <ResetAccountPasswordProgressiveDisclosure
-                    username={username}
-                  />
-                )}
-                {isExternal && (
-                  <NotificationCard
-                    className="w-full"
-                    title="Cannot reset password for external users"
-                    description="Password is managed by the external OIDC provider"
-                    type="warning"
-                  />
-                )}
-              </RbacProtected.Unrestricted>
-              <RbacProtected.Restricted>
-                <NotificationCard
-                  className="w-full"
-                  title="You do not have permission to reset the password for this account."
+      {reauth.modal}
+
+      <Drawer title={title} open={open} onClose={handleClose}>
+        <Tabs
+          items={[
+            {
+              key: 'details',
+              label: 'Details',
+              children: (
+                <UpdateAccountForm
+                  actions={resetPassword}
+                  username={username}
+                  onFinish={updateAccount}
+                  error={error}
+                  isPending={isPending}
                 />
-              </RbacProtected.Restricted>
-            </RbacProtected>
-          )}
-
-          <Divider className="my-2" />
-
-          <UpdateAccountForm
-            username={username}
-            onFinish={updateAccount}
-            error={error}
-            isPending={isPending}
-          />
-        </div>
+              ),
+            },
+            {
+              key: 'organisation',
+              label: 'Organisation',
+              children: (
+                <UpdateAccountOrgForm
+                  error={orgError}
+                  isPending={isOrgPending}
+                  onFinish={updateOrg}
+                  username={username}
+                />
+              ),
+            },
+          ]}
+        />
       </Drawer>
     </>
   );

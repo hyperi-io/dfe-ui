@@ -13,9 +13,10 @@ export type TAccountsItemSummary = TAccountsResponse['items'][number];
 export type TFetchAccountsQueryParams = {
   search?: string;
   oidc_id?: string;
+  org?: string;
   blocked?: boolean;
   include_core?: boolean;
-  sort_by?: 'created_at' | 'updated_at';
+  sort_by?: 'created_at' | 'updated_at' | 'org';
   sort_order?: 'asc' | 'desc';
   page_size?: number;
 };

@@ -7,14 +7,17 @@ import { type TLoginRefusal } from '@/core/config/loginRefusal';
 import { cn } from '@/core/utils/style';
 import { IconCircleCheckFilled, IconPrimaryLogoFull } from '@repo/dfe-icons';
 import { Alert } from 'antd';
+import type { ReactNode } from 'react';
 import './Login.css';
 
 const Login = ({
   callbackUrl,
+  children,
   notice,
   failure,
 }: {
   callbackUrl: string;
+  children?: ReactNode;
   notice?: string;
   failure?: TLoginRefusal;
 }) => {
@@ -53,7 +56,12 @@ const Login = ({
             description={shown.description}
           />
         )}
-        <LoginLocalOidcSwitch callbackUrl={callbackUrl} className="min-h-45" />
+        {children ?? (
+          <LoginLocalOidcSwitch
+            callbackUrl={callbackUrl}
+            className="min-h-45"
+          />
+        )}
       </div>
     </main>
   );
@@ -61,14 +69,21 @@ const Login = ({
 
 export const LoginScene = ({
   callbackUrl = '/',
+  children,
   notice,
   failure,
 }: {
   callbackUrl?: string;
+  /** Shown in place of the sign-in form, such as the link step of an OIDC sign-in. */
+  children?: ReactNode;
   /** A LOGIN_NOTICE_PARAM value; anything unknown shows nothing. */
   notice?: string;
   /** Why the last sign-in did not complete, shown above the form so the user can try again. */
   failure?: TLoginRefusal;
 }) => {
-  return <Login callbackUrl={callbackUrl} notice={notice} failure={failure} />;
+  return (
+    <Login callbackUrl={callbackUrl} notice={notice} failure={failure}>
+      {children}
+    </Login>
+  );
 };

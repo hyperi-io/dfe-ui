@@ -11,6 +11,10 @@ import { ENV_VAR_NAME_VALIDATOR, STORE_NAME_VALIDATOR } from './utils';
 // An Entra tenant GUID or domain, the shape the engine accepts in the authority URL.
 const TENANT_ID = /^[A-Za-z0-9][A-Za-z0-9.-]{0,252}$/;
 
+// A bare email domain such as corp.com, the shape the engine stores a trusted domain in.
+export const EMAIL_DOMAIN =
+  /^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9-]{2,63}$/i;
+
 const optionalText = () => z.string().default('');
 
 const envVarName = () =>
@@ -86,6 +90,8 @@ const oidcProviderShape = z.object({
       message: STORE_NAME_VALIDATOR.message('Name'),
     }),
   enabled: z.boolean().default(true),
+  // Empty is a platform provider.
+  org: z.string().default(''),
   type: z.enum(['google', 'entra_id', 'okta', 'generic']),
   display_name: optionalText(),
   issuer: z.string().min(1, { message: 'Issuer is required' }),
@@ -94,6 +100,12 @@ const oidcProviderShape = z.object({
     .array(z.string())
     .refine((scopes) => scopes.length === 0 || scopes.includes('openid'), {
       message: 'Scopes must include openid, or be left empty',
+    })
+    .optional(),
+  trusted_email_domains: z
+    .array(z.string())
+    .refine((domains) => domains.every((domain) => EMAIL_DOMAIN.test(domain)), {
+      message: 'Each domain must be a bare domain, such as corp.com',
     })
     .optional(),
   client_id: optionalText(),

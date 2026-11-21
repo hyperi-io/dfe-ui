@@ -1,3 +1,4 @@
+import { useReauthGrant } from '@/core/hooks/useReauthGrant';
 import { Modal } from '@/core/components/Modal';
 import { RbacProtected } from '@/core/components/RbacProtected';
 import { useDeleteGroup } from '@/Settings/hooks/groups/useDeleteGroup';
@@ -10,7 +11,10 @@ export const DeleteGroupModal = ({ group_name }: { group_name: string }) => {
   const [open, setOpen] = useState(false);
   const { notification } = App.useApp();
 
+  // Every delete asks for the password again.
+  const reauth = useReauthGrant(group_name, 'group');
   const { mutate, isPending, error } = useDeleteGroup({
+    reauth: reauth.grant,
     onSuccess: () => {
       setOpen(false);
       notification.success({
@@ -38,7 +42,7 @@ export const DeleteGroupModal = ({ group_name }: { group_name: string }) => {
             className="hover:text-error hover:bg-error/5"
             aria-label={`Delete ${group_name}`}
             icon={<IconTrash />}
-            onClick={() => setOpen(true)}
+            onClick={() => reauth.ask(() => setOpen(true))}
           >
             Delete Group
           </Button>
@@ -48,13 +52,14 @@ export const DeleteGroupModal = ({ group_name }: { group_name: string }) => {
             disabled
             type="text"
             icon={<IconTrash />}
-            onClick={() => setOpen(true)}
+            onClick={() => reauth.ask(() => setOpen(true))}
           >
             Delete Group
           </Button>
         </RbacProtected.Restricted>
       </RbacProtected>
 
+      {reauth.modal}
       <Modal
         title="Delete Group"
         open={open}

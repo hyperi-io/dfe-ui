@@ -33,6 +33,8 @@ describe('.useFetchAccountDetail', () => {
         disabled_at: '',
         blocked_at: '',
         external: false,
+        email_verified: false,
+        identities: [],
         password_change_required: false,
         groups: ['string'],
         created_at: 'string',
@@ -42,6 +44,9 @@ describe('.useFetchAccountDetail', () => {
         name: 'string',
         org: '',
         oidc_id: 'string',
+        oidc_type: 'string',
+        admin: false,
+        org_display_name: '',
       };
 
       await waitFor(() => {

@@ -86,6 +86,8 @@ const openEditDrawer = async (group: TGroupDetailResponse = LINKED_GROUP) => {
       { timeout: 15_000 },
     ),
   );
+  await user.type(await screen.findByLabelText('Your password'), 'pw');
+  await user.click(screen.getByRole('button', { name: 'Confirm' }));
   await screen.findByRole(
     'button',
     { name: 'Update Group' },
@@ -163,6 +165,8 @@ describe('EditGroupDrawer', { timeout: GROUP_DRAWER_TEST_TIMEOUT_MS }, () => {
         { timeout: 15_000 },
       ),
     );
+    await user.type(await screen.findByLabelText('Your password'), 'pw');
+    await user.click(screen.getByRole('button', { name: 'Confirm' }));
     await waitFor(
       () =>
         expect(
@@ -203,6 +207,8 @@ describe('EditGroupDrawer', { timeout: GROUP_DRAWER_TEST_TIMEOUT_MS }, () => {
         { timeout: 15_000 },
       ),
     );
+    await user.type(await screen.findByLabelText('Your password'), 'pw');
+    await user.click(screen.getByRole('button', { name: 'Confirm' }));
 
     await user.click(
       await screen.findByRole(
@@ -248,6 +254,9 @@ describe('EditGroupDrawer', { timeout: GROUP_DRAWER_TEST_TIMEOUT_MS }, () => {
 
     await closeDrawer(user);
     await user.click(screen.getByRole('button', { name: /Edit Group/ }));
+    // Every reopen asks for the password again.
+    await user.type(await screen.findByLabelText('Your password'), 'pw');
+    await user.click(screen.getByRole('button', { name: 'Confirm' }));
     await screen.findByRole(
       'button',
       { name: 'Update Group' },

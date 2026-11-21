@@ -1,6 +1,8 @@
 import { CredentialField } from '@/core/components/CredentialField';
 import { chooseCredentialSource } from '@/core/components/CredentialField/CredentialField.mocks';
 import { Form } from '@/core/components/Form';
+import { API_CONFIG_MOCKS } from '@/core/config/api/endpoints/generator';
+import { useAuthStore } from '@/core/stores/authStore';
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
 import { expectFieldError } from '@/core/utils/test-utils/expectFieldError';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
@@ -8,7 +10,16 @@ import { ENV_VAR_NAME_VALIDATOR } from '@/core/validationSchemas/utils';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Button } from 'antd';
-import { describe, expect, test, vi } from 'vitest';
+import { setupServer } from 'msw/node';
+import {
+  afterAll,
+  afterEach,
+  beforeAll,
+  describe,
+  expect,
+  test,
+  vi,
+} from 'vitest';
 import z from 'zod';
 
 const { wrapper } = buildTestWrapper().withTheme();
@@ -304,5 +315,53 @@ describe('CredentialField', () => {
       'placeholder',
       STORED_SECRET_HINT,
     );
+  });
+});
+
+describe('CredentialField for an org admin', () => {
+  const server = setupServer();
+
+  beforeAll(() => server.listen({ onUnhandledRequest: 'bypass' }));
+  afterEach(() => {
+    server.resetHandlers();
+    useAuthStore.getState().reset();
+  });
+  afterAll(() => server.close());
+
+  test('offers no env var and submits the value alone', async () => {
+    server.use(
+      API_CONFIG_MOCKS.auth.me.get.success({
+        mockedResponse: {
+          org_id: 'acme',
+          user_id: 'kim',
+          roles: ['org_admin'],
+          permissions: ['oidc:write'],
+          groups: [],
+          external: false,
+          blocked: false,
+          disabled_at: '',
+          blocked_at: '',
+          password_change_required: false,
+          hyperdx_role: '',
+          hyperdx_identity: '',
+        },
+      }),
+    );
+    const { onFinish, user } = renderClientId({
+      client_id_env: 'DFE_OIDC_OKTA_CLIENT_ID',
+    });
+    await waitFor(() => expect(useAuthStore.getState().me).not.toBeNull());
+    await waitFor(() =>
+      expect(
+        screen.queryByRole('combobox', { name: 'Client ID source' }),
+      ).not.toBeInTheDocument(),
+    );
+
+    await user.type(screen.getByRole('textbox'), 'acme-client');
+    await user.click(screen.getByRole('button', { name: 'Save' }));
+
+    expect(await submittedValues(onFinish)).toEqual({
+      client_id: 'acme-client',
+    });
   });
 });

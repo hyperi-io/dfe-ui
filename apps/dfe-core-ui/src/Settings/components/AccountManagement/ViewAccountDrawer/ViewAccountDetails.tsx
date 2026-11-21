@@ -5,6 +5,7 @@ import {
   formatDateToString,
   formatDateXAgo,
 } from '@/core/helpers/date.helpers';
+import { LinkedSignIns } from '@/Settings/components/AccountManagement/ViewAccountDrawer/LinkedSignIns';
 import { useFetchAccountDetail } from '@/Settings/hooks/accounts/useFetchAccountDetail';
 import { IconCheck, IconX } from '@repo/dfe-icons';
 import { Spin } from 'antd';
@@ -61,6 +62,8 @@ export const ViewAccountDetails = ({ username }: { username: string }) => {
         <dd>{data.email?.trim() || <EmptyData />}</dd>
         <dt className={dataListTermStyle}>Username:</dt>
         <dd>{data.username}</dd>
+        <dt className={dataListTermStyle}>Organisation:</dt>
+        <dd>{data.org_display_name || <EmptyData />}</dd>
         <dt className={dataListTermStyle}>Enabled:</dt>
         <dd className="flex items-center text-lg">
           {data.enabled ? <IconCheck /> : <IconX />}
@@ -78,6 +81,17 @@ export const ViewAccountDetails = ({ username }: { username: string }) => {
                 </li>
               ))}
             </ul>
+          ) : (
+            <EmptyData />
+          )}
+        </dd>
+        <dt className={dataListTermStyle}>Linked Sign-ins:</dt>
+        <dd>
+          {data.identities?.length ? (
+            <LinkedSignIns
+              identities={data.identities}
+              username={data.username}
+            />
           ) : (
             <EmptyData />
           )}

@@ -1,7 +1,7 @@
 import { Locator, Page, expect, test } from '@playwright/test';
 
 import { BASE_URL, e2eClient } from '@e2e/config/e2e.client';
-import { loginAs } from '@e2e/config/login.helpers';
+import { confirmItsYou, loginAs } from '@e2e/config/login.helpers';
 import { rx } from '@e2e/config/regex.helpers';
 import { TAGS } from '@e2e/config/tags.constants';
 
@@ -80,6 +80,7 @@ const createKey = async (page: Page, name: string) => {
     .getByRole('textbox', { name: 'Description', exact: true })
     .fill(DESCRIPTION);
   await create.getByRole('button', { name: 'Generate', exact: true }).click();
+  await confirmItsYou(page);
   await acknowledgeKey(page);
 
   const section = apiKeysSection(page);
@@ -110,6 +111,7 @@ test.describe('', { tag: [TAGS.core, TAGS.settings] }, () => {
       clone.getByRole('textbox', { name: 'Description', exact: true }),
     ).toHaveValue(DESCRIPTION);
     await clone.getByRole('button', { name: 'Generate', exact: true }).click();
+    await confirmItsYou(page);
     await acknowledgeKey(page);
 
     await expect(keyRow(apiKeysSection(page), `${name}_clone`)).toBeVisible();

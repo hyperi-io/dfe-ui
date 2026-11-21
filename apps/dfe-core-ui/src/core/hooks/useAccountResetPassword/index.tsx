@@ -1,3 +1,4 @@
+import { REAUTH_HEADER } from '@/core/hooks/useReauth';
 import { useMutation } from '@tanstack/react-query';
 import { resetPassword } from './api';
 import {
@@ -6,12 +7,15 @@ import {
 } from './types';
 
 interface UseAccountResetPasswordProps {
+  /** The re-auth grant for *username*, which the engine requires on a reset. */
+  reauth?: string;
   username: string;
   onSuccess?: (data: TAccountResetPasswordResponse) => void;
   onError?: (error: Error) => void;
 }
 
 export const useAccountResetPassword = ({
+  reauth,
   username,
   onSuccess,
   onError,
@@ -20,6 +24,7 @@ export const useAccountResetPassword = ({
     mutationFn: (body: TAccountResetPasswordRequestBody) =>
       resetPassword({
         body,
+        headerParams: { [REAUTH_HEADER]: reauth },
         pathParams: { username },
       }),
 

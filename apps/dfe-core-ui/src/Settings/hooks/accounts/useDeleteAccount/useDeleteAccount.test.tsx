@@ -40,7 +40,7 @@ describe('.useDeleteAccount', () => {
         { wrapper },
       );
 
-      result.current.mutate(username);
+      result.current.mutate({ reauth: 'grant', username });
 
       await waitFor(() => {
         expect(result.current).toEqual({
@@ -77,7 +77,7 @@ describe('.useDeleteAccount', () => {
         { wrapper },
       );
 
-      result.current.mutate(username);
+      result.current.mutate({ reauth: 'grant', username });
 
       await waitFor(() => {
         expect(onError).toHaveBeenCalled();

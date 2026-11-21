@@ -13,6 +13,8 @@ export type TRoleUpdateResponse = DfeClientSuccessResponseBody<
 >;
 
 export interface UseUpdateRoleProps {
+  /** The re-auth grant the engine requires on this change, read when the request goes out. */
+  reauth?: () => string | undefined;
   role_name: string;
   onSuccess?: (data: TRoleUpdateResponse) => void;
   onError?: (error: Error) => void;

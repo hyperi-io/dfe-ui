@@ -3,6 +3,7 @@
 import { MainContentCard } from '@/core/components/ContentCard';
 import { CustomScrollbar } from '@/core/components/CustomScrollbar';
 import { NavigationTabLabel } from '@/core/components/NavigationTabLabel';
+import { useAuthMe } from '@/core/hooks/useAuthMe';
 import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
 import { AccountManagement } from '@/Settings/components/AccountManagement';
 import { ApiKeyManagement } from '@/Settings/components/ApiKeyManagement';
@@ -18,13 +19,22 @@ import {
   adminTabFromPathname,
   adminTabPath,
   isAdminTabKey,
+  shownAdminTabKeys,
 } from './adminTabs';
 
 export const AdminControlsScene = () => {
   const router = useRouter();
   const pathname = usePathname();
 
-  const activeTab = useMemo(() => adminTabFromPathname(pathname), [pathname]);
+  const { data: me } = useAuthMe();
+  // Until the caller's permissions arrive every tab shows, so a slow load hides none.
+  const permissions = useMemo(
+    () => (me ? new Set(me.permissions ?? []) : undefined),
+    [me],
+  );
+  const shown = useMemo(() => shownAdminTabKeys(permissions), [permissions]);
+  const pathTab = useMemo(() => adminTabFromPathname(pathname), [pathname]);
+  const activeTab = shown.includes(pathTab) ? pathTab : (shown[0] ?? pathTab);
 
   const handleTabChange = useCallback(
     (key: string) => {
@@ -132,7 +142,7 @@ export const AdminControlsScene = () => {
             //   ),
             //   children: <AuditDashboard />,
             // },
-          ]}
+          ].filter((item) => shown.includes(item.key))}
         />
       </CustomScrollbar>
     </MainContentCard>

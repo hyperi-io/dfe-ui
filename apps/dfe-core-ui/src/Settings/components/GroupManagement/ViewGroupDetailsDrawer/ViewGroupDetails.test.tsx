@@ -68,4 +68,23 @@ describe('ViewGroupDetails', () => {
     expect(rows['Source ID:']).toBe('00000000-0000-0000-0000-000000000001');
     expect(rows['Source provider:']).toBe('entra');
   });
+
+  test.each([
+    [{ members: ['olga'], linked_members: ['ivy'] }, 'olgaivy', 1],
+    [{ members: [], linked_members: ['ivy'] }, 'ivy', 1],
+    [{ members: ['olga'], linked_members: [] }, 'olga', 0],
+    [{ members: [], linked_members: [] }, 'None', 0],
+  ])(
+    'members %j read %s, with the link holders marked',
+    async (held, expected, marked) => {
+      const rows = await renderRows({ ...GROUP, ...held });
+
+      expect(rows['Members:']).toBe(expected);
+      expect(
+        screen.queryAllByLabelText(
+          'Holds this group through its identity provider',
+        ),
+      ).toHaveLength(marked);
+    },
+  );
 });

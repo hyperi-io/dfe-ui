@@ -1,3 +1,4 @@
+import { useReauthGrant } from '@/core/hooks/useReauthGrant';
 import { Modal } from '@/core/components/Modal';
 import { RbacProtected } from '@/core/components/RbacProtected';
 import { Tooltip } from '@/core/components/Tooltip';
@@ -19,12 +20,14 @@ export const DeleteAccountDrawer = ({
   isExternal: boolean;
 }) => {
   const [open, setOpen] = useState(false);
+  // Held only while the confirmation is open, so every delete asks for the password again.
+  const reauth = useReauthGrant(username);
   const { notification } = App.useApp();
   const title = `Delete ${username}`;
 
   const { mutate, isPending, error } = useDeleteAccount({
     onSuccess: () => {
-      setOpen(false);
+      handleClose();
       notification.success({
         title: (
           <>
@@ -46,11 +49,19 @@ export const DeleteAccountDrawer = ({
       });
       return;
     }
-    setOpen(true);
+    reauth.ask(() => setOpen(true));
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+    reauth.drop();
   };
 
   const handleDelete = (values: DeleteAccountFormData) => {
-    mutate(values.username);
+    const grant = reauth.grant();
+    if (grant) {
+      mutate({ reauth: grant, username: values.username });
+    }
   };
 
   return (
@@ -95,10 +106,12 @@ export const DeleteAccountDrawer = ({
         </RbacProtected.Restricted>
       </RbacProtected>
 
+      {reauth.modal}
+
       <Modal
         title="Delete Account"
         open={open}
-        onCancel={() => setOpen(false)}
+        onCancel={handleClose}
         footer={null}
         destroyOnHidden
       >
@@ -107,7 +120,7 @@ export const DeleteAccountDrawer = ({
           onFinish={handleDelete}
           error={error}
           isPending={isPending}
-          onCancel={() => setOpen(false)}
+          onCancel={handleClose}
         />
       </Modal>
     </>

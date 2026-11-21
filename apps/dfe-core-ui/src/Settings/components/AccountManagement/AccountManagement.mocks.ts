@@ -22,6 +22,10 @@ const handlers = [
   API_CONFIG_MOCKS.auth.me.get.success({ mockedResponse: ADMIN }),
   API_CONFIG_MOCKS.auth.setupStatus.get.success(),
   API_CONFIG_MOCKS.accounts.default.get.success(),
+  API_CONFIG_MOCKS.orgs.default.get.success(),
+  API_CONFIG_MOCKS.system.organisation.get.success({
+    mockedResponse: { name: 'hyperi', display_name: 'HyperI' },
+  }),
 ];
 
 export const server = setupServer(...handlers);

@@ -7,6 +7,8 @@ describe('loginRefusal', () => {
     ['no_role_granted', 'No access to DFE yet'],
     ['account_disabled', 'Account disabled'],
     ['account_blocked', 'Account blocked'],
+    ['email_held', 'Email already in use'],
+    ['email_untrusted', 'Email domain not trusted'],
     ['service_unavailable', 'Sign-in not recorded'],
     ['unauthorized', 'Sign-in failed'],
   ])('the engine code %j reads as %j', (code, title) => {

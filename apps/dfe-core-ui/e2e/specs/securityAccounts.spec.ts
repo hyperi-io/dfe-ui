@@ -8,6 +8,7 @@ import {
   expectSourcesLanding,
   loginAs,
   textbox,
+  confirmItsYou,
 } from '@e2e/config/login.helpers';
 import { rx } from '@e2e/config/regex.helpers';
 import { logOut, openSettingsMenu } from '@e2e/config/settingsMenu.helpers';
@@ -88,7 +89,7 @@ const signIn = async (page: Page, username: string, password: string) => {
     name: 'Login with Local',
     exact: true,
   });
-  const usernameField = textbox(page, 'Username');
+  const usernameField = textbox(page, 'Username or Email');
   // Once the local tab is selected, the tab and the username field are both
   // present. Waiting for exactly one of them fails that page.
   await expect(localTab.or(usernameField).first()).toBeVisible();
@@ -191,10 +192,12 @@ test.describe('the admin through the setup wizard', () => {
     }
     await username.fill('wizard_user');
     await textbox(page, 'Email').fill('wizard_user@example.com');
+    await textbox(page, 'Name').fill('Wizard User');
     await textbox(page, 'Password').fill(freshPassword('wizard_user'));
     await page
       .getByRole('button', { name: 'Create Account', exact: true })
       .click();
+    await confirmItsYou(page);
 
     await expect(page).toHaveURL(`${BASE_URL}/setup/complete`);
     await expect(page.getByText(/stays as your local way in/)).toBeVisible();

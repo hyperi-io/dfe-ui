@@ -5,6 +5,7 @@ import { vi } from 'vitest';
 
 const OKTA_PROVIDER: TOidcProviderListItem = {
   name: 'okta',
+  org: '',
   type: 'okta',
   enabled: true,
   display_name: 'Okta',
@@ -33,6 +34,7 @@ const OKTA_PROVIDER: TOidcProviderListItem = {
   created_at: '2026-09-01T00:00:00Z',
   last_sync_at: '',
   last_sync_status: '',
+  trusted_email_domains: [],
   sync_error: '',
 };
 
@@ -59,6 +61,8 @@ export const stubIntersectionObserver = () =>
 
 /** Every lookup the group form makes before it can be submitted. */
 export const GROUP_FORM_HANDLERS = [
+  // Every group change asks for the password first.
+  API_CONFIG_MOCKS.auth.reauth.post.success(),
   API_CONFIG_MOCKS.auth.me.get.success({
     mockedResponse: ADMIN_MOCKED_RESPONSE,
   }),

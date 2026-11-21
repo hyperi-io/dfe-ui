@@ -1,3 +1,4 @@
+import { useReauthGrant } from '@/core/hooks/useReauthGrant';
 import { Drawer } from '@/core/components/Drawer';
 import { RbacProtected } from '@/core/components/RbacProtected';
 import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
@@ -15,6 +16,7 @@ export const EditRoleDrawer = ({
   disabled?: boolean;
   role_name: string;
 }) => {
+  const reauth = useReauthGrant(role_name, 'role');
   const [open, setOpen] = useState(false);
   const [api, contextHolder] = notification.useNotification();
 
@@ -25,8 +27,10 @@ export const EditRoleDrawer = ({
     isPending,
     error,
   } = useUpdateRole({
+    reauth: reauth.grant,
     role_name,
     onSuccess: () => {
+      reauth.drop();
       setOpen(false);
       api.success({
         title: 'Role updated successfully',
@@ -44,6 +48,7 @@ export const EditRoleDrawer = ({
 
   return (
     <>
+      {reauth.modal}
       {contextHolder}
       <RbacProtected action={RbacProtected.rbacActions.role_write}>
         <RbacProtected.Unrestricted>
@@ -51,7 +56,7 @@ export const EditRoleDrawer = ({
             type="text"
             icon={<IconEdit />}
             disabled={disabled}
-            onClick={() => setOpen(true)}
+            onClick={() => reauth.ask(() => setOpen(true))}
           >
             Edit Role
           </Button>

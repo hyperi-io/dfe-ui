@@ -1,3 +1,4 @@
+import { confirmReauth } from '@/core/utils/test-utils/confirmReauth';
 import {
   ADMIN_MOCKED_RESPONSE,
   server,
@@ -20,6 +21,10 @@ const RESULTS = API_CONFIG_MOCKS.oidcProviders.syncGroups.results;
 
 const sync = async (mockedResponse: TSyncOidcProviderGroupsResponse) => {
   server.use(
+    API_CONFIG_MOCKS.auth.me.get.success({
+      mockedResponse: ADMIN_MOCKED_RESPONSE,
+    }),
+    API_CONFIG_MOCKS.auth.reauth.post.success(),
     API_CONFIG_MOCKS.oidcProviders.syncGroups.post.success({
       mockedResponse,
       name: 'okta',
@@ -28,9 +33,11 @@ const sync = async (mockedResponse: TSyncOidcProviderGroupsResponse) => {
   render(<SyncOidcProviderGroupsDrawer oidcProviderName="okta" />, {
     wrapper,
   });
-  await userEvent.click(
+  const user = userEvent.setup();
+  await user.click(
     await screen.findByRole('button', { name: 'Sync OIDC Provider Groups' }),
   );
+  await confirmReauth(user);
 };
 
 const TITLES = {

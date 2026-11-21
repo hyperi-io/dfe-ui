@@ -6,6 +6,7 @@ import { TOidcProviderListItem } from './types';
 
 const OIDC_PROVIDER_ITEM: TOidcProviderListItem = {
   name: 'string',
+  org: '',
   type: 'string',
   enabled: true,
   display_name: 'string',
@@ -15,6 +16,7 @@ const OIDC_PROVIDER_ITEM: TOidcProviderListItem = {
   created_at: 'string',
   last_sync_at: 'string',
   last_sync_status: 'string',
+  trusted_email_domains: [],
   sync_error: 'string',
   client_id: 'string',
   client_secret_path: 'string',

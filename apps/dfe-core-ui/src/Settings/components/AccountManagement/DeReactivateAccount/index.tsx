@@ -1,3 +1,4 @@
+import { useReauthGrant } from '@/core/hooks/useReauthGrant';
 import { Modal } from '@/core/components/Modal';
 import { NotificationCard } from '@/core/components/NotificationCard';
 import { RbacProtected } from '@/core/components/RbacProtected';
@@ -18,9 +19,13 @@ export const DeReactivateAccount = ({
   const { notification } = App.useApp();
   const actionTitle = isActive ? 'Deactivate Account' : 'Activate Account';
 
+  // Every change asks for the password again.
+  const reauth = useReauthGrant(username);
   const { mutate, isPending, error, reset } = useUpdateAccount({
+    reauth: reauth.grant,
     username,
     onSuccess: () => {
+      reauth.drop();
       notification.success({
         title: isActive ? 'Account deactivated' : 'Account activated',
         placement: 'bottomLeft',
@@ -35,7 +40,7 @@ export const DeReactivateAccount = ({
     if (isCurrentUser) {
       setIsConfirming(true);
     } else {
-      mutate({ enabled: !isActive });
+      reauth.ask(() => mutate({ enabled: !isActive }));
     }
   };
 
@@ -57,6 +62,7 @@ export const DeReactivateAccount = ({
         >
           {actionTitle}
         </Button>
+        {reauth.modal}
         <Modal
           title="Confirm Action"
           open={isConfirming || !!error}

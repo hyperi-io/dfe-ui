@@ -19,6 +19,7 @@ export const oidcProviders = {
           items: [
             {
               name: 'string',
+              org: '',
               type: 'string',
               enabled: true,
               display_name: 'string',
@@ -28,6 +29,7 @@ export const oidcProviders = {
               created_at: 'string',
               last_sync_at: 'string',
               last_sync_status: 'string',
+              trusted_email_domains: [],
               sync_error: 'string',
               client_id: 'string',
               client_secret_path: 'string',
@@ -76,6 +78,7 @@ export const oidcProviders = {
       success: ({
         mockedResponse = {
           name: 'string',
+          org: '',
           display_name: 'string',
           enabled: true,
           type: 'generic',
@@ -85,6 +88,7 @@ export const oidcProviders = {
           created_at: 'string',
           last_sync_at: 'string',
           last_sync_status: 'string',
+          trusted_email_domains: [],
           sync_error: 'string',
           client_id: 'client_id',
           client_secret_path: 'client_secret_path',
@@ -137,6 +141,7 @@ export const oidcProviders = {
       success: ({
         mockedResponse = {
           name: 'name',
+          org: '',
           display_name: 'display_name',
           enabled: true,
           type: 'type',
@@ -165,6 +170,7 @@ export const oidcProviders = {
           created_at: 'created_at',
           last_sync_at: 'last_sync_at',
           last_sync_status: 'last_sync_status',
+          trusted_email_domains: [],
           sync_error: 'sync_error',
         },
         name = 'name',
