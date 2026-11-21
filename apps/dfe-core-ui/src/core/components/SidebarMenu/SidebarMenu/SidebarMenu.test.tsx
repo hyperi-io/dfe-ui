@@ -54,6 +54,7 @@ describe('SidebarMenu', () => {
         // Detect
         'Rules',
         'Hunts',
+        'Field Maps',
         // Stack
         'Components',
         'Admin Tools',
@@ -72,6 +73,35 @@ describe('SidebarMenu', () => {
       expect(
         await screen.findByRole('link', { name: 'Admin Tools' }),
       ).toHaveAttribute('href', '/admin-tools');
+    });
+
+    it('shows Field Maps to a role holding fieldmap:read', async () => {
+      server.use(
+        API_CONFIG_MOCKS.auth.me.get.success({
+          mockedResponse: meWithPermissions(['fieldmap:read']),
+        }),
+      );
+
+      render(<SidebarMenu collapsed={false} />, { wrapper });
+
+      expect(
+        await screen.findByRole('link', { name: 'Field Maps' }),
+      ).toHaveAttribute('href', '/field-maps');
+    });
+
+    it('hides Field Maps from a role without a fieldmap action', async () => {
+      server.use(
+        API_CONFIG_MOCKS.auth.me.get.success({
+          mockedResponse: meWithPermissions(['rule:read']),
+        }),
+      );
+
+      render(<SidebarMenu collapsed={false} />, { wrapper });
+
+      expect(
+        await screen.findByRole('link', { name: 'Rules' }),
+      ).toBeInTheDocument();
+      expect(screen.queryByRole('link', { name: 'Field Maps' })).toBeNull();
     });
 
     it('never shows Admin Tools to a role that only reads deployments', async () => {
