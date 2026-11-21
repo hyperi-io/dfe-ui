@@ -5,10 +5,12 @@ import { safeRedirectPath } from '@/core/config/loginCallback';
 import { loginRefusal, type TLoginRefusal } from '@/core/config/loginRefusal';
 import {
   OIDC_TOKEN_PROVIDER_ID,
+  readLinkFragment,
   readRefusalFragment,
   readTokenFragment,
 } from '@/core/config/oidcToken.constants';
 import { LoginScene } from '@/core/scenes/LoginScene';
+import { OidcLinkForm } from '@/core/scenes/LoginScene/OidcLinkForm';
 import { Spin } from 'antd';
 import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
@@ -16,6 +18,7 @@ import { useEffect, useRef, useState } from 'react';
 
 type THandBack = {
   fragment: ReturnType<typeof readTokenFragment>;
+  link: ReturnType<typeof readLinkFragment>;
   refusal: string | null;
   startedHere: boolean;
 };
@@ -41,7 +44,9 @@ const TOKEN_REFUSED = failed('The engine did not accept the login token.');
  *
  * The token is only used when the login nonce matches the one this tab stored
  * when it started the login (core/auth/oidcLoginNonce). A login the engine
- * refused comes back with its code instead, and the sign-in form says why.
+ * refused comes back with its code instead, and the sign-in form says why. A
+ * sign-in the engine holds for a local account's password comes back with a
+ * link ticket, and the page asks for that password.
  */
 export const OidcCallbackGate = ({
   callbackUrl = '/',
@@ -52,6 +57,7 @@ export const OidcCallbackGate = ({
 }) => {
   const router = useRouter();
   const [failure, setFailure] = useState<TLoginRefusal | null>(null);
+  const [held, setHeld] = useState<ReturnType<typeof readLinkFragment>>(null);
   const target = safeRedirectPath(callbackUrl);
   // Read once per mount: the fragment is stripped and the nonce spent on the first read.
   const handBack = useRef<THandBack | null>(null);
@@ -61,6 +67,7 @@ export const OidcCallbackGate = ({
     if (!handBack.current) {
       handBack.current = {
         fragment: readTokenFragment(window.location.hash),
+        link: readLinkFragment(window.location.hash),
         refusal: readRefusalFragment(window.location.hash),
         startedHere: consumeOidcLoginNonce(loginNonce),
       };
@@ -70,7 +77,7 @@ export const OidcCallbackGate = ({
         window.location.pathname + window.location.search,
       );
     }
-    const { fragment, refusal, startedHere } = handBack.current;
+    const { fragment, link, refusal, startedHere } = handBack.current;
 
     // Resolved on the next tick so the failure path is a callback, not a synchronous setState.
     const signInWithToken =
@@ -87,6 +94,10 @@ export const OidcCallbackGate = ({
         if (res && !res.error) {
           router.refresh();
           router.replace(target);
+        } else if (link && startedHere) {
+          setHeld(link);
+        } else if (link) {
+          setFailure(NOT_THIS_TAB);
         } else if (refusal) {
           setFailure(loginRefusal(refusal));
         } else if (!fragment) {
@@ -107,6 +118,22 @@ export const OidcCallbackGate = ({
 
   if (failure) {
     return <LoginScene callbackUrl={target} failure={failure} />;
+  }
+
+  if (held) {
+    return (
+      <LoginScene callbackUrl={target}>
+        <OidcLinkForm
+          account={held.account}
+          ticket={held.ticket}
+          onLinked={() => {
+            router.refresh();
+            router.replace(target);
+          }}
+          onRefused={(code) => setFailure(loginRefusal(code))}
+        />
+      </LoginScene>
+    );
   }
 
   return (

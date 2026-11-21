@@ -1,5 +1,6 @@
 import { rememberOidcLoginNonce } from '@/core/auth/oidcLoginNonce';
 import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { signIn } from 'next-auth/react';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import { OidcCallbackGate } from './OidcCallbackGate';
@@ -148,4 +149,85 @@ describe('OidcCallbackGate', () => {
       expect(mockedSignIn).not.toHaveBeenCalled();
     },
   );
+
+  describe("a sign-in held for its account's password", () => {
+    const HELD = 'error=link_required&account=kaz&link_ticket=t1&provider=okta';
+
+    const typePassword = async (password: string) => {
+      const user = userEvent.setup();
+      await user.type(await screen.findByLabelText('Password'), password);
+      await user.click(
+        screen.getByRole('button', { name: /link and sign in/i }),
+      );
+    };
+
+    test("asks for that account's password, then signs in through the link", async () => {
+      rememberOidcLoginNonce('n1');
+      landOn('?login_nonce=n1', HELD);
+
+      render(<OidcCallbackGate callbackUrl="/rules" loginNonce="n1" />);
+
+      expect(await screen.findByText('kaz')).toBeInTheDocument();
+      expect(mockedSignIn).not.toHaveBeenCalled();
+      await typePassword('pw');
+
+      await waitFor(() => expect(replace).toHaveBeenCalledWith('/rules'));
+      expect(mockedSignIn).toHaveBeenCalledWith('oidc-link', {
+        password: 'pw',
+        redirect: false,
+        ticket: 't1',
+      });
+      expect(window.location.hash).toBe('');
+    });
+
+    test('a wrong password keeps the form and says so', async () => {
+      rememberOidcLoginNonce('n1');
+      landOn('?login_nonce=n1', HELD);
+      mockedSignIn.mockResolvedValue({
+        error: 'unauthorized',
+        ok: false,
+        status: 401,
+        url: null,
+      });
+
+      render(<OidcCallbackGate loginNonce="n1" />);
+      await typePassword('wrong');
+
+      expect(
+        await screen.findByText('That password is not right for this account.'),
+      ).toBeInTheDocument();
+      expect(screen.getByLabelText('Password')).toBeInTheDocument();
+      expect(replace).not.toHaveBeenCalled();
+    });
+
+    test('an expired link ends the step with the reason', async () => {
+      rememberOidcLoginNonce('n1');
+      landOn('?login_nonce=n1', HELD);
+      mockedSignIn.mockResolvedValue({
+        error: 'link_ticket_invalid',
+        ok: false,
+        status: 401,
+        url: null,
+      });
+
+      render(<OidcCallbackGate loginNonce="n1" />);
+      await typePassword('pw');
+
+      expect(await screen.findByRole('alert')).toHaveTextContent(
+        'Link expired',
+      );
+      expect(screen.getByText('login form')).toBeInTheDocument();
+    });
+
+    test('a held sign-in this tab did not start asks nothing', async () => {
+      landOn('?login_nonce=attacker-chosen', HELD);
+
+      render(<OidcCallbackGate loginNonce="attacker-chosen" />);
+
+      expect(
+        await screen.findByText(/not started from this browser tab/),
+      ).toBeInTheDocument();
+      expect(screen.queryByLabelText('Password')).not.toBeInTheDocument();
+    });
+  });
 });

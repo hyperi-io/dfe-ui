@@ -1,3 +1,4 @@
+import { REAUTH_HEADER } from '@/core/hooks/useReauth';
 import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { updateOidcProvider } from './api';
@@ -7,12 +8,15 @@ import {
 } from './types';
 
 interface UseUpdateOidcProviderProps {
+  /** The re-auth grant the engine requires on this change, read when the request goes out. */
+  reauth?: () => string | undefined;
   onSuccess?: (data: TOidcProviderUpdateResponse) => void;
   onError?: (error: Error) => void;
   name: string;
 }
 
 export const useUpdateOidcProvider = ({
+  reauth,
   name,
   onSuccess,
   onError,
@@ -22,6 +26,7 @@ export const useUpdateOidcProvider = ({
   const { data, mutate, isPending, error } = useMutation({
     mutationFn: (oidcProvider: TOidcProviderUpdateRequestBody) =>
       updateOidcProvider({
+        headerParams: { [REAUTH_HEADER]: reauth?.() },
         body: oidcProvider,
         pathParams: { name: name },
       }),

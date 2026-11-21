@@ -22,11 +22,16 @@ export const accounts = {
             {
               username: 'string',
               oidc_id: 'string',
+              oidc_type: 'string',
+              admin: false,
+              org_display_name: '',
               enabled: true,
               blocked: false,
               disabled_at: '',
               blocked_at: '',
               external: false,
+              email_verified: false,
+              identities: [],
               password_change_required: false,
               groups: ['string'],
               created_at: 'string',
@@ -64,11 +69,16 @@ export const accounts = {
         mockedResponse = {
           username: 'string',
           oidc_id: 'string',
+          oidc_type: 'string',
+          admin: false,
+          org_display_name: '',
           enabled: true,
           blocked: false,
           disabled_at: '',
           blocked_at: '',
           external: false,
+          email_verified: false,
+          identities: [],
           password_change_required: false,
           groups: ['string'],
           created_at: 'string',
@@ -105,11 +115,16 @@ export const accounts = {
         mockedResponse = {
           username: 'string',
           oidc_id: 'string',
+          oidc_type: 'string',
+          admin: false,
+          org_display_name: '',
           enabled: true,
           blocked: false,
           disabled_at: '',
           blocked_at: '',
           external: false,
+          email_verified: false,
+          identities: [],
           password_change_required: false,
           groups: ['string'],
           created_at: 'string',
@@ -153,11 +168,16 @@ export const accounts = {
         mockedResponse = {
           username: 'string',
           oidc_id: 'string',
+          oidc_type: 'string',
+          admin: false,
+          org_display_name: '',
           enabled: true,
           blocked: false,
           disabled_at: '',
           blocked_at: '',
           external: false,
+          email_verified: false,
+          identities: [],
           password_change_required: false,
           groups: ['string'],
           created_at: 'string',
@@ -219,6 +239,58 @@ export const accounts = {
       } = {}) => {
         return http.delete(
           accounts.account.mockedUrl.replace('{username}', username),
+          () => {
+            return HttpResponse.json(mockedResponse, { status });
+          },
+        );
+      },
+    },
+  },
+  availability: {
+    mockedUrl: '/api/v1/auth/accounts/availability',
+    get: {
+      success: ({
+        mockedResponse = { email: '', username: '' },
+      }: {
+        mockedResponse?: { email: string; username: string };
+      } = {}) => {
+        return http.get(accounts.availability.mockedUrl, () => {
+          return HttpResponse.json(mockedResponse);
+        });
+      },
+    },
+  },
+  identity: {
+    mockedUrl: '/api/v1/auth/accounts/{username}/identities/{key}',
+    delete: {
+      success: ({
+        key = 'string',
+        username = 'string',
+      }: { key?: string; username?: string } = {}) => {
+        return http.delete(
+          accounts.identity.mockedUrl
+            .replace('{username}', username)
+            .replace('{key}', key),
+          () => {
+            return new HttpResponse(null, { status: 204 });
+          },
+        );
+      },
+      error: ({
+        key = 'string',
+        mockedResponse = DEFAULT_VALIDATION_ERROR,
+        status = 422,
+        username = 'string',
+      }: {
+        key?: string;
+        mockedResponse?: TValidationError;
+        status?: number;
+        username?: string;
+      } = {}) => {
+        return http.delete(
+          accounts.identity.mockedUrl
+            .replace('{username}', username)
+            .replace('{key}', key),
           () => {
             return HttpResponse.json(mockedResponse, { status });
           },
@@ -309,11 +381,16 @@ export const accounts = {
         mockedResponse = {
           username: 'string',
           oidc_id: 'string',
+          oidc_type: 'string',
+          admin: false,
+          org_display_name: '',
           enabled: true,
           blocked: false,
           disabled_at: '',
           blocked_at: '',
           external: false,
+          email_verified: false,
+          identities: [],
           password_change_required: false,
           groups: ['string'],
           email: 'string',
@@ -347,11 +424,16 @@ export const accounts = {
         mockedResponse = {
           username: 'string',
           oidc_id: 'string',
+          oidc_type: 'string',
+          admin: false,
+          org_display_name: '',
           enabled: true,
           blocked: false,
           disabled_at: '',
           blocked_at: '',
           external: false,
+          email_verified: false,
+          identities: [],
           password_change_required: false,
           groups: ['string'],
           email: 'string',

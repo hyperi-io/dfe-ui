@@ -23,6 +23,7 @@ const NO_GROUPS: TOidcProviderListItem['groups'] = {
 
 const PROVIDER: TOidcProviderListItem = {
   name: 'provider',
+  org: '',
   type: 'generic',
   enabled: true,
   display_name: 'Provider',
@@ -36,6 +37,7 @@ const PROVIDER: TOidcProviderListItem = {
   created_at: '2026-09-01T00:00:00Z',
   last_sync_at: '',
   last_sync_status: '',
+  trusted_email_domains: [],
   sync_error: '',
 };
 

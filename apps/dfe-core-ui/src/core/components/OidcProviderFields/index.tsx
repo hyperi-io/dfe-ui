@@ -13,6 +13,7 @@ import {
   groupModeOptions,
   MANUAL_MODE_HINT,
   SCOPES_PLACEHOLDER,
+  UNTRUSTED_DOMAINS_WARNING,
 } from '@/core/constants/oidcProviders.constants';
 import {
   entraTenantFromIssuer,
@@ -29,6 +30,8 @@ import {
 } from '@/core/helpers/oidcProviderFieldRules';
 import { presetFieldsForType } from '@/core/utils/oidcProviderPresets';
 import {
+  Alert,
+  Button,
   type FormInstance,
   FormRule,
   Input,
@@ -44,6 +47,7 @@ const ENRICH_ON_LOGIN_NAME = groupsField('enrich_on_login');
 const OKTA_DOMAIN_NAME = groupsField('okta_domain');
 const TENANT_ID_NAME = groupsField('tenant_id');
 const TENANT_ID_ENV_NAME = groupsField('tenant_id_env');
+const TRUSTED_EMAIL_DOMAINS_NAME = 'trusted_email_domains';
 
 const FieldHint = ({ children }: { children: ReactNode }) => (
   <p className="col-span-2 m-0 text-sm text-foreground/50 dark:text-dark-foreground/50">
@@ -96,11 +100,70 @@ export const useOidcProviderTypeChange = ({ form }: { form: FormInstance }) => {
   return { changeType, issuerBuilder };
 };
 
+/** The trusted domains, warning while there are none and offering `suggestedDomain` as one. */
+const TrustedEmailDomainsField = ({
+  rule,
+  suggestedDomain,
+}: {
+  rule: FormRule;
+  suggestedDomain?: string;
+}) => {
+  const form = Form.useFormInstance();
+  // useWatch is undefined until after the first render, so read the store until then.
+  const domains: unknown =
+    Form.useWatch(TRUSTED_EMAIL_DOMAINS_NAME) ??
+    form.getFieldValue(TRUSTED_EMAIL_DOMAINS_NAME);
+  const isEmpty = !Array.isArray(domains) || domains.length === 0;
+  return (
+    <>
+      <Form.Item
+        className="col-span-2"
+        label="Trusted Email Domains"
+        name={TRUSTED_EMAIL_DOMAINS_NAME}
+        rules={[rule]}
+        tooltip="Only a sign-in whose verified email is in one of these domains is let in, and it links to the DFE account holding that email. Trust a domain only for a provider whose directory you control."
+      >
+        <Select
+          mode="tags"
+          placeholder="corp.com"
+          tokenSeparators={[' ', ',']}
+          open={false}
+          suffixIcon={null}
+        />
+      </Form.Item>
+      {isEmpty && (
+        <Alert
+          className="col-span-2"
+          type="warning"
+          showIcon
+          message={UNTRUSTED_DOMAINS_WARNING}
+          action={
+            suggestedDomain && (
+              <Button
+                size="small"
+                onClick={() =>
+                  form.setFieldValue(TRUSTED_EMAIL_DOMAINS_NAME, [
+                    suggestedDomain,
+                  ])
+                }
+              >
+                Trust {suggestedDomain}
+              </Button>
+            )
+          }
+        />
+      )}
+    </>
+  );
+};
+
 interface OidcLoginFieldsProps {
   rule: FormRule;
   issuerBuilder: TIssuerBuilder;
   disabledFields?: { name?: boolean; issuer?: boolean };
   hasStoredScopes?: boolean;
+  /** A domain to offer while Trusted Email Domains is empty. */
+  suggestedDomain?: string;
 }
 
 /** The login fields of an OIDC provider form, laid out for a two-column grid. */
@@ -109,6 +172,7 @@ export const OidcLoginFields = ({
   issuerBuilder,
   disabledFields = {},
   hasStoredScopes = false,
+  suggestedDomain,
 }: OidcLoginFieldsProps) => (
   <>
     <Form.Item label="Name" name="name" rules={[rule]}>
@@ -151,6 +215,7 @@ export const OidcLoginFields = ({
         suffixIcon={null}
       />
     </Form.Item>
+    <TrustedEmailDomainsField rule={rule} suggestedDomain={suggestedDomain} />
   </>
 );
 

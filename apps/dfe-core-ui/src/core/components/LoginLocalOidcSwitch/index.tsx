@@ -2,6 +2,7 @@ import { useFetchSetupStatus } from '@/core/hooks/useFetchSetupStatus';
 import { cn } from '@/core/utils/style';
 import { Spin, Tabs } from 'antd';
 import { LocalLoginForm } from './LocalLoginForm';
+import { readLoginChoice } from './loginChoice';
 import { LoginWithOidcForm } from './LoginWithOidcForm';
 
 export const LoginLocalOidcSwitch = ({
@@ -32,6 +33,9 @@ export const LoginLocalOidcSwitch = ({
   return oidc_providers.length > 0 ? (
     <Tabs
       className={cn('w-full', className)}
+      defaultActiveKey={
+        readLoginChoice()?.method === 'local' ? 'local' : 'oidc'
+      }
       items={[
         {
           label: 'Login with OIDC',
@@ -46,7 +50,7 @@ export const LoginLocalOidcSwitch = ({
         {
           label: 'Login with Local',
           key: 'local',
-          children: <LocalLoginForm callbackUrl={callbackUrl} />,
+          children: <LocalLoginForm callbackUrl={callbackUrl} rememberable />,
         },
       ]}
     />

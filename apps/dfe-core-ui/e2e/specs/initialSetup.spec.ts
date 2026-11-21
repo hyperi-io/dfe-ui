@@ -5,6 +5,7 @@ import {
   expectForcedPasswordChange,
   expectSourcesLanding,
   textbox,
+  confirmItsYou,
 } from '@e2e/config/login.helpers';
 import { expect, test, type Page } from '@playwright/test';
 
@@ -40,7 +41,7 @@ const login = async (page: Page) => {
     name: 'Login with Local',
     exact: true,
   });
-  const username = textbox(page, 'Username');
+  const username = textbox(page, 'Username or Email');
   // Once the local tab is selected, the tab and the username field are both
   // present. Waiting for exactly one of them fails that page.
   await expect(localTab.or(username).first()).toBeVisible();
@@ -182,6 +183,7 @@ test.describe('', { tag: [TAGS.core] }, () => {
     await page
       .getByRole('button', { name: 'Create Account', exact: true })
       .click();
+    await confirmItsYou(page);
 
     /* COMPLETE -- the account completed setup, so the steps behind it are closed */
     await expect(page).toHaveURL(completePageUrl);

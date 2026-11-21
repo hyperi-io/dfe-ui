@@ -52,6 +52,7 @@ describe('.useUpdateOidcProvider', () => {
 
       const expectedResponse: TOidcProviderUpdateResponse = {
         name: 'name',
+        org: '',
         display_name: 'display_name',
         enabled: true,
         type: 'type',
@@ -80,6 +81,7 @@ describe('.useUpdateOidcProvider', () => {
         created_at: 'created_at',
         last_sync_at: 'last_sync_at',
         last_sync_status: 'last_sync_status',
+        trusted_email_domains: [],
         sync_error: 'sync_error',
       };
 

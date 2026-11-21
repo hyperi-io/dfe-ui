@@ -52,6 +52,9 @@ describe('.useUpdateCurrentUser', () => {
 
       const expectedResponse: TCurrentUserUpdateResponse = {
         oidc_id: 'string',
+        oidc_type: 'string',
+        admin: false,
+        org_display_name: '',
         name: 'string',
         email: 'string',
         phone: 'string',
@@ -62,6 +65,8 @@ describe('.useUpdateCurrentUser', () => {
         disabled_at: '',
         blocked_at: '',
         external: false,
+        email_verified: false,
+        identities: [],
         password_change_required: false,
         groups: ['string'],
         created_at: 'string',

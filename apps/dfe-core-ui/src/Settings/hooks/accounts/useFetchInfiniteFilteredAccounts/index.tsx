@@ -21,6 +21,7 @@ const SEARCH_DEBOUNCE_MS = 300;
 export const useFetchInfiniteFilteredAccounts = ({
   search,
   oidc_id,
+  org,
   blocked,
   include_core,
   sort_by,
@@ -41,6 +42,7 @@ export const useFetchInfiniteFilteredAccounts = ({
     queryKey: QUERY_KEYS.accounts.default({
       search: debouncedSearch,
       oidc_id,
+      org,
       include_core,
       blocked,
       sort_by,
@@ -53,6 +55,7 @@ export const useFetchInfiniteFilteredAccounts = ({
           search: debouncedSearch || undefined,
           blocked,
           oidc_id: oidc_id || undefined,
+          org: org || undefined,
           include_core: include_core || undefined,
           order_by: toOrderBy(sort_by, sort_order),
           page_token: pageParam,

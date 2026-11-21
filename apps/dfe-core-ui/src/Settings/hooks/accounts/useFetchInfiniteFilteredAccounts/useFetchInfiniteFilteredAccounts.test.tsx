@@ -69,6 +69,8 @@ describe('useFetchInfiniteFilteredAccounts', () => {
         disabled_at: '',
         blocked_at: '',
         external: false,
+        email_verified: false,
+        identities: [],
         password_change_required: false,
         groups: ['string'],
         created_at: '2021-01-01',
@@ -78,6 +80,9 @@ describe('useFetchInfiniteFilteredAccounts', () => {
         name: 'string',
         org: '',
         oidc_id: 'string',
+        oidc_type: 'string',
+        admin: false,
+        org_display_name: '',
       };
 
       expect(result.current.data).toBeDefined();
@@ -146,6 +151,8 @@ describe('useFetchInfiniteFilteredAccounts', () => {
         disabled_at: '',
         blocked_at: '',
         external: false,
+        email_verified: false,
+        identities: [],
         password_change_required: false,
         groups: ['string'],
         created_at: '2021-01-01',
@@ -155,6 +162,9 @@ describe('useFetchInfiniteFilteredAccounts', () => {
         name: 'string',
         org: '',
         oidc_id: 'string',
+        oidc_type: 'string',
+        admin: false,
+        org_display_name: '',
       };
 
       // Data should be flattened - 20 items total
@@ -191,6 +201,8 @@ describe('useFetchInfiniteFilteredAccounts', () => {
         disabled_at: '',
         blocked_at: '',
         external: false,
+        email_verified: false,
+        identities: [],
         password_change_required: false,
         groups: ['string'],
         created_at: '2021-01-01',
@@ -200,6 +212,9 @@ describe('useFetchInfiniteFilteredAccounts', () => {
         name: 'string',
         org: '',
         oidc_id: 'string',
+        oidc_type: 'string',
+        admin: false,
+        org_display_name: '',
       };
 
       // Verify we have 20 items (pages 1 and 2)

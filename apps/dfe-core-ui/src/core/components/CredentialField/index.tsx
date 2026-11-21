@@ -6,6 +6,7 @@ import {
   type TCredentialSource,
 } from '@/core/components/CredentialField/credentialSource';
 import { Form } from '@/core/components/Form';
+import { useAdministeredOrg } from '@/core/hooks/useAdministeredOrg';
 import { ruleCheckingField } from '@/core/utils/zod/useAntdZodResolver';
 import { Input, Select, Space, type FormItemProps, type FormRule } from 'antd';
 import { useId, useState } from 'react';
@@ -35,7 +36,10 @@ interface CredentialFieldProps {
   storedName?: TNamePath;
 }
 
-/** A credential set as a value or as the name of the env var holding it; only the selected member is a mounted form field, so a submit carries that member alone. */
+/**
+ * A credential set as a value or as the name of the env var holding it; only the selected member is a mounted form field, so a submit carries that member alone.
+ * An org admin sets values only: the engine refuses it an env var, which would read the engine's own environment.
+ */
 export const CredentialField = ({
   dependencies,
   envName,
@@ -47,6 +51,7 @@ export const CredentialField = ({
 }: CredentialFieldProps) => {
   const form = Form.useFormInstance();
   const id = useId();
+  const valuesOnly = Boolean(useAdministeredOrg());
   const hasStoredSecret =
     storedName !== undefined && isStoredSecret(form.getFieldValue(storedName));
   const [initialSource] = useState<TCredentialSource>(() =>
@@ -56,13 +61,14 @@ export const CredentialField = ({
       value: form.getFieldValue(valueName),
     }),
   );
-  const [source, setSource] = useState(initialSource);
+  const [chosenSource, setSource] = useState(initialSource);
+  const source = valuesOnly ? 'value' : chosenSource;
   const inputId = `${id}-${source}`;
   // The shown member also reports an error the rules pin to the member that is not mounted.
   const rules = (hidden: TNamePath) => [rule, ruleCheckingField(rule, hidden)];
   // A secret that opened on Env Var has none stored, so a blank value switched to would leave it with no source.
   const valueRules =
-    secret && initialSource === 'env'
+    secret && initialSource === 'env' && !valuesOnly
       ? [
           ...rules(envName),
           {
@@ -75,15 +81,17 @@ export const CredentialField = ({
   return (
     <Form.Item label={label} htmlFor={inputId}>
       <Space.Compact block>
-        <Select
-          id={`${id}-source`}
-          aria-label={`${label} source`}
-          className="w-28 shrink-0"
-          options={SOURCE_OPTIONS}
-          value={source}
-          onChange={setSource}
-          virtual={false}
-        />
+        {!valuesOnly && (
+          <Select
+            id={`${id}-source`}
+            aria-label={`${label} source`}
+            className="w-28 shrink-0"
+            options={SOURCE_OPTIONS}
+            value={source}
+            onChange={setSource}
+            virtual={false}
+          />
+        )}
         {source === 'value' ? (
           <Form.Item
             key="value"

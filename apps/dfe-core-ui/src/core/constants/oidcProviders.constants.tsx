@@ -104,3 +104,6 @@ export const ENTRA_TOKEN_CLAIM_HINT =
   'Optional. Read only when a user is in too many groups for the token to list them.';
 
 export const SCOPES_PLACEHOLDER = 'Provider type default';
+
+export const UNTRUSTED_DOMAINS_WARNING =
+  "With no trusted domain, nobody can sign in through this provider. Add your users' email domains.";

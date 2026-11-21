@@ -1,3 +1,4 @@
+import { useReauthGrant } from '@/core/hooks/useReauthGrant';
 import { Modal } from '@/core/components/Modal';
 import { RbacProtected } from '@/core/components/RbacProtected';
 import { useDeleteRole } from '@/Settings/hooks/roles/useDeleteRole';
@@ -17,11 +18,14 @@ export const DeleteRoleModal = ({
   onSuccess,
   disabled,
 }: DeleteRoleModalProps) => {
+  const reauth = useReauthGrant(role_name, 'role');
   const [open, setOpen] = useState(false);
   const { notification } = App.useApp();
 
   const { mutate, isPending, error } = useDeleteRole({
+    reauth: reauth.grant,
     onSuccess: () => {
+      reauth.drop();
       onSuccess?.();
       setOpen(false);
       notification.success({
@@ -41,6 +45,7 @@ export const DeleteRoleModal = ({
 
   return (
     <>
+      {reauth.modal}
       <RbacProtected action={RbacProtected.rbacActions.role_delete}>
         <RbacProtected.Unrestricted>
           <Button
@@ -48,7 +53,7 @@ export const DeleteRoleModal = ({
             className="hover:text-error hover:bg-error/5"
             aria-label={`Delete ${role_name}`}
             icon={<IconTrash />}
-            onClick={() => setOpen(true)}
+            onClick={() => reauth.ask(() => setOpen(true))}
             disabled={disabled}
           >
             Delete Role

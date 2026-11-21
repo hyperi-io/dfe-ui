@@ -31,7 +31,7 @@ const signIn = async (page: Page, password: string) => {
     name: 'Login with Local',
     exact: true,
   });
-  const username = textbox(page, 'Username');
+  const username = textbox(page, 'Username or Email');
   // Once the local tab is selected, the tab and the username field are both
   // present. Waiting for exactly one of them fails that page.
   await expect(localTab.or(username).first()).toBeVisible();

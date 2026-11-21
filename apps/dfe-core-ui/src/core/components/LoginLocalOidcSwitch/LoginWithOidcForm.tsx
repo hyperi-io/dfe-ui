@@ -1,19 +1,21 @@
 import { Form } from '@/core/components/Form';
 import { OidcLoginPopup } from '@/core/components/OidcLoginPopup';
 import { TFetchSetupStatusResponse } from '@/core/hooks/useFetchSetupStatus/types';
-import { readStorageItem, writeStorageItem } from '@/core/utils/storage';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
 import { Button, Checkbox, Select } from 'antd';
 import { useState } from 'react';
 import z from 'zod';
+import {
+  readLoginChoice,
+  REMEMBER_LABEL,
+  rememberLoginChoice,
+} from './loginChoice';
 
 const formSchema = z.object({
   provider: z.string().min(1, { message: 'Provider is required' }),
-  remember_selected_provider: z.boolean().default(false),
+  remember: z.boolean().default(false),
 });
 type FormData = z.infer<typeof formSchema>;
-
-const REMEMBERED_PROVIDER_KEY = 'dfe_provider';
 
 export const LoginWithOidcForm = ({
   oidc_providers,
@@ -26,16 +28,18 @@ export const LoginWithOidcForm = ({
   const [form] = Form.useForm<FormData>();
   const formValidation = useAntdZodResolver<FormData>(formSchema);
 
-  const localSelectedProvider = readStorageItem(REMEMBERED_PROVIDER_KEY);
+  const choice = readLoginChoice();
   const selectedProvider =
-    localSelectedProvider &&
-    oidc_providers?.find((provider) => provider.name === localSelectedProvider)
-      ?.name;
+    choice?.method === 'oidc'
+      ? oidc_providers?.find((provider) => provider.name === choice.provider)
+          ?.name
+      : undefined;
 
+  // The box starts ticked for a remembered provider, so logging in unticked forgets it.
   const handleSubmit = (values: FormData) => {
-    if (values.remember_selected_provider) {
-      writeStorageItem(REMEMBERED_PROVIDER_KEY, values.provider);
-    }
+    rememberLoginChoice(
+      values.remember ? { method: 'oidc', provider: values.provider } : null,
+    );
     setShowOidcLoginPopup(true);
   };
   return (
@@ -44,7 +48,7 @@ export const LoginWithOidcForm = ({
       onFinish={handleSubmit}
       initialValues={{
         provider: selectedProvider ?? oidc_providers?.[0]?.name ?? '',
-        remember_selected_provider: false,
+        remember: Boolean(selectedProvider),
       }}
     >
       <Form.Item name="provider" label="Provider" rules={[formValidation]}>
@@ -59,8 +63,8 @@ export const LoginWithOidcForm = ({
         />
       </Form.Item>
 
-      <Form.Item name="remember_selected_provider" valuePropName="checked">
-        <Checkbox>Remember Selected Provider</Checkbox>
+      <Form.Item name="remember" valuePropName="checked">
+        <Checkbox>{REMEMBER_LABEL}</Checkbox>
       </Form.Item>
 
       {showOidcLoginPopup && (

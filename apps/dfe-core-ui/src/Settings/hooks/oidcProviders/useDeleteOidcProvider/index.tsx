@@ -1,11 +1,15 @@
+import { REAUTH_HEADER } from '@/core/hooks/useReauth';
 import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { deleteOidcProvider } from './api';
 
 export const useDeleteOidcProvider = ({
+  reauth,
   onSuccess,
   onError,
 }: {
+  /** The re-auth grant the engine requires on this change, read when the request goes out. */
+  reauth?: () => string | undefined;
   onSuccess?: () => void;
   onError?: (error: Error) => void;
 }) => {
@@ -14,6 +18,7 @@ export const useDeleteOidcProvider = ({
   const { mutate, isPending, error } = useMutation({
     mutationFn: (name: string) =>
       deleteOidcProvider({
+        headerParams: { [REAUTH_HEADER]: reauth?.() },
         pathParams: { name: name },
       }),
     onSuccess: () => {

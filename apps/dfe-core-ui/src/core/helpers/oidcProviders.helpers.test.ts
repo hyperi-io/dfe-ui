@@ -4,12 +4,29 @@ import {
   toCreateOidcProviderBody,
   toScopeList,
   toUpdateOidcProviderBody,
+  trustableEmailDomain,
 } from './oidcProviders.helpers';
 
 const GOOGLE_GROUPS_SCOPE =
   'https://www.googleapis.com/auth/cloud-identity.groups.readonly';
 
 describe('oidcProviders.helpers', () => {
+  describe('.trustableEmailDomain', () => {
+    test.each([
+      { email: 'kaz@hyperi.io', expected: 'hyperi.io' },
+      { email: ' Kaz@Corp.Example.COM ', expected: 'corp.example.com' },
+      { email: 'odd"@name"@corp.com', expected: 'corp.com' },
+      { email: 'no-at-sign', expected: undefined },
+      { email: 'kaz@', expected: undefined },
+      { email: 'kaz@localhost', expected: undefined },
+      { email: '', expected: undefined },
+      { email: null, expected: undefined },
+      { email: undefined, expected: undefined },
+    ])('reads $email as $expected', ({ email, expected }) => {
+      expect(trustableEmailDomain(email)).toBe(expected);
+    });
+  });
+
   describe('.toScopeList', () => {
     test('splits a space-separated scope string', () => {
       expect(
@@ -37,6 +54,7 @@ describe('oidcProviders.helpers', () => {
   describe('.toCreateOidcProviderBody', () => {
     const create = {
       name: 'okta-workforce',
+      org: '',
       enabled: true,
       type: 'okta' as const,
       display_name: 'Okta',
@@ -84,6 +102,15 @@ describe('oidcProviders.helpers', () => {
       expect(
         toCreateOidcProviderBody({ ...create, scopes: ['openid', 'email'] }),
       ).toMatchObject({ scopes: ['openid', 'email'] });
+    });
+
+    test('sends the trusted email domains', () => {
+      expect(
+        toCreateOidcProviderBody({
+          ...create,
+          trusted_email_domains: ['corp.com'],
+        }),
+      ).toMatchObject({ trusted_email_domains: ['corp.com'] });
     });
 
     test('omits an empty list, which the engine refuses', () => {
@@ -165,6 +192,31 @@ describe('oidcProviders.helpers', () => {
           { ...stored, scopes: ['openid', 'email'] },
         ),
       ).toMatchObject({ scopes: ['email', 'openid'] });
+    });
+
+    test('sends trusted email domains that differ from the stored ones, an emptied list included', () => {
+      const trusted = { ...stored, trusted_email_domains: ['corp.com'] };
+      expect(
+        toUpdateOidcProviderBody(
+          { trusted_email_domains: ['corp.com', 'eu.corp.com'] },
+          trusted,
+        ),
+      ).toMatchObject({ trusted_email_domains: ['corp.com', 'eu.corp.com'] });
+      expect(
+        toUpdateOidcProviderBody({ trusted_email_domains: [] }, trusted),
+      ).toMatchObject({ trusted_email_domains: [] });
+    });
+
+    test.each([
+      ['an unchanged list', ['corp.com']],
+      ['an unrendered field', undefined],
+    ])('omits %s', (_case, domains) => {
+      expect(
+        toUpdateOidcProviderBody(
+          { trusted_email_domains: domains },
+          { ...stored, trusted_email_domains: ['corp.com'] },
+        ),
+      ).not.toHaveProperty('trusted_email_domains');
     });
 
     test('an emptied list leaves the stored scopes alone', () => {
@@ -267,6 +319,38 @@ describe('oidcProviders.helpers', () => {
       expect(toUpdateOidcProviderBody(shown, { ...stored, ...saved })).toEqual(
         expected,
       );
+    });
+
+    // The org as the form shows it, against the provider's stored one.
+    test.each<{
+      expected: Record<string, string>;
+      name: string;
+      shown: { org?: string };
+    }>([
+      {
+        name: 'an unedited org sends nothing',
+        shown: { org: 'acme' },
+        expected: {},
+      },
+      {
+        name: 'a changed org is sent',
+        shown: { org: 'globex' },
+        expected: { org: 'globex' },
+      },
+      {
+        name: 'a cleared org moves the provider to the platform',
+        shown: { org: undefined },
+        expected: { org: '' },
+      },
+      {
+        name: 'an org the form did not render sends nothing',
+        shown: {},
+        expected: {},
+      },
+    ])('$name', ({ expected, shown }) => {
+      expect(
+        toUpdateOidcProviderBody(shown, { ...stored, org: 'acme' }),
+      ).toEqual(expected);
     });
 
     // The engine drops a stored secret for an env var name sent without a value, so these bodies decide it.

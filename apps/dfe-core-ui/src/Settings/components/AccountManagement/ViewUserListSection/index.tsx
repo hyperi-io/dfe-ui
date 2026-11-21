@@ -1,8 +1,10 @@
 import { GenericErrorCard } from '@/core/components/GenericError';
 import { NotificationCard } from '@/core/components/NotificationCard';
+import { OrganisationSelect } from '@/core/components/OrganisationSelect';
 import { RbacProtected } from '@/core/components/RbacProtected';
 import { SectionCard } from '@/core/components/SectionCard';
 import { Table } from '@/core/components/Table';
+import { useAdministeredOrg } from '@/core/hooks/useAdministeredOrg';
 import { useFetchSetupStatus } from '@/core/hooks/useFetchSetupStatus';
 import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
 import { renderColumns } from '@/Settings/helpers/accountManagementHelpers';
@@ -15,6 +17,8 @@ import { useCallback, useState } from 'react';
 
 export const ViewUserListSection = () => {
   const [search, setSearch] = useState('');
+  const [org, setOrg] = useState<string>();
+  const administeredOrg = useAdministeredOrg();
   const pageSizeParam = useSearchParams().get('page_size');
   const parsedPageSize = pageSizeParam
     ? Number.parseInt(pageSizeParam, 10)
@@ -29,7 +33,14 @@ export const ViewUserListSection = () => {
     hasNextPage,
     fetchNextPage,
     error,
-  } = useFetchInfiniteFilteredAccounts({ search, blocked: false, page_size });
+  } = useFetchInfiniteFilteredAccounts({
+    search,
+    org,
+    blocked: false,
+    page_size,
+    // Root accounts (no org) sort first, then each org's, by username.
+    sort_by: 'org',
+  });
 
   const { componentHeight } = useSetComponentHeight({
     offset: 350,
@@ -62,13 +73,25 @@ export const ViewUserListSection = () => {
       title="Manage existing accounts"
       description="Manage local accounts, group memberships, and account status."
       rightTitleSlot={
-        <Input.Search
-          className="ml-auto w-60"
-          placeholder="Search accounts"
-          onChange={(e) => setSearch(e.target.value)}
-          value={search}
-          allowClear
-        />
+        <div className="ml-auto flex items-start gap-2">
+          {!administeredOrg && (
+            <OrganisationSelect
+              allowClear
+              aria-label="Filter by organisation"
+              className="w-48"
+              placeholder="All organisations"
+              value={org}
+              onChange={setOrg}
+            />
+          )}
+          <Input.Search
+            className="w-60"
+            placeholder="Search accounts"
+            onChange={(e) => setSearch(e.target.value)}
+            value={search}
+            allowClear
+          />
+        </div>
       }
     >
       <RbacProtected action={RbacProtected.rbacActions.account_read}>

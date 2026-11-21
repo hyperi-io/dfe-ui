@@ -31,6 +31,7 @@ const { wrapper } = buildTestWrapper().withReactQuery();
 describe('.useCreateOidcProvider', () => {
   const requestBody: TCreateOidcProviderRequest = {
     name: 'string',
+    org: '',
     type: 'generic',
     enabled: true,
     display_name: 'string',
@@ -71,6 +72,7 @@ describe('.useCreateOidcProvider', () => {
 
       const expectedResponse: TCreateOidcProviderResponse = {
         name: 'string',
+        org: '',
         display_name: 'string',
         enabled: true,
         type: 'generic',
@@ -80,6 +82,7 @@ describe('.useCreateOidcProvider', () => {
         created_at: 'string',
         last_sync_at: 'string',
         last_sync_status: 'string',
+        trusted_email_domains: [],
         sync_error: 'string',
         client_id: 'client_id',
         client_secret_path: 'client_secret_path',

@@ -1,7 +1,11 @@
 import { Locator, Page, expect, test } from '@playwright/test';
 
 import { BASE_URL, e2eClient } from '@e2e/config/e2e.client';
-import { loginAs } from '@e2e/config/login.helpers';
+import {
+  chooseYourOrganisation,
+  confirmItsYou,
+  loginAs,
+} from '@e2e/config/login.helpers';
 import { TAGS } from '@e2e/config/tags.constants';
 
 /**
@@ -67,9 +71,11 @@ const inviteAccount = async (page: Page) => {
   await create.getByPlaceholder('Enter email').fill(EMAIL);
   await create.getByPlaceholder('Enter name').fill(NAME);
   await create.getByPlaceholder('Enter password').fill(PASSWORD);
+  await chooseYourOrganisation(create);
   await create
     .getByRole('button', { name: 'Create Account', exact: true })
     .click();
+  await confirmItsYou(page);
 
   await expect(page.getByText('Account created successfully')).toBeVisible();
 
@@ -85,6 +91,7 @@ const deactivateAccount = async (page: Page, row: Locator) => {
   await page
     .getByRole('button', { name: 'Deactivate Account', exact: true })
     .click();
+  await confirmItsYou(page);
   await expect(page.getByText('Account deactivated')).toBeVisible();
   await expect(row.getByText('Inactive', { exact: true })).toBeVisible();
 };
@@ -103,6 +110,7 @@ test.describe('', { tag: [TAGS.core, TAGS.settings, TAGS.account] }, () => {
       await page
         .getByRole('button', { name: `Edit ${USERNAME}`, exact: true })
         .click();
+      await confirmItsYou(page);
 
       const edit = page.getByRole('dialog', { name: `Edit ${USERNAME}` });
       await expect(edit.getByPlaceholder('Enter name')).toHaveValue(NAME);
@@ -128,6 +136,7 @@ test.describe('', { tag: [TAGS.core, TAGS.settings, TAGS.account] }, () => {
       await page
         .getByRole('button', { name: 'Block Account', exact: true })
         .click();
+      await confirmItsYou(page);
 
       await expect(page.getByText('Account blocked')).toBeVisible();
       await expect(row).toHaveCount(0);
@@ -149,6 +158,7 @@ test.describe('', { tag: [TAGS.core, TAGS.settings, TAGS.account] }, () => {
       await page
         .getByRole('button', { name: `Delete ${USERNAME}`, exact: true })
         .click();
+      await confirmItsYou(page);
       const remove = page.getByRole('dialog', { name: 'Delete Account' });
       await remove
         .getByPlaceholder('Enter username to be deleted')

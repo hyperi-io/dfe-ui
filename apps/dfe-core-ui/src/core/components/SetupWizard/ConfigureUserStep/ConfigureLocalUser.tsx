@@ -1,3 +1,4 @@
+import { useReauthGrant } from '@/core/hooks/useReauthGrant';
 import {
   CreateAccountForm,
   CreateAccountFormData,
@@ -13,6 +14,7 @@ export const ConfigureLocalUser = ({ goNext }: { goNext: () => void }) => {
     username: string;
     password: string;
   }>({ username: '', password: '' });
+  const reauth = useReauthGrant(loginValues.username, 'account');
   const {
     mutate: login,
     isPending: isLoginPending,
@@ -29,23 +31,28 @@ export const ConfigureLocalUser = ({ goNext }: { goNext: () => void }) => {
     isPending: isCreateAccountPending,
     error: createAccountError,
   } = useCreateAccount({
+    reauth: reauth.grant,
     onSuccess: () => {
+      reauth.drop();
       login(loginValues);
     },
   });
 
   const handleFinish = (values: CreateAccountFormData) => {
     setLoginValues({ username: values.username, password: values.password });
-    createAccount({
-      ...values,
-      phone: values.phone ?? '',
-      name: values.name ?? '',
-      org: '',
-    });
+    reauth.ask(() =>
+      createAccount({
+        ...values,
+        phone: values.phone ?? '',
+        name: values.name ?? '',
+        org: '',
+      }),
+    );
   };
 
   return (
     <div className="flex flex-col gap-2">
+      {reauth.modal}
       <CreateAccountForm
         onFinish={handleFinish}
         error={createAccountError}

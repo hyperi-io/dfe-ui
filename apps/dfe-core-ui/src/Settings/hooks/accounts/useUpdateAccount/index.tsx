@@ -1,4 +1,5 @@
 import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
+import { REAUTH_HEADER } from '@/core/hooks/useReauth';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { updateAccount } from './api';
 import { TAccountUpdateRequestBody, TAccountUpdateResponse } from './types';
@@ -6,6 +7,8 @@ import { TAccountUpdateRequestBody, TAccountUpdateResponse } from './types';
 interface UseUpdateAccountProps {
   onSuccess?: (data: TAccountUpdateResponse) => void;
   onError?: (error: Error) => void;
+  /** The re-auth grant for *username*, which the engine requires on an edit, read when the request goes out. */
+  reauth?: () => string | undefined;
   username: string;
 }
 
@@ -13,6 +16,7 @@ export const useUpdateAccount = ({
   username,
   onSuccess,
   onError,
+  reauth,
 }: UseUpdateAccountProps) => {
   const queryClient = useQueryClient();
 
@@ -20,6 +24,7 @@ export const useUpdateAccount = ({
     mutationFn: (account: TAccountUpdateRequestBody) =>
       updateAccount({
         body: account,
+        headerParams: { [REAUTH_HEADER]: reauth?.() },
         pathParams: { username },
       }),
     onSuccess: (data) => {
