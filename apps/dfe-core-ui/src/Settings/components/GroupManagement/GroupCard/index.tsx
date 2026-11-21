@@ -7,6 +7,9 @@ import { ViewGroupDetailsDrawer } from '@/Settings/components/GroupManagement/Vi
 import { TAG_LIMIT, TagList } from './TagList';
 
 export const GroupCard = ({ group }: { group: TGroupsItemSummary }) => {
+  const members = group.members ?? [];
+  const linkedMembers = group.linked_members ?? [];
+  const memberCount = members.length + linkedMembers.length;
   return (
     <div className="rounded-md p-4 border border-foreground/10 dark:border-dark-foreground/10 relative h-full">
       <div className="flex flex-col gap-1">
@@ -56,11 +59,12 @@ export const GroupCard = ({ group }: { group: TGroupsItemSummary }) => {
         </p>
         <ul className="flex flex-wrap gap-2 w-full overflow-hidden max-h-12">
           <TagList
-            items={group.members ?? []}
+            items={members}
+            linked={linkedMembers}
             emptyLabel="No members assigned"
           />
         </ul>
-        {group.members && group.members.length > TAG_LIMIT && (
+        {memberCount > TAG_LIMIT && (
           <span
             className={cn(
               'text-xs self-end',
@@ -68,7 +72,7 @@ export const GroupCard = ({ group }: { group: TGroupsItemSummary }) => {
               'rounded-md px-2 py-0.5 border border-foreground/10 dark:border-dark-foreground/10',
             )}
           >
-            {`+ ${group.members.length - TAG_LIMIT} more`}
+            {`+ ${memberCount - TAG_LIMIT} more`}
           </span>
         )}
       </div>

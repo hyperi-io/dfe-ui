@@ -9671,6 +9671,11 @@ export interface components {
             roles: string[];
             /** Members */
             members: string[];
+            /**
+             * Linked Members
+             * @description Accounts that hold the group through an IdP sign-in its link matches, beside the stored members. Read-only: writing members never sets them.
+             */
+            linked_members?: string[];
             /** Scope */
             scope: string;
             /** Source Id */

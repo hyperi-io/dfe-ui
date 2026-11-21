@@ -1,5 +1,6 @@
 import { EmptyDetail } from '@/core/components/EmptyDetail';
 import { GenericErrorCard } from '@/core/components/GenericError';
+import { LinkedMemberName } from '@/Settings/components/GroupManagement/LinkedMemberName';
 import { useFetchGroupDetail } from '@/Settings/hooks/groups/useFetchGroupDetail';
 import { Spin } from 'antd';
 
@@ -77,14 +78,22 @@ export const ViewGroupDetails = ({ group_name }: { group_name: string }) => {
       </dd>
       <dt className={dataListTermStyle}>Members:</dt>
       <dd>
-        {data.members?.length > 0 ? (
+        {data.members?.length > 0 || (data.linked_members ?? []).length > 0 ? (
           <ul className="flex flex-wrap items-center gap-1">
             {data.members.map((member) => (
               <li
-                key={member}
+                key={`member-${member}`}
                 className="text-xs bg-foreground/10 dark:bg-dark-foreground/10 rounded-md px-2 py-0.5 whitespace-nowrap"
               >
                 {member}
+              </li>
+            ))}
+            {(data.linked_members ?? []).map((member) => (
+              <li
+                key={`linked-${member}`}
+                className="text-xs bg-foreground/10 dark:bg-dark-foreground/10 rounded-md px-2 py-0.5 whitespace-nowrap"
+              >
+                <LinkedMemberName username={member} />
               </li>
             ))}
           </ul>
