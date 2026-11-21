@@ -15774,6 +15774,13 @@ export interface components {
             /** @description How an agentless transform detects each event's source and what it does with one it cannot place. Read only when mode is agentless. Unset leaves the app's own defaults. */
             detect?: components["schemas"]["TransformDetect"] | null;
             /**
+             * Conf
+             * @description Settings the transform's program reads for this source, written as the integration documents them (dfe-transform-elastic sets them as _conf on each event: tz_offset, tz_map and the like). A plain map of at most 16 KiB, with no key named secret, password, token, api_key or client_secret at any depth. Only an app whose manifest declares a conf_path takes it.
+             */
+            conf?: {
+                [key: string]: unknown;
+            };
+            /**
              * Config File
              * @description Path to engine-specific config
              */
