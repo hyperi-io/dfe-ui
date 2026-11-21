@@ -2356,13 +2356,13 @@ export interface paths {
         get: operations["system.retention.get"];
         /**
          * Put Retention
-         * @description Store the override in the deploy repo, then apply it to every table that follows it.
+         * @description Store the override in the deploy repo and return, leaving the tables to a background pass.
          *
-         *     The engine's own tables and every deployed source's table are brought to the new
-         *     effective default in this request, with ``ALTER TABLE ... MODIFY TTL`` (or
-         *     ``REMOVE TTL`` for 0). A table that declares its own TTL is left alone. A
-         *     ClickHouse failure answers 502 with the override ALREADY committed. Sending the
-         *     same value again applies it.
+         *     The pass brings the engine's own tables and every deployed source's table to the
+         *     stored value with ``ALTER TABLE ... MODIFY TTL`` (or ``REMOVE TTL`` for 0). A table
+         *     that declares its own TTL is left alone. The pass runs again until every table
+         *     has it, so a ClickHouse that is down when the value is stored gets it once it is
+         *     back, and a restart does not lose it.
          */
         put: operations["system.retention.apply"];
         post?: never;
@@ -2424,7 +2424,8 @@ export interface paths {
          *     Omitted fields are left alone. null clears that override. Common-header type,
          *     version and engine are what a source inherits the next time it is deployed.
          *     This request does not rewrite them onto live tables. A patch that names
-         *     ttl_days stores it and then runs the same reconcile as PUT /retention.
+         *     ttl_days stores it and returns, and the same background pass as PUT /retention
+         *     applies it.
          */
         patch: operations["system.defaults.update"];
         trace?: never;
@@ -12605,32 +12606,6 @@ export interface components {
             buckets: components["schemas"]["ResourceBucketModel"][];
         };
         /**
-         * RetentionReconcileSummary
-         * @description What applying the new default did to the live tables.
-         */
-        RetentionReconcileSummary: {
-            /**
-             * Core Tables Altered
-             * @description database.table: <old> -> <new> days, for each engine table whose TTL moved.
-             */
-            core_tables_altered: string[];
-            /**
-             * Source Tables Altered
-             * @description database.table for each deployed source's table the apply altered.
-             */
-            source_tables_altered: string[];
-            /**
-             * Sources Reconciled
-             * @description Deployed sources whose table was brought current.
-             */
-            sources_reconciled: number;
-            /**
-             * Sources Skipped
-             * @description Deployed sources left to their next deploy: table absent, build failed or ClickHouse refused.
-             */
-            sources_skipped: number;
-        };
-        /**
          * RetentionStatus
          * @description The default TTL a time-series table gets when it declares none, and where it comes from.
          */
@@ -12672,39 +12647,6 @@ export interface components {
              * @description Retention in days for every table that follows the default; 0 keeps rows forever. null clears the override, so deployment_default applies again.
              */
             default_ttl_days: number | null;
-        };
-        /**
-         * RetentionUpdateResponse
-         * @description The default TTL after the change, and what applying it did.
-         */
-        RetentionUpdateResponse: {
-            /**
-             * Default Ttl Days
-             * @description Effective retention in days for every table that follows the default; 0 = no TTL. The override when one is stored, else deployment_default.
-             */
-            default_ttl_days: number;
-            /**
-             * Stored
-             * @description The admin's override, committed in the deploy repo; null when none is set.
-             */
-            stored: number | null;
-            /**
-             * Origin
-             * @description override when the stored value wins, deployment when deployment_default does.
-             * @enum {string}
-             */
-            origin: "override" | "deployment";
-            /**
-             * Deployment Default
-             * @description DFE_ENGINE_CLICKHOUSE_DEFAULT_TTL_DAYS as deployed; applies whenever no override is set.
-             */
-            deployment_default: number;
-            /**
-             * Editable
-             * @description Whether this deployment can store an override. False without gitops, where a PUT answers 503.
-             */
-            editable: boolean;
-            reconcile: components["schemas"]["RetentionReconcileSummary"];
         };
         /**
          * ReviewRequest
@@ -16066,23 +16008,6 @@ export interface components {
              * @description MergeTree-family variant. null clears it, so the deployment engine applies.
              */
             engine?: string | null;
-        };
-        /**
-         * SystemDefaultsUpdate
-         * @description The defaults after the patch. reconcile is set only when ttl_days was named.
-         */
-        SystemDefaultsUpdate: {
-            ttl_days: components["schemas"]["IntDefault"];
-            common_header_type: components["schemas"]["StrDefault"];
-            common_header_version: components["schemas"]["StrDefault"];
-            /** @description MergeTree-family variant, without the Replicated or Shared prefix. */
-            engine: components["schemas"]["StrDefault"];
-            /**
-             * Editable
-             * @description Whether this deployment can store an override. False without gitops.
-             */
-            editable: boolean;
-            reconcile?: components["schemas"]["RetentionReconcileSummary"] | null;
         };
         /**
          * SystemStatusResponse
@@ -25461,7 +25386,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["RetentionUpdateResponse"];
+                    "application/json": components["schemas"]["RetentionStatus"];
                 };
             };
             /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */
@@ -25484,15 +25409,6 @@ export interface operations {
             };
             /** @description Validation Error */
             422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["Problem"];
-                };
-            };
-            /** @description reconcile_failed: the value is stored, and applying it to ClickHouse failed; sending the same value again applies it */
-            502: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -25739,7 +25655,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["SystemDefaultsUpdate"];
+                    "application/json": components["schemas"]["SystemDefaults"];
                 };
             };
             /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */
@@ -25762,15 +25678,6 @@ export interface operations {
             };
             /** @description validation_error: a named value cannot be stored */
             422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["Problem"];
-                };
-            };
-            /** @description reconcile_failed: ttl_days is stored, and applying it to ClickHouse failed; sending the same value again applies it */
-            502: {
                 headers: {
                     [name: string]: unknown;
                 };
