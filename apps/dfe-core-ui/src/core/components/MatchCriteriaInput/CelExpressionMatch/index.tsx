@@ -1,64 +1,71 @@
 import { AceEditor } from '@/core/components/AceEditor';
 import { FormNotification } from '@/core/components/FormNotification';
-import { useCheckCel } from '@/core/hooks/useCelCheck';
 import { IconCheck, IconX } from '@repo/dfe-icons';
 import type { Editor } from 'ace-builds';
 import { Button } from 'antd';
 import { useEffect, useRef, useState } from 'react';
+import { ValidateCel } from '..';
 
 const EXAMPLE = "// eg: data_stream.dataset == 'okta.system'";
 
 export const CelExpressionMatch = ({
   value,
   onChange,
+  validateCel,
 }: {
   onChange?: (value?: string) => void;
   value?: string;
+  validateCel: ValidateCel;
 }) => {
   const [expression, setExpression] = useState(value ?? EXAMPLE);
   const editorRef = useRef<Editor | null>(null);
 
-  const {
-    data,
-    mutate: checkCel,
-    isPending,
-    error,
-    reset: resetCheckCel,
-  } = useCheckCel();
-
   const handleExpressionChange = (value: string) => {
     setExpression(value);
-    resetCheckCel();
+    validateCel?.reset();
     onChange?.(value);
   };
 
   useEffect(() => {
     const editor = editorRef.current;
-    const errors = (data?.errors ?? []).filter((message) => message.length > 0);
-    if (!editor || data?.valid !== false || errors.length === 0) return;
+    const errors = (validateCel?.data?.errors ?? []).filter(
+      (message) => message.length > 0,
+    );
+    if (!editor || validateCel?.data?.valid !== false || errors.length === 0)
+      return;
     editor.session.setAnnotations(
       errors.map((text) => ({ row: 0, column: 0, text, type: 'error' })),
     );
-  }, [data]);
+  }, [validateCel?.data]);
 
   return (
     <div className="flex flex-col gap-2">
       <div className="flex justify-end absolute top-12 right-2 z-10">
-        <Button
-          icon={data ? data?.valid ? <IconCheck /> : <IconX /> : null}
-          danger={data ? !data?.valid : false}
-          type="default"
+        {validateCel && (
+          <Button
+            icon={
+              validateCel?.data ? (
+                validateCel?.data?.valid ? (
+                  <IconCheck />
+                ) : (
+                  <IconX />
+                )
+              ) : null
+            }
+            danger={validateCel?.data ? !validateCel?.data?.valid : false}
+            type="default"
 
-          loading={isPending}
-          htmlType="button"
-          onClick={() => checkCel({ expression, check_profile: true })}
-        >
-          {data
-            ? data?.valid
-              ? 'Expression is valid'
-              : 'Expression is invalid'
-            : 'Check Expression'}
-        </Button>
+            loading={validateCel?.isPending}
+            htmlType="button"
+            onClick={() => validateCel?.mutate(expression)}
+          >
+            {validateCel?.data
+              ? validateCel?.data?.valid
+                ? 'Expression is valid'
+                : 'Expression is invalid'
+              : 'Check Expression'}
+          </Button>
+        )}
       </div>
 
       <AceEditor
@@ -72,17 +79,17 @@ export const CelExpressionMatch = ({
           editorRef.current = editor;
         }}
       />
-      {data && !data?.valid && (
+      {validateCel?.data && !validateCel?.data?.valid && (
         <FormNotification
           title="Expression is invalid"
-          text={data?.errors?.join(', ')}
+          text={validateCel?.data?.errors?.join(', ')}
           type="error"
         />
       )}
-      {error && (
+      {validateCel?.error && (
         <FormNotification
           title="Error checking expression"
-          text={error.message}
+          text={validateCel?.error?.message}
           type="error"
         />
       )}

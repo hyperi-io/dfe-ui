@@ -1,5 +1,4 @@
 import { Tooltip } from '@/core/components/Tooltip';
-import { MATCH_NESTING_LIMIT } from '@repo/dfe-engine-types/limits';
 import { IconPlus, IconSubtask, IconTrash } from '@repo/dfe-icons';
 import { cn } from '@repo/dfe-shared-ui';
 import { Button, Select } from 'antd';
@@ -15,6 +14,7 @@ import {
   GroupMode,
   TMatchFormNode,
   TMatchJoin,
+  TMatchOperator,
 } from './WhenMatch.types';
 
 export const ConditionGroup = ({
@@ -24,6 +24,8 @@ export const ConditionGroup = ({
   level,
   onRemove,
   onChange,
+  matchDepthLimit,
+  operatorOptions,
 }: {
   path: FieldPath;
   number: string;
@@ -31,9 +33,11 @@ export const ConditionGroup = ({
   level: number;
   onRemove?: () => void;
   onChange: (next: TMatchFormNode | null) => void;
+  matchDepthLimit: number;
+  operatorOptions: { label: string; value: TMatchOperator }[];
 }) => {
   const parts = node.parts ?? [];
-  const canNest = level < MATCH_NESTING_LIMIT;
+  const canNest = level < matchDepthLimit;
   const isRoot = level === 1;
   const label = isRoot ? 'Conditions' : `Group ${number}`;
 
@@ -65,7 +69,7 @@ export const ConditionGroup = ({
       className={cn(
         'flex flex-col gap-2 rounded-md border p-3',
         'border-foreground/15 dark:border-dark-foreground/15',
-        !isRoot && 'bg-foreground/[0.02] dark:bg-dark-foreground/[0.03]',
+        !isRoot && 'bg-foreground/2 dark:bg-dark-foreground/3',
       )}
     >
       {/* <Form.Item name={[...path, 'join']} hidden>
@@ -112,6 +116,8 @@ export const ConditionGroup = ({
             level={level + 1}
             onRemove={() => replacePart(index, null)}
             onChange={(next) => replacePart(index, next)}
+            matchDepthLimit={matchDepthLimit}
+            operatorOptions={operatorOptions}
           />
         ) : (
           <ConditionRow
@@ -120,6 +126,7 @@ export const ConditionGroup = ({
             node={part}
             onRemove={() => replacePart(index, null)}
             onChange={(next) => replacePart(index, next)}
+            operatorOptions={operatorOptions}
           />
         );
       })}
@@ -135,9 +142,7 @@ export const ConditionGroup = ({
         </Button>
         <Tooltip
           title={
-            canNest
-              ? undefined
-              : `Groups nest at most ${MATCH_NESTING_LIMIT} deep`
+            canNest ? undefined : `Groups nest at most ${matchDepthLimit} deep`
           }
         >
           <Button

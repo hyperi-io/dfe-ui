@@ -1,37 +1,21 @@
 import { ApiErrorNotification } from '@/core/components/ApiErrorNotification';
 import { Form } from '@/core/components/Form';
 import { MatchCriteriaInput } from '@/core/components/MatchCriteriaInput';
+import { useCheckCel } from '@/core/hooks/useCelCheck';
+import { useValidateRule } from '@/core/hooks/useValidateRule';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
-import { RULE_HUNT_NAME_VALIDATOR } from '@/core/validationSchemas/utils';
+import {
+  MATCH_NESTING_LIMIT,
+  MATCH_OPERATORS,
+} from '@repo/dfe-engine-types/limits';
 import { IconDeviceFloppy } from '@repo/dfe-icons';
 import { Button, FormProps, Input, Select } from 'antd';
 import { useEffect, useMemo } from 'react';
-import z from 'zod';
 import { DEFAULT_ESTIMATE_COST } from './defaults';
 import { ResponseModal } from './ResponseModal';
+import { buildFormSchema, CreateUpdateRuleFormData } from './schema';
 
-const requiredName = z.string().min(1, { message: 'Name is required' });
-
-// The engine checks the name on create only, and the gitops store allows names
-// the create endpoint refuses, so an existing rule's locked name stays unchecked.
-const newName = requiredName.refine(
-  (v) => RULE_HUNT_NAME_VALIDATOR.regex.test(v),
-  { message: RULE_HUNT_NAME_VALIDATOR.message('Name') },
-);
-
-const buildFormSchema = (nameIsNew: boolean) =>
-  z.object({
-    name: nameIsNew ? newName : requiredName,
-    display_name: z.string().optional().nullable(),
-    description: z.string().optional().nullable(),
-    severity: z.enum(['low', 'medium', 'high', 'critical']),
-    cel_filter: z.string().optional(),
-  });
 export { DEFAULT_ESTIMATE_COST } from './defaults';
-
-export type CreateUpdateRuleFormData = z.infer<
-  ReturnType<typeof buildFormSchema>
->;
 
 export interface DisabledFields {
   name?: boolean;
@@ -71,6 +55,43 @@ const CreateUpdateRuleFormBase = ({
       form.resetFields();
     }
   }, [resetFormFields, form]);
+
+  const operatorOptions = useMemo(
+    () =>
+      MATCH_OPERATORS.map((operator) => ({
+        label: operator,
+        value: operator,
+      })),
+    [],
+  );
+
+  const sqlCheck = useValidateRule();
+  const celCheck = useCheckCel();
+  const validateSql = {
+    data: sqlCheck.data
+      ? {
+          valid: sqlCheck.data.valid,
+          errors: (sqlCheck.data.errors ?? []).map((sqlError) => ({
+            message: sqlError.message,
+            suggestion: sqlError.suggestion ?? '',
+          })),
+        }
+      : null,
+    mutate: (sql: string) => sqlCheck.mutate({ sql }),
+    isPending: sqlCheck.isPending,
+    error: sqlCheck.error,
+    reset: sqlCheck.reset,
+  };
+  const validateCel = {
+    data: celCheck.data
+      ? { valid: celCheck.data.valid, errors: celCheck.data.errors ?? [] }
+      : null,
+    mutate: (expression: string) =>
+      celCheck.mutate({ expression, check_profile: true }),
+    isPending: celCheck.isPending,
+    error: celCheck.error,
+    reset: celCheck.reset,
+  };
 
   return (
     <Form
@@ -128,8 +149,15 @@ const CreateUpdateRuleFormBase = ({
         <Input.TextArea />
       </Form.Item>
 
-      <Form.Item label="Match Criteria">
-        <MatchCriteriaInput />
+      <Form.Item label="Match Criteria" name="match_criteria">
+        <MatchCriteriaInput
+          operatorOptions={operatorOptions}
+          matchDepthLimit={MATCH_NESTING_LIMIT}
+          validate={{
+            cel: validateCel,
+            sql: validateSql,
+          }}
+        />
       </Form.Item>
 
       {error && <ApiErrorNotification error={error} />}

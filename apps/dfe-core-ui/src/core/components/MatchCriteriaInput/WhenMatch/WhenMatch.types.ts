@@ -1,9 +1,20 @@
-import { components } from '@repo/dfe-engine-types';
 import { GROUP_MODES } from './WhenMatch.helpers';
 
-type TGeneratedSourceMatch = components['schemas']['SourceMatch'];
-
-export type TMatchOperator = NonNullable<TGeneratedSourceMatch['operator']>;
+export type TMatchOperator =
+  | 'equals'
+  | 'not_equals'
+  | 'exists'
+  | 'includes'
+  | 'starts_with'
+  | 'ends_with'
+  | 'lt'
+  | 'lte'
+  | 'gt'
+  | 'gte'
+  | 'in'
+  | 'always'
+  | null
+  | undefined;
 
 export type TMatchJoin = 'all' | 'any';
 

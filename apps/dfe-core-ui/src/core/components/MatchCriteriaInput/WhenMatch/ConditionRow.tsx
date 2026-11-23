@@ -1,7 +1,7 @@
 import { Tooltip } from '@/core/components/Tooltip';
 import { IconTrash } from '@repo/dfe-icons';
 import { Button, Checkbox, Input, Select } from 'antd';
-import { OPERATOR_OPTIONS, operatorTakesValue } from './WhenMatch.helpers';
+import { operatorTakesValue } from './WhenMatch.helpers';
 import { TMatchFormNode, TMatchOperator } from './WhenMatch.types';
 
 export const ConditionRow = ({
@@ -9,11 +9,13 @@ export const ConditionRow = ({
   node,
   onRemove,
   onChange,
+  operatorOptions,
 }: {
   number: string;
   node: TMatchFormNode;
   onRemove: () => void;
   onChange: (next: TMatchFormNode | null) => void;
+  operatorOptions: { label: string; value: TMatchOperator }[];
 }) => {
   const takesValue = operatorTakesValue(node.operator);
   const name = `Condition ${number}`;
@@ -59,7 +61,7 @@ export const ConditionRow = ({
             value: operatorTakesValue(operator) ? node.value : '',
           });
         }}
-        options={OPERATOR_OPTIONS}
+        options={operatorOptions}
       />
 
       <Input

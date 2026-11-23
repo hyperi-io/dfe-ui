@@ -1,16 +1,17 @@
 import { AceEditor } from '@/core/components/AceEditor';
 import { FormNotification } from '@/core/components/FormNotification';
-import { useValidateRule } from '@/core/hooks/useValidateRule';
 import { IconCheck, IconX } from '@repo/dfe-icons';
 import type { Editor } from 'ace-builds';
 import { Button, Tag } from 'antd';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { ValidateSql } from '..';
 import { getNormalisedSql } from './SqlMatch.helpers';
 
 interface SqlMatchProps {
   value?: string;
   onChange?: (value: string) => void;
   className?: string;
+  validateSql: ValidateSql;
 }
 
 const READONLY_LINES = 3;
@@ -97,19 +98,17 @@ const lockSqlPrefix = (editor: Editor, onBlocked: () => void) => {
   });
 };
 
-export const SqlMatch = ({ value, onChange, ...props }: SqlMatchProps) => {
+export const SqlMatch = ({
+  value,
+  onChange,
+  validateSql,
+  ...props
+}: SqlMatchProps) => {
   const [notice, setNotice] = useState<NoticePoint | null>(null);
   const hideNotice = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const [sql, setSql] = useState(value ?? '');
   const editorRef = useRef<Editor | null>(null);
-  const {
-    data,
-    mutate: checkSql,
-    isPending,
-    error,
-    reset: resetCheckSql,
-  } = useValidateRule();
 
   const showNotice = useCallback((editor: Editor) => {
     setNotice(noticeAtCursor(editor));
@@ -119,7 +118,7 @@ export const SqlMatch = ({ value, onChange, ...props }: SqlMatchProps) => {
 
   const handleCheckSql = () => {
     const normalisedSql = getNormalisedSql(documentFor(sql));
-    checkSql({ sql: normalisedSql });
+    validateSql?.mutate(normalisedSql);
   };
 
   const handleSqlChange = (document: string) => {
@@ -127,7 +126,7 @@ export const SqlMatch = ({ value, onChange, ...props }: SqlMatchProps) => {
     // A blocked edit of the prefix shifts the lines. The lock puts them back,
     // so this document is not the one to keep.
     if (document !== documentFor(clause)) return;
-    resetCheckSql();
+    validateSql?.reset();
     setSql(clause);
     onChange?.(documentFor(clause));
   };
@@ -141,10 +140,11 @@ export const SqlMatch = ({ value, onChange, ...props }: SqlMatchProps) => {
 
   useEffect(() => {
     const editor = editorRef.current;
-    const errors = (data?.errors ?? []).filter(
+    const errors = (validateSql?.data?.errors ?? []).filter(
       (error) => error.message.length > 0,
     );
-    if (!editor || data?.valid !== false || errors.length === 0) return;
+    if (!editor || validateSql?.data?.valid !== false || errors.length === 0)
+      return;
     editor.session.setAnnotations(
       errors.map((error) => ({
         row: 0,
@@ -154,26 +154,36 @@ export const SqlMatch = ({ value, onChange, ...props }: SqlMatchProps) => {
         type: 'error',
       })),
     );
-  }, [data]);
+  }, [validateSql?.data]);
 
   return (
     <div className="flex flex-col gap-2">
       <div className="flex justify-end absolute top-12 right-2 z-10">
-        <Button
-          icon={data ? data?.valid ? <IconCheck /> : <IconX /> : null}
-          danger={data ? !data?.valid : false}
-          type="default"
+        {validateSql && (
+          <Button
+            icon={
+              validateSql?.data ? (
+                validateSql?.data?.valid ? (
+                  <IconCheck />
+                ) : (
+                  <IconX />
+                )
+              ) : null
+            }
+            danger={validateSql?.data ? !validateSql?.data?.valid : false}
+            type="default"
 
-          loading={isPending}
-          htmlType="button"
-          onClick={handleCheckSql}
-        >
-          {data
-            ? data?.valid
-              ? 'SQL is valid'
-              : 'SQL is invalid'
-            : 'Check SQL'}
-        </Button>
+            loading={validateSql?.isPending}
+            htmlType="button"
+            onClick={handleCheckSql}
+          >
+            {validateSql?.data
+              ? validateSql?.data?.valid
+                ? 'SQL is valid'
+                : 'SQL is invalid'
+              : 'Check SQL'}
+          </Button>
+        )}
       </div>
       <div className="relative">
         {notice && (
@@ -196,17 +206,19 @@ export const SqlMatch = ({ value, onChange, ...props }: SqlMatchProps) => {
           }}
         />
       </div>
-      {data && !data?.valid && (
+      {validateSql?.data && !validateSql?.data?.valid && (
         <FormNotification
           title="SQL is invalid"
-          text={data?.errors?.map((error) => error.message).join(', ')}
+          text={validateSql?.data?.errors
+            ?.map((error) => error.message)
+            .join(', ')}
           type="error"
         />
       )}
-      {error && (
+      {validateSql?.error && (
         <FormNotification
           title="Error checking SQL"
-          text={error.message}
+          text={validateSql?.error?.message}
           type="error"
         />
       )}

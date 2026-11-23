@@ -1,8 +1,7 @@
 import { ButtonLinkSavedSearch } from '@/core/components/ButtonLinkSavedSearch';
-import {
-  CreateUpdateRuleForm,
-  CreateUpdateRuleFormData,
-} from '@/core/components/CreateUpdateRuleFormV2';
+import { CreateUpdateRuleForm } from '@/core/components/CreateUpdateRuleFormV2';
+import { CreateUpdateRuleFormData } from '@/core/components/CreateUpdateRuleFormV2/schema';
+import { toApiRootMatch } from '@/RulesV2/utils/ruleMatch';
 import { Drawer } from '@/core/components/Drawer';
 import { RbacProtected } from '@/core/components/RbacProtected';
 import { useListRulesContext } from '@/core/contexts/ListRulesContextV2';
@@ -64,7 +63,10 @@ export const CreateCustomRuleDrawer = ({
     },
   });
   const handleCreateRule = (values: CreateUpdateRuleFormData) => {
-    createRuleMutation(values);
+    createRuleMutation({
+      ...values,
+      match: values.match ? toApiRootMatch(values.match) : values.match,
+    });
   };
   return (
     <>
@@ -119,6 +121,7 @@ export const CreateCustomRuleDrawer = ({
             display_name: '',
             description: '',
             severity: 'medium',
+            source_type: 'raw',
             cel_filter: '',
           }}
         />

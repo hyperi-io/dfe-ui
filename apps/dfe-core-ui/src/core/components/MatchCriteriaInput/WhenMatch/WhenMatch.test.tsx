@@ -7,7 +7,14 @@ describe('MatchConditionsEditor', () => {
   it('undoes and redoes a condition edit', async () => {
     const user = userEvent.setup();
     const onChange = vi.fn();
-    render(<MatchConditionsEditor value={null} onChange={onChange} />);
+    render(
+      <MatchConditionsEditor
+        value={null}
+        onChange={onChange}
+        operatorOptions={[]}
+        matchDepthLimit={4}
+      />,
+    );
 
     await user.type(screen.getByPlaceholderText('Enter field'), 'a');
     expect(screen.getByPlaceholderText('Enter field')).toHaveValue('a');
@@ -24,6 +31,8 @@ describe('MatchConditionsEditor', () => {
     const user = userEvent.setup();
     render(
       <MatchConditionsEditor
+        operatorOptions={[]}
+        matchDepthLimit={4}
         value={{
           join: 'all',
           parts: [
@@ -52,6 +61,8 @@ describe('MatchConditionsEditor', () => {
   it('keeps redo when the single field reports the undone text again', () => {
     render(
       <MatchConditionsEditor
+        operatorOptions={[]}
+        matchDepthLimit={4}
         value={{ field: 'host', operator: 'equals', value: 'a' }}
         onChange={vi.fn()}
       />,
@@ -73,6 +84,8 @@ describe('MatchConditionsEditor', () => {
     const user = userEvent.setup();
     render(
       <MatchConditionsEditor
+        operatorOptions={[]}
+        matchDepthLimit={4}
         value={{ field: 'host', operator: 'equals', value: 'a' }}
         onChange={vi.fn()}
       />,
@@ -100,6 +113,8 @@ describe('MatchConditionsEditor', () => {
     const user = userEvent.setup();
     render(
       <MatchConditionsEditor
+        operatorOptions={[]}
+        matchDepthLimit={4}
         value={{ field: 'host', operator: 'equals', value: 'a' }}
         onChange={vi.fn()}
       />,
@@ -119,6 +134,8 @@ describe('MatchConditionsEditor', () => {
     const user = userEvent.setup();
     render(
       <MatchConditionsEditor
+        operatorOptions={[]}
+        matchDepthLimit={4}
         value={{ field: 'host', operator: 'equals', value: 'a' }}
         onChange={vi.fn()}
       />,
@@ -145,7 +162,14 @@ describe('MatchConditionsEditor', () => {
 
   it('undoes adding a condition', async () => {
     const user = userEvent.setup();
-    render(<MatchConditionsEditor value={null} onChange={vi.fn()} />);
+    render(
+      <MatchConditionsEditor
+        value={null}
+        onChange={vi.fn()}
+        operatorOptions={[]}
+        matchDepthLimit={4}
+      />,
+    );
 
     await user.click(screen.getByRole('button', { name: 'Add condition' }));
     expect(
@@ -164,6 +188,8 @@ describe('MatchConditionsEditor', () => {
     const onChange = vi.fn();
     render(
       <MatchConditionsEditor
+        operatorOptions={[]}
+        matchDepthLimit={4}
         value={{
           join: 'all',
           parts: [
@@ -209,6 +235,8 @@ describe('MatchConditionsEditor', () => {
     const user = userEvent.setup();
     render(
       <MatchConditionsEditor
+        operatorOptions={[]}
+        matchDepthLimit={4}
         value={{
           join: 'all',
           parts: [

@@ -30,6 +30,7 @@ describe('.useCreateRule', () => {
     name: 'string',
     severity: 'string',
     cel_filter: 'string',
+    source_type: 'raw',
   };
   describe('onSuccess', () => {
     test('should call onSuccess', async () => {

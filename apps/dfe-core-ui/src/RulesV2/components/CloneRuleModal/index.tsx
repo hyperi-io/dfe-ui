@@ -55,7 +55,8 @@ export const CloneRuleModal = ({
   });
   const handleCloneRule = (values: FormData) => {
     createRuleMutation({
-      severity: rule.severity,
+      severity: rule.severity as 'low' | 'medium' | 'high' | 'critical',
+      source_type: rule.source_type ?? 'raw',
       cel_filter: rule.cel_filter,
       name: values.name,
     });

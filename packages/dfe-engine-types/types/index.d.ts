@@ -2291,11 +2291,12 @@ export interface paths {
         put?: never;
         /**
          * Create Rule
-         * @description Create a detection rule from a CEL filter or a WHERE fragment.
+         * @description Create a detection rule from one detection form.
          *
          *     The rule stores that detection and nothing about a source or a hunt. A hunt
-         *     names the rules it runs and the table they read. A filter that does not
-         *     transpile, or a WHERE fragment the hunt runner would refuse, is 422 and
+         *     names the rules it runs and the table they read. A full ``user_sql`` query
+         *     is reduced to its WHERE, and a ``match`` is compiled to one. A filter that
+         *     does not transpile, or a detection the hunt runner would refuse, is 422 and
          *     nothing is written.
          *
          *     A production+team write is routed to a review branch instead of the branch the
@@ -2397,9 +2398,9 @@ export interface paths {
          * Update Rule
          * @description Replace a detection rule's label, description, severity, and detection.
          *
-         *     The replacement is a CEL filter or a WHERE fragment, as on create. It does
-         *     not record a source or a hunt. A replacement the hunt runner would refuse is
-         *     422 and the stored rule is left as it was.
+         *     The replacement is one detection form, as on create. It does not record a
+         *     source or a hunt. A replacement the hunt runner would refuse is 422 and the
+         *     stored rule is left as it was.
          *
          *     A production+team write is routed to a review branch instead of the branch the
          *     runner git-syncs, and the ``X-DFE-Review-Required`` header says so.
@@ -13746,7 +13747,7 @@ export interface components {
         };
         /**
          * RuleV2CreateRequest
-         * @description Create a detection rule from a CEL filter or a WHERE fragment.
+         * @description Create a detection rule from one detection form.
          */
         RuleV2CreateRequest: {
             /**
@@ -13767,14 +13768,28 @@ export interface components {
             severity: string;
             /**
              * Where Clause
-             * @description Detection condition, the SQL after WHERE. The hunt that runs the rule names the table. Give this or ``cel_filter``, not both, and not a full SELECT
+             * @description Detection condition, the SQL after WHERE. The hunt that runs the rule names the table. Not a full SELECT. Give this or one other detection, not more
              */
             where_clause?: string | null;
             /**
              * Cel Filter
-             * @description CEL expression transpiled to the rule's WHERE. Give this or ``where_clause``, not both
+             * @description CEL expression transpiled to the rule's WHERE. Give this or one other detection, not more
              */
             cel_filter?: string | null;
+            /**
+             * User Sql
+             * @description Full detection query: SELECT ... FROM <db>.<table> WHERE .... Search sends this when it creates a rule. The stored rule keeps the WHERE and drops the FROM, because the hunt names the table. Set ``source_type`` to 'hyperdx' for SQL a Search view renders. Give this or one other detection, not more
+             */
+            user_sql?: string | null;
+            /**
+             * Source Type
+             * @description 'raw' for SQL written by hand, or 'hyperdx' for SQL a Search view renders. Applies to ``user_sql``
+             * @default raw
+             * @enum {string}
+             */
+            source_type: "raw" | "hyperdx";
+            /** @description Structured match, the same shape as a source match: one test of a field, or ``all`` or ``any`` of several, with ``negate``. The engine compiles it to the rule's WHERE and stores the match so a builder can reopen it. Give this or one other detection, not more */
+            match?: components["schemas"]["RuleCondition"] | null;
             /**
              * Name
              * @description Rule file name (YAML stem); must be unique
@@ -13798,18 +13813,24 @@ export interface components {
          * RuleV2FromHyperdxRequest
          * @description Create a hunt rule from the SQL a Search view runs.
          *
-         *     Search renders the view to ``raw_sql`` and sends it here. The create
-         *     pipeline strips the UI meta (time bounds, LIMIT, ``__hdx_time_bucket``,
-         *     SETTINGS) via the dfe-hyperdx sanitizer, and the engine derives a unique rule id
-         *     from the saved-search name. The caller gets that id back and opens
-         *     ``/rules-v2/{id}`` -- no id to invent, no IndexedDB round-trip.
+         *     Search renders the view to ``raw_sql`` (or ``user_sql``, the name the rule
+         *     pipeline uses) and sends it here. The create pipeline strips the UI meta
+         *     (time bounds, LIMIT, ``__hdx_time_bucket``, SETTINGS) via the dfe-hyperdx
+         *     sanitizer, and the engine derives a unique rule id from the saved-search
+         *     name. The caller gets that id back and opens ``/rules-v2/{id}`` -- no id to
+         *     invent, no IndexedDB round-trip.
          */
         RuleV2FromHyperdxRequest: {
             /**
              * Raw Sql
-             * @description The ClickHouse SELECT the Search view renders to
+             * @description The ClickHouse SELECT the Search view renders to. Give this or ``user_sql``
              */
-            raw_sql: string;
+            raw_sql?: string | null;
+            /**
+             * User Sql
+             * @description The same SELECT, under the name the rule pipeline uses. Give this or ``raw_sql``
+             */
+            user_sql?: string | null;
             /**
              * Saved Search Name
              * @description Search saved-search name; seeds the rule id and label
@@ -13883,6 +13904,13 @@ export interface components {
              * @description CEL expression the WHERE was transpiled from, absent when the rule is a WHERE fragment
              */
             cel_filter?: string | null;
+            /** @description The structured match the WHERE was compiled from, in the same shape as a source match. Absent when the rule was written as SQL, a WHERE fragment, or CEL */
+            match?: components["schemas"]["RuleCondition"] | null;
+            /**
+             * Source Type
+             * @description How the rule's SQL was written: raw, or hyperdx for SQL a Search view renders. Absent when the rule is a WHERE fragment, a CEL filter, or a match
+             */
+            source_type?: ("raw" | "hyperdx") | null;
             /** Warnings */
             warnings?: string[];
             /** Sql Errors */
@@ -13935,14 +13963,28 @@ export interface components {
             severity: string;
             /**
              * Where Clause
-             * @description Detection condition, the SQL after WHERE. The hunt that runs the rule names the table. Give this or ``cel_filter``, not both, and not a full SELECT
+             * @description Detection condition, the SQL after WHERE. The hunt that runs the rule names the table. Not a full SELECT. Give this or one other detection, not more
              */
             where_clause?: string | null;
             /**
              * Cel Filter
-             * @description CEL expression transpiled to the rule's WHERE. Give this or ``where_clause``, not both
+             * @description CEL expression transpiled to the rule's WHERE. Give this or one other detection, not more
              */
             cel_filter?: string | null;
+            /**
+             * User Sql
+             * @description Full detection query: SELECT ... FROM <db>.<table> WHERE .... Search sends this when it creates a rule. The stored rule keeps the WHERE and drops the FROM, because the hunt names the table. Set ``source_type`` to 'hyperdx' for SQL a Search view renders. Give this or one other detection, not more
+             */
+            user_sql?: string | null;
+            /**
+             * Source Type
+             * @description 'raw' for SQL written by hand, or 'hyperdx' for SQL a Search view renders. Applies to ``user_sql``
+             * @default raw
+             * @enum {string}
+             */
+            source_type: "raw" | "hyperdx";
+            /** @description Structured match, the same shape as a source match: one test of a field, or ``all`` or ``any`` of several, with ``negate``. The engine compiles it to the rule's WHERE and stores the match so a builder can reopen it. Give this or one other detection, not more */
+            match?: components["schemas"]["RuleCondition"] | null;
         };
         /**
          * SampleBackend
@@ -26006,7 +26048,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused, nothing written. The body failed validation (code validation_error): give a CEL filter or a WHERE fragment, one of the two, and not a full SQL statement. Or the detection was refused -- the WHERE fragment does not parse, calls a function that reads outside the row (url, s3, a dictionary) or sends it to another service (the ai* functions), reads another table, or the CEL filter does not transpile (code invalid_sql, the errors in sql_errors). Or the rule matches every event (code rule_matches_everything, the detection WHERE in context). */
+            /** @description Refused, nothing written. The body failed validation (code validation_error): give a WHERE fragment, a CEL filter, a full user_sql query, or a match, one of them, and a WHERE fragment is not a full SQL statement. Or the detection was refused -- the WHERE fragment or the SQL does not parse, calls a function that reads outside the row (url, s3, a dictionary) or sends it to another service (the ai* functions), reads another table, the CEL filter does not transpile, or the match does not compile (code invalid_sql, the errors in sql_errors). Or the rule matches every event (code rule_matches_everything, the detection WHERE in context). */
             422: {
                 headers: {
                     [name: string]: unknown;
@@ -26066,7 +26108,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused, nothing written. The body failed validation (code validation_error): give a CEL filter or a WHERE fragment, one of the two, and not a full SQL statement. Or the detection was refused -- the WHERE fragment does not parse, calls a function that reads outside the row (url, s3, a dictionary) or sends it to another service (the ai* functions), reads another table, or the CEL filter does not transpile (code invalid_sql, the errors in sql_errors). Or the rule matches every event (code rule_matches_everything, the detection WHERE in context). */
+            /** @description Refused, nothing written. The body failed validation (code validation_error): give a WHERE fragment, a CEL filter, a full user_sql query, or a match, one of them, and a WHERE fragment is not a full SQL statement. Or the detection was refused -- the WHERE fragment or the SQL does not parse, calls a function that reads outside the row (url, s3, a dictionary) or sends it to another service (the ai* functions), reads another table, the CEL filter does not transpile, or the match does not compile (code invalid_sql, the errors in sql_errors). Or the rule matches every event (code rule_matches_everything, the detection WHERE in context). */
             422: {
                 headers: {
                     [name: string]: unknown;
@@ -26306,7 +26348,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused, nothing written. The body failed validation (code validation_error): give a CEL filter or a WHERE fragment, one of the two, and not a full SQL statement. Or the detection was refused -- the WHERE fragment does not parse, calls a function that reads outside the row (url, s3, a dictionary) or sends it to another service (the ai* functions), reads another table, or the CEL filter does not transpile (code invalid_sql, the errors in sql_errors). Or the rule matches every event (code rule_matches_everything, the detection WHERE in context). */
+            /** @description Refused, nothing written. The body failed validation (code validation_error): give a WHERE fragment, a CEL filter, a full user_sql query, or a match, one of them, and a WHERE fragment is not a full SQL statement. Or the detection was refused -- the WHERE fragment or the SQL does not parse, calls a function that reads outside the row (url, s3, a dictionary) or sends it to another service (the ai* functions), reads another table, the CEL filter does not transpile, or the match does not compile (code invalid_sql, the errors in sql_errors). Or the rule matches every event (code rule_matches_everything, the detection WHERE in context). */
             422: {
                 headers: {
                     [name: string]: unknown;

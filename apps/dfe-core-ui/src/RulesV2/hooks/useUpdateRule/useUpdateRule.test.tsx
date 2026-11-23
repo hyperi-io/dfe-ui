@@ -30,6 +30,13 @@ describe('.useUpdateRule', () => {
     display_name: 'string',
     severity: 'string',
     cel_filter: 'string',
+    source_type: 'raw',
+    match: {
+      field: 'string',
+      operator: 'equals',
+      value: 'string',
+      negate: false,
+    },
   };
 
   const name = 'name';

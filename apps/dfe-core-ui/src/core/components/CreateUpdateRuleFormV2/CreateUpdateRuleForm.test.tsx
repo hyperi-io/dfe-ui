@@ -7,7 +7,8 @@ import { RULE_HUNT_NAME_VALIDATOR } from '@/core/validationSchemas/utils';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, test, vi } from 'vitest';
-import { CreateUpdateRuleForm, CreateUpdateRuleFormData } from '.';
+import { CreateUpdateRuleForm } from '.';
+import { CreateUpdateRuleFormData } from './schema';
 
 // Ace's beautify extension reads a global that only the app shell sets.
 vi.mock('@/core/components/AceEditor', () => ({
@@ -22,6 +23,7 @@ const initialValues: CreateUpdateRuleFormData = {
   description: 'Repeated failed logins',
   cel_filter: 'event.action == "login"',
   severity: 'high',
+  source_type: 'raw',
 };
 
 const renderForm = (onFinish = vi.fn()) =>

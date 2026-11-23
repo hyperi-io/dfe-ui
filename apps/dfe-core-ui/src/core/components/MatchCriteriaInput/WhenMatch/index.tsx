@@ -12,7 +12,7 @@ import {
   redoMatch,
   undoMatch,
 } from './WhenMatch.history';
-import { TMatchFormNode } from './WhenMatch.types';
+import { TMatchFormNode, TMatchOperator } from './WhenMatch.types';
 
 const normalize = (next: TMatchFormNode | null): MatchSnapshot => {
   const onlyPart = next?.parts?.length === 1 ? next.parts[0] : undefined;
@@ -36,9 +36,13 @@ const normalize = (next: TMatchFormNode | null): MatchSnapshot => {
 export const MatchConditionsEditor = ({
   value,
   onChange,
+  operatorOptions,
+  matchDepthLimit = 4,
 }: {
   value: TMatchFormNode | null;
   onChange: (value: TMatchFormNode | null) => void;
+  operatorOptions: { label: string; value: TMatchOperator }[];
+  matchDepthLimit: number;
 }) => {
   const [history, setHistory] = useState(() => matchHistory(value));
   const historyRef = useRef(history);
@@ -124,29 +128,36 @@ export const MatchConditionsEditor = ({
         shortcutHandled.current = false;
       }}
     >
-      <div className="flex justify-end gap-1">
-        <Tooltip title="Undo">
-          <Button
-            type="text"
-            aria-label="Undo"
-            disabled={history.past.length === 0}
-            icon={<IconArrowBackUp className="w-4 h-4" />}
-            onClick={undo}
-          />
-        </Tooltip>
-        <Tooltip title="Redo">
-          <Button
-            type="text"
-            aria-label="Redo"
-            disabled={history.future.length === 0}
-            icon={<IconArrowForwardUp className="w-4 h-4" />}
-            onClick={redo}
-          />
-        </Tooltip>
-      </div>
+      {(history.past.length !== 0 || history.future.length !== 0) && (
+        <div className="flex justify-end gap-1">
+          <Tooltip title="Undo">
+            <Button
+              type="text"
+              aria-label="Undo"
+              disabled={history.past.length === 0}
+              icon={<IconArrowBackUp className="w-4 h-4" />}
+              onClick={undo}
+            />
+          </Tooltip>
+          <Tooltip title="Redo">
+            <Button
+              type="text"
+              aria-label="Redo"
+              disabled={history.future.length === 0}
+              icon={<IconArrowForwardUp className="w-4 h-4" />}
+              onClick={redo}
+            />
+          </Tooltip>
+        </div>
+      )}
+
       {!match || !isMatchGroup(match) ? (
         <>
-          <SingleCondition value={match} onChange={commit} />
+          <SingleCondition
+            value={match}
+            onChange={commit}
+            operatorOptions={operatorOptions}
+          />
           <div>
             <Button
               type="link"
@@ -177,6 +188,8 @@ export const MatchConditionsEditor = ({
           node={match}
           level={1}
           onChange={commit}
+          operatorOptions={operatorOptions}
+          matchDepthLimit={matchDepthLimit}
         />
       )}
     </div>
