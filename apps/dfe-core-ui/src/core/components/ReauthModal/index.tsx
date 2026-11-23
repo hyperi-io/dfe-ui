@@ -20,7 +20,7 @@ const KIND_NOUNS: Record<TReauthKind, string> = {
   role: 'role',
 };
 
-/** Asks the signed-in user to prove it is still them before it *verb*s *target*: its password, or a fresh sign-in at its identity provider. Hands back the grant the engine signs for that one target. */
+/** Asks the signed-in user to prove it is still them before the action (*verb*) on *target*: its password, or a fresh sign-in at its identity provider. Hands back the grant the engine signs for that one target. */
 export const ReauthModal = ({
   kind = 'account',
   onCancel,
