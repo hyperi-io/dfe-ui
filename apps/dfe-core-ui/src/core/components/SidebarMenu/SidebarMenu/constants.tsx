@@ -66,11 +66,17 @@ const observeItems = (hyperdxUrl?: string): SidebarNavItem[] =>
           icon: <IconLayoutGrid />,
           actions: [rbacActions.dashboard_read],
         },
-        // Hunt Results is a saved-search view over dfe.detection, so it sits
-        // with the dashboards it reads like, last of the observe group.
+      ]
+    : [];
+
+// The search over dfe.detection, listed under Detect beside the hunts that
+// write it. It is a HyperDX embed, so it needs the HyperDX URL too.
+const detectionItems = (hyperdxUrl?: string): SidebarNavItem[] =>
+  hyperdxUrl
+    ? [
         {
           key: '/observe/hunt-results',
-          label: 'Hunt Results',
+          label: 'Detections',
           icon: <IconRadar />,
           actions: [rbacActions.dashboard_read],
         },
@@ -151,6 +157,7 @@ export const buildSidebarMenuGroups = (
           rbacActions.hunt_delete,
         ],
       },
+      ...detectionItems(hyperdxUrl),
       {
         key: '/field-maps',
         label: 'Field Maps',

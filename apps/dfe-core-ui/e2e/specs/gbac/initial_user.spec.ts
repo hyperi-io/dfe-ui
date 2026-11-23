@@ -26,7 +26,7 @@ test.describe('', { tag: [TAGS.core, TAGS.gbac] }, () => {
 
     /* Shows the correct sidebar navigation links */
     await expect(
-      page.getByRole('link', { name: 'Hunt Results', exact: true }),
+      page.getByRole('link', { name: 'Detections', exact: true }),
     ).toBeVisible();
     await expect(
       page.getByRole('link', { name: 'Search', exact: true }),

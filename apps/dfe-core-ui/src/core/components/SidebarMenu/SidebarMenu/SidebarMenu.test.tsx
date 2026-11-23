@@ -46,7 +46,6 @@ describe('SidebarMenu', () => {
         'Saved Searches',
         'Chart Explorer',
         'Dashboards',
-        'Hunt Results',
         // Data flow
         'Sources',
         'Meta Schemas',
@@ -54,6 +53,7 @@ describe('SidebarMenu', () => {
         // Detect
         'Rules',
         'Hunts',
+        'Detections',
         'Field Maps',
         // Stack
         'Components',
