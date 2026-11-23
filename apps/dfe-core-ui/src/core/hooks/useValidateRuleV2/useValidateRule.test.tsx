@@ -43,13 +43,7 @@ describe('.useValidateRule', () => {
 
       const expectedResponse: TSqlValidationResponse = {
         valid: true,
-        errors: [
-          {
-            message: 'string',
-            position: 0,
-            suggestion: 'string',
-          },
-        ],
+        errors: [],
       };
 
       await waitFor(() => {
@@ -74,7 +68,7 @@ describe('.useValidateRule', () => {
 
   describe('onError', () => {
     beforeEach(() => {
-      server.use(API_CONFIG_MOCKS.rules.validate.post.error());
+      server.use(API_CONFIG_MOCKS.rulesV2.validate.post.error());
     });
     test('should call onError', async () => {
       const onSuccess = vi.fn();
