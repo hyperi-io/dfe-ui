@@ -6666,6 +6666,55 @@ export interface components {
             topics_pending_removal?: string[];
         };
         /**
+         * ArgoCondition
+         * @description One condition Argo CD writes on an instance's Application.
+         */
+        ArgoCondition: {
+            /**
+             * Type
+             * @description The condition kind, such as ComparisonError, InvalidSpecError or SyncError.
+             */
+            type: string;
+            /**
+             * Message
+             * @default
+             */
+            message: string;
+        };
+        /**
+         * ArgoHealth
+         * @description The health Argo CD reports for an instance's Application.
+         */
+        ArgoHealth: {
+            /**
+             * Status
+             * @description Argo CD's health: Healthy, Progressing, Degraded, Suspended, Missing or Unknown.
+             */
+            status: string;
+        };
+        /**
+         * ArgoSync
+         * @description What Argo CD says about an instance's Application, read when the status is asked.
+         */
+        ArgoSync: {
+            /**
+             * Status
+             * @description Argo CD's sync state: Synced, OutOfSync or Unknown.
+             */
+            status: string;
+            /**
+             * Revision
+             * @description The revision Argo CD last compared, or null before its first compare.
+             */
+            revision: string | null;
+            health: components["schemas"]["ArgoHealth"];
+            /**
+             * Conditions
+             * @description Argo CD's conditions on the Application, empty when it has none.
+             */
+            conditions: components["schemas"]["ArgoCondition"][];
+        };
+        /**
          * ArtifactModel
          * @description A library artefact, with its versions and tags.
          */
@@ -15774,6 +15823,13 @@ export interface components {
             /** @description How an agentless transform detects each event's source and what it does with one it cannot place. Read only when mode is agentless. Unset leaves the app's own defaults. */
             detect?: components["schemas"]["TransformDetect"] | null;
             /**
+             * Conf
+             * @description Settings the transform's program reads for this source, written as the integration documents them (dfe-transform-elastic sets them as _conf on each event: tz_offset, tz_map and the like). A plain map of at most 16 KiB, with no key named secret, password, token, api_key or client_secret at any depth. Only an app whose manifest declares a conf_path takes it.
+             */
+            conf?: {
+                [key: string]: unknown;
+            };
+            /**
              * Config File
              * @description Path to engine-specific config
              */
@@ -16131,6 +16187,8 @@ export interface components {
             started_epoch?: number | null;
             /** Uptime Seconds */
             uptime_seconds?: number | null;
+            /** @description What Argo CD says about the instance's Application. Null off Kubernetes, with no service account mounted, or when the Application cannot be read. */
+            sync?: components["schemas"]["ArgoSync"] | null;
         };
         /**
          * StrDefault
