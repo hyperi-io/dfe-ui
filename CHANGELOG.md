@@ -3,6 +3,37 @@
 Rendered by CI and committed back at the end of a release -- do not edit by
 hand. Release notes also appear on the GitHub Releases page, one per tag.
 
+## [1.7.46](https://github.com/hyperi-io/dfe-ui/compare/v1.7.45...v1.7.46) (2026-11-23)
+
+### What's Changed
+* docs(console): match the docs to the code by @catinspace-au in https://github.com/hyperi-io/dfe-ui/pull/738
+* docs(api-client): link the engine types sync workflow by @catinspace-au in https://github.com/hyperi-io/dfe-ui/pull/740
+* fix(e2e): replace the Elastic-derived upload mock and archive reader by @catinspace-au in https://github.com/hyperi-io/dfe-ui/pull/741
+* docs(contributing): drop the DCO sign-off requirement by @catinspace-au in https://github.com/hyperi-io/dfe-ui/pull/742
+* docs(console): correct docs and redraw all ten Mermaid diagrams by @catinspace-au in https://github.com/hyperi-io/dfe-ui/pull/743
+* fix: 719 fixui ingest rules refactor by @kbrandt-hs in https://github.com/hyperi-io/dfe-ui/pull/745
+* fix(console): fix three display errors by @catinspace-au in https://github.com/hyperi-io/dfe-ui/pull/749
+* fix(hunts): show and set a hunt's enabled state by @catinspace-au in https://github.com/hyperi-io/dfe-ui/pull/744
+* fix(e2e): match the hunt heading with a string by @catinspace-au in https://github.com/hyperi-io/dfe-ui/pull/751
+* docs(diagrams): apply the house diagram style by @catinspace-au in https://github.com/hyperi-io/dfe-ui/pull/753
+* docs(architecture): reshape the architecture page and its part pages by @catinspace-au in https://github.com/hyperi-io/dfe-ui/pull/754
+* fix(deps): move Next.js to 16.4.6 by @catinspace-au in https://github.com/hyperi-io/dfe-ui/pull/755
+* docs(diagrams): drop per-diagram config from 4 non-flowchart diagrams by @catinspace-au in https://github.com/hyperi-io/dfe-ui/pull/756
+* chore(dfe-engine-types): sync from dfe-engine by @hypersec-ci-bot[bot] in https://github.com/hyperi-io/dfe-ui/pull/752
+* chore(dfe-engine-types): sync from dfe-engine by @hypersec-ci-bot[bot] in https://github.com/hyperi-io/dfe-ui/pull/760
+* fix(ui): show no telemetry on the status card by @catinspace-au in https://github.com/hyperi-io/dfe-ui/pull/762
+* fix(orgs): set your own organisation in the console by @kazmosahebi in https://github.com/hyperi-io/dfe-ui/pull/761
+* fix(ci): default main releases to candidates by @catinspace-au in https://github.com/hyperi-io/dfe-ui/pull/765
+* fix(console): remove the WASM Transforms page by @catinspace-au in https://github.com/hyperi-io/dfe-ui/pull/759
+* chore(dfe-engine-types): sync from dfe-engine by @hypersec-ci-bot[bot] in https://github.com/hyperi-io/dfe-ui/pull/767
+* fix(console): label dormant sources and show dashes for empty fields by @catinspace-au in https://github.com/hyperi-io/dfe-ui/pull/768
+* fix(platform): remove the unused PlatformToolbar by @catinspace-au in https://github.com/hyperi-io/dfe-ui/pull/770
+* fix(settings): organisation roles, sign-in links and re-auth by @kazmosahebi in https://github.com/hyperi-io/dfe-ui/pull/771
+* chore(dfe-engine-types): sync from dfe-engine by @hypersec-ci-bot[bot] in https://github.com/hyperi-io/dfe-ui/pull/773
+* fix(settings): use function matchers for account rows and cells by @catinspace-au in https://github.com/hyperi-io/dfe-ui/pull/774
+* fix(console): add Field Maps to Detect sidebar by @catinspace-au in https://github.com/hyperi-io/dfe-ui/pull/772
+* fix(console): show a short message for an HTML error page by @catinspace-au in https://github.com/hyperi-io/dfe-ui/pull/775
+
 ## [1.7.45](https://github.com/hyperi-io/dfe-ui/compare/v1.7.44...v1.7.45) (2026-11-15)
 
 ### Bug Fixes
