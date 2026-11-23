@@ -7,6 +7,7 @@ import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
 import { useFetchRuleDetail } from '@/RulesV2/hooks/useFetchRuleDetail';
 import { IconAlertCircle } from '@repo/dfe-icons';
 import { Spin } from 'antd';
+import { HuntBanner } from './HuntBanner';
 import { RuleDetailActionMenu } from './RuleDetailActionMenu';
 
 const dataListTermStyle =
@@ -66,6 +67,7 @@ export const ViewRuleDetail = () => {
         <RuleDetailActionMenu rule={ruleDetail} />
       </div>
       <div className="flex flex-col gap-4">
+        <HuntBanner ruleName={selectedRuleName ?? ''} />
         <dl className="grid grid-cols-[140px_1fr_140px_1fr] gap-x-6 gap-y-1">
           <dt className={dataListTermStyle}>Name:</dt>
           <dd>{ruleDetail.name}</dd>

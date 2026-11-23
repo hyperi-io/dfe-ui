@@ -454,12 +454,14 @@ export const QUERY_KEYS = Object.freeze({
   hunts: {
     default: ({
       search,
+      rule,
       sort_by,
       sort_order,
       page_size,
     }: UseFetchInfiniteFilteredHuntsProps = {}) => [
       'hunts',
       ...(search ? ['search', search] : []),
+      ...(rule ? ['rule', rule] : []),
       ...(sort_by ? ['sort_by', sort_by] : []),
       ...(sort_order ? ['sort_order', sort_order] : []),
       ...(page_size ? ['page_size', page_size] : []),
