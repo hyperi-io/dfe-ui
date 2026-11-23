@@ -10,7 +10,7 @@ import { Button, Input } from 'antd';
 type TReauthFormValues = { password: string };
 
 /** The action the modal names, so a create, delete or revoke reads as one. */
-export type TReauthVerb = 'change' | 'create' | 'delete' | 'revoke';
+export type TReauthVerb = 'change' | 'create' | 'delete' | 'revoke' | 'unlink';
 
 const KIND_NOUNS: Record<TReauthKind, string> = {
   account: 'account',
