@@ -1,12 +1,12 @@
 import { CreateUpdateRuleForm } from '@/core/components/CreateUpdateRuleFormV2';
 import { CreateUpdateRuleFormData } from '@/core/components/CreateUpdateRuleFormV2/schema';
-import { fromApiRootMatch, toApiRootMatch } from '@/RulesV2/utils/ruleMatch';
 import { CustomScrollbar } from '@/core/components/CustomScrollbar';
 import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
 import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
 import { TRuleDetail } from '@/RulesV2/hooks/useFetchRuleDetail/types';
 import { useUpdateRule } from '@/RulesV2/hooks/useUpdateRule';
 import { TRuleUpdateResponse } from '@/RulesV2/hooks/useUpdateRule/types';
+import { fromApiRootMatch, toApiRootMatch } from '@/RulesV2/utils/ruleMatch';
 import { useQueryClient } from '@tanstack/react-query';
 
 interface UpdateRuleFormProps {
@@ -37,9 +37,13 @@ export const UpdateRuleForm = ({ rule, onSuccess }: UpdateRuleFormProps) => {
   });
 
   const handleUpdateRule = (values: CreateUpdateRuleFormData) => {
+    // Remove the name from the values to avoid updating the rule name
+    const { name: _name, ...updateValues } = values;
     updateRule({
-      ...values,
-      match: values.match ? toApiRootMatch(values.match) : values.match,
+      ...updateValues,
+      match: updateValues.match
+        ? toApiRootMatch(updateValues.match)
+        : updateValues.match,
     });
   };
 
