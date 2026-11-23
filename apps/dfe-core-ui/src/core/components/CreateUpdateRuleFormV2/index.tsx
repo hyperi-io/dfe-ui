@@ -2,7 +2,7 @@ import { ApiErrorNotification } from '@/core/components/ApiErrorNotification';
 import { Form } from '@/core/components/Form';
 import { MatchCriteriaInput } from '@/core/components/MatchCriteriaInput';
 import { useCheckCel } from '@/core/hooks/useCelCheck';
-import { useValidateRule } from '@/core/hooks/useValidateRule';
+import { useValidateRule } from '@/core/hooks/useValidateRuleV2';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
 import {
   MATCH_NESTING_LIMIT,
@@ -10,7 +10,7 @@ import {
 } from '@repo/dfe-engine-types/limits';
 import { IconDeviceFloppy } from '@repo/dfe-icons';
 import { Button, FormProps, Input, Select } from 'antd';
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { DEFAULT_ESTIMATE_COST } from './defaults';
 import { ResponseModal } from './ResponseModal';
 import { buildFormSchema, CreateUpdateRuleFormData } from './schema';
@@ -49,6 +49,8 @@ const CreateUpdateRuleFormBase = ({
   );
   const formValidation =
     useAntdZodResolver<CreateUpdateRuleFormData>(formSchema);
+  const [matchCriteriaFormName, setMatchCriteriaFormName] =
+    useState<string>('match');
 
   useEffect(() => {
     if (resetFormFields) {
@@ -149,13 +151,26 @@ const CreateUpdateRuleFormBase = ({
         <Input.TextArea />
       </Form.Item>
 
-      <Form.Item label="Match Criteria" name="match_criteria">
+      <Form.Item label="Match Criteria" name={matchCriteriaFormName}>
         <MatchCriteriaInput
           operatorOptions={operatorOptions}
           matchDepthLimit={MATCH_NESTING_LIMIT}
           validate={{
             cel: validateCel,
             sql: validateSql,
+          }}
+          onModeChange={(mode) => {
+            switch (mode) {
+              case 'conditions':
+                setMatchCriteriaFormName('match');
+                break;
+              case 'expression':
+                setMatchCriteriaFormName('cel_filter');
+                break;
+              case 'sql':
+                setMatchCriteriaFormName('user_sql');
+                break;
+            }
           }}
         />
       </Form.Item>

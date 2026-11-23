@@ -5,7 +5,6 @@ import type { Editor } from 'ace-builds';
 import { Button, Tag } from 'antd';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { ValidateSql } from '..';
-import { getNormalisedSql } from './SqlMatch.helpers';
 
 interface SqlMatchProps {
   value?: string;
@@ -117,7 +116,7 @@ export const SqlMatch = ({
   }, []);
 
   const handleCheckSql = () => {
-    const normalisedSql = getNormalisedSql(documentFor(sql));
+    const normalisedSql = documentFor(sql);
     validateSql?.mutate(normalisedSql);
   };
 

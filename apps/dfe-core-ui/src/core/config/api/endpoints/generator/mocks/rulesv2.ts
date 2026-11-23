@@ -1,5 +1,6 @@
 import { TRuleCreateResponse } from '@/core/hooks/useCreateRuleV2/types';
 import { TRuleListResponse as TRuleListResponseV2 } from '@/core/hooks/useFetchInfiniteFilteredRulesV2/types';
+import { TSqlValidationResponse } from '@/core/hooks/useValidateRuleV2/types';
 import { TRuleDetail } from '@/RulesV2/hooks/useFetchRuleDetail/types';
 import { TRuleUpdateResponse } from '@/RulesV2/hooks/useUpdateRule/types';
 import { http, HttpResponse } from 'msw';
@@ -199,8 +200,29 @@ export const rulesV2 = {
   validate: {
     mockedUrl: '/api/v1/rules-v2/validate',
     post: {
-      success: () => console.error('Not implemented'),
-      error: () => console.error('Not implemented'),
+      success: ({
+        mockedResponse = {
+          valid: true,
+          errors: [],
+        },
+      }: {
+        mockedResponse?: TSqlValidationResponse;
+      } = {}) => {
+        return http.post(rulesV2.validate.mockedUrl, () => {
+          return HttpResponse.json(mockedResponse);
+        });
+      },
+      error: ({
+        mockedResponse = DEFAULT_VALIDATION_ERROR,
+        status = 422,
+      }: {
+        mockedResponse?: TValidationError;
+        status?: number;
+      } = {}) => {
+        return http.post(rulesV2.validate.mockedUrl, () => {
+          return HttpResponse.json(mockedResponse, { status });
+        });
+      },
     },
   },
 };
