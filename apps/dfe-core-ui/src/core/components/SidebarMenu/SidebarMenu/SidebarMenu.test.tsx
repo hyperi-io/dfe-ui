@@ -104,6 +104,36 @@ describe('SidebarMenu', () => {
       expect(screen.queryByRole('link', { name: 'Field Maps' })).toBeNull();
     });
 
+    // Detections asks for dashboard:read, unlike the rest of Detect, so either
+    // family alone shows the Detect heading over a different set of links.
+    it.each([
+      {
+        permission: 'dashboard:read',
+        shown: 'Detections',
+        hidden: 'Hunts',
+      },
+      { permission: 'hunt:read', shown: 'Hunts', hidden: 'Detections' },
+    ])(
+      'shows $shown under Detect, not $hidden, to a role holding only $permission',
+      async ({ permission, shown, hidden }) => {
+        server.use(
+          API_CONFIG_MOCKS.auth.me.get.success({
+            mockedResponse: meWithPermissions([permission]),
+          }),
+        );
+
+        render(<SidebarMenu collapsed={false} />, { wrapper });
+
+        expect(
+          await screen.findByRole('link', { name: shown }),
+        ).toBeInTheDocument();
+        expect(screen.queryByRole('link', { name: hidden })).toBeNull();
+        expect(
+          screen.getAllByRole('presentation').map((item) => item.textContent),
+        ).toContain('Detect');
+      },
+    );
+
     it('never shows Admin Tools to a role that only reads deployments', async () => {
       server.use(
         API_CONFIG_MOCKS.auth.me.get.success({

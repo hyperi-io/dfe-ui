@@ -89,9 +89,9 @@ const detectionItems = (hyperdxUrl?: string): SidebarNavItem[] =>
  *
  * Observe is where the data is looked at. Data flow defines what comes in, how
  * it is transformed and where it lands. Detect defines what to look for, and
- * Stack is what is running. Each group is one RBAC family, so
- * a user sees a heading exactly when at least one destination under it is
- * theirs.
+ * Stack is what is running. A user sees a heading exactly when at least one
+ * destination under it is theirs. Detections is the one entry whose action
+ * belongs to another group's family (dashboard_read, Observe's).
  *
  * Entries are DATA. One renderer draws every one of them, so a destination is a
  * row added here rather than another copy of the RbacProtected wrapper.
