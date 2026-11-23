@@ -43,7 +43,7 @@ test.describe('', { tag: [TAGS.core, TAGS.gbac] }, () => {
 
     /* Does not show other sidebar navigation links */
     await expect(
-      page.getByRole('link', { name: 'Hunt Results', exact: true }),
+      page.getByRole('link', { name: 'Detections', exact: true }),
     ).toBeHidden();
     await expect(
       page.getByRole('link', { name: 'Search', exact: true }),

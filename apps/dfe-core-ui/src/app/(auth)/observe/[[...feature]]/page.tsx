@@ -31,7 +31,7 @@ const USAGE_STRIP_PATH = 'dashboards';
 /**
  * dfe-ui paths that are a HyperDX route plus fixed params.
  *
- * Hunt Results gets its own path rather than a query string on /observe/search
+ * Detections gets its own path rather than a query string on /observe/search
  * so the sidebar's pathname matching can tell the two entries apart, and so it
  * always opens on the detections rather than resuming the user's last source.
  * `source` is matched by NAME -- ids are per-deployment, and the fork seeds this

@@ -150,7 +150,7 @@ test(
       })
       .toBeGreaterThanOrEqual(2);
 
-    // The console's Hunt Results page shows the same detections ClickHouse holds
+    // The console's Detections page shows the same detections ClickHouse holds
     await page.goto(`${BASE_URL}/observe/hunt-results`);
     await expect(
       page
