@@ -48,6 +48,7 @@ export const useFetchInfiniteFilteredHunts = ({
       fetchInfiniteFilteredHunts({
         queryParams: {
           search: debouncedSearch || undefined,
+          rule: rule || undefined,
           order_by: toOrderBy(sort_by, sort_order),
           page_token: pageParam,
           page_size,

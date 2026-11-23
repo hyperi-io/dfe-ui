@@ -31,7 +31,7 @@ export const HuntBanner = ({ ruleName }: { ruleName: string }) => {
     );
   }
 
-  return (
+  return hunts && hunts.length > 0 ? (
     <NotificationCard
       title={`${total_size} hunt ${total_size === 1 ? ' is ' : 's are '} associated with this rule:`}
       description={
@@ -57,6 +57,13 @@ export const HuntBanner = ({ ruleName }: { ruleName: string }) => {
           </Button>
         </>
       }
+    />
+  ) : (
+    <NotificationCard
+      title="No hunts associated with this rule"
+      description="This rule is not associated with any hunts."
+      type="warning"
+      variant="subtle"
     />
   );
 };

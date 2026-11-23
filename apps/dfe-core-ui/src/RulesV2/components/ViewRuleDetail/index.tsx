@@ -6,15 +6,14 @@ import { useListRulesContext } from '@/core/contexts/ListRulesContextV2';
 import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
 import { useFetchRuleDetail } from '@/RulesV2/hooks/useFetchRuleDetail';
 import { IconAlertCircle } from '@repo/dfe-icons';
+import { cn } from '@repo/dfe-shared-ui';
 import { Spin } from 'antd';
 import { HuntBanner } from './HuntBanner';
 import { RuleDetailActionMenu } from './RuleDetailActionMenu';
 
 const dataListTermStyle =
   'font-medium text-foreground/40 dark:text-dark-foreground/40';
-const EmptyData = () => (
-  <span className="text-foreground/40 dark:text-dark-foreground/40">None</span>
-);
+
 export const ViewRuleDetail = () => {
   const { selectedRuleName } = useListRulesContext();
   const {
@@ -73,10 +72,38 @@ export const ViewRuleDetail = () => {
           <dd>{ruleDetail.name}</dd>
           <dt className={dataListTermStyle}>Severity:</dt>
           <dd>{ruleDetail.severity}</dd>
-          <dt className={dataListTermStyle}>Where Clause:</dt>
-          <dd>{ruleDetail.where_clause || <EmptyData />}</dd>
-          <dt className={dataListTermStyle}>CEL Filter:</dt>
-          <dd>{ruleDetail.cel_filter || <EmptyData />}</dd>
+          {ruleDetail.description && (
+            <>
+              <dt className={dataListTermStyle}>Description:</dt>
+              <dd className="col-span-3">{ruleDetail.description}</dd>
+            </>
+          )}
+          {ruleDetail.where_clause && (
+            <>
+              <dt className={dataListTermStyle}>Where Clause:</dt>
+              <dd
+                className={cn(
+                  'text-xs font-mono bg-foreground/5 dark:bg-dark-foreground/5 p-2 rounded-md',
+                  !ruleDetail.cel_filter && 'col-span-3',
+                )}
+              >
+                {ruleDetail.where_clause}
+              </dd>
+            </>
+          )}
+          {ruleDetail.cel_filter && (
+            <>
+              <dt className={dataListTermStyle}>CEL Filter:</dt>
+              <dd
+                className={cn(
+                  'text-xs font-mono bg-foreground/5 dark:bg-dark-foreground/5 p-2 rounded-md',
+                  !ruleDetail.where_clause && 'col-span-3',
+                )}
+              >
+                {ruleDetail.cel_filter}
+              </dd>
+            </>
+          )}
         </dl>
       </div>
 
