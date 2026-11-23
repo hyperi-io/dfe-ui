@@ -52,12 +52,12 @@ describe('SidebarMenu selection', () => {
     expect(await selectedLabels()).toEqual(['Dashboards']);
   });
 
-  // Hunt Results has its own path rather than a query string on
+  // Detections has its own path rather than a query string on
   // /observe/search, so that the two entries stay distinguishable here.
-  it('highlights Hunt Results without also lighting up Search', async () => {
+  it('highlights Detections without also lighting up Search', async () => {
     usePathnameMock.mockReturnValue('/observe/hunt-results');
     render(<SidebarMenu collapsed={false} />, { wrapper });
-    expect(await selectedLabels()).toEqual(['Hunt Results']);
+    expect(await selectedLabels()).toEqual(['Detections']);
   });
 
   it('prefers the longest matching key', async () => {
