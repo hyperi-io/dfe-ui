@@ -15,7 +15,7 @@ export const RevokeApiKeyModal = ({
   shortToken: string;
   name: string;
 }) => {
-  const reauth = useReauthGrant(shortToken, 'api_key');
+  const reauth = useReauthGrant(shortToken, 'api_key', 'revoke');
   const [open, setOpen] = useState(false);
 
   const {

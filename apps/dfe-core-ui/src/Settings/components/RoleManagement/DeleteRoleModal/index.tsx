@@ -18,7 +18,7 @@ export const DeleteRoleModal = ({
   onSuccess,
   disabled,
 }: DeleteRoleModalProps) => {
-  const reauth = useReauthGrant(role_name, 'role');
+  const reauth = useReauthGrant(role_name, 'role', 'delete');
   const [open, setOpen] = useState(false);
   const { notification } = App.useApp();
 

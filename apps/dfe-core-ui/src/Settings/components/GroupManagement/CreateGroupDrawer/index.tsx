@@ -15,7 +15,7 @@ export const CreateGroupDrawer = () => {
   const [isOpen, setIsOpen] = useState(false);
   // The grant names the group it creates, so it is asked for at submit.
   const [newGroup, setNewGroup] = useState('');
-  const reauth = useReauthGrant(newGroup, 'group');
+  const reauth = useReauthGrant(newGroup, 'group', 'create');
   const [api, contextHolder] = notification.useNotification();
 
   const {

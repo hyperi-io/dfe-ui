@@ -87,7 +87,7 @@ export const CreateApiKeyForm = ({
 }) => {
   // The grant names the key it creates, so it is asked for at submit.
   const [reauthTarget, setReauthTarget] = useState('');
-  const reauth = useReauthGrant(reauthTarget, 'api_key');
+  const reauth = useReauthGrant(reauthTarget, 'api_key', 'create');
   const {
     data,
     mutate: generateApiKey,

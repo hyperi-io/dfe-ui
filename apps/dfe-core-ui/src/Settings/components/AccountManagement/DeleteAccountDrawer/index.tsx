@@ -21,7 +21,7 @@ export const DeleteAccountDrawer = ({
 }) => {
   const [open, setOpen] = useState(false);
   // Held only while the confirmation is open, so every delete asks for the password again.
-  const reauth = useReauthGrant(username);
+  const reauth = useReauthGrant(username, 'account', 'delete');
   const { notification } = App.useApp();
   const title = `Delete ${username}`;
 

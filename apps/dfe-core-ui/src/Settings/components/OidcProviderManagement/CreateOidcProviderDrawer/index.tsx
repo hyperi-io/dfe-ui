@@ -11,7 +11,7 @@ import { useState } from 'react';
 
 export const CreateOidcProviderDrawer = ({ title }: { title: string }) => {
   const [reauthTarget, setReauthTarget] = useState('');
-  const reauth = useReauthGrant(reauthTarget, 'provider');
+  const reauth = useReauthGrant(reauthTarget, 'provider', 'create');
   const [open, setOpen] = useState(false);
   const onClose = () => setOpen(false);
   const { notification } = App.useApp();

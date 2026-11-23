@@ -14,7 +14,7 @@ export const ConfigureLocalUser = ({ goNext }: { goNext: () => void }) => {
     username: string;
     password: string;
   }>({ username: '', password: '' });
-  const reauth = useReauthGrant(loginValues.username, 'account');
+  const reauth = useReauthGrant(loginValues.username, 'account', 'create');
   const {
     mutate: login,
     isPending: isLoginPending,

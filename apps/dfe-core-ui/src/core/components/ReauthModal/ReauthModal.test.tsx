@@ -1,6 +1,6 @@
 import { ADMIN_MOCKED_RESPONSE } from '@/core/components/RbacProtected/hooks/hooks.mocks';
 import { API_CONFIG_MOCKS } from '@/core/config/api/endpoints/generator';
-import { REAUTH_MESSAGE } from '@/core/hooks/useReauth';
+import { REAUTH_MESSAGE, type TReauthKind } from '@/core/hooks/useReauth';
 import { useAuthStore } from '@/core/stores/authStore';
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
 import { act, render, screen } from '@testing-library/react';
@@ -16,7 +16,7 @@ import {
   it,
   vi,
 } from 'vitest';
-import { ReauthModal } from '.';
+import { ReauthModal, type TReauthVerb } from '.';
 
 const IDP_URL = 'https://idp.example/authorize?state=test';
 
@@ -175,4 +175,33 @@ describe('ReauthModal', () => {
       await screen.findByText('Allow pop-ups for this site, then try again.'),
     ).toBeInTheDocument();
   });
+
+  const verbs: [TReauthVerb, TReauthKind, string][] = [
+    ['create', 'account', 'account'],
+    ['change', 'group', 'group'],
+    ['delete', 'role', 'role'],
+    ['revoke', 'api_key', 'API key'],
+  ];
+
+  it.each(verbs)(
+    'names the %s action on a %s in the password prompt',
+    async (verb, kind, noun) => {
+      signedIn(false);
+      render(
+        <ReauthModal
+          open
+          kind={kind}
+          target="bob"
+          verb={verb}
+          onCancel={vi.fn()}
+          onGranted={vi.fn()}
+        />,
+        { wrapper },
+      );
+
+      expect(await screen.findByText(/Enter your password/)).toHaveTextContent(
+        `Enter your password to ${verb} ${noun} bob.`,
+      );
+    },
+  );
 });

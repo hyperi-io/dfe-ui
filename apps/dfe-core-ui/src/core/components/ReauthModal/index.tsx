@@ -9,6 +9,9 @@ import { Button, Input } from 'antd';
 
 type TReauthFormValues = { password: string };
 
+/** The action the modal names, so a create, delete or revoke reads as one. */
+export type TReauthVerb = 'change' | 'create' | 'delete' | 'revoke';
+
 const KIND_NOUNS: Record<TReauthKind, string> = {
   account: 'account',
   api_key: 'API key',
@@ -17,19 +20,21 @@ const KIND_NOUNS: Record<TReauthKind, string> = {
   role: 'role',
 };
 
-/** Asks the signed-in user to prove it is still them before it changes *target*: its password, or a fresh sign-in at its identity provider. Hands back the grant the engine signs for that one target. */
+/** Asks the signed-in user to prove it is still them before it *verb*s *target*: its password, or a fresh sign-in at its identity provider. Hands back the grant the engine signs for that one target. */
 export const ReauthModal = ({
   kind = 'account',
   onCancel,
   onGranted,
   open,
   target,
+  verb = 'change',
 }: {
   kind?: TReauthKind;
   onCancel: () => void;
   onGranted: (grant: string) => void;
   open: boolean;
   target: string;
+  verb?: TReauthVerb;
 }) => {
   const [form] = Form.useForm<TReauthFormValues>();
   const { data: me } = useAuthMe();
@@ -42,7 +47,7 @@ export const ReauthModal = ({
     },
   });
   const idp = useIdpReauth({ onGranted });
-  const action = `change ${KIND_NOUNS[kind]}`;
+  const action = `${verb} ${KIND_NOUNS[kind]}`;
 
   const handleCancel = () => {
     form.resetFields();

@@ -37,7 +37,7 @@ export const ConfigureOidcStep = ({
   const [form] = Form.useForm();
   // The grant names the provider it changes, so it is asked for at submit.
   const [reauthTarget, setReauthTarget] = useState('');
-  const reauth = useReauthGrant(reauthTarget, 'provider');
+  const reauth = useReauthGrant(reauthTarget, 'provider', 'create');
   const {
     mutate: createOidcProvider,
     isPending: isCreateOidcProviderPending,

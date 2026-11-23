@@ -21,7 +21,7 @@ export const DeleteOidcProviderModal = ({
   onSuccess,
   disabled,
 }: DeleteOidcProviderModalProps) => {
-  const reauth = useReauthGrant(oidcProviderName, 'provider');
+  const reauth = useReauthGrant(oidcProviderName, 'provider', 'delete');
   const [open, setOpen] = useState(false);
   const { notification } = App.useApp();
 

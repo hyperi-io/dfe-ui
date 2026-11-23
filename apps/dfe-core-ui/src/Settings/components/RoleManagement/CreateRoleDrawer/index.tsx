@@ -12,7 +12,7 @@ import { useState } from 'react';
 
 export const CreateRoleDrawer = () => {
   const [reauthTarget, setReauthTarget] = useState('');
-  const reauth = useReauthGrant(reauthTarget, 'role');
+  const reauth = useReauthGrant(reauthTarget, 'role', 'create');
   const [isOpen, setIsOpen] = useState(false);
   const [api, contextHolder] = notification.useNotification();
 

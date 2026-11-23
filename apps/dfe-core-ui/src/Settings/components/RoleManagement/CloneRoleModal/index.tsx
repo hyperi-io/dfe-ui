@@ -10,7 +10,7 @@ import { CloneRoleForm } from './CloneRoleForm';
 
 export const CloneRoleModal = ({ role_name }: { role_name: string }) => {
   const [reauthTarget, setReauthTarget] = useState('');
-  const reauth = useReauthGrant(reauthTarget, 'role');
+  const reauth = useReauthGrant(reauthTarget, 'role', 'create');
   const [open, setOpen] = useState(false);
 
   const { notification } = App.useApp();

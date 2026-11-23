@@ -1,14 +1,15 @@
-import { ReauthModal } from '@/core/components/ReauthModal';
+import { type TReauthVerb, ReauthModal } from '@/core/components/ReauthModal';
 import type { TReauthKind } from '@/core/hooks/useReauth';
 import { useRef, useState } from 'react';
 
 /**
- * Ask for the signed-in user's password before a change to the account or group *target*, then run the change.
+ * Ask for the signed-in user's password before the account or group *target* is *verb*ed, then run the change.
  * The grant the engine signs is kept until dropped, so the caller decides how long one confirmation lasts.
  */
 export const useReauthGrant = (
   target: string,
   kind: TReauthKind = 'account',
+  verb: TReauthVerb = 'change',
 ) => {
   const grantRef = useRef<string>(undefined);
   const [pending, setPending] = useState<{ run: (grant: string) => void }>();
@@ -18,6 +19,7 @@ export const useReauthGrant = (
       kind={kind}
       open={pending !== undefined}
       target={target}
+      verb={verb}
       onCancel={() => setPending(undefined)}
       onGranted={(granted) => {
         grantRef.current = granted;

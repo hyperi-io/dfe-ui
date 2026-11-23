@@ -12,7 +12,7 @@ export const DeleteGroupModal = ({ group_name }: { group_name: string }) => {
   const { notification } = App.useApp();
 
   // Every delete asks for the password again.
-  const reauth = useReauthGrant(group_name, 'group');
+  const reauth = useReauthGrant(group_name, 'group', 'delete');
   const { mutate, isPending, error } = useDeleteGroup({
     reauth: reauth.grant,
     onSuccess: () => {
