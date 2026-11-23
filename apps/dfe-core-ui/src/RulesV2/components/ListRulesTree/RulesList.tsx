@@ -3,9 +3,37 @@ import { useListRulesContext } from '@/core/contexts/ListRulesContextV2';
 import { TRuleListItem } from '@/core/hooks/useFetchInfiniteFilteredRulesV2/types';
 import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
 import { cn } from '@/core/utils/style';
+import { IconUrgent } from '@repo/dfe-icons';
+import { Tooltip } from '@repo/dfe-shared-ui';
 import { Spin } from 'antd';
 import { EmptyList } from './EmptyList';
 import { ErrorList } from './ErrorList';
+
+const SeverityIcon = ({
+  severity,
+}: {
+  severity: TRuleListItem['severity'];
+}) => {
+  const severityColor = {
+    low: 'bg-green-500',
+    medium: 'bg-yellow-500',
+    high: 'bg-orange-500',
+    critical: 'bg-red-500',
+  };
+  return (
+    <Tooltip title={`Severity: ${severity}`}>
+      <span
+        className={cn(
+          'rounded-full p-0.5 text-white',
+          severityColor[severity as keyof typeof severityColor] ||
+            'text-gray-500',
+        )}
+      >
+        <IconUrgent className="w-4 h-4" />
+      </span>
+    </Tooltip>
+  );
+};
 
 export const RulesList = ({
   className,
@@ -76,12 +104,15 @@ export const RulesList = ({
                 onClick={() => setSelectedRuleName(rule.name)}
               >
                 <dl className="w-full min-w-0">
-                  <dt className="font-medium truncate">
+                  <dt className="font-medium truncate flex items-center gap-2">
+                    {rule.severity && <SeverityIcon severity={rule.severity} />}{' '}
                     {rule.display_name ?? rule.name}
                   </dt>
-                  <dd className="text-sm text-gray-500 capitalize truncate dark:text-gray-400">
-                    {rule.severity}
-                  </dd>
+                  {rule.description && (
+                    <dd className="text-[13px] text-gray-500 capitalize truncate dark:text-gray-400">
+                      {rule.description}
+                    </dd>
+                  )}
                 </dl>
               </button>
             </li>
