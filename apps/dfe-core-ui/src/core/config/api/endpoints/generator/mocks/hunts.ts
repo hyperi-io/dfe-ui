@@ -2,6 +2,7 @@ import { THuntListResponse } from '@/core/hooks/useFetchInfiniteFilteredHunts/ty
 import { THuntCreateResponse } from '@/Hunts/hooks/useCreateHunt/types';
 import { THuntEngineStatus } from '@/Hunts/hooks/useFetchEngineStatus/types';
 import { THuntDetailResponse } from '@/Hunts/hooks/useFetchHuntDetail/types';
+import { THuntExecutionsResponse } from '@/Hunts/hooks/useFetchHuntExecutions/types';
 import { TTriggerResponse } from '@/Hunts/hooks/useTriggerHunt/types';
 import { http, HttpResponse } from 'msw';
 import {
@@ -273,6 +274,47 @@ export const hunts = {
           hunts.huntRun.mockedUrl.replace('{name}', name),
           () => {
             return HttpResponse.json(mockedResponse, { status });
+          },
+        );
+      },
+    },
+  },
+  huntExecutions: {
+    mockedUrl: '/api/v1/hunts/{name}/executions',
+    get: {
+      success: ({
+        mockedResponse = {
+          items: [
+            {
+              execution_id: 'execution_id',
+              fire: 1,
+              status: 'status',
+              rows_returned: 1,
+              execution_time_ms: 1000,
+              cost_window_minutes: 10,
+              cost_estimate: {
+                estimated_rows: 1000,
+                rows_in_window: 1000,
+                projected_per_day: 1000,
+                match_ratio: 1000,
+                band: 'warn',
+                window_minutes: 10,
+                duration_ms: 1000,
+              },
+            },
+          ],
+          total_size: 1,
+          next_page_token: null,
+        },
+        name = 'name',
+      }: {
+        mockedResponse?: THuntExecutionsResponse;
+        name?: string;
+      } = {}) => {
+        return http.get(
+          hunts.huntExecutions.mockedUrl.replace('{name}', name),
+          () => {
+            return HttpResponse.json(mockedResponse);
           },
         );
       },
