@@ -53,6 +53,7 @@ describe('.useCreateRule', () => {
           where_clause: 'string',
           cel_filter: 'string',
           created_at: 'string',
+          original_sql: 'string',
         },
         sanitize_summary: {
           additionalProp1: {},

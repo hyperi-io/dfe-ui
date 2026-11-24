@@ -26,6 +26,8 @@ const rule: TRuleDetail = {
   where_clause: '1',
   cel_filter: '',
   created_at: '2026-01-01T00:00:00Z',
+  original_sql: 'string',
+  description: 'string',
 };
 
 const openClone = async (source: TRuleDetail) => {
