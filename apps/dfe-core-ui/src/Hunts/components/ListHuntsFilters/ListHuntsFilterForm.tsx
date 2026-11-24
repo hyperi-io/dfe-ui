@@ -2,13 +2,15 @@ import { Form } from '@/core/components/Form';
 import { SortActions } from '@/core/components/SortActions';
 import { HuntSortBy } from '@/core/hooks/useFetchInfiniteFilteredHunts/types';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
+import { RuleSelect } from '@/Hunts/components/RuleSelectCreate';
 import { useListHuntsContext } from '@/Hunts/contexts/ListHuntsContext';
 import { Button, Input } from 'antd';
 import { useEffect, useId } from 'react';
 import z from 'zod';
 
 const formSchema = z.object({
-  search: z.string().optional(),
+  search: z.string().optional().nullable(),
+  rule: z.string().optional().nullable(),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -27,17 +29,19 @@ export const ListHuntsFilterForm = ({
   const formValidation = useAntdZodResolver<FormData>(formSchema);
 
   const handleApplyFilters = (values: FormData) => {
-    const { search } = values;
+    const { search, rule } = values;
     setFilters({
-      search: search ?? undefined,
+      search: search ?? null,
+      rule: rule ?? null,
     });
     onSuccess?.();
   };
 
   const handleResetFilters = () => {
-    form.setFieldsValue({ search: '' });
+    form.setFieldsValue({ search: '', rule: null });
     setFilters({
-      search: undefined,
+      search: null,
+      rule: null,
     });
     onClose?.();
   };
@@ -45,16 +49,21 @@ export const ListHuntsFilterForm = ({
   useEffect(() => {
     form.setFieldsValue({
       search: filters.search ?? '',
+      rule: filters.rule ?? null,
     });
-  }, [form, filters.search]);
+  }, [form, filters.search, filters.rule]);
 
   const sortBySelectId = useId();
 
   return (
     <Form
-      key={`${filters.search ?? ''}`}
+      key={`${filters.search ?? ''}:${filters.rule ?? ''}`}
       form={form}
       onFinish={handleApplyFilters}
+      initialValues={{
+        rule: filters.rule ?? null,
+        search: filters.search ?? '',
+      }}
     >
       <SortActions
         id={{
@@ -71,8 +80,8 @@ export const ListHuntsFilterForm = ({
         ]}
         onChange={({ sortBy, sortDirection }) =>
           setFilters({
-            ...(sortBy !== undefined && { sort_by: sortBy as HuntSortBy }),
-            ...(sortDirection !== undefined && {
+            ...(sortBy !== null && { sort_by: sortBy as HuntSortBy }),
+            ...(sortDirection !== null && {
               sort_order: sortDirection as 'asc' | 'desc',
             }),
           })
@@ -91,6 +100,20 @@ export const ListHuntsFilterForm = ({
         />
       </Form.Item>
 
+      <Form.Item
+        name="rule"
+        label="Rule"
+        rules={[formValidation]}
+        layout="horizontal"
+      >
+        <RuleSelect
+          size="small"
+          showCreate={false}
+          allowClear
+          mode={undefined}
+        />
+      </Form.Item>
+
       <Form.Item className="flex justify-end">
         <Button
           className="mb-2 mr-2 text-xs"
@@ -98,7 +121,7 @@ export const ListHuntsFilterForm = ({
           htmlType="button"
           size="small"
           onClick={handleResetFilters}
-          disabled={!filters.search}
+          disabled={!filters.search && !filters.rule}
         >
           Clear Filters
         </Button>
