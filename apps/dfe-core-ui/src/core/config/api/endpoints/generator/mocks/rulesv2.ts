@@ -22,6 +22,7 @@ export const rulesV2 = {
           where_clause: 'string',
           cel_filter: 'string',
           created_at: 'string',
+          original_sql: 'string',
         },
         name = 'name',
       }: {
@@ -57,6 +58,7 @@ export const rulesV2 = {
             where_clause: 'string',
             cel_filter: 'string',
             created_at: 'string',
+            original_sql: 'string',
           },
           sanitize_summary: {
             additionalProp1: {},
@@ -167,6 +169,7 @@ export const rulesV2 = {
             where_clause: 'string',
             cel_filter: 'string',
             created_at: 'string',
+            original_sql: 'string',
           },
           sanitize_summary: {
             additionalProp1: {},
