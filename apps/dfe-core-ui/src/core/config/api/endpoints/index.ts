@@ -101,6 +101,7 @@ export const API_CONFIG = Object.freeze({
     engineStatus: '/api/v1/hunts/status',
     hunt: '/api/v1/hunts/{name}',
     huntRun: '/api/v1/hunts/{name}/run',
+    huntExecutions: '/api/v1/hunts/{name}/executions',
   },
   oidc: {
     login: '/api/v1/auth/oidc/{provider}/login',

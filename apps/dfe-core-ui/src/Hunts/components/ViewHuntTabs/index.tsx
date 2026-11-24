@@ -5,11 +5,15 @@ import { THuntDetailResponse } from '@/Hunts/hooks/useFetchHuntDetail/types';
 import { Tabs } from 'antd';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useCallback, useMemo } from 'react';
+import { AssociatedRulesTab } from './AssociatedRulesTab';
 import { ConfigurationDetailsTabContent } from './ConfigurationDetailsTabContent';
+import { ExecutionsTab } from './ExecutionsTab';
 
 const HUNT_DETAIL_TAB_KEY_MAP = {
   configuration: 'Configuration Details',
   alerts: 'Alerts Configuration',
+  executions: 'Executions',
+  associatedRules: 'Associated Rules',
 } as const;
 const HUNT_DETAIL_TAB_KEYS = Object.keys(HUNT_DETAIL_TAB_KEY_MAP);
 
@@ -71,6 +75,20 @@ export const ViewHuntDetailTabs = ({
           label: HUNT_DETAIL_TAB_KEY_MAP['configuration'],
           children: <ConfigurationDetailsTabContent {...huntDetailData} />,
         },
+        {
+          key: 'executions',
+          label: HUNT_DETAIL_TAB_KEY_MAP['executions'],
+          children: <ExecutionsTab name={selectedHuntName} />,
+        },
+        ...(huntDetailData.rules && huntDetailData.rules.length > 0
+          ? [
+              {
+                key: 'associatedRules',
+                label: HUNT_DETAIL_TAB_KEY_MAP['associatedRules'],
+                children: <AssociatedRulesTab rules={huntDetailData.rules} />,
+              },
+            ]
+          : []),
       ]}
     />
   );

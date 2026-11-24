@@ -472,7 +472,18 @@ export const QUERY_KEYS = Object.freeze({
       '{name}',
       ...(name ? [name] : []),
     ],
-    huntRun: () => ['hunts', '{name}', 'run'],
+    huntRun: ({ name }: { name?: string | null } = {}) => [
+      'hunts',
+      '{name}',
+      'run',
+      ...(name ? [name] : []),
+    ],
+    huntExecutions: ({ name }: { name?: string | null } = {}) => [
+      'hunts',
+      '{name}',
+      'executions',
+      ...(name ? [name] : []),
+    ],
   },
   oidc: {
     login: ({
