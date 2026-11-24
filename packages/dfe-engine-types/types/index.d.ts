@@ -2276,6 +2276,150 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/rules-v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Rules
+         * @description List detection rules with pagination and search.
+         */
+        get: operations["rules-v2.list"];
+        put?: never;
+        /**
+         * Create Rule
+         * @description Create a detection rule from one detection form.
+         *
+         *     The rule stores that detection and nothing about a source or a hunt. A hunt
+         *     names the rules it runs and the table they read. A full ``user_sql`` query
+         *     is reduced to its WHERE, and a ``match`` is compiled to one. A filter that
+         *     does not transpile, or a detection the hunt runner would refuse, is 422 and
+         *     nothing is written.
+         *
+         *     A production+team write is routed to a review branch instead of the branch the
+         *     runner git-syncs, and the ``X-DFE-Review-Required`` header says so.
+         */
+        post: operations["rules-v2.create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/rules-v2/from-hyperdx": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Create Rule From Search
+         * @description Create a rule from the SQL a Search view renders to.
+         *
+         *     The pipeline keeps the detection WHERE and drops the query's FROM, so the
+         *     stored rule names no source and no hunt. A view that does not compile, or
+         *     that matches every event, is refused with 422. RBAC: ``rule:write``
+         *     (data_analyst) -- ``org_viewer`` has neither this grant nor the UI button.
+         */
+        post: operations["rules-v2.from-hyperdx"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/rules-v2/validate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Validate Rule Sql
+         * @description Validate a detection query (SELECT ... FROM ...) without creating a rule.
+         *
+         *     Returns any syntax errors or validation issues found.
+         */
+        post: operations["rules-v2.validate"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/rules-v2/preview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Preview Rule
+         * @description Compile a condition and check it exactly as a save would, writing nothing.
+         *
+         *     Runs the creation pipeline of ``POST /rules-v2`` (compile, parse, the forbidden-keyword
+         *     and column checks, the matches-everything check and the alert-volume preview) under the
+         *     same org fence, and stops before the save. A condition the save would refuse comes back
+         *     with 200 and its reasons in ``sql_errors`` or ``matches_everything``, so a builder can
+         *     show them as the author edits. A body that is not a condition at all is 422.
+         */
+        post: operations["rules-v2.preview"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/rules-v2/{name}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Rule
+         * @description Get a detection rule by file name.
+         */
+        get: operations["rules-v2.get"];
+        /**
+         * Update Rule
+         * @description Replace a detection rule's label, description, severity, and detection.
+         *
+         *     The replacement is one detection form, as on create. It does not record a
+         *     source or a hunt. A replacement the hunt runner would refuse is 422 and the
+         *     stored rule is left as it was.
+         *
+         *     A production+team write is routed to a review branch instead of the branch the
+         *     runner git-syncs, and the ``X-DFE-Review-Required`` header says so.
+         */
+        put: operations["rules-v2.apply"];
+        post?: never;
+        /**
+         * Delete Rule
+         * @description Delete a detection rule.
+         *
+         *     A production+team delete is routed to a review branch, so the runner keeps
+         *     compiling the rule until that branch is merged, which ``X-DFE-Review-Required`` says.
+         */
+        delete: operations["rules-v2.delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/alerts/destinations": {
         parameters: {
             query?: never;
@@ -5866,6 +6010,31 @@ export interface paths {
          *     it returns is internal to the deployment.
          */
         get: operations["config.client"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/config/features": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Feature Flags
+         * @description The deployment's feature flags, for the web UI.
+         *
+         *     Each key is true or false. A flag the deployment did not set is absent, and
+         *     code treats an absent flag as off. The value is the one ``feature_enabled``
+         *     returns, so the UI and a code check agree. Authenticated but ungated: every
+         *     console pane may read it.
+         */
+        get: operations["config.features"];
         put?: never;
         post?: never;
         delete?: never;
@@ -11919,6 +12088,15 @@ export interface components {
             /** Total Size */
             total_size?: number | null;
         };
+        /** Page[RuleV2Summary] */
+        Page_RuleV2Summary_: {
+            /** Items */
+            items: components["schemas"]["RuleV2Summary"][];
+            /** Next Page Token */
+            next_page_token?: string | null;
+            /** Total Size */
+            total_size?: number | null;
+        };
         /** Page[SchemaColumn] */
         Page_SchemaColumn_: {
             /** Items */
@@ -13566,6 +13744,247 @@ export interface components {
              * @description Lookback window in minutes the preview counts over. Absent or 0 uses the deployment's preview window.
              */
             cost_window_minutes?: number | null;
+        };
+        /**
+         * RuleV2CreateRequest
+         * @description Create a detection rule from one detection form.
+         */
+        RuleV2CreateRequest: {
+            /**
+             * Display Name
+             * @description Human-readable label (defaults from ``name`` when omitted on create)
+             */
+            display_name?: string | null;
+            /**
+             * Description
+             * @description What the rule detects
+             */
+            description?: string | null;
+            /**
+             * Severity
+             * @description low|medium|high|critical
+             * @default medium
+             */
+            severity: string;
+            /**
+             * Where Clause
+             * @description Detection condition, the SQL after WHERE. The hunt that runs the rule names the table. Not a full SELECT. Give this or one other detection, not more
+             */
+            where_clause?: string | null;
+            /**
+             * Cel Filter
+             * @description CEL expression transpiled to the rule's WHERE. Give this or one other detection, not more
+             */
+            cel_filter?: string | null;
+            /**
+             * User Sql
+             * @description Full detection query: SELECT ... FROM <db>.<table> WHERE .... Search sends this when it creates a rule. The stored rule keeps the WHERE and drops the FROM, because the hunt names the table. Set ``source_type`` to 'hyperdx' for SQL a Search view renders. Give this or one other detection, not more
+             */
+            user_sql?: string | null;
+            /**
+             * Source Type
+             * @description 'raw' for SQL written by hand, or 'hyperdx' for SQL a Search view renders. Applies to ``user_sql``
+             * @default raw
+             * @enum {string}
+             */
+            source_type: "raw" | "hyperdx";
+            /** @description Structured match, the same shape as a source match: one test of a field, or ``all`` or ``any`` of several, with ``negate``. The engine compiles it to the rule's WHERE and stores the match so a builder can reopen it. Give this or one other detection, not more */
+            match?: components["schemas"]["RuleCondition"] | null;
+            /**
+             * Name
+             * @description Rule file name (YAML stem); must be unique
+             */
+            name: string;
+        };
+        /**
+         * RuleV2CreateResponse
+         * @description The created rule and any validation notes. Nothing here names a hunt or a source.
+         */
+        RuleV2CreateResponse: {
+            rule: components["schemas"]["RuleV2Response"];
+            /** Sanitize Summary */
+            sanitize_summary?: {
+                [key: string]: unknown;
+            };
+            /** Sql Errors */
+            sql_errors?: components["schemas"]["SqlValidationError"][];
+        };
+        /**
+         * RuleV2FromHyperdxRequest
+         * @description Create a hunt rule from the SQL a Search view runs.
+         *
+         *     Search renders the view to ``raw_sql`` (or ``user_sql``, the name the rule
+         *     pipeline uses) and sends it here. The create pipeline strips the UI meta
+         *     (time bounds, LIMIT, ``__hdx_time_bucket``, SETTINGS) via the dfe-hyperdx
+         *     sanitizer, and the engine derives a unique rule id from the saved-search
+         *     name. The caller gets that id back and opens ``/rules-v2/{id}`` -- no id to
+         *     invent, no IndexedDB round-trip.
+         */
+        RuleV2FromHyperdxRequest: {
+            /**
+             * Raw Sql
+             * @description The ClickHouse SELECT the Search view renders to. Give this or ``user_sql``
+             */
+            raw_sql?: string | null;
+            /**
+             * User Sql
+             * @description The same SELECT, under the name the rule pipeline uses. Give this or ``raw_sql``
+             */
+            user_sql?: string | null;
+            /**
+             * Saved Search Name
+             * @description Search saved-search name; seeds the rule id and label
+             */
+            saved_search_name?: string | null;
+            /**
+             * Severity
+             * @description low|medium|high|critical
+             * @default medium
+             */
+            severity: string;
+            /**
+             * Description
+             * @description What the rule detects
+             */
+            description?: string | null;
+        };
+        /**
+         * RuleV2FromHyperdxResponse
+         * @description The rule created from a Search query.
+         */
+        RuleV2FromHyperdxResponse: {
+            /**
+             * Id
+             * @description Created rule id (YAML stem); open at /rules-v2/{id}
+             */
+            id: string;
+            /** Display Name */
+            display_name: string;
+            /** Sanitize Summary */
+            sanitize_summary?: {
+                [key: string]: unknown;
+            };
+            /** Warnings */
+            warnings?: string[];
+            /** Sql Errors */
+            sql_errors?: components["schemas"]["SqlValidationError"][];
+        };
+        /**
+         * RuleV2Response
+         * @description A detection rule as the API returns it.
+         *
+         *     ``where_clause`` is the condition a hunt runs. For a CEL rule it is the
+         *     filter transpiled to SQL, and ``cel_filter`` is the expression the author wrote.
+         */
+        RuleV2Response: {
+            /**
+             * Name
+             * @description Rule file name (YAML stem)
+             */
+            name: string;
+            /**
+             * Display Name
+             * @description Human-readable rule label
+             */
+            display_name: string;
+            /**
+             * Description
+             * @description What the rule detects
+             */
+            description?: string | null;
+            /** Severity */
+            severity: string;
+            /**
+             * Where Clause
+             * @description Detection condition a hunt runs against its own source
+             */
+            where_clause: string;
+            /**
+             * Cel Filter
+             * @description CEL expression the WHERE was transpiled from, absent when the rule is a WHERE fragment
+             */
+            cel_filter?: string | null;
+            /** @description The structured match the WHERE was compiled from, in the same shape as a source match. Absent when the rule was written as SQL, a WHERE fragment, or CEL */
+            match?: components["schemas"]["RuleCondition"] | null;
+            /**
+             * Source Type
+             * @description How the rule's SQL was written: raw, or hyperdx for SQL a Search view renders. Absent when the rule is a WHERE fragment, a CEL filter, or a match
+             */
+            source_type?: ("raw" | "hyperdx") | null;
+            /** Warnings */
+            warnings?: string[];
+            /** Sql Errors */
+            sql_errors?: components["schemas"]["SqlValidationError"][];
+            /** Created At */
+            created_at: string;
+        };
+        /**
+         * RuleV2Summary
+         * @description A detection rule in a listing.
+         */
+        RuleV2Summary: {
+            /**
+             * Name
+             * @description Rule file name (YAML stem)
+             */
+            name: string;
+            /** Display Name */
+            display_name: string;
+            /**
+             * Description
+             * @description What the rule detects
+             */
+            description?: string | null;
+            /** Severity */
+            severity: string;
+            /** Created At */
+            created_at: string;
+        };
+        /**
+         * RuleV2UpdateRequest
+         * @description Replace a detection rule's label, description, severity, and detection.
+         */
+        RuleV2UpdateRequest: {
+            /**
+             * Display Name
+             * @description Human-readable label (defaults from ``name`` when omitted on create)
+             */
+            display_name?: string | null;
+            /**
+             * Description
+             * @description What the rule detects
+             */
+            description?: string | null;
+            /**
+             * Severity
+             * @description low|medium|high|critical
+             * @default medium
+             */
+            severity: string;
+            /**
+             * Where Clause
+             * @description Detection condition, the SQL after WHERE. The hunt that runs the rule names the table. Not a full SELECT. Give this or one other detection, not more
+             */
+            where_clause?: string | null;
+            /**
+             * Cel Filter
+             * @description CEL expression transpiled to the rule's WHERE. Give this or one other detection, not more
+             */
+            cel_filter?: string | null;
+            /**
+             * User Sql
+             * @description Full detection query: SELECT ... FROM <db>.<table> WHERE .... Search sends this when it creates a rule. The stored rule keeps the WHERE and drops the FROM, because the hunt names the table. Set ``source_type`` to 'hyperdx' for SQL a Search view renders. Give this or one other detection, not more
+             */
+            user_sql?: string | null;
+            /**
+             * Source Type
+             * @description 'raw' for SQL written by hand, or 'hyperdx' for SQL a Search view renders. Applies to ``user_sql``
+             * @default raw
+             * @enum {string}
+             */
+            source_type: "raw" | "hyperdx";
+            /** @description Structured match, the same shape as a source match: one test of a field, or ``all`` or ``any`` of several, with ``negate``. The engine compiles it to the rule's WHERE and stores the match so a builder can reopen it. Give this or one other detection, not more */
+            match?: components["schemas"]["RuleCondition"] | null;
         };
         /**
          * SampleBackend
@@ -25520,6 +25939,491 @@ export interface operations {
             };
         };
     };
+    "rules-v2.list": {
+        parameters: {
+            query?: {
+                /** @description Case-insensitive search in name, display_name, description, severity */
+                search?: string | null;
+                /** @description Filter by severity */
+                severity?: string | null;
+                /** @description Items per page: 0 means 50, above 1000 is cut to it */
+                page_size?: number;
+                /** @description The next_page_token of the previous page */
+                page_token?: string | null;
+                /** @description Items to skip, after page_token */
+                skip?: number;
+                /** @description Ordering over created_at, description, display_name, name, severity, each optionally followed by desc */
+                order_by?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Page_RuleV2Summary_"];
+                };
+            };
+            /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+        };
+    };
+    "rules-v2.create": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RuleV2CreateRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RuleV2CreateResponse"];
+                };
+            };
+            /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Refused, nothing written. The body failed validation (code validation_error): give a WHERE fragment, a CEL filter, a full user_sql query, or a match, one of them, and a WHERE fragment is not a full SQL statement. Or the detection was refused -- the WHERE fragment or the SQL does not parse, calls a function that reads outside the row (url, s3, a dictionary) or sends it to another service (the ai* functions), reads another table, the CEL filter does not transpile, or the match does not compile (code invalid_sql, the errors in sql_errors). Or the rule matches every event (code rule_matches_everything, the detection WHERE in context). */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+        };
+    };
+    "rules-v2.from-hyperdx": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RuleV2FromHyperdxRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RuleV2FromHyperdxResponse"];
+                };
+            };
+            /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Refused, nothing written. The body failed validation (code validation_error): give a WHERE fragment, a CEL filter, a full user_sql query, or a match, one of them, and a WHERE fragment is not a full SQL statement. Or the detection was refused -- the WHERE fragment or the SQL does not parse, calls a function that reads outside the row (url, s3, a dictionary) or sends it to another service (the ai* functions), reads another table, the CEL filter does not transpile, or the match does not compile (code invalid_sql, the errors in sql_errors). Or the rule matches every event (code rule_matches_everything, the detection WHERE in context). */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+        };
+    };
+    "rules-v2.validate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SqlValidationRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SqlValidationResponse"];
+                };
+            };
+            /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+        };
+    };
+    "rules-v2.preview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RulePreviewRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RulePreviewResponse"];
+                };
+            };
+            /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+        };
+    };
+    "rules-v2.get": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                name: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RuleV2Response"];
+                };
+            };
+            /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+        };
+    };
+    "rules-v2.apply": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                name: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RuleV2UpdateRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RuleV2CreateResponse"];
+                };
+            };
+            /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Refused, nothing written. The body failed validation (code validation_error): give a WHERE fragment, a CEL filter, a full user_sql query, or a match, one of them, and a WHERE fragment is not a full SQL statement. Or the detection was refused -- the WHERE fragment or the SQL does not parse, calls a function that reads outside the row (url, s3, a dictionary) or sends it to another service (the ai* functions), reads another table, the CEL filter does not transpile, or the match does not compile (code invalid_sql, the errors in sql_errors). Or the rule matches every event (code rule_matches_everything, the detection WHERE in context). */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+        };
+    };
+    "rules-v2.delete": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                name: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+        };
+    };
     "alerts.destinations": {
         parameters: {
             query?: {
@@ -37404,6 +38308,55 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ClientConfig"];
+                };
+            };
+            /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+        };
+    };
+    "config.features": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: boolean;
+                    };
                 };
             };
             /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */

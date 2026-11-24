@@ -1,0 +1,48 @@
+import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
+import { renderHook, waitFor } from '@testing-library/react';
+import { afterAll, afterEach, beforeAll, describe, expect, test } from 'vitest';
+import { useFetchRuleDetail } from '.';
+import { TRuleDetail } from './types';
+import { server } from './useFetchRuleDetail.mocks';
+
+beforeAll(() =>
+  server.listen({
+    onUnhandledRequest: 'error',
+  }),
+);
+afterEach(() => server.resetHandlers());
+afterAll(() => server.close());
+
+const { wrapper } = buildTestWrapper().withReactQuery();
+
+describe('.useFetchRuleDetail', () => {
+  describe('name is provided', () => {
+    test('should return data', async () => {
+      const { result } = renderHook(
+        () =>
+          useFetchRuleDetail({
+            name: 'name',
+          }),
+        { wrapper },
+      );
+
+      const response: TRuleDetail = {
+        display_name: 'string',
+        name: 'string',
+        severity: 'string',
+        description: 'string',
+        where_clause: 'string',
+        cel_filter: 'string',
+        created_at: 'string',
+      };
+
+      await waitFor(() => {
+        expect(result.current).toEqual({
+          data: response,
+          isLoading: false,
+          error: null,
+        });
+      });
+    });
+  });
+});

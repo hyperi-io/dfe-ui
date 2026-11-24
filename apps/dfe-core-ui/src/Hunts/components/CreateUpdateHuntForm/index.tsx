@@ -6,12 +6,12 @@ import { getApiErrorResponseBody } from '@/core/config/api/client';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
 import { RULE_HUNT_NAME_VALIDATOR } from '@/core/validationSchemas/utils';
 import { CRONBuilderDrawer } from '@/Hunts/components/CRONBuilderDrawer';
+import { RuleSelect } from '@/Hunts/components/RuleSelectCreate';
 import { autoDisableNotice } from '@/Hunts/utils/autoDisable';
 import { IconDeviceFloppy, IconPlus, IconTrash } from '@repo/dfe-icons';
 import { Alert, Button, FormProps, Input, Switch } from 'antd';
 import { useEffect, useMemo } from 'react';
 import z from 'zod';
-import { RuleSelect } from './RuleSelectCreate';
 
 /** The engine's code for a hunt naming an organisation it does not hold, such as a deleted one. */
 export const UNKNOWN_ORG_CODE = 'unknown_org';

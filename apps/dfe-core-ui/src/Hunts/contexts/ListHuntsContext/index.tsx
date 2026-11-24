@@ -35,16 +35,19 @@ const parseFiltersFromParams = (
   const searchParam = params.get('search');
   const search =
     searchParam === null || searchParam === '' ? undefined : searchParam;
+  const ruleParam = params.get('rule');
+  const rule = ruleParam === null || ruleParam === '' ? undefined : ruleParam;
   const sort_by = (params.get('sort_by') as HuntSortBy) ?? undefined;
   const sort_order = (params.get('sort_order') as 'asc' | 'desc') ?? undefined;
   const page_sizeParam = params.get('page_size');
   const page_size = page_sizeParam ? parseInt(page_sizeParam, 10) : undefined;
-  return { search, sort_by, sort_order, page_size };
+  return { search, rule, sort_by, sort_order, page_size };
 };
 
 const filtersToSearchString = (f: ListHuntsQueryParams): string => {
   const params = new URLSearchParams();
   if (f.search) params.set('search', f.search);
+  if (f.rule) params.set('rule', f.rule);
   if (f.sort_by) params.set('sort_by', f.sort_by);
   if (f.sort_order) params.set('sort_order', f.sort_order);
   if (f.page_size) params.set('page_size', String(f.page_size));
@@ -55,7 +58,8 @@ const filtersToSearchString = (f: ListHuntsQueryParams): string => {
 const hasSortFilters = (f: ListHuntsQueryParams) =>
   f.sort_by !== undefined || f.sort_order !== undefined;
 
-const hasSearchFilters = (f: ListHuntsQueryParams) => f.search !== undefined;
+const hasSearchFilters = (f: ListHuntsQueryParams) =>
+  f.search !== undefined || f.rule !== undefined;
 
 const hasAnyFilters = (f: ListHuntsQueryParams) =>
   hasSearchFilters(f) || hasSortFilters(f);
@@ -129,6 +133,7 @@ export const ListHuntsProvider = ({
     isFetchingNextPage,
   } = useFetchInfiniteFilteredHunts({
     search: filters.search,
+    rule: filters.rule,
     sort_by: filters.sort_by,
     sort_order: filters.sort_order,
     page_size: filters.page_size,

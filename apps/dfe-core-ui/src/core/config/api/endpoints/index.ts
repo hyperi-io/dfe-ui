@@ -50,6 +50,11 @@ export const API_CONFIG = Object.freeze({
     validate: '/api/v1/rules/validate',
     rule: '/api/v1/rules/{name}',
   },
+  rulesV2: {
+    default: '/api/v1/rules-v2',
+    validate: '/api/v1/rules-v2/validate',
+    rule: '/api/v1/rules-v2/{name}',
+  },
   alerts: {
     destinations: '/api/v1/alerts/destinations',
     destination: '/api/v1/alerts/destinations/{name}',
@@ -177,6 +182,7 @@ export const API_CONFIG = Object.freeze({
   },
   clientConfig: {
     default: '/api/v1/config/client',
+    features: '/api/v1/config/features',
   },
   system: {
     version: '/api/v1/system/version',
@@ -194,5 +200,9 @@ export const API_CONFIG = Object.freeze({
   apiKeys: {
     default: '/api/v1/auth/api-keys',
     apiKey: '/api/v1/auth/api-keys/{short_token}',
+  },
+  cel: {
+    check: '/api/v1/cel/check',
+    checkBatch: '/api/v1/cel/check-batch',
   },
 } as const satisfies Record<string, Record<string, keyof paths>>);
