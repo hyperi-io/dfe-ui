@@ -108,11 +108,16 @@ export const RulesList = ({
                     {rule.severity && <SeverityIcon severity={rule.severity} />}{' '}
                     {rule.display_name ?? rule.name}
                   </dt>
-                  {rule.description && (
-                    <dd className="text-[13px] text-gray-500 capitalize truncate dark:text-gray-400">
-                      {rule.description}
-                    </dd>
-                  )}
+
+                  <dd
+                    className={cn(
+                      'text-[13px] capitalize truncate',
+                      rule.description && 'text-gray-500 dark:text-gray-400',
+                      !rule.description && 'text-gray-400 dark:text-gray-500',
+                    )}
+                  >
+                    {rule.description || 'No description'}
+                  </dd>
                 </dl>
               </button>
             </li>
