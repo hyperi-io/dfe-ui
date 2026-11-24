@@ -1,4 +1,4 @@
-import { RulesToolbar } from '@/Rules/components/RulesToolbar';
+import { RulesToolbar } from '@/RulesV2/components/RulesToolbar';
 
 export default async function Layout({
   children,

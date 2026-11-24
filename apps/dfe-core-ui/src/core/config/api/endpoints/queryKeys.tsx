@@ -5,6 +5,7 @@ import { useFetchInfiniteFilteredGroupsProps } from '@/core/hooks/useFetchInfini
 import { UseFetchInfiniteFilteredHuntsProps } from '@/core/hooks/useFetchInfiniteFilteredHunts/types';
 import { UseFetchInfiniteFilteredOrganisationsProps } from '@/core/hooks/useFetchInfiniteFilteredOrganisations/types';
 import { UseFetchInfiniteFilteredRulesProps } from '@/core/hooks/useFetchInfiniteFilteredRules/types';
+import { UseFetchInfiniteFilteredRulesProps as UseFetchInfiniteFilteredRulesV2Props } from '@/core/hooks/useFetchInfiniteFilteredRulesV2/types';
 import { UseFetchInfiniteFilteredSchemasProps } from '@/core/hooks/useFetchInfiniteFilteredSchemas/types';
 import { UseFetchInfiniteFilteredSourceCatalogueTagsProps } from '@/core/hooks/useFetchInfiniteFilteredSourceCatalogueTags/types';
 import { UseFetchInfiniteFilteredSourcesProps } from '@/core/hooks/useFetchInfiniteFilteredSources/types';
@@ -182,6 +183,28 @@ export const QUERY_KEYS = Object.freeze({
     validate: () => ['rules', 'validate'],
     rule: ({ name }: { name?: string | null } = {}) => [
       'rules',
+      '{name}',
+      ...(name ? [name] : []),
+    ],
+  },
+  rulesV2: {
+    default: ({
+      search,
+      severity,
+      sort_by,
+      sort_order,
+      page_size,
+    }: UseFetchInfiniteFilteredRulesV2Props = {}) => [
+      'rules-v2',
+      ...(search ? ['search', search] : []),
+      ...(severity ? ['severity', severity] : []),
+      ...(sort_by ? ['sort_by', sort_by] : []),
+      ...(sort_order ? ['sort_order', sort_order] : []),
+      ...(page_size ? ['page_size', page_size] : []),
+    ],
+    validate: () => ['rules-v2', 'validate'],
+    rule: ({ name }: { name?: string | null } = {}) => [
+      'rules-v2',
       '{name}',
       ...(name ? [name] : []),
     ],
@@ -431,12 +454,14 @@ export const QUERY_KEYS = Object.freeze({
   hunts: {
     default: ({
       search,
+      rule,
       sort_by,
       sort_order,
       page_size,
     }: UseFetchInfiniteFilteredHuntsProps = {}) => [
       'hunts',
       ...(search ? ['search', search] : []),
+      ...(rule ? ['rule', rule] : []),
       ...(sort_by ? ['sort_by', sort_by] : []),
       ...(sort_order ? ['sort_order', sort_order] : []),
       ...(page_size ? ['page_size', page_size] : []),
@@ -872,6 +897,7 @@ export const QUERY_KEYS = Object.freeze({
   },
   clientConfig: {
     default: () => ['config', 'client'],
+    features: () => ['config', 'features'],
   },
   system: {
     version: () => ['system', 'version'],
@@ -910,6 +936,10 @@ export const QUERY_KEYS = Object.freeze({
       ...(page_size ? ['page_size', page_size] : []),
     ],
     apiKey: () => ['auth', 'api-keys', '{short_token}'],
+  },
+  cel: {
+    check: () => ['cel', 'check'],
+    checkBatch: () => ['cel', 'check-batch'],
   },
 } as const satisfies Record<
   string,

@@ -56,6 +56,7 @@ export const HuntList = ({
         defaultFilters={{
           ...filters,
           search: undefined,
+          rule: undefined,
         }}
       />
     );

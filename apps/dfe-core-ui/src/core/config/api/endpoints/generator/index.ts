@@ -4,6 +4,7 @@ import { apiKeys } from './mocks/apiKeys';
 import { apps } from './mocks/apps';
 import { auth } from './mocks/auth';
 import { backingServices } from './mocks/backingServices';
+import { cel } from './mocks/cel';
 import { clientConfig } from './mocks/clientConfig';
 import { deployment } from './mocks/deployment';
 import { fieldMaps } from './mocks/fieldMaps';
@@ -21,12 +22,14 @@ import { orgs } from './mocks/orgs';
 import { repository } from './mocks/repository';
 import { roles } from './mocks/roles';
 import { rules } from './mocks/rules';
+import { rulesV2 } from './mocks/rulesv2';
 import { schemas } from './mocks/schemas';
 import { sources } from './mocks/sources';
 import { system } from './mocks/system';
 import { usage } from './mocks/usage';
 
 export const API_CONFIG_MOCKS = Object.freeze({
+  cel,
   accounts,
   alerts,
   apiKeys,
@@ -50,6 +53,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
   repository,
   roles,
   rules,
+  rulesV2,
   schemas,
   sources,
   system,
