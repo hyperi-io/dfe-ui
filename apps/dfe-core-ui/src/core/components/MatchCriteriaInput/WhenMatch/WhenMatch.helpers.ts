@@ -29,6 +29,19 @@ export const groupModeOf = (node: TMatchFormNode): GroupMode =>
     (mode) => mode.join === node.join && mode.negate === !!node.negate,
   )?.value ?? 'all';
 
+export const issueMessage = (
+  issues: { path: (string | number)[]; message: string }[] | undefined,
+  path: (string | number)[],
+) =>
+  issues
+    ?.filter(
+      (issue) =>
+        issue.path.length === path.length &&
+        issue.path.every((segment, index) => segment === path[index]),
+    )
+    .map((issue) => issue.message)
+    .join(' ');
+
 export const matchDepth = (node?: TMatchFormNode | null): number => {
   if (!node || !isMatchGroup(node)) return 0;
   const parts = node.parts ?? [];

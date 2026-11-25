@@ -1,9 +1,20 @@
 import { Radio } from 'antd';
-import { useState } from 'react';
+import { ReactNode, useState } from 'react';
 import { CelExpressionMatch } from './CelExpressionMatch';
 import { SqlMatch } from './SqlMatch';
 import { MatchConditionsEditor } from './WhenMatch/index';
-import { TMatchFormNode, TMatchOperator } from './WhenMatch/WhenMatch.types';
+import {
+  FieldPath,
+  TMatchFormNode,
+  TMatchOperator,
+} from './WhenMatch/WhenMatch.types';
+
+export type CriteriaFieldIssue = {
+  path: FieldPath;
+  message: string;
+};
+
+const INPUT_ISSUE = new Set(['field', 'operator', 'value', 'parts']);
 
 type MatchCriteriaType = 'conditions' | 'expression' | 'sql';
 export type ValidateCel = {
@@ -31,6 +42,7 @@ export type ValidateSql = {
   reset: () => void;
 };
 interface MatchCriteriaInputProps {
+  value?: string | TMatchFormNode | null;
   onChange?: (value?: string | TMatchFormNode) => void;
   onModeChange?: (mode: MatchCriteriaType) => void;
   modes?: MatchCriteriaType[];
@@ -40,15 +52,22 @@ interface MatchCriteriaInputProps {
     cel: ValidateCel;
     sql: ValidateSql;
   };
+  /** Shown beside the mode switch, for every mode. */
+  actions?: ReactNode;
+  /** Problems with the criteria currently on screen. */
+  issues?: CriteriaFieldIssue[];
 }
 
 export const MatchCriteriaInput = ({
+  value,
   onChange,
   onModeChange,
   modes = ['conditions', 'expression', 'sql'],
   operatorOptions,
   matchDepthLimit = 4,
   validate,
+  actions,
+  issues,
 }: MatchCriteriaInputProps) => {
   const [matchMode, setMatchMode] = useState<MatchCriteriaType>('conditions');
 
@@ -59,22 +78,28 @@ export const MatchCriteriaInput = ({
 
   return (
     <div className="flex flex-col gap-2">
-      <Radio.Group
-        aria-label="Match mode"
-        optionType="button"
-        options={[
-          { label: 'Conditions', value: 'conditions' },
-          { label: 'CEL Fast expression', value: 'expression' },
-          { label: 'SQL', value: 'sql' },
-        ]}
-        onChange={(e) => handleModeChange(e.target.value as MatchCriteriaType)}
-      />
+      <div className="flex items-center justify-between gap-2">
+        <Radio.Group
+          aria-label="Match mode"
+          optionType="button"
+          options={[
+            { label: 'Conditions', value: 'conditions' },
+            { label: 'CEL Fast expression', value: 'expression' },
+            { label: 'SQL', value: 'sql' },
+          ]}
+          onChange={(e) =>
+            handleModeChange(e.target.value as MatchCriteriaType)
+          }
+        />
+        {actions}
+      </div>
       {modes.includes('conditions') && matchMode === 'conditions' && (
         <MatchConditionsEditor
-          value={null}
+          value={value != null && typeof value === 'object' ? value : null}
           onChange={(next) => onChange?.(next ?? undefined)}
           operatorOptions={operatorOptions}
           matchDepthLimit={matchDepthLimit}
+          issues={issues}
         />
       )}
       {modes.includes('expression') && matchMode === 'expression' && (
@@ -83,6 +108,16 @@ export const MatchCriteriaInput = ({
       {modes.includes('sql') && matchMode === 'sql' && (
         <SqlMatch onChange={onChange} validateSql={validate.sql} />
       )}
+      {issues
+        ?.filter((issue) => !INPUT_ISSUE.has(String(issue.path.at(-1))))
+        .map((issue) => (
+          <p
+            key={`${issue.path.join('.')}:${issue.message}`}
+            className="text-xs text-error"
+          >
+            {issue.message}
+          </p>
+        ))}
     </div>
   );
 };

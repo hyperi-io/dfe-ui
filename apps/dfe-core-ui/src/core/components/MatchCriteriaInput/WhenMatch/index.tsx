@@ -12,7 +12,7 @@ import {
   redoMatch,
   undoMatch,
 } from './WhenMatch.history';
-import { TMatchFormNode, TMatchOperator } from './WhenMatch.types';
+import { FieldPath, TMatchFormNode, TMatchOperator } from './WhenMatch.types';
 
 const normalize = (next: TMatchFormNode | null): MatchSnapshot => {
   const onlyPart = next?.parts?.length === 1 ? next.parts[0] : undefined;
@@ -38,11 +38,13 @@ export const MatchConditionsEditor = ({
   onChange,
   operatorOptions,
   matchDepthLimit = 4,
+  issues,
 }: {
   value: TMatchFormNode | null;
   onChange: (value: TMatchFormNode | null) => void;
   operatorOptions: { label: string; value: TMatchOperator }[];
   matchDepthLimit: number;
+  issues?: { path: FieldPath; message: string }[];
 }) => {
   const [history, setHistory] = useState(() => matchHistory(value));
   const historyRef = useRef(history);
@@ -157,6 +159,7 @@ export const MatchConditionsEditor = ({
             value={match}
             onChange={commit}
             operatorOptions={operatorOptions}
+            issues={issues}
           />
           <div>
             <Button
@@ -183,13 +186,14 @@ export const MatchConditionsEditor = ({
         </>
       ) : (
         <ConditionGroup
-          path={['match']}
+          path={[]}
           number=""
           node={match}
           level={1}
           onChange={commit}
           operatorOptions={operatorOptions}
           matchDepthLimit={matchDepthLimit}
+          issues={issues}
         />
       )}
     </div>

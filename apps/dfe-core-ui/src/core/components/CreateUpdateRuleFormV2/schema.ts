@@ -10,6 +10,59 @@ import z from 'zod';
 
 type IssueSink = Pick<z.RefinementCtx, 'addIssue'>;
 
+export type CriteriaIssue = {
+  path: (string | number)[];
+  message: string;
+};
+
+const sqlClause = (sql?: string | null) => {
+  if (!sql?.trim()) return '';
+  const split = sql.split(/\bWHERE\b/i);
+  if (split.length === 1) return sql.trim();
+  return split.slice(1).join('WHERE').trim();
+};
+
+/** Problems with the detection the active mode would run. */
+export const criteriaIssues = (
+  field: 'match' | 'cel_filter' | 'user_sql',
+  values: {
+    match?: TMatchFormNode | null;
+    cel_filter?: string | null;
+    user_sql?: string | null;
+  },
+): CriteriaIssue[] => {
+  if (field === 'cel_filter') {
+    return values.cel_filter?.trim()
+      ? []
+      : [{ path: ['cel_filter'], message: 'Expression is required' }];
+  }
+  if (field === 'user_sql') {
+    return sqlClause(values.user_sql)
+      ? []
+      : [{ path: ['user_sql'], message: 'SQL is required' }];
+  }
+  const issues: CriteriaIssue[] = [];
+  const node = values.match ?? { field: '', operator: 'equals', value: '' };
+  checkMatchNode(node, [], {
+    addIssue: (issue) => {
+      if (typeof issue === 'string' || !issue.message) return;
+      issues.push({
+        path: (issue.path ?? []).filter(
+          (segment): segment is string | number => typeof segment !== 'symbol',
+        ),
+        message: issue.message,
+      });
+    },
+  });
+  if (matchDepth(node) > MATCH_NESTING_LIMIT) {
+    issues.push({
+      path: ['parts'],
+      message: `Groups nest at most ${MATCH_NESTING_LIMIT} deep`,
+    });
+  }
+  return issues;
+};
+
 const checkMatchNode = (
   node: TMatchFormNode | null | undefined,
   path: (string | number)[],

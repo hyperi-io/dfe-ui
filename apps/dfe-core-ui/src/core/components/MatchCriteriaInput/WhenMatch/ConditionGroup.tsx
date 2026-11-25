@@ -8,6 +8,7 @@ import {
   GROUP_MODES,
   groupModeOf,
   isMatchGroup,
+  issueMessage,
 } from './WhenMatch.helpers';
 import {
   FieldPath,
@@ -26,6 +27,7 @@ export const ConditionGroup = ({
   onChange,
   matchDepthLimit,
   operatorOptions,
+  issues,
 }: {
   path: FieldPath;
   number: string;
@@ -35,8 +37,10 @@ export const ConditionGroup = ({
   onChange: (next: TMatchFormNode | null) => void;
   matchDepthLimit: number;
   operatorOptions: { label: string; value: TMatchOperator }[];
+  issues?: { path: FieldPath; message: string }[];
 }) => {
   const parts = node.parts ?? [];
+  const partsError = issueMessage(issues, [...path, 'parts']);
   const canNest = level < matchDepthLimit;
   const isRoot = level === 1;
   const label = isRoot ? 'Conditions' : `Group ${number}`;
@@ -91,6 +95,7 @@ export const ConditionGroup = ({
           }))}
         />
         <span>of these are true</span>
+        {partsError && <span className="text-xs text-error">{partsError}</span>}
         {onRemove && (
           <Tooltip title={`Remove group ${number}`}>
             <Button
@@ -118,12 +123,15 @@ export const ConditionGroup = ({
             onChange={(next) => replacePart(index, next)}
             matchDepthLimit={matchDepthLimit}
             operatorOptions={operatorOptions}
+            issues={issues}
           />
         ) : (
           <ConditionRow
             key={partNumber}
+            path={partPath}
             number={partNumber}
             node={part}
+            issues={issues}
             onRemove={() => replacePart(index, null)}
             onChange={(next) => replacePart(index, next)}
             operatorOptions={operatorOptions}
