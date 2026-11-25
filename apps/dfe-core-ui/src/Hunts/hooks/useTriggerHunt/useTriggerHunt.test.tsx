@@ -12,6 +12,7 @@ import {
   test,
   vi,
 } from 'vitest';
+import { huntPollSecondsKey } from '@/Hunts/hooks/useFetchHuntRunState';
 import { useTriggerHunt } from '.';
 import { TTriggerResponse } from './types';
 import { server } from './useTriggerHunt.mocks';
@@ -67,7 +68,7 @@ describe('.useTriggerHunt', () => {
   });
 
   describe('the hunt it queued a run for', () => {
-    test('has its detail and run state read again, and no other hunt does', async () => {
+    test('has every query about it read again, and no other hunt does', async () => {
       server.use(
         API_CONFIG_MOCKS.hunts.huntRun.post.success({ name: 'audit' }),
       );
@@ -81,9 +82,13 @@ describe('.useTriggerHunt', () => {
       }
       const detail = QUERY_KEYS.hunts.hunt({ name: 'audit' });
       const runState = [...detail, 'run-state'];
+      // Another view of the same hunt, keyed apart from the detail.
+      const executions = ['hunts', '{name}', 'executions', 'audit'];
       const other = QUERY_KEYS.hunts.hunt({ name: 'other' });
-      [detail, runState, other].forEach((key) =>
-        queryClient.setQueryData(key, {}),
+      const otherExecutions = ['hunts', '{name}', 'executions', 'other'];
+      const unrelated = ['rules', 'audit'];
+      [detail, runState, executions, other, otherExecutions, unrelated].forEach(
+        (key) => queryClient.setQueryData(key, {}),
       );
 
       result.current.mutate();
@@ -91,8 +96,38 @@ describe('.useTriggerHunt', () => {
       await waitFor(() => {
         expect(queryClient.getQueryState(detail)?.isInvalidated).toBe(true);
       });
-      expect(queryClient.getQueryState(runState)?.isInvalidated).toBe(true);
-      expect(queryClient.getQueryState(other)?.isInvalidated).toBe(false);
+      [runState, executions].forEach((key) =>
+        expect(queryClient.getQueryState(key)?.isInvalidated).toBe(true),
+      );
+      [other, otherExecutions, unrelated].forEach((key) =>
+        expect(queryClient.getQueryState(key)?.isInvalidated).toBe(false),
+      );
+    });
+
+    test("keeps the runner's poll period for the run state's polling", async () => {
+      server.use(
+        API_CONFIG_MOCKS.hunts.huntRun.post.success({
+          name: 'audit',
+          mockedResponse: {
+            hunt_name: 'audit',
+            queued: true,
+            requested_fire: 0,
+            poll_seconds: 30,
+          },
+        }),
+      );
+      const builder = buildTestWrapper().withReactQuery();
+      const { result } = renderHook(() => useTriggerHunt({ name: 'audit' }), {
+        wrapper: builder.wrapper,
+      });
+
+      result.current.mutate();
+
+      await waitFor(() => {
+        expect(
+          builder.queryClient?.getQueryData(huntPollSecondsKey('audit')),
+        ).toBe(30);
+      });
     });
   });
 

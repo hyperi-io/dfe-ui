@@ -1,20 +1,25 @@
 import { API_CONFIG_MOCKS } from '@/core/config/api/endpoints/generator';
+import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
 import type { THuntListItem } from '@/core/hooks/useFetchInfiniteFilteredHunts/types';
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
 import { pageOf } from '@/core/utils/test-utils/pageOf';
 import { renderHook, waitFor } from '@testing-library/react';
+import type { Query, QueryClient, QueryKey } from '@tanstack/react-query';
 import { http, HttpResponse } from 'msw';
 import { setupServer } from 'msw/node';
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
-import { RUN_POLL_MS, runPollInterval, useFetchHuntRunState } from '.';
+import {
+  huntPollSecondsKey,
+  RUN_POLL_MS,
+  runPollInterval,
+  useFetchHuntRunState,
+} from '.';
 
 const server = setupServer();
 
 beforeAll(() => server.listen({ onUnhandledRequest: 'error' }));
 afterEach(() => server.resetHandlers());
 afterAll(() => server.close());
-
-const { wrapper } = buildTestWrapper().withReactQuery();
 
 const item = (name: string, extra: Partial<THuntListItem> = {}) =>
   ({
@@ -45,6 +50,8 @@ const listing = (items: THuntListItem[]) => {
   );
   return asked;
 };
+
+const { wrapper } = buildTestWrapper().withReactQuery();
 
 describe('.useFetchHuntRunState', () => {
   it('returns the hunt whose name matches, not another the search also found', async () => {
@@ -92,6 +99,59 @@ describe('.useFetchHuntRunState', () => {
   });
 });
 
+describe('.useFetchHuntRunState polling', () => {
+  // The interval the hook handed react-query, called on the query's own state.
+  const intervalOf = (client: QueryClient, name: string) => {
+    const query = client
+      .getQueryCache()
+      .find({ queryKey: [...QUERY_KEYS.hunts.hunt({ name }), 'run-state'] });
+    if (!query) throw new Error('the run state was not queried');
+    const option = query.observers[0]?.options.refetchInterval;
+    if (typeof option !== 'function') throw new Error('no interval function');
+    return () => option(query as Query<unknown, Error, unknown, QueryKey>);
+  };
+
+  const mount = async (name: string) => {
+    const builder = buildTestWrapper().withReactQuery();
+    const rendered = renderHook(() => useFetchHuntRunState({ name }), {
+      wrapper: builder.wrapper,
+    });
+    await waitFor(() => expect(rendered.result.current.run).toBeTruthy());
+    const client = builder.queryClient;
+    if (!client) throw new Error('no query client');
+    return { client, ...rendered };
+  };
+
+  it('polls a queued hunt at the default pace and stops once it is idle', async () => {
+    listing([item('audit', { run_requested: true })]);
+    const { client } = await mount('audit');
+    expect(intervalOf(client, 'audit')()).toBe(RUN_POLL_MS);
+
+    listing([item('audit')]);
+    await client.refetchQueries({ queryKey: ['hunts'] });
+    expect(intervalOf(client, 'audit')()).toBe(false);
+  });
+
+  it("polls at the runner's poll period once a trigger has left it", async () => {
+    listing([item('audit', { running: true })]);
+    const { client } = await mount('audit');
+    client.setQueryData(huntPollSecondsKey('audit'), 12);
+
+    expect(intervalOf(client, 'audit')()).toBe(12_000);
+  });
+
+  it('stops polling when a read fails, though the last good data still says running', async () => {
+    listing([item('audit', { running: true })]);
+    const { client } = await mount('audit');
+    expect(intervalOf(client, 'audit')()).toBe(RUN_POLL_MS);
+
+    server.use(API_CONFIG_MOCKS.hunts.default.get.error({ status: 500 }));
+    await client.refetchQueries({ queryKey: ['hunts'] });
+
+    expect(intervalOf(client, 'audit')()).toBe(false);
+  });
+});
+
 describe('.runPollInterval', () => {
   it.each([
     { case: 'running', run: { running: true }, wait: RUN_POLL_MS },
@@ -110,5 +170,20 @@ describe('.runPollInterval', () => {
     { case: 'not yet read', run: undefined, wait: false },
   ])('is $wait for a hunt that is $case', ({ run, wait }) => {
     expect(runPollInterval(run)).toBe(wait);
+  });
+});
+
+describe('.runPollInterval with the runner poll period', () => {
+  it.each([
+    { seconds: undefined, wait: RUN_POLL_MS },
+    { seconds: 0, wait: RUN_POLL_MS },
+    { seconds: 0.2, wait: 1000 },
+    { seconds: 30, wait: 30_000 },
+  ])('is $wait for a poll period of $seconds', ({ seconds, wait }) => {
+    expect(runPollInterval({ running: true }, seconds)).toBe(wait);
+  });
+
+  it('stays false for an idle hunt however long the period', () => {
+    expect(runPollInterval({ running: false }, 30)).toBe(false);
   });
 });

@@ -42,11 +42,14 @@ export const formatEpochSecondsLocal = (seconds: number) => {
     : INVALID_DATE_LABEL;
 };
 
-/** Epoch seconds as how long ago it was, such as "5 minutes ago". */
-export const formatEpochSecondsAgo = (seconds: number) => {
-  const parsed = dayjs.unix(seconds);
+/**
+ * Epoch seconds as how long before `now` (milliseconds) it was, such as "5 minutes ago".
+ * A time ahead of `now`, from a clock behind the engine's, reads as just now.
+ */
+export const formatEpochSecondsAgo = (seconds: number, now = Date.now()) => {
+  const parsed = dayjs.unix(Math.min(seconds, now / 1000));
   return Number.isFinite(seconds) && parsed.isValid()
-    ? parsed.fromNow()
+    ? parsed.from(dayjs(now))
     : INVALID_DATE_LABEL;
 };
 
