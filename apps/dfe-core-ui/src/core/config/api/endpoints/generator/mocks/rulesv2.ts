@@ -230,7 +230,7 @@ export const rulesV2 = {
     },
   },
   run: {
-    mockedUrl: '/api/v1/rules-v2/{name}/run',
+    mockedUrl: '/api/v1/rules-v2/run',
     post: {
       success: ({
         mockedResponse = {
@@ -243,31 +243,37 @@ export const rulesV2 = {
             rows_in_window: 0,
             projected_per_day: 0,
             match_ratio: 0,
-            band: 'warn',
+            band: 'unmeasured',
             window_minutes: 0,
+            duration_ms: 0,
+            warnings: ['string'],
           },
+          sql_errors: [
+            {
+              message: 'string',
+              position: 0,
+              suggestion: 'string',
+            },
+          ],
+          columns: ['string'],
+          results: [],
           execution_time_ms: 0,
           truncated: false,
         },
-        name = 'name',
       }: {
         mockedResponse?: TTriggerOnDemandRuleResponse;
-        name?: string;
-      } = {}) => {
-        return http.post(rulesV2.run.mockedUrl.replace('{name}', name), () => {
+      } = {}) =>
+        http.post(rulesV2.run.mockedUrl, () => {
           return HttpResponse.json(mockedResponse);
-        });
-      },
+        }),
       error: ({
         mockedResponse = DEFAULT_VALIDATION_ERROR,
         status = 422,
-        name = 'name',
       }: {
         mockedResponse?: TValidationError;
         status?: number;
-        name?: string;
       } = {}) => {
-        return http.post(rulesV2.run.mockedUrl.replace('{name}', name), () => {
+        return http.post(rulesV2.run.mockedUrl, () => {
           return HttpResponse.json(mockedResponse, { status });
         });
       },

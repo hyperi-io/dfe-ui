@@ -210,7 +210,6 @@ export const QUERY_KEYS = Object.freeze({
     ],
     run: ({ name }: { name?: string | null } = {}) => [
       'rules-v2',
-      '{name}',
       'run',
       ...(name ? [name] : []),
     ],
