@@ -5,14 +5,13 @@ import { loginAs } from '@e2e/config/login.helpers';
 import { TAGS } from '@e2e/config/tags.constants';
 
 /**
- * Org files sort by name and the grid asks for 12 at a time.
- * Your organisation (`organisation`) sorts first and shows in its own banner,
- * so the grid's first page holds 11 cards: `Searchable Organisation 0` is on it
- * and `Searchable Organisation 49` is not.
+ * The grid lists organisations by display name, six at a time, and "Show more"
+ * adds six. Your organisation (`organisation`) shows in its own banner, never in
+ * the grid. By display name `Searchable Organisation 0` is in the first six and
+ * `Searchable Organisation 49` is not.
  * Search matches the name or the display name.
  */
-const FIRST_PAGE = 12;
-const FIRST_PAGE_CARDS = FIRST_PAGE - 1;
+const STEP = 6;
 const MATCH = 'Searchable Organisation 49';
 const OTHER = 'Searchable Organisation 0';
 
@@ -61,14 +60,8 @@ const searchOrganisations = async (section: Locator, keyword: string) => {
   await expect(field).toHaveValue(keyword);
 };
 
-/** The next page loads when the sentinel under the grid scrolls into view. */
-const scrollOrganisations = async (section: Locator) => {
-  const grid = section.locator('ul.grid');
-  await grid.evaluate((node) => {
-    const scroller = node.parentElement;
-    if (scroller) scroller.scrollTop = scroller.scrollHeight;
-  });
-};
+const showMore = (section: Locator) =>
+  section.getByRole('button', { name: 'Show more' });
 
 test.describe('', { tag: [TAGS.core, TAGS.search, TAGS.pagination] }, () => {
   test('A search keeps the organisation whose name matches', async ({
@@ -91,20 +84,21 @@ test.describe('', { tag: [TAGS.core, TAGS.search, TAGS.pagination] }, () => {
     await expect(orgName(section, MATCH)).toHaveCount(0);
   });
 
-  test('Scrolling the list loads the next page', async ({ page }) => {
+  test('Show more adds the next six', async ({ page }) => {
     await openOrganisations(page);
     const section = organisationsSection(page);
 
-    await expect(cards(section)).toHaveCount(FIRST_PAGE_CARDS);
+    await expect(cards(section)).toHaveCount(STEP);
     await expect(orgName(section, OTHER)).toBeVisible();
     await expect(orgName(section, MATCH)).toHaveCount(0);
 
+    await showMore(section).click();
+    await expect(cards(section)).toHaveCount(2 * STEP);
+
     await expect(async () => {
-      await scrollOrganisations(section);
+      await showMore(section).click();
       await expect(orgName(section, MATCH)).toBeAttached();
     }).toPass({ timeout: 20_000 });
-
-    expect(await cards(section).count()).toBeGreaterThan(FIRST_PAGE);
   });
 
   test('A search that matches nothing says so', async ({ page }) => {

@@ -1,7 +1,11 @@
 import { Locator, Page, expect, test } from '@playwright/test';
 
 import { BASE_URL, e2eClient } from '@e2e/config/e2e.client';
-import { confirmItsYou, loginAs } from '@e2e/config/login.helpers';
+import {
+  adminPassword,
+  confirmItsYou,
+  loginAs,
+} from '@e2e/config/login.helpers';
 import { rx } from '@e2e/config/regex.helpers';
 import { TAGS } from '@e2e/config/tags.constants';
 
@@ -124,10 +128,11 @@ test.describe('', { tag: [TAGS.core, TAGS.settings] }, () => {
     await row
       .getByRole('button', { name: 'Revoke API Key', exact: true })
       .click();
-    const revoke = page.getByRole('dialog').filter({ hasText: name });
+    const revoke = page.getByRole('dialog', { name: `Revoke ${name}?` });
     await expect(
       revoke.getByText('This action cannot be undone.'),
     ).toBeVisible();
+    await revoke.getByLabel('Your password').fill(adminPassword());
     await revoke
       .getByRole('button', { name: 'Revoke API Key', exact: true })
       .click();

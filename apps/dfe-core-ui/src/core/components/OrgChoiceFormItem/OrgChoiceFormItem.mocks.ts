@@ -9,6 +9,7 @@ export const signedInAs = (org: string) =>
       oidc_type: '',
       admin: false,
       org_display_name: '',
+      org_enabled: true,
       enabled: true,
       blocked: false,
       disabled_at: '',
@@ -24,6 +25,7 @@ export const signedInAs = (org: string) =>
       org,
       created_at: '',
       updated_at: '',
+      last_login_at: '',
     },
   });
 

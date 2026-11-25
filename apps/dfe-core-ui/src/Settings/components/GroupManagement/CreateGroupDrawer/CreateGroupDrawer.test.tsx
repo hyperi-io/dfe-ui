@@ -97,6 +97,15 @@ const submit = async (user: UserEvent) => {
 };
 
 describe('CreateGroupDrawer', { timeout: GROUP_DRAWER_TEST_TIMEOUT_MS }, () => {
+  test('marks only the fields a group needs as required', async () => {
+    await openCreateDrawer();
+
+    const required = Array.from(
+      document.querySelectorAll('label.ant-form-item-required'),
+    ).map((label) => label.textContent);
+    expect(required).toEqual(['Name', 'Roles']);
+  });
+
   test('a source ID and a suggested provider reach the POST body trimmed', async () => {
     const user = await openCreateDrawer();
     await fillRequiredFields(user);
@@ -116,7 +125,6 @@ describe('CreateGroupDrawer', { timeout: GROUP_DRAWER_TEST_TIMEOUT_MS }, () => {
       description: '',
       roles: ['viewer'],
       members: [],
-      scope: 'system',
       source_id: 'dfe-viewers',
       source_provider: 'okta',
     });
@@ -189,6 +197,37 @@ describe('CreateGroupDrawer', { timeout: GROUP_DRAWER_TEST_TIMEOUT_MS }, () => {
     expect(
       await screen.findByText(message, {}, { timeout: 15_000 }),
     ).toBeInTheDocument();
+    // The engine refuses the create before it asks for the password.
+    expect(screen.queryByLabelText('Your password')).not.toBeInTheDocument();
+  });
+
+  test('asks for the password only when the engine says the create needs it, then retries with the grant', async () => {
+    const sent: (string | null)[] = [];
+    server.use(
+      API_CONFIG_MOCKS.auth.reauth.post.success(),
+      http.post(API_CONFIG_MOCKS.groups.default.mockedUrl, ({ request }) => {
+        const grant = request.headers.get('X-DFE-Reauth');
+        sent.push(grant);
+        return grant
+          ? HttpResponse.json(CREATED_GROUP)
+          : HttpResponse.json(
+              {
+                title: 'Forbidden',
+                code: 'reauth_required',
+                detail: 'Confirm it is you',
+              },
+              { status: 403 },
+            );
+      }),
+    );
+    const user = await openCreateDrawer();
+    await fillRequiredFields(user);
+
+    await submit(user);
+
+    await waitFor(() => expect(sent).toHaveLength(2));
+    expect(sent[0]).toBeNull();
+    expect(sent[1]).toBeTruthy();
   });
 
   test('a refused create no longer shows its reason once the drawer is reopened', async () => {

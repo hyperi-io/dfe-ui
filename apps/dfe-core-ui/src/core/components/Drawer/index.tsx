@@ -24,6 +24,11 @@ interface DrawerProps extends AntdDrawerProps {
   onOk?: () => void;
 }
 
+/** For a drawer opening on Tabs: the tab bar brings 12px of its own, so the body's top padding drops to 12px. */
+export const TABBED_DRAWER_STYLES: AntdDrawerProps['styles'] = {
+  body: { paddingTop: 12 },
+};
+
 const isDrawerMask = (target: EventTarget | null) =>
   target instanceof Element && Boolean(target.closest('.ant-drawer-mask'));
 

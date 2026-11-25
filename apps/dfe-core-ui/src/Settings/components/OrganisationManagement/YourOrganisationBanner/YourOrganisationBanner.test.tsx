@@ -1,6 +1,7 @@
 import { API_CONFIG_MOCKS } from '@/core/config/api/endpoints/generator';
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
 import { act, render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { http, HttpResponse } from 'msw';
 import { setupServer } from 'msw/node';
 import {
@@ -34,7 +35,7 @@ describe('YourOrganisationBanner', () => {
         mockedResponse: {
           name: 'acme',
           display_name: 'Acme',
-          org_ids: ['acme'],
+          org_ids: ['acme', 'acme-eu'],
           enabled: true,
           created_at: '',
           updated_at: '',
@@ -47,10 +48,12 @@ describe('YourOrganisationBanner', () => {
     expect(
       await screen.findByRole('button', { name: 'Edit Acme' }),
     ).toBeInTheDocument();
+    expect(screen.getByText('acme')).toBeVisible();
+    expect(screen.getByText('acme-eu')).toBeVisible();
     expect(screen.getByText('Acme')).toBeInTheDocument();
-    expect(screen.getByText('Your organisation')).toBeInTheDocument();
+    await userEvent.setup().hover(screen.getByText('Your organisation'));
     expect(
-      screen.getByText('The organisation running this platform (acme).'),
+      await screen.findByText('The organisation running this platform.'),
     ).toBeInTheDocument();
     expect(
       screen.getByRole('button', { name: 'View Acme details' }),

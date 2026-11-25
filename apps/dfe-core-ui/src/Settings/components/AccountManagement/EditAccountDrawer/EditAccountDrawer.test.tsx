@@ -2,6 +2,8 @@ import { ADMIN_MOCKED_RESPONSE } from '@/core/components/RbacProtected/hooks/hoo
 import { signedInAs } from '@/core/components/OrgChoiceFormItem/OrgChoiceFormItem.mocks';
 import { API_CONFIG_MOCKS } from '@/core/config/api/endpoints/generator';
 import { useAuthStore } from '@/core/stores/authStore';
+import { confirmReauth } from '@/core/utils/test-utils/confirmReauth';
+import { expectLabelTooltip } from '@/core/utils/test-utils/expectLabelTooltip';
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
 import { TAccountDetailResponse } from '@/Settings/hooks/accounts/useFetchAccountDetail/types';
 import { render, screen, waitFor } from '@testing-library/react';
@@ -33,6 +35,7 @@ const account = (
   oidc_type: '',
   admin: false,
   org_display_name: '',
+  org_enabled: true,
   enabled: true,
   blocked: false,
   disabled_at: '',
@@ -48,6 +51,7 @@ const account = (
   org: '',
   created_at: '',
   updated_at: '',
+  last_login_at: '',
 });
 
 const server = setupServer(
@@ -85,13 +89,23 @@ const openDrawer = async (username: string, external = false) => {
   await user.click(
     await screen.findByRole('button', { name: `Edit ${username}` }),
   );
-  await user.type(await screen.findByLabelText('Your password'), 'pw');
-  await user.click(screen.getByRole('button', { name: 'Confirm' }));
   return {
     reset: await screen.findByRole('button', { name: 'Reset Password' }),
     user,
   };
 };
+
+describe('EditAccountDrawer username', () => {
+  test("says in the ? beside its label that a username can't be changed", async () => {
+    const { user } = await openDrawer('kim');
+
+    await user.hover(screen.getByLabelText(/^Username/));
+    await expect(
+      screen.findByText("Usernames can't be changed", {}, { timeout: 500 }),
+    ).rejects.toThrow();
+    await expectLabelTooltip(user, 'Username', "Usernames can't be changed");
+  });
+});
 
 describe('EditAccountDrawer reset password', () => {
   test('your own account goes to your profile to reset it', async () => {
@@ -121,25 +135,16 @@ describe('EditAccountDrawer reset password', () => {
 });
 
 describe('EditAccountDrawer re-auth', () => {
-  test('asks for the password before the drawer opens', async () => {
-    server.use(
-      API_CONFIG_MOCKS.accounts.account.get.success({
-        mockedResponse: account('bob', false),
-        username: 'bob',
-      }),
-    );
-    const user = userEvent.setup();
-    render(<EditAccountDrawer username="bob" isExternal={false} />, {
-      wrapper,
-    });
+  test('opens without a password prompt', async () => {
+    await openDrawer('bob');
 
-    await user.click(await screen.findByRole('button', { name: 'Edit bob' }));
-
-    expect(await screen.findByText("Confirm it's you")).toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: 'Update Account' })).toBeNull();
+    expect(screen.queryByText("Confirm it's you")).not.toBeInTheDocument();
+    expect(
+      await screen.findByRole('button', { name: 'Update Account' }),
+    ).toBeInTheDocument();
   });
 
-  test('sends the grant with the edit', async () => {
+  test('asks for the password when the engine says the save needs it, then retries with the grant', async () => {
     const sent: (string | null)[] = [];
     server.use(
       http.put(
@@ -148,8 +153,18 @@ describe('EditAccountDrawer re-auth', () => {
           'bob',
         ),
         ({ request }) => {
-          sent.push(request.headers.get('X-DFE-Reauth'));
-          return HttpResponse.json(account('bob', false));
+          const grant = request.headers.get('X-DFE-Reauth');
+          sent.push(grant);
+          return grant
+            ? HttpResponse.json(account('bob', false))
+            : HttpResponse.json(
+                {
+                  title: 'Forbidden',
+                  code: 'reauth_required',
+                  detail: 'Confirm it is you',
+                },
+                { status: 403 },
+              );
         },
       ),
     );
@@ -158,7 +173,8 @@ describe('EditAccountDrawer re-auth', () => {
     await user.click(
       await screen.findByRole('button', { name: 'Update Account' }),
     );
+    await confirmReauth(user);
 
-    await waitFor(() => expect(sent).toEqual(['reauth-grant']));
+    await waitFor(() => expect(sent).toEqual([null, 'reauth-grant']));
   });
 });

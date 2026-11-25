@@ -1,7 +1,7 @@
 import { Page, expect, test } from '@playwright/test';
 
 import { BASE_URL, e2eClient } from '@e2e/config/e2e.client';
-import { loginAs } from '@e2e/config/login.helpers';
+import { adminPassword, loginAs } from '@e2e/config/login.helpers';
 import { TAGS } from '@e2e/config/tags.constants';
 
 /**
@@ -120,11 +120,9 @@ test.describe(
           .getByRole('button', { name: `Delete ${RENAMED}`, exact: true })
           .click();
         const remove = page.getByRole('dialog', {
-          name: 'Delete Organisation',
+          name: `Delete ${RENAMED}?`,
         });
-        await remove
-          .getByPlaceholder('Enter organisation ID to be deleted')
-          .fill(NAME);
+        await remove.getByLabel('Your password').fill(adminPassword());
         await remove
           .getByRole('button', { name: 'Delete', exact: true })
           .click();

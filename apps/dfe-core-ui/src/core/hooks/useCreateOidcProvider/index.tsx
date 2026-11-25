@@ -21,7 +21,7 @@ export const useCreateOidcProvider = ({
 }: UseCreateOidcProviderProps = {}) => {
   const queryClient = useQueryClient();
 
-  const { data, mutate, isPending, error } = useMutation({
+  const { data, mutate, isPending, error, reset } = useMutation({
     mutationFn: (provider: TCreateOidcProviderRequest) =>
       createOidcProviderApi({
         headerParams: { [REAUTH_HEADER]: reauth?.() },
@@ -43,5 +43,6 @@ export const useCreateOidcProvider = ({
     mutate,
     isPending,
     error,
+    reset,
   };
 };

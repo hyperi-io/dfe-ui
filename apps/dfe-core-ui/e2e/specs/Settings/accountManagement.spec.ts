@@ -3,6 +3,7 @@ import { Locator, Page, expect, test } from '@playwright/test';
 import { BASE_URL, e2eClient } from '@e2e/config/e2e.client';
 import {
   chooseYourOrganisation,
+  adminPassword,
   confirmItsYou,
   loginAs,
 } from '@e2e/config/login.helpers';
@@ -110,7 +111,6 @@ test.describe('', { tag: [TAGS.core, TAGS.settings, TAGS.account] }, () => {
       await page
         .getByRole('button', { name: `Edit ${USERNAME}`, exact: true })
         .click();
-      await confirmItsYou(page);
 
       const edit = page.getByRole('dialog', { name: `Edit ${USERNAME}` });
       await expect(edit.getByPlaceholder('Enter name')).toHaveValue(NAME);
@@ -118,6 +118,7 @@ test.describe('', { tag: [TAGS.core, TAGS.settings, TAGS.account] }, () => {
       await edit
         .getByRole('button', { name: 'Update Account', exact: true })
         .click();
+      await confirmItsYou(page);
 
       await expect(
         page.getByText('Account updated successfully'),
@@ -158,11 +159,8 @@ test.describe('', { tag: [TAGS.core, TAGS.settings, TAGS.account] }, () => {
       await page
         .getByRole('button', { name: `Delete ${USERNAME}`, exact: true })
         .click();
-      await confirmItsYou(page);
-      const remove = page.getByRole('dialog', { name: 'Delete Account' });
-      await remove
-        .getByPlaceholder('Enter username to be deleted')
-        .fill(USERNAME);
+      const remove = page.getByRole('dialog', { name: `Delete ${USERNAME}?` });
+      await remove.getByLabel('Your password').fill(adminPassword());
       await remove.getByRole('button', { name: 'Delete', exact: true }).click();
 
       await expect(

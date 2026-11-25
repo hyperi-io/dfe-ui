@@ -16,10 +16,12 @@ import { useSearchParams } from 'next/navigation';
 import { useCallback, useState } from 'react';
 
 export const ViewUserListSection = () => {
+  const searchParams = useSearchParams();
   const [search, setSearch] = useState('');
-  const [org, setOrg] = useState<string>();
+  // An organisation's Users tab links here with ?org= to open on its accounts.
+  const [org, setOrg] = useState(searchParams.get('org') ?? undefined);
   const administeredOrg = useAdministeredOrg();
-  const pageSizeParam = useSearchParams().get('page_size');
+  const pageSizeParam = searchParams.get('page_size');
   const parsedPageSize = pageSizeParam
     ? Number.parseInt(pageSizeParam, 10)
     : undefined;

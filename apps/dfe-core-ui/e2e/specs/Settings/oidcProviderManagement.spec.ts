@@ -1,7 +1,11 @@
 import { Locator, Page, expect, test } from '@playwright/test';
 
 import { BASE_URL, e2eClient } from '@e2e/config/e2e.client';
-import { confirmItsYou, loginAs } from '@e2e/config/login.helpers';
+import {
+  adminPassword,
+  confirmItsYou,
+  loginAs,
+} from '@e2e/config/login.helpers';
 import { rx } from '@e2e/config/regex.helpers';
 import { TAGS } from '@e2e/config/tags.constants';
 
@@ -91,7 +95,7 @@ const createProvider = async (
     .click();
 
   const create = page.getByRole('dialog', {
-    name: 'Configure New OIDC Provider',
+    name: 'Create OIDC Provider',
   });
   await create.getByRole('textbox', { name: 'Name', exact: true }).fill(name);
   await create
@@ -150,7 +154,6 @@ test.describe('', { tag: [TAGS.core, TAGS.settings] }, () => {
     await page
       .getByRole('button', { name: `Edit ${displayName}`, exact: true })
       .click();
-    await confirmItsYou(page);
     const edit = page.getByRole('dialog', { name: 'Edit OIDC Provider' });
     await expect(
       edit.getByRole('textbox', { name: 'Name', exact: true }),
@@ -162,6 +165,7 @@ test.describe('', { tag: [TAGS.core, TAGS.settings] }, () => {
       .getByRole('textbox', { name: 'Display Name', exact: true })
       .fill(renamed);
     await edit.getByRole('button', { name: 'Update', exact: true }).click();
+    await confirmItsYou(page);
 
     await expect(
       page.getByText(`${renamed} updated successfully`),
@@ -172,12 +176,8 @@ test.describe('', { tag: [TAGS.core, TAGS.settings] }, () => {
     await page
       .getByRole('button', { name: `Delete ${name}`, exact: true })
       .click();
-    const remove = page.getByRole('dialog', {
-      name: 'Delete OIDC Provider',
-    });
-    await remove
-      .getByPlaceholder('Enter OIDC Provider Name to be deleted')
-      .fill(name);
+    const remove = page.getByRole('dialog', { name: `Delete ${name}?` });
+    await remove.getByLabel('Your password').fill(adminPassword());
     await remove.getByRole('button', { name: 'Delete', exact: true }).click();
 
     await expect(page.getByText(`${name} deleted successfully`)).toBeVisible();
@@ -228,19 +228,17 @@ test.describe('', { tag: [TAGS.core, TAGS.settings] }, () => {
       .click();
 
     const remove = page.getByRole('dialog', {
-      name: 'Delete OIDC Provider',
+      name: `Delete ${SEEDED_PROVIDER}?`,
     });
     await expect(
-      remove.getByText(/accounts are associated with this OIDC Provider/),
+      remove.getByText(/sign in through this OIDC provider/),
     ).toBeVisible();
     await expect(
       remove.getByText(
-        'Accounts will be deleted and user access will be revoked.',
+        /Accounts it owns will be deleted and their access revoked/,
       ),
     ).toBeVisible();
-    await remove
-      .getByPlaceholder('Enter OIDC Provider Name to be deleted')
-      .fill(SEEDED_PROVIDER);
+    await remove.getByLabel('Your password').fill(adminPassword());
     await remove.getByRole('button', { name: 'Delete', exact: true }).click();
 
     // The signed-in admin signed in through this provider, so the delete

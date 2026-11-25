@@ -10,14 +10,15 @@ import { useState } from 'react';
 export const InviteUserDrawer = () => {
   const [open, setOpen] = useState(false);
   const { notification } = App.useApp();
-  // The grant names the account it creates, so it is asked for at submit.
+  // The grant names the account it creates, so it is asked for once the engine wants it.
   const [reauthTarget, setReauthTarget] = useState('');
-  const reauth = useReauthGrant(reauthTarget, 'account');
+  const reauth = useReauthGrant(reauthTarget, 'account', 'create');
 
   const {
     mutate: createAccount,
     isPending,
     error,
+    reset,
   } = useCreateAccount({
     reauth: reauth.grant,
     onSuccess: () => {
@@ -32,7 +33,14 @@ export const InviteUserDrawer = () => {
 
   const handleCreate = (values: Parameters<typeof createAccount>[0]) => {
     setReauthTarget(values.username);
-    reauth.ask(() => createAccount(values));
+    // The engine asks for the password only when the change needs it.
+    createAccount(values, {
+      onError: (refusal) => {
+        if (reauth.askIfRequired(refusal, () => createAccount(values))) {
+          reset();
+        }
+      },
+    });
   };
 
   return (

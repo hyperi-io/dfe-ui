@@ -15,7 +15,7 @@ export const useRevokeApiKey = ({
 }) => {
   const queryClient = useQueryClient();
 
-  const { mutate, isPending, error } = useMutation({
+  const { mutate, isPending, error, reset } = useMutation({
     mutationFn: (short_token: string) =>
       revokeApiKey({
         headerParams: { [REAUTH_HEADER]: reauth?.() },
@@ -33,5 +33,5 @@ export const useRevokeApiKey = ({
     },
   });
 
-  return { mutate, isPending, error };
+  return { mutate, isPending, error, reset };
 };

@@ -8,6 +8,11 @@ import { EditRoleDrawer } from '@/Settings/components/RoleManagement/EditRoleDra
 import { ViewRoleDetailsDrawer } from '@/Settings/components/RoleManagement/ViewRoleDetailsDrawer';
 import { TRoleListItem } from '@/Settings/hooks/roles/useFetchInfiniteFilteredRoles/types';
 import { IconLockFilled } from '@repo/dfe-icons';
+import { Tag } from 'antd';
+import {
+  isOrgScoped,
+  ORG_SCOPED_HELP,
+} from '@/Settings/components/RoleManagement/roleScope';
 
 const PERMISSION_LIMIT = 4;
 
@@ -65,6 +70,11 @@ export const RoleCard = ({ role }: { role: TRoleListItem }) => {
             </Tooltip>
           )}
           {role.name}
+          {isOrgScoped(role) && (
+            <Tooltip destroyOnHidden title={ORG_SCOPED_HELP}>
+              <Tag className="m-0">Scoped</Tag>
+            </Tooltip>
+          )}
         </h3>
         <p className="text-sm text-foreground/50 dark:text-dark-foreground/50">
           {role.description}

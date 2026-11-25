@@ -23,7 +23,7 @@ export const useUpdateOidcProvider = ({
 }: UseUpdateOidcProviderProps) => {
   const queryClient = useQueryClient();
 
-  const { data, mutate, isPending, error } = useMutation({
+  const { data, mutate, isPending, error, reset } = useMutation({
     mutationFn: (oidcProvider: TOidcProviderUpdateRequestBody) =>
       updateOidcProvider({
         headerParams: { [REAUTH_HEADER]: reauth?.() },
@@ -48,5 +48,5 @@ export const useUpdateOidcProvider = ({
     },
   });
 
-  return { data, mutate, isPending, error };
+  return { data, mutate, isPending, error, reset };
 };

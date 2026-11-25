@@ -13,7 +13,6 @@ const BASE: CreateUpdateGroupFormData = {
   description: '',
   roles: ['viewer'],
   members: [],
-  scope: 'system',
   source_id: '',
   source_provider: '',
 };

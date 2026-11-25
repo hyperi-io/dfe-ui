@@ -15,6 +15,7 @@ import {
 } from '@/core/constants/oidcProviders.constants';
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
 import { expectFieldError } from '@/core/utils/test-utils/expectFieldError';
+import { expectLabelTooltip } from '@/core/utils/test-utils/expectLabelTooltip';
 import { ENV_VAR_NAME_VALIDATOR } from '@/core/validationSchemas/utils';
 import { defaultGroupResolution } from '@/core/validationSchemas/oidcProviders.schema';
 import { render, screen, waitFor } from '@testing-library/react';
@@ -70,6 +71,7 @@ const renderForm = (
       error={null}
       onFinish={onFinish}
       initialValues={initialValuesFor(type, mode)}
+      orgScope="yours"
     />,
     { wrapper },
   );
@@ -86,6 +88,7 @@ const renderEdit = (
       initialValues={initialValues}
       disabledFields={{ name: true, type: true, issuer: true }}
       buttonLabel="Update"
+      orgScope="stored"
     />,
     { wrapper },
   );
@@ -285,17 +288,17 @@ describe(
     });
 
     test.each([
-      ['google', 'api', ['Type', 'Organisation', 'Name', 'Issuer', 'Mode']],
+      ['google', 'api', ['Type', 'Name', 'Issuer', 'Client ID', 'Mode']],
       [
         'okta',
         'api',
-        ['Type', 'Organisation', 'Name', 'Issuer', 'Mode', 'Okta Domain'],
+        ['Type', 'Name', 'Issuer', 'Client ID', 'Mode', 'Okta Domain'],
       ],
-      ['entra_id', 'api', ['Type', 'Organisation', 'Name', 'Issuer', 'Mode']],
+      ['entra_id', 'api', ['Type', 'Name', 'Issuer', 'Client ID', 'Mode']],
       [
         'generic',
         'token_claim',
-        ['Type', 'Organisation', 'Name', 'Issuer', 'Mode'],
+        ['Type', 'Name', 'Issuer', 'Client ID', 'Mode'],
       ],
     ] as const)(
       'Type = %s in %s mode marks only what the engine requires',
@@ -347,13 +350,29 @@ describe(
         await screen.findByLabelText('Service Account JSON'),
       ).toBeInTheDocument();
       expect(screen.queryByLabelText('Admin Email')).not.toBeInTheDocument();
-      expect(screen.getByText(GOOGLE_SERVICE_ACCOUNT_HINT)).toBeInTheDocument();
+      await expectLabelTooltip(
+        userEvent.setup(),
+        'Service Account JSON',
+        GOOGLE_SERVICE_ACCOUNT_HINT,
+      );
+    });
+
+    test('the group settings sit under a Groups heading that does not fold', () => {
+      renderForm('google');
+
+      expect(
+        screen.getByRole('heading', { name: 'Groups' }),
+      ).toBeInTheDocument();
+      expect(
+        screen.queryByRole('button', { name: /Groups/ }),
+      ).not.toBeInTheDocument();
     });
 
     test('manual mode says why it has no group settings', async () => {
       renderForm('entra_id', 'manual');
 
-      expect(await screen.findByText(MANUAL_MODE_HINT)).toBeInTheDocument();
+      await screen.findByLabelText('Mode');
+      await expectLabelTooltip(userEvent.setup(), 'Mode', MANUAL_MODE_HINT);
     });
 
     test('a new provider offers the provider type default scopes', () => {
@@ -438,6 +457,7 @@ describe(
           error={null}
           onFinish={onFinish}
           initialValues={initialValuesFor('google')}
+          orgScope="yours"
           suggestedDomain="hyperi.io"
         />,
         { wrapper },
@@ -704,11 +724,16 @@ describe(
       ).not.toBeInTheDocument();
     });
 
-    test('editing shows the stored issuer read-only without the guided fields', () => {
+    test('editing shows the stored issuer read-only without the guided fields, and keeps the stored name', () => {
       renderEdit({
         ...PROVIDERS_MAP['okta']?.initialValues,
         issuer: 'https://example.okta.com',
       });
+
+      expect(screen.getByLabelText('Name')).toHaveValue('okta');
+      expect(screen.getByLabelText('Client ID')).toHaveValue(
+        'DFE_OIDC_OKTA_CLIENT_ID',
+      );
 
       const issuer = screen.getByLabelText('Issuer');
       expect(issuer).toBeDisabled();

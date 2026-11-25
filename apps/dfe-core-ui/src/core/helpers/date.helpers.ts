@@ -6,6 +6,8 @@ dayjs.extend(utc);
 
 const INVALID_DATE_LABEL = 'Invalid date';
 const EMPTY_DATE_LABEL = 'N/A';
+// Largest first: the first unit with a whole count names the age.
+const AGO_UNITS = ['year', 'month', 'day', 'hour', 'minute'] as const;
 
 export const parseValidDate = (
   date: string | null | undefined,
@@ -46,26 +48,11 @@ export const formatDateXAgo = (date: string) => {
     return date?.trim() ? INVALID_DATE_LABEL : EMPTY_DATE_LABEL;
   }
 
-  const diffInMinutes = dayjs().diff(parsed, 'minute');
-  const diffInHours = dayjs().diff(parsed, 'hour');
-  const diffInDays = dayjs().diff(parsed, 'day');
-  const diffInMonths = dayjs().diff(parsed, 'month');
-  const diffInYears = dayjs().diff(parsed, 'year');
-
-  if (diffInYears > 0) {
-    return `${diffInYears} years ago`;
-  }
-  if (diffInMonths > 0) {
-    return `${diffInMonths} months ago`;
-  }
-  if (diffInDays > 0) {
-    return `${diffInDays} days ago`;
-  }
-  if (diffInHours > 0) {
-    return `${diffInHours} hours ago`;
-  }
-  if (diffInMinutes > 0) {
-    return `${diffInMinutes} minutes ago`;
+  for (const unit of AGO_UNITS) {
+    const count = dayjs().diff(parsed, unit);
+    if (count > 0) {
+      return `${count} ${unit}${count === 1 ? '' : 's'} ago`;
+    }
   }
   return 'just now';
 };

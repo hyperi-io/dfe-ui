@@ -18,7 +18,7 @@ export const useCreateAccount = ({
 }: UseCreateAccountProps = {}) => {
   const queryClient = useQueryClient();
 
-  const { data, mutate, isPending, error } = useMutation({
+  const { data, mutate, isPending, error, reset } = useMutation({
     mutationFn: (account: TAccountCreateRequestBody) =>
       createAccount({
         headerParams: { [REAUTH_HEADER]: reauth?.() },
@@ -40,5 +40,6 @@ export const useCreateAccount = ({
     mutate,
     isPending,
     error,
+    reset,
   };
 };

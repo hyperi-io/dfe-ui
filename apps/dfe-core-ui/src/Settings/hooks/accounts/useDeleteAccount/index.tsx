@@ -11,7 +11,7 @@ export const useDeleteAccount = ({
   onError?: (error: Error) => void;
 }) => {
   const queryClient = useQueryClient();
-  const { mutate, isPending, error } = useMutation({
+  const { mutate, isPending, error, reset } = useMutation({
     // The re-auth grant for *username*, which the engine requires on a delete.
     mutationFn: ({ reauth, username }: { reauth: string; username: string }) =>
       deleteAccount({
@@ -29,5 +29,5 @@ export const useDeleteAccount = ({
     },
   });
 
-  return { mutate, isPending, error };
+  return { mutate, isPending, error, reset };
 };

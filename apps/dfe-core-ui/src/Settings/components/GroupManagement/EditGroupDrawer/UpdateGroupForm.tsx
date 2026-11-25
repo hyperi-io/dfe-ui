@@ -66,11 +66,7 @@ export const UpdateGroupForm = ({
       error={error}
       isPending={isPending}
       initialValues={initialValues}
-      disabledFields={{
-        name: true,
-        scope: true,
-        organisation: true,
-      }}
+      disabledFields={{ name: true }}
       buttonLabel="Update Group"
       showMembersField
       savedLink={{

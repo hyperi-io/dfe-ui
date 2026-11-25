@@ -25,11 +25,14 @@ import {
   MockIntersectionObserver,
   signedInAs,
 } from '@/core/components/OrgChoiceFormItem/OrgChoiceFormItem.mocks';
+import { expectLabelTooltip } from '@/core/utils/test-utils/expectLabelTooltip';
+import { STAND_IN_GROUP } from '@/core/components/AccountGroupSelect/AccountGroupSelect.mocks';
 import { CreateAccountForm } from '.';
 
-// The group picker reads RBAC and the groups list, and the password rule depends on neither.
-vi.mock('@/core/components/AccountGroupSelect', () => ({
-  AccountGroupSelect: () => null,
+vi.mock('@/core/components/AccountGroupSelect', async () => ({
+  AccountGroupSelect: (
+    await import('@/core/components/AccountGroupSelect/AccountGroupSelect.mocks')
+  ).AccountGroupSelectStandIn,
 }));
 
 // The organisation picker lists the organisations and starts on the signed-in user's own.
@@ -106,6 +109,7 @@ const submit = async (password: string, name = 'New User') => {
     .catch(() => undefined);
   if (own) {
     await user.click(own);
+    await user.click(screen.getByRole('checkbox', { name: 'Choose a group' }));
     await user.click(screen.getByRole('button', { name: 'Create Account' }));
   }
 };
@@ -237,6 +241,18 @@ describe('CreateAccountForm name', () => {
 });
 
 describe('CreateAccountForm username', () => {
+  test('explains the username in the ? beside its label, not over the field', async () => {
+    const hint = "A username identifies the account and can't be changed later";
+    const user = userEvent.setup();
+    render(<CreateAccount />, { wrapper });
+
+    await user.hover(screen.getByLabelText(/^Username/));
+    await expect(
+      screen.findByText(hint, {}, { timeout: 500 }),
+    ).rejects.toThrow();
+    await expectLabelTooltip(user, 'Username', hint);
+  });
+
   test('shows an invalid username until it is fixed', async () => {
     const user = userEvent.setup();
     render(<CreateAccount />, { wrapper });
@@ -275,11 +291,15 @@ describe('CreateAccountForm username', () => {
 
 describe('CreateAccountForm organisation', () => {
   test.each([
-    { name: 'your organisation as a root account', pick: undefined, sends: '' },
     {
-      name: 'the customer organisation picked',
+      name: 'your organisation as a root account, with the groups chosen',
+      pick: undefined,
+      sends: { groups: [STAND_IN_GROUP], org: '' },
+    },
+    {
+      name: 'the customer organisation picked, in its viewers group',
       pick: 'Globex',
-      sends: 'globex',
+      sends: { groups: ['globex-viewers'], org: 'globex' },
     },
   ])('sends $name', async ({ pick, sends }) => {
     server.use(API_CONFIG_MOCKS.accounts.default.post.success());
@@ -297,11 +317,29 @@ describe('CreateAccountForm organisation', () => {
       await user.click(await screen.findByTitle(pick));
     } else {
       await user.click(await screen.findByRole('radio', { name: OWN_ORG }));
+      await user.click(
+        screen.getByRole('checkbox', { name: 'Choose a group' }),
+      );
     }
     await user.click(screen.getByRole('button', { name: 'Create Account' }));
 
     await waitFor(() => expect(sent).toHaveLength(1));
-    expect(await sent[0]?.json()).toMatchObject({ org: sends });
+    expect(await sent[0]?.json()).toMatchObject(sends);
+  });
+
+  test('creates nothing in your organisation until a group is chosen', async () => {
+    server.use(API_CONFIG_MOCKS.accounts.default.post.success());
+    const user = userEvent.setup();
+    render(<CreateAccount />, { wrapper });
+    await fillDetails(user, TWELVE_CHARS);
+
+    await user.click(await screen.findByRole('radio', { name: OWN_ORG }));
+    await user.click(screen.getByRole('button', { name: 'Create Account' }));
+
+    expect(
+      await screen.findByText('Choose at least one group'),
+    ).toBeInTheDocument();
+    expect(sent).toEqual([]);
   });
 
   test('offers the role, not groups, the moment a customer organisation is chosen', async () => {
@@ -374,7 +412,16 @@ describe('CreateAccountForm organisation', () => {
         onFinish={onFinish}
         error={null}
         isPending={false}
+        disabledFields={{ groups: true }}
         hiddenFields={{ org: true }}
+        initialValues={{
+          email: '',
+          groups: ['dfe-admins'],
+          name: '',
+          password: '',
+          phone: '',
+          username: '',
+        }}
       />,
       { wrapper },
     );
@@ -390,7 +437,10 @@ describe('CreateAccountForm organisation', () => {
     await user.click(screen.getByRole('button', { name: 'Create Account' }));
 
     await waitFor(() => expect(onFinish).toHaveBeenCalledTimes(1));
-    expect(onFinish.mock.calls[0]?.[0]).toMatchObject({ org: '' });
+    expect(onFinish.mock.calls[0]?.[0]).toMatchObject({
+      groups: ['dfe-admins'],
+      org: '',
+    });
     expect(reads).not.toContain(API_CONFIG_MOCKS.accounts.me.mockedUrl);
   });
 });

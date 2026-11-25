@@ -5,7 +5,6 @@ import {
   type TOrgChoice,
 } from '@/core/components/OrgChoiceFormItem';
 import { OrgRoleFormItem } from '@/core/components/OrgRoleFormItem';
-import { Tooltip } from '@/core/components/Tooltip';
 import { Input, type FormRule } from 'antd';
 import {
   emailAvailableRule,
@@ -16,6 +15,13 @@ import {
 const AVAILABILITY_DEBOUNCE_MS = 400;
 
 const ACCOUNT_ORG_CHOICES: readonly TOrgChoice[] = ['own', 'customer'];
+
+// An account holds its roles only through its groups, so the engine refuses one with none.
+const GROUPS_REQUIRED: FormRule = {
+  message: 'Choose at least one group',
+  required: true,
+  type: 'array',
+};
 
 /**
  * An account's details, laid out once for create and edit alike.
@@ -29,32 +35,24 @@ export const AccountDetailFields = ({
   rule: FormRule;
 }) => (
   <>
-    <Form.Item label="Username" required={isNew}>
-      <Tooltip
-        title={
-          isNew
-            ? "A username identifies the account and can't be changed later"
-            : "Usernames can't be changed"
-        }
-        placement="topLeft"
-      >
-        {/* A disabled input fires no hover, so the wrapper carries the tooltip. */}
-        <span className="block">
-          <Form.Item
-            name="username"
-            noStyle
-            rules={isNew ? [rule, usernameAvailableRule] : undefined}
-            validateDebounce={isNew ? AVAILABILITY_DEBOUNCE_MS : undefined}
-            validateFirst
-          >
-            <Input
-              aria-label="Username"
-              disabled={!isNew}
-              placeholder={isNew ? 'Enter username' : undefined}
-            />
-          </Form.Item>
-        </span>
-      </Tooltip>
+    <Form.Item
+      name="username"
+      label="Username"
+      required={isNew}
+      rules={isNew ? [rule, usernameAvailableRule] : undefined}
+      tooltip={
+        isNew
+          ? "A username identifies the account and can't be changed later"
+          : "Usernames can't be changed"
+      }
+      validateDebounce={isNew ? AVAILABILITY_DEBOUNCE_MS : undefined}
+      validateFirst
+    >
+      <Input
+        aria-label="Username"
+        disabled={!isNew}
+        placeholder={isNew ? 'Enter username' : undefined}
+      />
     </Form.Item>
 
     <Form.Item
@@ -102,7 +100,11 @@ export const AccountAccessFields = ({
   withOrg?: boolean;
 }) => {
   const groups = (
-    <Form.Item name="groups" label="Groups" rules={rule ? [rule] : undefined}>
+    <Form.Item
+      name="groups"
+      label="Groups"
+      rules={rule ? [GROUPS_REQUIRED, rule] : [GROUPS_REQUIRED]}
+    >
       <AccountGroupSelect disabled={groupsDisabled} />
     </Form.Item>
   );

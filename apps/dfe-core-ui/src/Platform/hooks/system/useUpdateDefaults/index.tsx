@@ -1,3 +1,4 @@
+import { REAUTH_HEADER } from '@/core/hooks/useReauth';
 import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { updateSystemDefaultsApi } from './api';
@@ -9,7 +10,10 @@ import {
 export const useUpdateSystemDefaults = ({
   onSuccess,
   onError,
+  reauth,
 }: {
+  /** The re-auth grant a change of retention carries. */
+  reauth?: () => string | undefined;
   onSuccess?: (values: TUpdateSystemDefaultsResponse) => void;
   onError?: (error: Error) => void;
 } = {}) => {
@@ -19,6 +23,7 @@ export const useUpdateSystemDefaults = ({
     mutationFn: (body: TUpdateSystemDefaultsRequest) =>
       updateSystemDefaultsApi({
         body,
+        headerParams: { [REAUTH_HEADER]: reauth?.() },
       }),
     onSuccess: (values) => {
       void queryClient.invalidateQueries({

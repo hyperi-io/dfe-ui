@@ -7,6 +7,7 @@ import {
 } from '@/core/constants/oidcProviders.constants';
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
 import { expectFieldError } from '@/core/utils/test-utils/expectFieldError';
+import { expectLabelTooltip } from '@/core/utils/test-utils/expectLabelTooltip';
 import { defaultGroupResolution } from '@/core/validationSchemas/oidcProviders.schema';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -157,7 +158,7 @@ describe('ConfigureOIDCForm', () => {
     },
   );
 
-  test('Type = google asks for no admin email and requires only what the engine requires', () => {
+  test('Type = google asks for no admin email and requires only what the engine requires', async () => {
     const { container } = render(<OidcForm type="google" />, { wrapper });
 
     expect(screen.queryByLabelText('Admin Email')).not.toBeInTheDocument();
@@ -166,17 +167,17 @@ describe('ConfigureOIDCForm', () => {
       Array.from(
         container.querySelectorAll('label.ant-form-item-required'),
       ).map((label) => label.textContent?.trim()),
-    ).toEqual(['Type', 'Name', 'Issuer', 'Mode']);
-    for (const label of [
-      ...GOOGLE_SERVICE_ACCOUNT_FIELDS,
-      'Client ID',
-      'Client Secret',
-    ]) {
+    ).toEqual(['Type', 'Name', 'Issuer', 'Client ID', 'Mode']);
+    for (const label of [...GOOGLE_SERVICE_ACCOUNT_FIELDS, 'Client Secret']) {
       expect(screen.getByText(label, { selector: 'label' })).not.toHaveClass(
         'ant-form-item-required',
       );
     }
-    expect(screen.getByText(GOOGLE_SERVICE_ACCOUNT_HINT)).toBeInTheDocument();
+    await expectLabelTooltip(
+      userEvent.setup(),
+      'Service Account JSON',
+      GOOGLE_SERVICE_ACCOUNT_HINT,
+    );
   });
 
   test.each([
@@ -188,7 +189,8 @@ describe('ConfigureOIDCForm', () => {
     expect(PROVIDERS_MAP[type]?.initialValues.groups?.mode).toBe(mode);
   });
 
-  test('a new Okta provider builds its issuer and Okta Domain from the org domain', async () => {
+  // The wizard keeps the type's name and credential variables, which the deploy example documents.
+  test('a new Okta provider builds its issuer and Okta Domain from the org domain, keeping the preset name', async () => {
     const user = userEvent.setup();
     const onFinish = vi.fn();
     render(<OidcForm type="okta" onFinish={onFinish} />, { wrapper });
@@ -203,6 +205,10 @@ describe('ConfigureOIDCForm', () => {
     expect(
       await screen.findByText('Issuer: https://dev-123.okta.com'),
     ).toBeInTheDocument();
+    expect(screen.getByLabelText('Name')).toHaveValue('okta');
+    expect(screen.getByLabelText('Client ID')).toHaveValue(
+      'DFE_OIDC_OKTA_CLIENT_ID',
+    );
   });
 
   test('an existing provider locks the fields the engine update ignores', () => {

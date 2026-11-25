@@ -1,71 +1,127 @@
-import { CustomScrollbar } from '@/core/components/CustomScrollbar';
 import { GenericErrorCard } from '@/core/components/GenericError';
 import { NotificationCard } from '@/core/components/NotificationCard';
-import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
+import { CustomerProvidersCard } from '@/Settings/components/OidcProviderManagement/CustomerProvidersCard';
 import { OidcProviderCard } from '@/Settings/components/OidcProviderManagement/OidcProviderCard';
+import { PagedList } from '@/Settings/components/PagedList';
 import { useFetchInfiniteFilteredOidcProviders } from '@/Settings/hooks/oidcProviders/useFetchInfiniteFilteredOidcProviders';
+import type { TOidcProviderListItem } from '@/Settings/hooks/oidcProviders/useFetchInfiniteFilteredOidcProviders/types';
+import { useOrganisationLabels } from '@/Settings/hooks/organisations/useOrganisationLabels';
+import { SHOW_ALL_PAGE_SIZE, useShowMore } from '@/Settings/hooks/useShowMore';
 import { IconInfoCircle } from '@repo/dfe-icons';
 import { Spin } from 'antd';
-import { useSearchParams } from 'next/navigation';
 
-export const OidcProviderList = ({ search = '' }: { search?: string }) => {
-  const pageSizeParam = useSearchParams().get('page_size');
-  const parsedPageSize = pageSizeParam
-    ? Number.parseInt(pageSizeParam, 10)
-    : undefined;
-  const page_size = Number.isInteger(parsedPageSize)
-    ? parsedPageSize
-    : undefined;
+const CARD_GRID = 'grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4';
+
+const byDisplayName = (a: TOidcProviderListItem, b: TOidcProviderListItem) =>
+  (a.display_name || a.name).localeCompare(b.display_name || b.name);
+
+const NO_MORE_PAGES = {
+  fetchNextPage: () => Promise.resolve(),
+  hasNextPage: false,
+  isFetchingNextPage: false,
+};
+
+/** One section's sign-in providers: your organisation's as cards, or one card per customer organisation that opens to its providers. */
+export const OidcProviderList = ({
+  onOrgClosed,
+  openOrg,
+  scope,
+  search = '',
+}: {
+  onOrgClosed?: () => void;
+  /** A customer organisation whose providers open in their drawer as the list shows them. */
+  openOrg?: string;
+  scope: 'customer' | 'yours';
+  search?: string;
+}) => {
+  // Providers number in the tens, so the list is read whole and searched here, organisation names included.
   const {
-    data: { items: oidcProviders },
-    isFetchingNextPage,
-    loadMoreRef,
+    data: { items: providers = [] },
     isLoading,
     error,
-  } = useFetchInfiniteFilteredOidcProviders({ search, page_size });
+  } = useFetchInfiniteFilteredOidcProviders({ page_size: SHOW_ALL_PAGE_SIZE });
+  const { isYours, orgLabel } = useOrganisationLabels();
+  const paging = useShowMore();
 
-  const { componentHeight } = useSetComponentHeight({
-    offset: 295,
-  });
+  const term = search.trim().toLowerCase();
+  const matches = (provider: TOidcProviderListItem) =>
+    !term ||
+    [
+      provider.name,
+      provider.display_name,
+      ...(scope === 'customer' ? [provider.org, orgLabel(provider.org)] : []),
+    ].some((value) => value?.toLowerCase().includes(term));
+
+  const shown = providers
+    .filter((provider) => isYours(provider.org) === (scope === 'yours'))
+    .filter(matches)
+    .sort(byDisplayName);
+  const grouped = new Map<string, TOidcProviderListItem[]>();
+  for (const provider of shown) {
+    grouped.set(provider.org, [...(grouped.get(provider.org) ?? []), provider]);
+  }
+  const orgCards = [...grouped.entries()]
+    .map(([org, held]) => ({ held, org }))
+    .sort((a, b) => orgLabel(a.org).localeCompare(orgLabel(b.org)));
+  const providerView = paging.view({ ...NO_MORE_PAGES, items: shown });
+  const orgView = paging.view({ ...NO_MORE_PAGES, items: orgCards });
+
+  if (isLoading) {
+    return (
+      <>
+        <Spin /> <p className="sr-only">Loading OIDC providers</p>
+      </>
+    );
+  }
+  if (error) {
+    return (
+      <GenericErrorCard
+        title="Error fetching OIDC providers"
+        description={error.message}
+      />
+    );
+  }
+  if (shown.length === 0) {
+    return (
+      <NotificationCard
+        className="w-full"
+        description={
+          scope === 'yours'
+            ? 'No OIDC providers found'
+            : 'No customer OIDC providers found'
+        }
+        icon={<IconInfoCircle />}
+      />
+    );
+  }
+
   return (
-    <div>
-      {isLoading && (
-        <>
-          <Spin /> <p className="sr-only">Loading OIDC providers</p>
-        </>
-      )}
-      {error && (
-        <>
-          <GenericErrorCard
-            title="Error fetching OIDC providers"
-            description={error.message}
-          />
-        </>
-      )}
-      {!isLoading && !error && oidcProviders?.length === 0 && (
-        <NotificationCard
-          className="w-full"
-          description="No OIDC providers found"
-          icon={<IconInfoCircle />}
-        />
-      )}
-      {oidcProviders && oidcProviders?.length > 0 && (
-        <CustomScrollbar height={componentHeight}>
-          <ul className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-            {oidcProviders?.map((oidcProvider) => (
-              <li key={oidcProvider.name}>
-                <OidcProviderCard
-                  key={oidcProvider.name}
-                  oidcProvider={oidcProvider}
+    <PagedList
+      hasMore={(scope === 'yours' ? providerView : orgView).hasMore}
+      loading={false}
+      onLoadMore={() => {}}
+      onShowMore={paging.showMore}
+      scrolling={paging.scrolling}
+    >
+      <ul className={CARD_GRID}>
+        {scope === 'yours'
+          ? providerView.visible.map((provider) => (
+              <li key={provider.name}>
+                <OidcProviderCard oidcProvider={provider} />
+              </li>
+            ))
+          : orgView.visible.map(({ held, org }) => (
+              <li key={org}>
+                <CustomerProvidersCard
+                  defaultOpen={org === openOrg}
+                  label={orgLabel(org)}
+                  onClose={onOrgClosed}
+                  org={org}
+                  providers={held}
                 />
               </li>
             ))}
-            <div ref={loadMoreRef} className="h-4 flex justify-center">
-              {isFetchingNextPage && <Spin size="small" />}
-            </div>
-          </ul>
-        </CustomScrollbar>
-      )}
-    </div>
+      </ul>
+    </PagedList>
   );
 };

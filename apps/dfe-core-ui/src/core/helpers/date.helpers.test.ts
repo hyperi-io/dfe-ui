@@ -50,8 +50,15 @@ describe('ViewOrganisationDrawer.helpers', () => {
       vi.useRealTimers();
     });
 
-    test('should format recent valid date as relative time', () => {
-      expect(formatDateXAgo('2021-01-01T00:00:00Z')).toBe('1 minutes ago');
+    test.each([
+      { date: '2021-01-01T00:00:00Z', expected: '1 minute ago' },
+      { date: '2020-12-31T23:58:00Z', expected: '3 minutes ago' },
+      { date: '2020-12-31T23:01:00Z', expected: '1 hour ago' },
+      { date: '2020-12-29T00:01:00Z', expected: '3 days ago' },
+      { date: '2020-12-01T00:01:00Z', expected: '1 month ago' },
+      { date: '2018-01-01T00:01:00Z', expected: '3 years ago' },
+    ])('formats $date as $expected', ({ date, expected }) => {
+      expect(formatDateXAgo(date)).toBe(expected);
     });
 
     test('should return just now when timestamp matches now', () => {

@@ -1,11 +1,12 @@
-import { Drawer } from '@/core/components/Drawer';
+import { Drawer, TABBED_DRAWER_STYLES } from '@/core/components/Drawer';
 import { RbacProtected } from '@/core/components/RbacProtected';
+import { FilteredAccounts } from '@/Settings/components/AccountManagement/FilteredAccounts';
 import { TOidcProviderListItem } from '@/Settings/hooks/oidcProviders/useFetchInfiniteFilteredOidcProviders/types';
 import { IconEye } from '@repo/dfe-icons';
 import { Button, Tabs } from 'antd';
 import { useState } from 'react';
 import { ViewOidcProviderDetail } from './ViewOidcProviderDetail';
-import { ViewOidcUserAccounts } from './ViewOidcUserAccounts';
+import { ViewOidcProviderGroups } from './ViewOidcProviderGroups';
 
 export const ViewOidcProviderDrawer = ({
   oidcProvider,
@@ -39,6 +40,9 @@ export const ViewOidcProviderDrawer = ({
         open={open}
         onClose={() => setOpen(false)}
         size="60%"
+        styles={TABBED_DRAWER_STYLES}
+        // Nothing here is edited, so there is nothing to lose by clicking away.
+        preventClickaway={{ enabled: false }}
       >
         <Tabs
           items={[
@@ -48,10 +52,17 @@ export const ViewOidcProviderDrawer = ({
               children: <ViewOidcProviderDetail oidcProvider={oidcProvider} />,
             },
             {
+              label: 'Groups',
+              key: 'groups',
+              children: <ViewOidcProviderGroups oidcProvider={oidcProvider} />,
+            },
+            {
               label: 'Users',
               key: 'users',
               children: (
-                <ViewOidcUserAccounts oidcProviderId={oidcProvider.name} />
+                <FilteredAccounts
+                  filter={{ blocked: false, oidc_id: oidcProvider.name }}
+                />
               ),
             },
           ]}

@@ -1,10 +1,9 @@
 import { PopoverMenu } from '@/core/components/PopoverMenu';
 import { TGroupsItemSummary } from '@/core/hooks/useFetchInfiniteFilteredGroups/types';
-import { cn } from '@/core/utils/style';
 import { DeleteGroupModal } from '@/Settings/components/GroupManagement/DeleteGroupModal';
 import { EditGroupDrawer } from '@/Settings/components/GroupManagement/EditGroupDrawer';
 import { ViewGroupDetailsDrawer } from '@/Settings/components/GroupManagement/ViewGroupDetailsDrawer';
-import { TAG_LIMIT, TagList } from './TagList';
+import { TagList, TagOverflow } from './TagList';
 
 export const GroupCard = ({ group }: { group: TGroupsItemSummary }) => {
   const members = group.members ?? [];
@@ -27,10 +26,7 @@ export const GroupCard = ({ group }: { group: TGroupsItemSummary }) => {
         />
 
         <h3 className="flex items-center gap-2">
-          <span className="font-medium">{group.name}</span>{' '}
-          <p className="text-xs bg-foreground/50 dark:bg-dark-foreground/50 text-white rounded-full px-2 py-0.5 whitespace-nowrap">
-            scope: {group.scope}
-          </p>
+          <span className="font-medium">{group.name}</span>
         </h3>
         <p className="text-sm text-foreground/50 dark:text-dark-foreground/50">
           {group.description || 'No description'}
@@ -42,17 +38,7 @@ export const GroupCard = ({ group }: { group: TGroupsItemSummary }) => {
         <ul className="flex flex-wrap gap-2 w-full overflow-hidden max-h-12 relative">
           <TagList items={group.roles ?? []} emptyLabel="No roles assigned" />
         </ul>
-        {group.roles && group.roles.length > TAG_LIMIT && (
-          <span
-            className={cn(
-              'text-xs self-end',
-              'bg-background dark:bg-dark-background',
-              'rounded-md px-2 py-0.5 border border-foreground/10 dark:border-dark-foreground/10',
-            )}
-          >
-            {`+ ${group.roles.length - TAG_LIMIT} more`}
-          </span>
-        )}
+        <TagOverflow className="self-end" count={group.roles?.length ?? 0} />
 
         <p className="text-xs text-foreground/40 dark:text-dark-foreground/40 mt-2">
           Members
@@ -64,17 +50,7 @@ export const GroupCard = ({ group }: { group: TGroupsItemSummary }) => {
             emptyLabel="No members assigned"
           />
         </ul>
-        {memberCount > TAG_LIMIT && (
-          <span
-            className={cn(
-              'text-xs self-end',
-              'bg-background dark:bg-dark-background',
-              'rounded-md px-2 py-0.5 border border-foreground/10 dark:border-dark-foreground/10',
-            )}
-          >
-            {`+ ${memberCount - TAG_LIMIT} more`}
-          </span>
-        )}
+        <TagOverflow className="self-end" count={memberCount} />
       </div>
     </div>
   );

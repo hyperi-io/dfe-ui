@@ -1,4 +1,5 @@
 import {
+  adminPassword,
   chooseYourOrganisation,
   confirmItsYou,
 } from '@e2e/config/login.helpers';
@@ -79,12 +80,12 @@ test.describe(
       expect(okUi.path).not.toBe('/login');
 
       await userAction(page, row, `Edit ${user}`);
-      await confirmItsYou(page);
       const edit = page.getByRole('dialog', { name: `Edit ${user}` });
       await edit.getByPlaceholder('Enter name').fill('Jset User Renamed');
       await edit
         .getByRole('button', { name: 'Update Account', exact: true })
         .click();
+      await confirmItsYou(page);
       await expect(
         page.getByText('Account updated successfully'),
       ).toBeVisible();
@@ -136,9 +137,8 @@ test.describe(
       expect(offUi.path).toBe('/login');
 
       await userAction(page, row, `Delete ${user}`);
-      await confirmItsYou(page);
-      const remove = page.getByRole('dialog', { name: 'Delete Account' });
-      await remove.getByPlaceholder('Enter username to be deleted').fill(user);
+      const remove = page.getByRole('dialog', { name: `Delete ${user}?` });
+      await remove.getByLabel('Your password').fill(adminPassword());
       await remove.getByRole('button', { name: 'Delete', exact: true }).click();
       await expect(
         page.getByText(`${user} deleted successfully`),

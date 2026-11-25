@@ -64,8 +64,7 @@ describe('SyncOidcProviderGroupsDrawer', () => {
     },
     {
       status: 'user_token',
-      message:
-        "Each user's groups are read from their own token when they log in, so there is no directory to sync.",
+      message: "Groups come from the user's token at login.",
     },
     {
       status: 'skipped',

@@ -1,25 +1,63 @@
 import { EmptyDetail } from '@/core/components/EmptyDetail';
-import { SimpleCollapse } from '@/core/components/SimpleCollapse';
+import { Tooltip } from '@/core/components/Tooltip';
 import {
   formatDateToString,
   formatDateXAgo,
 } from '@/core/helpers/date.helpers';
-import { groupModeLabel } from '@/core/helpers/oidcProviderFieldRules';
 import { cn } from '@/core/utils/style';
-import {
-  OidcSyncStatusTag,
-  syncStatusDetail,
-} from '@/Settings/components/OidcProviderManagement/OidcSyncStatusTag';
+import { TAG_CLASS } from '@/Settings/components/GroupManagement/GroupCard/TagList';
+import { isReadAtLogin } from '@/Settings/components/OidcProviderManagement/OidcSyncStatusTag';
 import { TOidcProviderListItem } from '@/Settings/hooks/oidcProviders/useFetchInfiniteFilteredOidcProviders/types';
-import { IconCheck, IconX } from '@repo/dfe-icons';
+import { Tag } from 'antd';
 
-const dataListTermStyle =
+export const dataListTermStyle =
   'font-medium text-foreground/40 dark:text-dark-foreground/40';
-// One label width for every section keeps the value column aligned.
-const dataListGridStyle = 'grid grid-cols-[180px_1fr] gap-x-6 gap-y-1';
+// Labels never wrap: the label column grows past 160px to fit the longest, and baselines line each label up with its value's first line.
+export const dataListGridStyle =
+  'grid grid-cols-[minmax(160px,max-content)_1fr] items-baseline gap-x-6 gap-y-3';
+const PILL_STYLE =
+  'flex shrink-0 items-center text-xs bg-foreground/10 dark:bg-dark-foreground/10 rounded-full px-4 py-1';
+
+/** When the provider's groups last changed hands: a sync's time, or that they are read at each login and never synced. */
+const SyncPill = ({
+  oidcProvider,
+}: {
+  oidcProvider: TOidcProviderListItem;
+}) => {
+  if (isReadAtLogin(oidcProvider.last_sync_status)) {
+    return <p className={PILL_STYLE}>Groups read at login</p>;
+  }
+  if (!oidcProvider.last_sync_at) {
+    return <p className={PILL_STYLE}>Not synced yet</p>;
+  }
+  return (
+    <Tooltip
+      destroyOnHidden
+      title={formatDateToString(oidcProvider.last_sync_at)}
+    >
+      <p className={PILL_STYLE}>
+        Last synced {formatDateXAgo(oidcProvider.last_sync_at)}
+      </p>
+    </Tooltip>
+  );
+};
+
 const EmptyData = () => (
   <span className="text-foreground/40 dark:text-dark-foreground/40">None</span>
 );
+
+const Tags = ({ items }: { items: readonly string[] }) =>
+  items.length ? (
+    <ul className="flex flex-wrap items-center gap-2">
+      {items.map((item) => (
+        <li key={item} className={cn(TAG_CLASS, 'whitespace-normal break-all')}>
+          {item}
+        </li>
+      ))}
+    </ul>
+  ) : (
+    <EmptyData />
+  );
 
 export const ViewOidcProviderDetail = ({
   oidcProvider,
@@ -34,197 +72,52 @@ export const ViewOidcProviderDetail = ({
       />
     );
   }
-  const syncDetail = syncStatusDetail(
-    oidcProvider.last_sync_status,
-    oidcProvider.sync_error,
-  );
   return (
-    <div className="flex flex-col gap-2">
-      <div className="flex justify-between">
-        <h1 className="text-lg font-semibold">{oidcProvider?.display_name}</h1>
-        <p className="flex items-center text-xs bg-foreground/10 dark:bg-dark-foreground/10 rounded-full px-4 py-1">
-          {oidcProvider?.last_sync_at ? (
-            <>Last synced {formatDateXAgo(oidcProvider?.last_sync_at)}</>
-          ) : (
-            <span>Not synced yet</span>
-          )}
-        </p>
+    <div className="flex flex-col gap-4">
+      <div className="flex justify-between gap-4">
+        <h1 className="flex flex-wrap items-center gap-2 text-lg font-semibold">
+          {oidcProvider.display_name || oidcProvider.name}
+          {!oidcProvider.enabled && <Tag className="m-0">Disabled</Tag>}
+        </h1>
+        <SyncPill oidcProvider={oidcProvider} />
       </div>
       <dl className={dataListGridStyle}>
         <dt className={dataListTermStyle}>Name:</dt>
-        <dd>{oidcProvider?.name}</dd>
-        <dt className={dataListTermStyle}>Display Name:</dt>
-        <dd>{oidcProvider?.display_name}</dd>
+        <dd className="break-all">{oidcProvider.name}</dd>
+        <dt className={dataListTermStyle}>Status:</dt>
+        <dd>{oidcProvider.enabled ? 'Enabled' : 'Disabled'}</dd>
         <dt className={dataListTermStyle}>Type:</dt>
-        <dd>{oidcProvider?.type}</dd>
+        <dd>{oidcProvider.type}</dd>
         <dt className={dataListTermStyle}>Issuer:</dt>
-        <dd>{oidcProvider?.issuer}</dd>
+        <dd className="break-all">{oidcProvider.issuer || <EmptyData />}</dd>
         <dt className={dataListTermStyle}>Scopes:</dt>
         <dd>
-          {oidcProvider?.scopes?.length ? (
-            <ul className="flex flex-col">
-              {oidcProvider.scopes.map((scope) => (
-                <li key={scope} className="break-all">
-                  {scope}
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <EmptyData />
-          )}
+          <Tags items={oidcProvider.scopes ?? []} />
         </dd>
         <dt className={dataListTermStyle}>Trusted Email Domains:</dt>
         <dd>
-          {oidcProvider?.trusted_email_domains?.length ? (
-            <ul className="flex flex-col">
-              {oidcProvider.trusted_email_domains.map((domain) => (
-                <li key={domain} className="break-all">
-                  {domain}
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <EmptyData />
-          )}
+          <Tags items={oidcProvider.trusted_email_domains ?? []} />
         </dd>
         <dt className={dataListTermStyle}>Client ID:</dt>
-        <dd>
-          {oidcProvider?.client_id ? oidcProvider.client_id : <EmptyData />}
-        </dd>
-        <dt className={dataListTermStyle}>Client ID Environment Variable:</dt>
-        <dd>
-          {oidcProvider?.client_id_env ? (
-            oidcProvider.client_id_env
-          ) : (
-            <EmptyData />
-          )}
-        </dd>
-        <dt className={dataListTermStyle}>
-          Client Secret Environment Variable:
-        </dt>
-        <dd>
-          {oidcProvider?.client_secret_env ? (
-            oidcProvider.client_secret_env
-          ) : (
-            <EmptyData />
-          )}
-        </dd>
-      </dl>
-
-      <SimpleCollapse
-        className="border-none px-0"
-        title="Groups"
-        defaultOpen={true}
-      >
-        <dl className={dataListGridStyle}>
-          <dt className={dataListTermStyle}>Mode:</dt>
-          <dd>{groupModeLabel(oidcProvider?.groups?.mode ?? '')}</dd>
-          {oidcProvider?.groups?.claim_name && (
-            <>
-              <dt className={dataListTermStyle}>Claim Name:</dt>
-              <dd>{oidcProvider?.groups?.claim_name}</dd>
-            </>
-          )}
-          {oidcProvider?.groups?.sync_interval && (
-            <>
-              <dt className={dataListTermStyle}>Sync Interval:</dt>
-              <dd>{oidcProvider?.groups?.sync_interval} seconds</dd>
-            </>
-          )}
-          <dt className={dataListTermStyle}>Enrich on Login:</dt>
-          <dd className="flex items-center gap-2">
-            {oidcProvider?.groups?.enrich_on_login ? (
-              <>
-                <IconCheck />
-                Yes
-              </>
-            ) : (
-              <>
-                <IconX />
-                No
-              </>
-            )}
-          </dd>
-          {oidcProvider?.groups?.service_account_json_env && (
-            <>
-              <dt className={dataListTermStyle}>
-                Service Account JSON Environment Variable:
-              </dt>
-              <dd>{oidcProvider?.groups?.service_account_json_env}</dd>
-            </>
-          )}
-          {oidcProvider?.groups?.domain && (
-            <>
-              <dt className={dataListTermStyle}>Domain:</dt>
-              <dd>{oidcProvider?.groups?.domain}</dd>
-            </>
-          )}
-          {oidcProvider?.groups?.tenant_id && (
-            <>
-              <dt className={dataListTermStyle}>Tenant ID:</dt>
-              <dd>{oidcProvider?.groups?.tenant_id}</dd>
-            </>
-          )}
-          {oidcProvider?.groups?.tenant_id_env && (
-            <>
-              <dt className={dataListTermStyle}>
-                Tenant ID Environment Variable:
-              </dt>
-              <dd>{oidcProvider?.groups?.tenant_id_env}</dd>
-            </>
-          )}
-          {oidcProvider?.groups?.client_secret_env && (
-            <>
-              <dt className={dataListTermStyle}>
-                Directory Client Secret Environment Variable:
-              </dt>
-              <dd>{oidcProvider?.groups?.client_secret_env}</dd>
-            </>
-          )}
-          {oidcProvider?.groups?.api_token_env && (
-            <>
-              <dt className={dataListTermStyle}>
-                API Token Environment Variable:
-              </dt>
-              <dd>{oidcProvider?.groups?.api_token_env}</dd>
-            </>
-          )}
-          {oidcProvider?.groups?.okta_domain && (
-            <>
-              <dt className={dataListTermStyle}>Okta Domain:</dt>
-              <dd>{oidcProvider?.groups?.okta_domain}</dd>
-            </>
-          )}
-          {oidcProvider?.last_sync_at && (
-            <>
-              <dt className={dataListTermStyle}>Last Sync:</dt>
-              <dd className="flex flex-wrap items-center gap-x-2">
-                <OidcSyncStatusTag status={oidcProvider.last_sync_status} />
-                {formatDateToString(oidcProvider.last_sync_at)}
-              </dd>
-              {syncDetail && (
-                <>
-                  <dt className={dataListTermStyle}>Sync Message:</dt>
-                  <dd>{syncDetail}</dd>
-                </>
-              )}
-            </>
-          )}
-        </dl>
-      </SimpleCollapse>
-
-      <dl
-        className={cn(
-          // Grid
-          dataListGridStyle,
-          // Text
-          'text-foreground/60 dark:text-dark-foreground/60',
-          // Border & Spacing
-          'mt-2 border-t border-foreground/10 dark:border-dark-foreground/10 pt-2',
+        <dd className="break-all">{oidcProvider.client_id || <EmptyData />}</dd>
+        {oidcProvider.client_id_env && (
+          <>
+            <dt className={dataListTermStyle}>
+              Client ID Environment Variable:
+            </dt>
+            <dd className="break-all">{oidcProvider.client_id_env}</dd>
+          </>
         )}
-      >
-        <dt className={cn(dataListTermStyle)}>Created At:</dt>
-        <dd>{formatDateToString(oidcProvider?.created_at)}</dd>
+        {oidcProvider.client_secret_env && (
+          <>
+            <dt className={dataListTermStyle}>
+              Client Secret Environment Variable:
+            </dt>
+            <dd className="break-all">{oidcProvider.client_secret_env}</dd>
+          </>
+        )}
+        <dt className={dataListTermStyle}>Created At:</dt>
+        <dd>{formatDateToString(oidcProvider.created_at)}</dd>
       </dl>
     </div>
   );

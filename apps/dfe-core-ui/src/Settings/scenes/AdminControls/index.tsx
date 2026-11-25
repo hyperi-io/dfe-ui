@@ -4,7 +4,6 @@ import { MainContentCard } from '@/core/components/ContentCard';
 import { CustomScrollbar } from '@/core/components/CustomScrollbar';
 import { NavigationTabLabel } from '@/core/components/NavigationTabLabel';
 import { useAuthMe } from '@/core/hooks/useAuthMe';
-import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
 import { AccountManagement } from '@/Settings/components/AccountManagement';
 import { ApiKeyManagement } from '@/Settings/components/ApiKeyManagement';
 import { GroupManagement } from '@/Settings/components/GroupManagement';
@@ -46,11 +45,10 @@ export const AdminControlsScene = () => {
     [router],
   );
 
-  const { componentHeight } = useSetComponentHeight({ offset: 100 });
-
   return (
     <MainContentCard className="pl-0">
-      <CustomScrollbar height={componentHeight}>
+      {/* CSS sizes the box before the first paint, so no scrollbar shows while JS measures the window. */}
+      <CustomScrollbar className="h-[calc(100dvh-100px)]!">
         <Tabs
           className="h-full min-h-0"
           tabPlacement="start"

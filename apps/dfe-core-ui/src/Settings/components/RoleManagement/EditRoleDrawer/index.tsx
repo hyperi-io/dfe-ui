@@ -26,6 +26,7 @@ export const EditRoleDrawer = ({
     mutate: updateRole,
     isPending,
     error,
+    reset,
   } = useUpdateRole({
     reauth: reauth.grant,
     role_name,
@@ -43,7 +44,13 @@ export const EditRoleDrawer = ({
   });
 
   const handleUpdateRole = (values: UpdateRoleFormData) => {
-    updateRole(values);
+    updateRole(values, {
+      onError: (refusal) => {
+        if (reauth.askIfRequired(refusal, () => updateRole(values))) {
+          reset();
+        }
+      },
+    });
   };
 
   return (
@@ -56,7 +63,7 @@ export const EditRoleDrawer = ({
             type="text"
             icon={<IconEdit />}
             disabled={disabled}
-            onClick={() => reauth.ask(() => setOpen(true))}
+            onClick={() => setOpen(true)}
           >
             Edit Role
           </Button>

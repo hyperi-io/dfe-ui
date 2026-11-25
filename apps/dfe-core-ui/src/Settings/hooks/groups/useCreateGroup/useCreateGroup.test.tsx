@@ -31,7 +31,6 @@ describe('.useCreateGroup', () => {
     description: 'string',
     roles: ['string'],
     members: [],
-    scope: 'string',
     source_id: 'string',
     source_provider: 'string',
   };

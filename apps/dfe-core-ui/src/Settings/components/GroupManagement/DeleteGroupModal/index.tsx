@@ -1,21 +1,21 @@
-import { useReauthGrant } from '@/core/hooks/useReauthGrant';
 import { Modal } from '@/core/components/Modal';
 import { RbacProtected } from '@/core/components/RbacProtected';
 import { useDeleteGroup } from '@/Settings/hooks/groups/useDeleteGroup';
 import { IconTrash } from '@repo/dfe-icons';
 import { App, Button } from 'antd';
-import { useState } from 'react';
-import { DeleteGroupForm, DeleteGroupFormData } from './DeleteGroupForm';
+import { useRef, useState } from 'react';
+import { DeleteGroupForm } from './DeleteGroupForm';
 
 export const DeleteGroupModal = ({ group_name }: { group_name: string }) => {
   const [open, setOpen] = useState(false);
   const { notification } = App.useApp();
 
   // Every delete asks for the password again.
-  const reauth = useReauthGrant(group_name, 'group');
-  const { mutate, isPending, error } = useDeleteGroup({
-    reauth: reauth.grant,
+  const grant = useRef<string>(undefined);
+  const { mutate, isPending, error, reset } = useDeleteGroup({
+    reauth: () => grant.current,
     onSuccess: () => {
+      grant.current = undefined;
       setOpen(false);
       notification.success({
         title: (
@@ -29,8 +29,9 @@ export const DeleteGroupModal = ({ group_name }: { group_name: string }) => {
     },
   });
 
-  const handleDeleteGroup = (values: DeleteGroupFormData) => {
-    mutate(values.group_name);
+  const close = () => {
+    reset();
+    setOpen(false);
   };
 
   return (
@@ -42,36 +43,33 @@ export const DeleteGroupModal = ({ group_name }: { group_name: string }) => {
             className="hover:text-error hover:bg-error/5"
             aria-label={`Delete ${group_name}`}
             icon={<IconTrash />}
-            onClick={() => reauth.ask(() => setOpen(true))}
+            onClick={() => setOpen(true)}
           >
             Delete Group
           </Button>
         </RbacProtected.Unrestricted>
         <RbacProtected.Restricted tooltip={{ show: true }}>
-          <Button
-            disabled
-            type="text"
-            icon={<IconTrash />}
-            onClick={() => reauth.ask(() => setOpen(true))}
-          >
+          <Button disabled type="text" icon={<IconTrash />}>
             Delete Group
           </Button>
         </RbacProtected.Restricted>
       </RbacProtected>
 
-      {reauth.modal}
       <Modal
-        title="Delete Group"
+        title={`Delete ${group_name}?`}
         open={open}
-        onCancel={() => setOpen(false)}
+        onCancel={close}
         footer={null}
         destroyOnHidden
       >
         <DeleteGroupForm
-          onFinish={handleDeleteGroup}
+          onConfirm={(granted) => {
+            grant.current = granted;
+            mutate(group_name);
+          }}
           error={error}
           isPending={isPending}
-          onCancel={() => setOpen(false)}
+          onCancel={close}
           group_name={group_name}
         />
       </Modal>

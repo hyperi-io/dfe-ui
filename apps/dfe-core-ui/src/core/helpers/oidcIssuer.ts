@@ -2,11 +2,18 @@ import {
   PROVIDERS,
   PROVIDERS_MAP,
 } from '@/core/constants/oidcProviders.constants';
+import type { TOidcProviderType } from '@/core/helpers/oidcProviderFieldRules';
 
 export type TIssuerMode = 'guided' | 'manual';
 
 // The Entra ID authority paths that stand for many tenants rather than one directory.
 const ENTRA_MULTI_TENANT_ALIASES = ['common', 'organizations', 'consumers'];
+
+const ENTRA_TENANT_GUID =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+// The hosts Okta serves its own org domains under, which tell no two Okta orgs apart.
+const OKTA_HOST_SUFFIX = /\.(okta|oktapreview|okta-emea|okta-gov)\.com$/i;
 
 export interface TOktaIssuerParts {
   domain: string;
@@ -50,7 +57,7 @@ export const buildOktaIssuer = ({ domain }: TOktaIssuerParts) => {
 };
 
 /** The host of an issuer URL, where the Okta API is called, or '' when there is no issuer. */
-export const oktaDomainFromIssuer = ({ issuer }: { issuer: string }) =>
+export const issuerHost = ({ issuer }: { issuer: string }) =>
   issuer
     .trim()
     .replace(/^https?:\/\//i, '')
@@ -95,4 +102,62 @@ export const issuerOnTypeChange = ({
     return { issuer: current, mode: 'manual' };
   }
   return { issuer: built[type] ?? preset, mode: 'guided' };
+};
+
+/** What tells one provider from another of its type: the Okta org, the Entra tenant (a tenant ID's first block), the Google domain or a custom issuer's host. */
+const distinguishingPart = ({
+  issuer,
+  trustedEmailDomains,
+  type,
+}: {
+  issuer: string;
+  trustedEmailDomains: readonly string[];
+  type: TOidcProviderType;
+}) => {
+  if (type === 'google') {
+    return trustedEmailDomains[0] ?? '';
+  }
+  if (type === 'okta') {
+    return issuerHost({ issuer }).replace(OKTA_HOST_SUFFIX, '');
+  }
+  if (type === 'entra_id') {
+    const tenant = entraTenantFromIssuer({ issuer });
+    return ENTRA_TENANT_GUID.test(tenant)
+      ? tenant.slice(0, 8)
+      : (tenant.split('.')[0] ?? '');
+  }
+  return PRESET_ISSUERS.includes(issuer) ? '' : issuerHost({ issuer });
+};
+
+/** The name a new provider is offered: its type's preset name, then what tells it from others of that type once the form holds it. */
+export const suggestedProviderName = ({
+  issuer,
+  trustedEmailDomains,
+  type,
+}: {
+  issuer: string;
+  trustedEmailDomains: readonly string[];
+  type: TOidcProviderType;
+}) => {
+  const stem = PROVIDERS_MAP[type]?.initialValues.name ?? type;
+  const part = distinguishingPart({ issuer, trustedEmailDomains, type })
+    .toLowerCase()
+    .replace(/[^a-z0-9.-]+/g, '-')
+    .replace(/^[^a-z0-9]+|[^a-z0-9]+$/g, '');
+  return part ? `${stem}-${part}` : stem;
+};
+
+/** The env var a provider credential is offered: `DFE_OIDC_`, the provider name in env var form, then `suffix`, as the deploy example names DFE_OIDC_OKTA_CLIENT_ID. '' for a name with no letter or digit. */
+export const suggestedCredentialEnv = ({
+  name,
+  suffix,
+}: {
+  name: string;
+  suffix: 'CLIENT_ID' | 'CLIENT_SECRET';
+}) => {
+  const stem = name
+    .toUpperCase()
+    .replace(/[^A-Z0-9]+/g, '_')
+    .replace(/^_+|_+$/g, '');
+  return stem ? `DFE_OIDC_${stem}_${suffix}` : '';
 };

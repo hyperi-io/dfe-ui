@@ -610,7 +610,7 @@ export interface paths {
         put?: never;
         /**
          * Create Group
-         * @description Create a new RBAC group at a scope.
+         * @description Create a new system-wide RBAC group.
          */
         post: operations["auth.groups.create"];
         delete?: never;
@@ -639,7 +639,7 @@ export interface paths {
         post?: never;
         /**
          * Delete Group
-         * @description Delete a group (checked at the group's scope).
+         * @description Delete a group and drop its members from it (checked at the group's scope).
          */
         delete: operations["auth.groups.delete"];
         options?: never;
@@ -6248,6 +6248,12 @@ export interface components {
              */
             org_display_name: string;
             /**
+             * Org Enabled
+             * @description False while the account's org is disabled, which refuses its sign-in whatever the account's own state
+             * @default true
+             */
+            org_enabled: boolean;
+            /**
              * External
              * @description True when the account authenticates through an identity provider
              */
@@ -6286,10 +6292,21 @@ export interface components {
              * @default false
              */
             password_change_required: boolean;
+            /**
+             * Linked Groups
+             * @description The groups in groups held only through an IdP sign-in, each with its provider, so they change with what the IdP asserts rather than with a membership write
+             */
+            linked_groups?: components["schemas"]["LinkedGroupResponse"][];
             /** Created At */
             created_at: string;
             /** Updated At */
             updated_at: string;
+            /**
+             * Last Login At
+             * @description When the account last signed in, by password or through an identity provider, empty if it never has
+             * @default
+             */
+            last_login_at: string;
         };
         /**
          * ActionDef
@@ -8291,7 +8308,7 @@ export interface components {
         };
         /**
          * CreateGroupRequest
-         * @description Body for creating a group.
+         * @description Body for creating a system-wide group.
          */
         CreateGroupRequest: {
             /**
@@ -8310,12 +8327,6 @@ export interface components {
              * @default
              */
             description: string;
-            /**
-             * Scope
-             * @description 'system' (roles bind system-wide) or 'org:<name>' (group exists only inside that org; roles bind at that org's scope)
-             * @default system
-             */
-            scope: string;
             /**
              * Members
              * @description Account usernames in this group (local login resolves roles from this list)
@@ -10666,6 +10677,25 @@ export interface components {
             outdated: boolean;
         };
         /**
+         * LinkedGroupResponse
+         * @description A group an account holds only through an IdP sign-in.
+         */
+        LinkedGroupResponse: {
+            /** Name */
+            name: string;
+            /**
+             * Provider
+             * @description The provider whose assertion links the group
+             */
+            provider: string;
+            /**
+             * Provider Type
+             * @description The provider's type (google, entra_id, okta or generic), empty once it is no longer registered
+             * @default
+             */
+            provider_type: string;
+        };
+        /**
          * LinkedIdentityResponse
          * @description An IdP sign-in linked to an account, which reaches it without a password.
          */
@@ -12750,7 +12780,7 @@ export interface components {
         /** @enum {string} */
         RbacScope: "group:write" | "group:read" | "group:delete" | "group:add_member" | "group:remove_member" | "account:write" | "account:read" | "account:delete" | "accounts:reset_password" | "account:attributes:read" | "account:attributes:write" | "account:attributes:read_sensitive" | "account:attributes:write_sensitive" | "group:attributes:read" | "group:attributes:write" | "group:attributes:read_sensitive" | "group:attributes:write_sensitive" | "alert:read" | "alert:write" | "alert:delete" | "api_key:read" | "api_key:write" | "api_key:delete" | "cel:check" | "clickhouse_cloud:manage" | "dashboard:read" | "synthetic-data:read" | "synthetic-data:run" | "deployment:read" | "deployment:write" | "deployment:delete" | "deployment:admin_links:read" | "fieldmap:read" | "fieldmap:write" | "fieldmap:delete" | "hunt:read" | "hunt:write" | "hunt:delete" | "hunt:execute" | "oidc:read" | "oidc:write" | "oidc:delete" | "org:read" | "org:write" | "org:delete" | "org:ingest_credentials:write" | "pipeline:read" | "pipeline:write" | "query:read" | "query:execute" | "raw_query:execute" | "repository:read" | "repository:write" | "role:read" | "role:write" | "role:delete" | "role:scopes" | "rule:read" | "rule:write" | "rule:delete" | "rule:validate" | "sampler:read" | "schema:read" | "schema:write" | "schema:delete" | "service_surface:read" | "service_surface:write" | "service:read" | "service:write" | "service:delete" | "service:validate" | "sigma:read" | "sigma:write" | "sigma:admin" | "source:read" | "source:write" | "source:delete" | "source:deploy" | "system:read" | "system:write" | "task:read" | "task:write" | "transform:compile" | "transform:test" | "usage:read" | "governance:read" | "governance:write" | "helmvars:read" | "helmvars:write" | "dryrun:execute" | "library:read" | "library:write" | "lifecycle:read" | "config:write";
         /** @enum {string} */
-        ReauthKind: "account" | "api_key" | "group" | "provider" | "role";
+        ReauthKind: "account" | "api_key" | "credential" | "group" | "org" | "provider" | "role" | "setting";
         /**
          * ReauthRequest
          * @description Your own password, and the account you are about to edit.
@@ -20705,10 +20735,7 @@ export interface operations {
     "auth.roles.create": {
         parameters: {
             query?: never;
-            header?: {
-                /** @description The grant POST /auth/reauth returned for this change */
-                "X-DFE-Reauth"?: string;
-            };
+            header?: never;
             path?: never;
             cookie?: never;
         };
@@ -21685,7 +21712,10 @@ export interface operations {
     "orgs.apply": {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description The grant POST /auth/reauth returned for this change */
+                "X-DFE-Reauth"?: string;
+            };
             path: {
                 name: string;
             };
@@ -21747,7 +21777,10 @@ export interface operations {
     "orgs.delete": {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description The grant POST /auth/reauth returned for this change */
+                "X-DFE-Reauth"?: string;
+            };
             path: {
                 name: string;
             };
@@ -21933,6 +21966,8 @@ export interface operations {
                 dry_run?: boolean;
             };
             header?: {
+                /** @description The grant POST /auth/reauth returned for this change */
+                "X-DFE-Reauth"?: string;
                 /** @description The current ETag: the write fails with 412 if it has changed */
                 "If-Match"?: string | null;
                 /** @description `*` to create: the write fails with 412 if the resource exists */
@@ -22004,6 +22039,8 @@ export interface operations {
                 dry_run?: boolean;
             };
             header?: {
+                /** @description The grant POST /auth/reauth returned for this change */
+                "X-DFE-Reauth"?: string;
                 /** @description The current ETag: the write fails with 412 if it has changed */
                 "If-Match"?: string | null;
                 /** @description `*` to create: the write fails with 412 if the resource exists */
@@ -22069,6 +22106,8 @@ export interface operations {
                 dry_run?: boolean;
             };
             header?: {
+                /** @description The grant POST /auth/reauth returned for this change */
+                "X-DFE-Reauth"?: string;
                 /** @description The current ETag: the write fails with 412 if it has changed */
                 "If-Match"?: string | null;
                 /** @description `*` to create: the write fails with 412 if the resource exists */
@@ -26110,7 +26149,10 @@ export interface operations {
     "system.retention.apply": {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description The grant POST /auth/reauth returned for this change */
+                "X-DFE-Reauth"?: string;
+            };
             path?: never;
             cookie?: never;
         };
@@ -26241,6 +26283,8 @@ export interface operations {
                 dry_run?: boolean;
             };
             header?: {
+                /** @description The grant POST /auth/reauth returned for this change */
+                "X-DFE-Reauth"?: string;
                 /** @description The current ETag: the write fails with 412 if it has changed */
                 "If-Match"?: string | null;
                 /** @description `*` to create: the write fails with 412 if the resource exists */
@@ -26379,7 +26423,10 @@ export interface operations {
     "system.defaults.update": {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description The grant POST /auth/reauth returned for this change */
+                "X-DFE-Reauth"?: string;
+            };
             path?: never;
             cookie?: never;
         };

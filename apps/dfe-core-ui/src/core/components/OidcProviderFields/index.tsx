@@ -12,12 +12,17 @@ import {
   GROUPS_FORM_NAME,
   groupModeOptions,
   MANUAL_MODE_HINT,
+  PROVIDER_NAME_HINT,
+  PROVIDERS,
   SCOPES_PLACEHOLDER,
+  TRUSTED_EMAIL_DOMAINS_HINT,
   UNTRUSTED_DOMAINS_WARNING,
 } from '@/core/constants/oidcProviders.constants';
 import {
   entraTenantFromIssuer,
-  oktaDomainFromIssuer,
+  issuerHost,
+  suggestedCredentialEnv,
+  suggestedProviderName,
 } from '@/core/helpers/oidcIssuer';
 import {
   defaultGroupMode,
@@ -29,6 +34,7 @@ import {
   type TGroupMode,
 } from '@/core/helpers/oidcProviderFieldRules';
 import { presetFieldsForType } from '@/core/utils/oidcProviderPresets';
+import { CreateUpdateOidcProviderFormData } from '@/core/validationSchemas/oidcProviders.schema';
 import {
   Alert,
   Button,
@@ -39,7 +45,7 @@ import {
   Select,
   Switch,
 } from 'antd';
-import { type ReactNode, useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 
 const groupsField = (field: string) => [GROUPS_FORM_NAME, field];
 
@@ -49,41 +55,102 @@ const TENANT_ID_NAME = groupsField('tenant_id');
 const TENANT_ID_ENV_NAME = groupsField('tenant_id_env');
 const TRUSTED_EMAIL_DOMAINS_NAME = 'trusted_email_domains';
 
-const FieldHint = ({ children }: { children: ReactNode }) => (
-  <p className="col-span-2 m-0 text-sm text-foreground/50 dark:text-dark-foreground/50">
-    {children}
-  </p>
-);
+const CLIENT_ID_ENV_NAME = 'client_id_env';
+const CLIENT_SECRET_ENV_NAME = 'client_secret_env';
+const PROVIDER_NAME = 'name';
 
-/** Keeps the field `name` set to what `derive` reads from the issuer, until it holds a value this did not fill or the field `unlessSet` holds one. */
-const useFieldFromIssuer = ({
+type TFormValues = Partial<CreateUpdateOidcProviderFormData>;
+type TFieldPath = string | string[];
+
+/** The value at `path` in a set of form values. */
+const valueAt = (values: object | undefined, path: TFieldPath): unknown =>
+  [path]
+    .flat()
+    .reduce<unknown>(
+      (parent, key) =>
+        parent && typeof parent === 'object'
+          ? (parent as Record<string, unknown>)[key]
+          : undefined,
+      values,
+    );
+
+/** The issuer a set of form values holds, undefined until the form has one to read. */
+const issuerOf = ({ issuer }: TFormValues) =>
+  typeof issuer === 'string' ? issuer : undefined;
+
+/**
+ * Keeps the field `name` set to what `derive` reads from the form while the field is empty, holds what this last filled or holds a type preset, and the field `unlessSet` is empty.
+ * `derive` returning undefined leaves the field alone.
+ */
+const useDerivedField = ({
   derive,
   enabled,
   name,
   unlessSet,
 }: {
-  derive: ({ issuer }: { issuer: string }) => string;
+  derive: (values: TFormValues) => string | undefined;
   enabled: boolean;
-  name: string[];
-  unlessSet?: string[];
+  name: TFieldPath;
+  unlessSet?: TFieldPath;
 }) => {
   const form = Form.useFormInstance();
-  const issuer: unknown = Form.useWatch('issuer', form);
+  const value: string | undefined = Form.useWatch(
+    (values: TFormValues) => (enabled ? derive(values) : undefined),
+    form,
+  );
   const filled = useRef<string>(undefined);
 
   useEffect(() => {
-    if (!enabled || typeof issuer !== 'string') {
+    if (value === undefined) {
       return;
     }
-    const value = derive({ issuer });
     const current: unknown = form.getFieldValue(name);
+    const isPreset = PROVIDERS.some(
+      ({ initialValues }) => valueAt(initialValues, name) === current,
+    );
     const isSetElsewhere =
       unlessSet !== undefined && !!form.getFieldValue(unlessSet);
-    if (!isSetElsewhere && (!current || current === filled.current)) {
+    if (
+      !isSetElsewhere &&
+      (!current || current === filled.current || isPreset)
+    ) {
       form.setFieldValue(name, value);
     }
     filled.current = value;
-  }, [derive, enabled, form, issuer, name, unlessSet]);
+  }, [form, name, unlessSet, value]);
+};
+
+/** Suggests a new provider's name from its type, issuer and trusted domains, and its credential env vars from its name, so a second provider of a type takes neither from the first. */
+const useSuggestedNames = ({ enabled }: { enabled: boolean }) => {
+  const credentialEnv =
+    (suffix: 'CLIENT_ID' | 'CLIENT_SECRET') =>
+    ({ name }: TFormValues) =>
+      name ? suggestedCredentialEnv({ name, suffix }) : undefined;
+
+  useDerivedField({
+    derive: (values) => {
+      const issuer = issuerOf(values);
+      return issuer !== undefined && isOidcProviderType(values.type)
+        ? suggestedProviderName({
+            issuer,
+            trustedEmailDomains: values.trusted_email_domains ?? [],
+            type: values.type,
+          })
+        : undefined;
+    },
+    enabled,
+    name: PROVIDER_NAME,
+  });
+  useDerivedField({
+    derive: credentialEnv('CLIENT_ID'),
+    enabled,
+    name: CLIENT_ID_ENV_NAME,
+  });
+  useDerivedField({
+    derive: credentialEnv('CLIENT_SECRET'),
+    enabled,
+    name: CLIENT_SECRET_ENV_NAME,
+  });
 };
 
 /** The Type change both provider forms make: presets fill what the user has not typed, and the guided issuer follows the new type. */
@@ -121,7 +188,7 @@ const TrustedEmailDomainsField = ({
         label="Trusted Email Domains"
         name={TRUSTED_EMAIL_DOMAINS_NAME}
         rules={[rule]}
-        tooltip="Only a sign-in whose verified email is in one of these domains is let in, and it links to the DFE account holding that email. Trust a domain only for a provider whose directory you control."
+        tooltip={TRUSTED_EMAIL_DOMAINS_HINT}
       >
         <Select
           mode="tags"
@@ -164,6 +231,8 @@ interface OidcLoginFieldsProps {
   hasStoredScopes?: boolean;
   /** A domain to offer while Trusted Email Domains is empty. */
   suggestedDomain?: string;
+  /** Suggests the name and credential env vars per provider rather than per type. */
+  suggestsNames?: boolean;
 }
 
 /** The login fields of an OIDC provider form, laid out for a two-column grid. */
@@ -173,51 +242,61 @@ export const OidcLoginFields = ({
   disabledFields = {},
   hasStoredScopes = false,
   suggestedDomain,
-}: OidcLoginFieldsProps) => (
-  <>
-    <Form.Item label="Name" name="name" rules={[rule]}>
-      <Input disabled={disabledFields.name} />
-    </Form.Item>
-    <Form.Item label="Display Name" name="display_name" rules={[rule]}>
-      <Input />
-    </Form.Item>
-    <IssuerField
-      builder={issuerBuilder}
-      disabled={disabledFields.issuer}
-      rule={rule}
-    />
-    <CredentialField
-      label="Client ID"
-      valueName="client_id"
-      envName="client_id_env"
-      rule={rule}
-    />
-    <CredentialField
-      label="Client Secret"
-      valueName="client_secret"
-      envName="client_secret_env"
-      storedName="client_secret_path"
-      rule={rule}
-      secret
-    />
-    <Form.Item
-      className="col-span-2"
-      label="Scopes"
-      name="scopes"
-      rules={[rule]}
-    >
-      <Select
-        mode="tags"
-        // An emptied edit keeps the stored scopes, so no default hint.
-        placeholder={hasStoredScopes ? undefined : SCOPES_PLACEHOLDER}
-        tokenSeparators={[' ', ',']}
-        open={false}
-        suffixIcon={null}
+  suggestsNames = false,
+}: OidcLoginFieldsProps) => {
+  useSuggestedNames({ enabled: suggestsNames });
+  return (
+    <>
+      <Form.Item
+        label="Name"
+        name={PROVIDER_NAME}
+        rules={[rule]}
+        tooltip={PROVIDER_NAME_HINT}
+      >
+        <Input disabled={disabledFields.name} />
+      </Form.Item>
+      <Form.Item label="Display Name" name="display_name" rules={[rule]}>
+        <Input />
+      </Form.Item>
+      <IssuerField
+        builder={issuerBuilder}
+        disabled={disabledFields.issuer}
+        rule={rule}
       />
-    </Form.Item>
-    <TrustedEmailDomainsField rule={rule} suggestedDomain={suggestedDomain} />
-  </>
-);
+      <CredentialField
+        label="Client ID"
+        valueName="client_id"
+        envName={CLIENT_ID_ENV_NAME}
+        rule={rule}
+        required
+      />
+      <CredentialField
+        label="Client Secret"
+        valueName="client_secret"
+        envName={CLIENT_SECRET_ENV_NAME}
+        storedName="client_secret_path"
+        rule={rule}
+        secret
+      />
+      <Form.Item
+        className="col-span-2"
+        label="Scopes"
+        name="scopes"
+        rules={[rule]}
+      >
+        <Select
+          mode="tags"
+          // An emptied edit keeps the stored scopes, so no default hint.
+          placeholder={hasStoredScopes ? undefined : SCOPES_PLACEHOLDER}
+          tokenSeparators={[' ', ',']}
+          open={false}
+          suffixIcon={null}
+        />
+      </Form.Item>
+      <TrustedEmailDomainsField rule={rule} suggestedDomain={suggestedDomain} />
+    </>
+  );
+};
 
 interface OidcGroupFieldsProps {
   rule: FormRule;
@@ -249,14 +328,22 @@ export const OidcGroupFields = ({
   const enrichForced =
     providerType !== undefined && isEnrichOnLoginForced(providerType);
 
-  useFieldFromIssuer({
-    derive: oktaDomainFromIssuer,
+  useDerivedField({
+    derive: (values) => {
+      const issuer = issuerOf(values);
+      return issuer === undefined ? undefined : issuerHost({ issuer });
+    },
     enabled: derivesFromIssuer && providerType === 'okta',
     name: OKTA_DOMAIN_NAME,
   });
   // A provider that stores no tenant, new or edited, takes the one its issuer names; a stored one is left alone.
-  useFieldFromIssuer({
-    derive: entraTenantFromIssuer,
+  useDerivedField({
+    derive: (values) => {
+      const issuer = issuerOf(values);
+      return issuer === undefined
+        ? undefined
+        : entraTenantFromIssuer({ issuer });
+    },
     enabled: providerType === 'entra_id',
     name: TENANT_ID_NAME,
     unlessSet: TENANT_ID_ENV_NAME,
@@ -278,7 +365,12 @@ export const OidcGroupFields = ({
 
   return (
     <>
-      <Form.Item label="Mode" name={groupsField('mode')} rules={[rule]}>
+      <Form.Item
+        label="Mode"
+        name={groupsField('mode')}
+        rules={[rule]}
+        tooltip={mode === 'manual' ? MANUAL_MODE_HINT : undefined}
+      >
         <Select disabled={modeOptions.length === 1} options={modeOptions} />
       </Form.Item>
 
@@ -289,8 +381,6 @@ export const OidcGroupFields = ({
       >
         <Switch disabled={isEnrichLocked} />
       </Form.Item>
-
-      {mode === 'manual' && <FieldHint>{MANUAL_MODE_HINT}</FieldHint>}
 
       {isModeSettingUsed('claim_name', mode) && (
         <Form.Item
@@ -325,9 +415,6 @@ export const OidcGroupFields = ({
 
       {uses('tenant_id') && (
         <>
-          {mode === 'token_claim' && (
-            <FieldHint>{ENTRA_TOKEN_CLAIM_HINT}</FieldHint>
-          )}
           {/* Read from the issuer, never typed; errors show on the Issuer row. */}
           <Form.Item name={TENANT_ID_NAME} hidden>
             <Input />
@@ -339,18 +426,18 @@ export const OidcGroupFields = ({
       )}
 
       {uses('client_secret') && (
-        <>
-          {mode === 'api' && <FieldHint>{ENTRA_API_SECRET_HINT}</FieldHint>}
-          <CredentialField
-            label="Directory Secret"
-            valueName={groupsField('client_secret')}
-            envName={groupsField('client_secret_env')}
-            storedName={groupsField('client_secret_path')}
-            rule={rule}
-            dependencies={['client_secret', 'client_secret_env']}
-            secret
-          />
-        </>
+        <CredentialField
+          label="Directory Secret"
+          valueName={groupsField('client_secret')}
+          envName={groupsField('client_secret_env')}
+          storedName={groupsField('client_secret_path')}
+          rule={rule}
+          dependencies={['client_secret', 'client_secret_env']}
+          secret
+          tooltip={
+            mode === 'api' ? ENTRA_API_SECRET_HINT : ENTRA_TOKEN_CLAIM_HINT
+          }
+        />
       )}
 
       {uses('api_token') && (
@@ -365,17 +452,15 @@ export const OidcGroupFields = ({
       )}
 
       {uses('service_account_json') && (
-        <>
-          <FieldHint>{GOOGLE_SERVICE_ACCOUNT_HINT}</FieldHint>
-          <CredentialField
-            label="Service Account JSON"
-            valueName={groupsField('service_account_json')}
-            envName={groupsField('service_account_json_env')}
-            storedName={groupsField('service_account_json_path')}
-            rule={rule}
-            secret
-          />
-        </>
+        <CredentialField
+          label="Service Account JSON"
+          valueName={groupsField('service_account_json')}
+          envName={groupsField('service_account_json_env')}
+          storedName={groupsField('service_account_json_path')}
+          rule={rule}
+          secret
+          tooltip={GOOGLE_SERVICE_ACCOUNT_HINT}
+        />
       )}
 
       {uses('domain') && (

@@ -2,7 +2,10 @@ import { expect, test } from '@playwright/test';
 
 import { TAGS } from '@e2e/config/tags.constants';
 import { prepareJourneyStack } from '@e2e/config/journey.helpers';
-import { confirmItsYou } from '@e2e/config/login.helpers';
+import {
+  chooseYourOrganisation,
+  confirmItsYou,
+} from '@e2e/config/login.helpers';
 
 import {
   ADMIN,
@@ -82,7 +85,7 @@ test.describe(
       await ad.getByPlaceholder('Enter email').fill(`${user}@example.com`);
       await ad.getByPlaceholder('Enter name').fill('Jset Role User');
       await ad.getByPlaceholder('Enter password').fill(PASSWORD);
-      await choose(page, ad, 'Select groups', group);
+      await chooseYourOrganisation(ad, group);
       await ad
         .getByRole('button', { name: 'Create Account', exact: true })
         .click();

@@ -1,12 +1,11 @@
-import { useReauthGrant } from '@/core/hooks/useReauthGrant';
-import { FormNotification } from '@/core/components/FormNotification';
 import { Modal } from '@/core/components/Modal';
 import { NotificationCard } from '@/core/components/NotificationCard';
 import { RbacProtected } from '@/core/components/RbacProtected';
+import { ReauthPanel } from '@/core/components/ReauthPanel';
 import { useRevokeApiKey } from '@/Settings/hooks/apiKeys/useRevokeApiKey';
 import { IconInfoCircle, IconTrash } from '@repo/dfe-icons';
 import { Button } from 'antd';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 
 export const RevokeApiKeyModal = ({
   shortToken,
@@ -15,27 +14,30 @@ export const RevokeApiKeyModal = ({
   shortToken: string;
   name: string;
 }) => {
-  const reauth = useReauthGrant(shortToken, 'api_key');
   const [open, setOpen] = useState(false);
 
+  // Every revoke asks for the password again.
+  const grant = useRef<string>(undefined);
   const {
     mutate: revokeApiKey,
     isPending,
     error,
+    reset,
   } = useRevokeApiKey({
-    reauth: reauth.grant,
+    reauth: () => grant.current,
     onSuccess: () => {
-      reauth.drop();
+      grant.current = undefined;
       setOpen(false);
     },
   });
 
-  const handleRevokeApiKey = () => {
-    revokeApiKey(shortToken);
+  const close = () => {
+    reset();
+    setOpen(false);
   };
+
   return (
     <>
-      {reauth.modal}
       <RbacProtected action={RbacProtected.rbacActions.api_key_delete}>
         <RbacProtected.Unrestricted>
           <Button
@@ -44,7 +46,7 @@ export const RevokeApiKeyModal = ({
             shape="circle"
             aria-label="Revoke API Key"
             icon={<IconTrash />}
-            onClick={() => reauth.ask(() => setOpen(true))}
+            onClick={() => setOpen(true)}
             danger
           />
         </RbacProtected.Unrestricted>
@@ -62,32 +64,31 @@ export const RevokeApiKeyModal = ({
       </RbacProtected>
 
       <Modal
-        classNames={{ body: 'flex flex-col gap-2' }}
+        title={`Revoke ${name}?`}
         destroyOnHidden
         open={open}
-        onCancel={() => setOpen(false)}
+        onCancel={close}
         footer={null}
       >
-        <p>
-          Are you sure you want to revoke this API key:{' '}
-          <span className="font-bold">{name}</span>?
-        </p>
-        <NotificationCard
-          icon={<IconInfoCircle />}
-          title="This action cannot be undone."
-          type="warning"
-        />
-
-        {error && <FormNotification type="error" text={error.message} />}
-
-        <Button
-          type="primary"
+        <ReauthPanel
+          confirmLabel="Revoke API Key"
           danger
-          onClick={handleRevokeApiKey}
-          loading={isPending}
+          error={error}
+          isPending={isPending}
+          kind="api_key"
+          target={shortToken}
+          onCancel={close}
+          onGranted={(granted) => {
+            grant.current = granted;
+            revokeApiKey(shortToken);
+          }}
         >
-          Revoke API Key
-        </Button>
+          <NotificationCard
+            icon={<IconInfoCircle />}
+            title="This action cannot be undone."
+            type="warning"
+          />
+        </ReauthPanel>
       </Modal>
     </>
   );

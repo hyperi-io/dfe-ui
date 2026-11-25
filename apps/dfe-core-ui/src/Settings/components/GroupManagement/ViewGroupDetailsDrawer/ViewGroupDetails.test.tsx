@@ -47,15 +47,13 @@ describe('ViewGroupDetails', () => {
   test('a group with no source ID reads as not linked', async () => {
     const rows = await renderRows(GROUP);
 
-    expect(rows['Source ID:']).toBe('Not linked');
-    expect(rows['Source provider:']).toBe('None');
+    expect(rows['Linked To:']).toBe('Not linked');
   });
 
   test('a provider with no source ID is shown on an unlinked group', async () => {
     const rows = await renderRows({ ...GROUP, source_provider: 'okta' });
 
-    expect(rows['Source ID:']).toBe('Not linked');
-    expect(rows['Source provider:']).toBe('okta');
+    expect(rows['Linked To:']).toBe('okta');
   });
 
   test('a linked group shows the provider it is scoped to', async () => {
@@ -65,8 +63,9 @@ describe('ViewGroupDetails', () => {
       source_provider: 'entra',
     });
 
-    expect(rows['Source ID:']).toBe('00000000-0000-0000-0000-000000000001');
-    expect(rows['Source provider:']).toBe('entra');
+    expect(rows['Linked To:']).toBe(
+      'entra (00000000-0000-0000-0000-000000000001)',
+    );
   });
 
   test.each([

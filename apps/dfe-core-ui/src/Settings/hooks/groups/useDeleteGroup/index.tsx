@@ -14,7 +14,7 @@ export const useDeleteGroup = ({
   onError?: (error: Error) => void;
 }) => {
   const queryClient = useQueryClient();
-  const { mutate, isPending, error } = useMutation({
+  const { mutate, isPending, error, reset } = useMutation({
     mutationFn: (group_name: string) =>
       deleteGroup({
         headerParams: { [REAUTH_HEADER]: reauth?.() },
@@ -37,5 +37,5 @@ export const useDeleteGroup = ({
     },
   });
 
-  return { mutate, isPending, error };
+  return { mutate, isPending, error, reset };
 };

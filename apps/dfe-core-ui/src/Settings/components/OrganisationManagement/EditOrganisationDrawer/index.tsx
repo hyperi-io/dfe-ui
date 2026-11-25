@@ -1,3 +1,4 @@
+import { useReauthGrant } from '@/core/hooks/useReauthGrant';
 import {
   CreateUpdateOrganisationForm,
   CreateUpdateOrganisationFormData,
@@ -24,36 +25,55 @@ export const EditOrganisationDrawer = ({
 
   const queryClient = useQueryClient();
 
+  const reauth = useReauthGrant(organisation.name, 'org');
   const {
     mutate: updateOrganisation,
     isPending,
     error,
+    reset,
   } = useUpdateOrganisation({
     org_name: organisation.name,
+    reauth: reauth.grant,
     onSuccess: () => {
+      reauth.drop();
       api.success({
         title: 'Organisation updated successfully',
         placement: 'bottomLeft',
       });
-      setOpen(false);
+      close();
       void queryClient.invalidateQueries({
         queryKey: QUERY_KEYS.orgs.org({ name: organisation.name }),
       });
     },
   });
 
+  // A refusal belongs to the attempt that drew it, not to the next opening.
+  function close() {
+    setOpen(false);
+    reset();
+  }
+
   const handleUpdateOrganisation = (
     values: CreateUpdateOrganisationFormData,
   ) => {
-    updateOrganisation({
+    const body = {
       display_name: values.display_name,
       org_ids: values.org_ids,
       enabled: organisation.enabled,
+    };
+    // The engine refuses a clashing ID before it asks for the password, so the password is asked for only when the engine says the change needs it.
+    updateOrganisation(body, {
+      onError: (refusal) => {
+        if (reauth.askIfRequired(refusal, () => updateOrganisation(body))) {
+          reset();
+        }
+      },
     });
   };
   return (
     <>
       {contextHolder}
+      {reauth.modal}
       <RbacProtected action={RbacProtected.rbacActions.org_write}>
         <RbacProtected.Unrestricted>
           <Button
@@ -78,11 +98,7 @@ export const EditOrganisationDrawer = ({
         </RbacProtected.Restricted>
       </RbacProtected>
 
-      <Drawer
-        title="Edit Organisation"
-        open={open}
-        onClose={() => setOpen(false)}
-      >
+      <Drawer title="Edit Organisation" open={open} onClose={close}>
         <CreateUpdateOrganisationForm
           initialValues={{
             ...organisation,

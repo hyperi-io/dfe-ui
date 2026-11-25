@@ -2,7 +2,6 @@ import { ADMIN_MOCKED_RESPONSE } from '@/core/components/RbacProtected/hooks/hoo
 import { API_CONFIG_MOCKS } from '@/core/config/api/endpoints/generator';
 import { useAuthStore } from '@/core/stores/authStore';
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
-import { confirmReauth } from '@/core/utils/test-utils/confirmReauth';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { http, HttpResponse } from 'msw';
@@ -41,30 +40,28 @@ afterAll(() => server.close());
 const { wrapper } = buildTestWrapper().withTheme().withReactQuery();
 
 describe('DeleteRoleModal', () => {
-  it('asks for the password on open, then deletes the role with the grant it earned', async () => {
+  it('deletes from one panel that takes the password, with no name to type', async () => {
     const user = userEvent.setup();
     render(<DeleteRoleModal role_name="auditor" />, { wrapper });
 
     await user.click(
       await screen.findByRole('button', { name: 'Delete auditor' }),
     );
-    await confirmReauth(user);
-    expect(asked).toEqual([
-      { kind: 'role', password: 'pw', target: 'auditor' },
-    ]);
+    expect(await screen.findByText('Delete auditor?')).toBeInTheDocument();
+    expect(screen.queryByRole('textbox')).not.toBeInTheDocument();
 
-    await user.type(
-      await screen.findByPlaceholderText('Enter role name to be deleted'),
-      'auditor',
-    );
+    await user.type(screen.getByLabelText('Your password'), 'pw');
     await user.click(screen.getByRole('button', { name: 'Delete' }));
 
     await waitFor(() =>
       expect(deleted).toEqual([{ grant: 'role-grant', name: 'auditor' }]),
     );
+    expect(asked).toEqual([
+      { kind: 'role', password: 'pw', target: 'auditor' },
+    ]);
   });
 
-  it('opens nothing when the password prompt is cancelled', async () => {
+  it('deletes nothing when the panel is cancelled', async () => {
     const user = userEvent.setup();
     render(<DeleteRoleModal role_name="auditor" />, { wrapper });
 
@@ -73,9 +70,7 @@ describe('DeleteRoleModal', () => {
     );
     await user.click(await screen.findByRole('button', { name: 'Cancel' }));
 
-    expect(
-      screen.queryByPlaceholderText('Enter role name to be deleted'),
-    ).not.toBeInTheDocument();
     expect(asked).toEqual([]);
+    expect(deleted).toEqual([]);
   });
 });

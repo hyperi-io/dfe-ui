@@ -5,12 +5,14 @@ import { TAccountsResponse } from '@/Settings/hooks/accounts/useFetchInfiniteFil
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { http, HttpResponse } from 'msw';
+import { useSearchParams } from 'next/navigation';
 import {
   afterAll,
   afterEach,
   beforeAll,
   describe,
   expect,
+  onTestFinished,
   test,
   vi,
 } from 'vitest';
@@ -52,10 +54,12 @@ const accounts = (): TAccountsResponse => ({
       groups: ['dfe-admins'],
       created_at: 'string',
       updated_at: 'string',
+      last_login_at: '',
       email: 'string',
       phone: 'string',
       name: 'string',
       org: '',
+      org_enabled: true,
       oidc_id: 'string',
       oidc_type: 'string',
       admin: false,
@@ -74,10 +78,12 @@ const accounts = (): TAccountsResponse => ({
       groups: ['dfe-admins'],
       created_at: 'string',
       updated_at: 'string',
+      last_login_at: '',
       email: 'string',
       phone: 'string',
       name: 'string',
       org: '',
+      org_enabled: true,
       oidc_id: 'string',
       oidc_type: 'string',
       admin: false,
@@ -151,6 +157,30 @@ describe('AccountManagement', () => {
     expect(screen.queryByText('Retired')).not.toBeInTheDocument();
   });
 
+  test('an active account of a disabled org is shown as blocked by its org', async () => {
+    const page = accounts();
+    server.use(
+      accountsHandler({
+        ...page,
+        items: page.items.map((account) =>
+          account.username === 'alice'
+            ? { ...account, org: 'globex', org_enabled: false }
+            : account,
+        ),
+      }),
+      API_CONFIG_MOCKS.auth.setupStatus.get.success({
+        mockedResponse: setupStatus({ admin_retired: false }),
+      }),
+    );
+
+    render(<AccountManagement />, { wrapper });
+
+    expect(await screen.findByText('Org disabled')).toBeInTheDocument();
+    // An account disabled on its own reads as itself, whatever its org.
+    expect(screen.getByText('Inactive')).toBeInTheDocument();
+    expect(screen.queryByText('Active')).not.toBeInTheDocument();
+  });
+
   test('leads with the org and stacks the email under the name', async () => {
     server.use(
       accountsHandler({
@@ -162,10 +192,12 @@ describe('AccountManagement', () => {
             groups: [],
             created_at: 'string',
             updated_at: 'string',
+            last_login_at: '',
             email: 'dfe-test@dfe-oidc.test',
             phone: '',
             name: 'DFE dfe-test',
             org: 'acme',
+            org_enabled: true,
             org_display_name: 'Acme',
             oidc_id: 'string',
             oidc_type: 'string',
@@ -184,10 +216,12 @@ describe('AccountManagement', () => {
             groups: ['dfe-admins'],
             created_at: 'string',
             updated_at: 'string',
+            last_login_at: '',
             email: '',
             phone: '',
             name: '',
             org: '',
+            org_enabled: true,
             oidc_id: 'string',
             oidc_type: 'string',
             admin: false,
@@ -404,5 +438,27 @@ describe('AccountManagement', () => {
     await user.click(await screen.findByTitle('Acme'));
     await waitFor(() => expect(requests.at(-1)?.org).toBe('acme'));
     expect(requests[0]).toEqual({ org: null, order_by: 'org' });
+  });
+
+  test("opens on an organisation's accounts when the link names one", async () => {
+    const params = (query: string) =>
+      new URLSearchParams(query) as ReturnType<typeof useSearchParams>;
+    vi.mocked(useSearchParams).mockReturnValue(params('org=acme'));
+    onTestFinished(() => {
+      vi.mocked(useSearchParams).mockReturnValue(params(''));
+    });
+    const orgs: (string | null)[] = [];
+    server.use(
+      http.get(API_CONFIG_MOCKS.accounts.default.mockedUrl, ({ request }) => {
+        const params = new URL(request.url).searchParams;
+        if (params.get('blocked') !== 'true') orgs.push(params.get('org'));
+        return HttpResponse.json(accounts());
+      }),
+    );
+
+    render(<AccountManagement />, { wrapper });
+
+    await waitFor(() => expect(orgs).not.toHaveLength(0));
+    expect(orgs[0]).toBe('acme');
   });
 });

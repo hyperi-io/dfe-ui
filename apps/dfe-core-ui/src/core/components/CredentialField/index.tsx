@@ -9,7 +9,7 @@ import { Form } from '@/core/components/Form';
 import { useAdministeredOrg } from '@/core/hooks/useAdministeredOrg';
 import { ruleCheckingField } from '@/core/utils/zod/useAntdZodResolver';
 import { Input, Select, Space, type FormItemProps, type FormRule } from 'antd';
-import { useId, useState } from 'react';
+import { type ReactNode, useId, useState } from 'react';
 
 type TNamePath = NonNullable<FormItemProps['name']>;
 
@@ -34,6 +34,9 @@ interface CredentialFieldProps {
   secret?: boolean;
   /** The stored secret's path, non-empty when a blank value keeps it. */
   storedName?: TNamePath;
+  /** Marks the label required: the item names no field for the form to read it from. */
+  required?: boolean;
+  tooltip?: ReactNode;
 }
 
 /**
@@ -44,9 +47,11 @@ export const CredentialField = ({
   dependencies,
   envName,
   label,
+  required,
   rule,
   secret = false,
   storedName,
+  tooltip,
   valueName,
 }: CredentialFieldProps) => {
   const form = Form.useFormInstance();
@@ -79,7 +84,12 @@ export const CredentialField = ({
       : rules(envName);
 
   return (
-    <Form.Item label={label} htmlFor={inputId}>
+    <Form.Item
+      label={label}
+      htmlFor={inputId}
+      required={required}
+      tooltip={tooltip}
+    >
       <Space.Compact block>
         {!valuesOnly && (
           <Select

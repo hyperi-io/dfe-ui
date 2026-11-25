@@ -3,19 +3,27 @@ import { NotificationCard } from '@/core/components/NotificationCard';
 import { RbacProtected } from '@/core/components/RbacProtected';
 import { Table } from '@/core/components/Table';
 import { useFetchSetupStatus } from '@/core/hooks/useFetchSetupStatus';
+import { useFetchYourOrganisation } from '@/core/hooks/useFetchYourOrganisation';
 import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
 import { renderColumns } from '@/Settings/helpers/accountManagementHelpers';
 import { useFetchInfiniteFilteredAccounts } from '@/Settings/hooks/accounts/useFetchInfiniteFilteredAccounts';
-import { TAccountsItemSummary } from '@/Settings/hooks/accounts/useFetchInfiniteFilteredAccounts/types';
-import { IconInfoCircle } from '@repo/dfe-icons';
-import { Input, Spin } from 'antd';
+import {
+  TAccountsItemSummary,
+  TFetchAccountsQueryParams,
+} from '@/Settings/hooks/accounts/useFetchInfiniteFilteredAccounts/types';
+import { IconChevronRight, IconInfoCircle } from '@repo/dfe-icons';
+import { Input } from 'antd';
+import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { useCallback, useState } from 'react';
 
-export const ViewOidcUserAccounts = ({
-  oidcProviderId,
+/** A searchable table of the accounts *filter* selects, such as a sign-in provider's or an organisation's, with an optional link to where they are edited. */
+export const FilteredAccounts = ({
+  filter,
+  manageHref,
 }: {
-  oidcProviderId: string;
+  filter: Pick<TFetchAccountsQueryParams, 'blocked' | 'oidc_id' | 'org'>;
+  manageHref?: string;
 }) => {
   const [search, setSearch] = useState('');
   const pageSizeParam = useSearchParams().get('page_size');
@@ -33,9 +41,8 @@ export const ViewOidcUserAccounts = ({
     fetchNextPage,
     error,
   } = useFetchInfiniteFilteredAccounts({
+    ...filter,
     search,
-    oidc_id: oidcProviderId,
-    blocked: false,
     page_size,
   });
 
@@ -49,7 +56,15 @@ export const ViewOidcUserAccounts = ({
     Boolean(setupStatus?.admin_retired) &&
     account.username === setupStatus?.admin_username;
 
-  const columns = renderColumns({ isRetiredAdmin, renderActions: false });
+  // One organisation's table repeats its name on every row, and another organisation's accounts hold a role there rather than groups.
+  const { data: yours } = useFetchYourOrganisation();
+  const columns = renderColumns({
+    isRetiredAdmin,
+    orgColumn: !filter.org,
+    renderActions: false,
+    roleColumn:
+      Boolean(filter.org) && Boolean(yours) && filter.org !== yours?.name,
+  });
   const handleScroll = useCallback(
     (e: React.UIEvent<HTMLDivElement, UIEvent>) => {
       const el = e.currentTarget;
@@ -68,41 +83,41 @@ export const ViewOidcUserAccounts = ({
   return (
     <RbacProtected action={RbacProtected.rbacActions.account_read}>
       <RbacProtected.Unrestricted>
-        <div className="mb-4 flex justify-end">
-          <Input.Search
-            className="w-60"
-            placeholder="Search users"
-            onChange={(e) => setSearch(e.target.value)}
-            value={search}
-            allowClear
-          />
-        </div>
-        {isLoading && (
-          <>
-            <Spin /> <p className="sr-only">Loading accounts</p>
-          </>
-        )}
-        {error && (
+        {error ? (
           <GenericErrorCard
             title="Error fetching accounts"
             description={error.message}
           />
-        )}
-        {!isLoading && !error && accounts.length === 0 && (
-          <NotificationCard
-            className="w-full"
-            description="No accounts found"
-            icon={<IconInfoCircle />}
-          />
-        )}
-        {!isLoading && !error && accounts.length > 0 && (
+        ) : (
+          // The table stays up with no rows, so a search that matches nothing keeps its box.
           <Table
             rowKey="username"
             scroll={{ y: componentHeight }}
             dataSource={accounts}
             columns={columns}
+            loading={isLoading}
             pagination={false}
             onScroll={handleScroll}
+            title={() => (
+              <div className="flex items-center gap-2">
+                {manageHref && (
+                  <Link
+                    href={manageHref}
+                    className="flex items-center gap-1 text-sm text-tertiary! hover:underline"
+                  >
+                    Manage users
+                    <IconChevronRight className="h-4 w-4" aria-hidden />
+                  </Link>
+                )}
+                <Input.Search
+                  className="ml-auto w-60"
+                  placeholder="Search users"
+                  onChange={(e) => setSearch(e.target.value)}
+                  value={search}
+                  allowClear
+                />
+              </div>
+            )}
           />
         )}
       </RbacProtected.Unrestricted>

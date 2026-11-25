@@ -70,6 +70,8 @@ const resetPassword = async (
   await textbox(page, 'New Password').fill(password);
   await textbox(page, 'Confirm Password').fill(password);
   await dialog.getByRole('button', { name: 'Reset Password' }).click();
+  // The reset asks for the signed-in admin's own password.
+  await confirmItsYou(page);
   await expect(
     page.getByText(`${username} password reset successfully`),
   ).toBeVisible();

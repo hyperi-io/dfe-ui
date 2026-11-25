@@ -4,11 +4,8 @@ import { Modal } from '@/core/components/Modal';
 import { RbacProtected } from '@/core/components/RbacProtected';
 import { IconTrash } from '@repo/dfe-icons';
 import { App, Button } from 'antd';
-import { useState } from 'react';
-import {
-  DeleteOrganisationForm,
-  DeleteOrganisationFormData,
-} from './DeleteOrganisationForm';
+import { useRef, useState } from 'react';
+import { DeleteOrganisationForm } from './DeleteOrganisationForm';
 
 interface DeleteOrganisationModalProps {
   org_name: string;
@@ -24,8 +21,12 @@ export const DeleteOrganisationModal = ({
   const [open, setOpen] = useState(false);
   const { notification } = App.useApp();
 
-  const { mutate, isPending, error } = useDeleteOrganisation({
+  // Deleting takes the org's accounts, keys and providers with it, so it asks for the password.
+  const grant = useRef<string>(undefined);
+  const { mutate, isPending, error, reset } = useDeleteOrganisation({
+    reauth: () => grant.current,
     onSuccess: () => {
+      grant.current = undefined;
       onSuccess?.();
       setOpen(false);
       notification.success({
@@ -39,8 +40,10 @@ export const DeleteOrganisationModal = ({
       });
     },
   });
-  const handleDeleteOrganisation = (values: DeleteOrganisationFormData) => {
-    mutate(values.org_name);
+
+  const close = () => {
+    reset();
+    setOpen(false);
   };
 
   return (
@@ -72,16 +75,20 @@ export const DeleteOrganisationModal = ({
       </RbacProtected>
 
       <Modal
-        title="Delete Organisation"
+        title={`Delete ${display_name}?`}
         open={open}
-        onCancel={() => setOpen(false)}
+        destroyOnHidden
+        onCancel={close}
         footer={null}
       >
         <DeleteOrganisationForm
-          onFinish={handleDeleteOrganisation}
+          onConfirm={(granted) => {
+            grant.current = granted;
+            mutate(org_name);
+          }}
           error={error}
           isPending={isPending}
-          onCancel={() => setOpen(false)}
+          onCancel={close}
           org_name={org_name}
         />
       </Modal>

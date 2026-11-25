@@ -24,12 +24,12 @@ export const TestOidcProviderModal = ({
             Test OIDC Provider
           </Button>
         </RbacProtected.Unrestricted>
+        <RbacProtected.Restricted tooltip={{ show: true }}>
+          <Button type="text" icon={<IconTestPipe />} disabled>
+            Test OIDC Provider
+          </Button>
+        </RbacProtected.Restricted>
       </RbacProtected>
-      <RbacProtected.Restricted tooltip={{ show: true }}>
-        <Button type="text" icon={<IconTestPipe />} disabled>
-          Test OIDC Provider
-        </Button>
-      </RbacProtected.Restricted>
       <Modal
         title="Test OIDC Provider"
         open={open}

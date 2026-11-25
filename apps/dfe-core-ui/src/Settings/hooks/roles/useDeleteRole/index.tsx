@@ -14,7 +14,7 @@ export const useDeleteRole = ({
   onError?: (error: Error) => void;
 }) => {
   const queryClient = useQueryClient();
-  const { mutate, isPending, error } = useMutation({
+  const { mutate, isPending, error, reset } = useMutation({
     mutationFn: (role_name: string) =>
       deleteRole({
         headerParams: { [REAUTH_HEADER]: reauth?.() },
@@ -36,5 +36,5 @@ export const useDeleteRole = ({
       onError?.(error);
     },
   });
-  return { mutate, isPending, error };
+  return { mutate, isPending, error, reset };
 };

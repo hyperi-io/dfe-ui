@@ -6,6 +6,7 @@ import {
   TResetPasswordFormValues,
 } from '@/core/components/ResetPasswordForm';
 import { useAccountResetPassword } from '@/core/hooks/useAccountResetPassword';
+import { useReauthGrant } from '@/core/hooks/useReauthGrant';
 import { IconRefresh } from '@repo/dfe-icons';
 import { App, Button } from 'antd';
 import { useId, useState } from 'react';
@@ -26,9 +27,13 @@ export const ResetPasswordModal = ({
     setOpen(false);
   };
 
+  // A security account's password is its recovery credential, so a reset asks for the caller's own password.
+  const reauth = useReauthGrant(username, 'account', 'reset the password of');
   const { data, mutate, isPending, error, reset } = useAccountResetPassword({
+    reauth: reauth.grant,
     username: username,
     onSuccess: () => {
+      reauth.drop();
       notification.success({
         title: `${username} password reset successfully`,
         placement: 'bottomLeft',
@@ -38,8 +43,13 @@ export const ResetPasswordModal = ({
   });
 
   const onFinish = ({ new_password }: TResetPasswordFormValues) => {
-    mutate({
-      new_password,
+    const body = { new_password };
+    mutate(body, {
+      onError: (refusal) => {
+        if (reauth.askIfRequired(refusal, () => mutate(body))) {
+          reset();
+        }
+      },
     });
   };
 
@@ -102,6 +112,7 @@ export const ResetPasswordModal = ({
         />
       </Modal>
 
+      {reauth.modal}
       <GitEnabledPendingReviewModal
         pending={data?.git.pending}
         onCancel={close}

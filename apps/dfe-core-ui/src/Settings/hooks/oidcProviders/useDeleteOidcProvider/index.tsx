@@ -15,7 +15,7 @@ export const useDeleteOidcProvider = ({
 }) => {
   const queryClient = useQueryClient();
 
-  const { mutate, isPending, error } = useMutation({
+  const { mutate, isPending, error, reset } = useMutation({
     mutationFn: (name: string) =>
       deleteOidcProvider({
         headerParams: { [REAUTH_HEADER]: reauth?.() },
@@ -35,5 +35,5 @@ export const useDeleteOidcProvider = ({
     },
   });
 
-  return { mutate, isPending, error };
+  return { mutate, isPending, error, reset };
 };

@@ -1,45 +1,22 @@
-import { Form } from '@/core/components/Form';
-import { FormNotification } from '@/core/components/FormNotification';
 import { NotificationCard } from '@/core/components/NotificationCard';
-import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
+import { ReauthPanel } from '@/core/components/ReauthPanel';
 import { useFetchInfiniteFilteredAccounts } from '@/Settings/hooks/accounts/useFetchInfiniteFilteredAccounts';
-import { Button, Input, Spin } from 'antd';
-import { useState } from 'react';
-import z from 'zod';
+import { Spin } from 'antd';
 
-const formSchema = z.object({
-  oidcProviderName: z
-    .string({ message: 'OIDC Provider Name is required' })
-    .min(1, { message: 'OIDC Provider Name is required' }),
-});
-export type DeleteOidcProviderFormData = z.infer<typeof formSchema>;
-
+/** Confirms deleting an OIDC provider with the password, in one panel. */
 export const DeleteOidcProviderForm = ({
   oidcProviderName,
-  onFinish,
+  onConfirm,
   error,
   isPending,
   onCancel,
 }: {
   oidcProviderName: string;
-  onFinish: (values: DeleteOidcProviderFormData) => void;
+  onConfirm: (grant: string) => void;
   error?: Error | null;
   isPending?: boolean;
-  onCancel?: () => void;
+  onCancel: () => void;
 }) => {
-  const [form] = Form.useForm<DeleteOidcProviderFormData>();
-  const formValidation =
-    useAntdZodResolver<DeleteOidcProviderFormData>(formSchema);
-  const [formError, setFormError] = useState<string | null>(null);
-
-  const handleFinish = (values: DeleteOidcProviderFormData) => {
-    if (values.oidcProviderName !== oidcProviderName) {
-      setFormError('OIDC Provider Name does not match');
-      return;
-    }
-    onFinish(values);
-  };
-
   const {
     data: { total_size: accountsCount = 0 },
     isLoading: isLoadingAccounts,
@@ -49,55 +26,31 @@ export const DeleteOidcProviderForm = ({
   });
 
   return (
-    <>
-      <Form form={form} onFinish={handleFinish}>
-        <p>
-          Are you sure you want to delete{' '}
-          <span className="font-semibold">{oidcProviderName}</span>?
-        </p>
+    <ReauthPanel
+      confirmLabel="Delete"
+      danger
+      error={error}
+      isPending={isPending || isLoadingAccounts}
+      kind="provider"
+      target={oidcProviderName}
+      onCancel={onCancel}
+      onGranted={onConfirm}
+    >
+      {isLoadingAccounts && (
+        <>
+          <Spin />{' '}
+          <span className="sr-only">Loading associated accounts...</span>
+        </>
+      )}
 
-        {isLoadingAccounts && (
-          <>
-            <Spin />{' '}
-            <span className="sr-only">Loading associated accounts...</span>
-          </>
-        )}
-
-        {(accountsCount ?? 0) > 0 && (
-          <NotificationCard
-            type="error"
-            title="This action cannot be undone."
-            description={`${accountsCount} accounts are associated with this OIDC Provider. Accounts will be deleted and user access will be revoked.`}
-          />
-        )}
-
-        <Form.Item name="oidcProviderName" rules={[formValidation]}>
-          <Input placeholder="Enter OIDC Provider Name to be deleted" />
-        </Form.Item>
-        {(error || formError) && (
-          <FormNotification text={error?.message || formError} type="error" />
-        )}
-
-        <div className="flex w-full justify-end gap-x-2">
-          <Button
-            loading={isPending || isLoadingAccounts}
-            disabled={isPending || isLoadingAccounts}
-            type="primary"
-            danger
-            htmlType="submit"
-          >
-            Delete
-          </Button>
-          <Button
-            loading={isPending}
-            disabled={isPending}
-            type="default"
-            onClick={onCancel}
-          >
-            Cancel
-          </Button>
-        </div>
-      </Form>
-    </>
+      {(accountsCount ?? 0) > 0 && (
+        <NotificationCard
+          type="error"
+          title="This action cannot be undone."
+          // The count includes accounts that only link a sign-in through the provider, which the delete unlinks rather than deletes.
+          description={`${accountsCount} ${accountsCount === 1 ? 'account signs' : 'accounts sign'} in through this OIDC provider. Accounts it owns will be deleted and their access revoked. Accounts only linked to it keep their other sign-ins.`}
+        />
+      )}
+    </ReauthPanel>
   );
 };

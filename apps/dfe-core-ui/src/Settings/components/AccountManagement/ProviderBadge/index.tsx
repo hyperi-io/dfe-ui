@@ -5,6 +5,7 @@ const LETTERS = { entra_id: 'E', google: 'G', okta: 'O' } as const;
 
 const SIZES = {
   default: 'h-4 w-4 text-[10px]',
+  large: 'h-12 w-12 text-base',
   small: 'h-3.5 w-3.5 text-[9px]',
 } as const;
 
