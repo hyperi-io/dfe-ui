@@ -1,4 +1,5 @@
 import { API_CONFIG_MOCKS } from '@/core/config/api/endpoints/generator';
+import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
 import { renderHook, waitFor } from '@testing-library/react';
 import {
@@ -62,6 +63,36 @@ describe('.useTriggerHunt', () => {
       await waitFor(() => {
         expect(onError).not.toHaveBeenCalled();
       });
+    });
+  });
+
+  describe('the hunt it queued a run for', () => {
+    test('has its detail and run state read again, and no other hunt does', async () => {
+      server.use(
+        API_CONFIG_MOCKS.hunts.huntRun.post.success({ name: 'audit' }),
+      );
+      const builder = buildTestWrapper().withReactQuery();
+      const { result } = renderHook(() => useTriggerHunt({ name: 'audit' }), {
+        wrapper: builder.wrapper,
+      });
+      const queryClient = builder.queryClient;
+      if (!queryClient) {
+        throw new Error('the query client is set once the wrapper mounts');
+      }
+      const detail = QUERY_KEYS.hunts.hunt({ name: 'audit' });
+      const runState = [...detail, 'run-state'];
+      const other = QUERY_KEYS.hunts.hunt({ name: 'other' });
+      [detail, runState, other].forEach((key) =>
+        queryClient.setQueryData(key, {}),
+      );
+
+      result.current.mutate();
+
+      await waitFor(() => {
+        expect(queryClient.getQueryState(detail)?.isInvalidated).toBe(true);
+      });
+      expect(queryClient.getQueryState(runState)?.isInvalidated).toBe(true);
+      expect(queryClient.getQueryState(other)?.isInvalidated).toBe(false);
     });
   });
 

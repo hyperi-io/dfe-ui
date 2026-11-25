@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import {
   formatDateToString,
   formatDateXAgo,
+  formatEpochSecondsAgo,
   formatEpochSecondsLocal,
   parseValidDate,
 } from './date.helpers';
@@ -92,6 +93,36 @@ describe('.formatEpochSecondsLocal', () => {
     'a non-finite value (%s) reads as Invalid date',
     (value) => {
       expect(formatEpochSecondsLocal(value)).toBe('Invalid date');
+    },
+  );
+});
+
+describe('.formatEpochSecondsAgo', () => {
+  const NOW = new Date('2026-11-26T12:00:00Z');
+  const nowSeconds = NOW.getTime() / 1000;
+
+  beforeEach(() => {
+    vi.useFakeTimers();
+    vi.setSystemTime(NOW);
+  });
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  test.each([
+    [10, 'a few seconds ago'],
+    [60, 'a minute ago'],
+    [5 * 60, '5 minutes ago'],
+    [3 * 3600, '3 hours ago'],
+    [2 * 86400, '2 days ago'],
+  ])('%s seconds back reads as %s', (back, expected) => {
+    expect(formatEpochSecondsAgo(nowSeconds - back)).toBe(expected);
+  });
+
+  test.each([Number.NaN, Number.POSITIVE_INFINITY])(
+    'a non-finite value (%s) reads as Invalid date',
+    (value) => {
+      expect(formatEpochSecondsAgo(value)).toBe('Invalid date');
     },
   );
 });

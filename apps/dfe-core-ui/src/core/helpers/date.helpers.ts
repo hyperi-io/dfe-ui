@@ -1,7 +1,9 @@
 /* import-scope-drift-disable - (exported for tests) */
 import dayjs, { type Dayjs } from 'dayjs';
+import relativeTime from 'dayjs/plugin/relativeTime';
 import utc from 'dayjs/plugin/utc';
 
+dayjs.extend(relativeTime);
 dayjs.extend(utc);
 
 const INVALID_DATE_LABEL = 'Invalid date';
@@ -37,6 +39,14 @@ export const formatEpochSecondsLocal = (seconds: number) => {
   const parsed = dayjs.unix(seconds);
   return Number.isFinite(seconds) && parsed.isValid()
     ? parsed.format('DD MMM YYYY, HH:mm:ss')
+    : INVALID_DATE_LABEL;
+};
+
+/** Epoch seconds as how long ago it was, such as "5 minutes ago". */
+export const formatEpochSecondsAgo = (seconds: number) => {
+  const parsed = dayjs.unix(seconds);
+  return Number.isFinite(seconds) && parsed.isValid()
+    ? parsed.fromNow()
     : INVALID_DATE_LABEL;
 };
 

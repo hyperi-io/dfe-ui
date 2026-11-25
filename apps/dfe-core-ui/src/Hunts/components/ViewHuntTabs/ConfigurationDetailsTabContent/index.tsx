@@ -1,13 +1,69 @@
+import {
+  formatEpochSecondsAgo,
+  formatEpochSecondsLocal,
+} from '@/core/helpers/date.helpers';
 import { cn } from '@/core/utils/style';
 import { THuntDetailResponse } from '@/Hunts/hooks/useFetchHuntDetail/types';
+import { useFetchHuntRunState } from '@/Hunts/hooks/useFetchHuntRunState';
 import { IconExternalLink } from '@repo/dfe-icons';
 import Link from 'next/link';
 
 const dataListTermStyle =
   'font-medium text-foreground/40 dark:text-dark-foreground/40';
-const EmptyData = () => (
-  <span className="text-foreground/40 dark:text-dark-foreground/40">None</span>
+const EmptyData = ({ text = 'None' }: { text?: string }) => (
+  <span className="text-foreground/40 dark:text-dark-foreground/40">
+    {text}
+  </span>
 );
+
+/** When the hunt last ran and what it wrote, and whether a run is on its way. */
+const HuntRunRows = ({ name }: { name: string }) => {
+  const { run, isLoading, error } = useFetchHuntRunState({ name });
+  const lastRun = run?.last_run;
+  const rows = run?.last_run_rows;
+  const pending = run?.running
+    ? 'Running now'
+    : run?.run_requested
+      ? 'Run queued'
+      : null;
+
+  if (isLoading || error || !run) {
+    const text = isLoading ? 'Loading' : 'Not available';
+    return (
+      <>
+        <dt className={dataListTermStyle}>Last Run:</dt>
+        <dd>
+          <EmptyData text={text} />
+        </dd>
+        <dt className={dataListTermStyle}>Rows Written:</dt>
+        <dd>
+          <EmptyData text={text} />
+        </dd>
+      </>
+    );
+  }
+
+  return (
+    <>
+      <dt className={dataListTermStyle}>Last Run:</dt>
+      <dd className="flex flex-wrap items-baseline gap-x-3">
+        {lastRun == null ? (
+          <EmptyData text="Never run" />
+        ) : (
+          <>
+            <span>{formatEpochSecondsLocal(lastRun)}</span>
+            <span className="text-foreground/60 dark:text-dark-foreground/60">
+              {formatEpochSecondsAgo(lastRun)}
+            </span>
+          </>
+        )}
+        {pending && <span className="font-medium">{pending}</span>}
+      </dd>
+      <dt className={dataListTermStyle}>Rows Written:</dt>
+      <dd>{rows == null ? <EmptyData /> : rows.toLocaleString()}</dd>
+    </>
+  );
+};
 
 export const ConfigurationDetailsTabContent = ({
   name,
@@ -30,6 +86,7 @@ export const ConfigurationDetailsTabContent = ({
         <dd>{display_name ? display_name : <EmptyData />}</dd>
         <dt className={dataListTermStyle}>Cron:</dt>
         <dd>{cronText ? cronText : <EmptyData />}</dd>
+        <HuntRunRows name={name} />
         <dt className={dataListTermStyle}>Log Buffer:</dt>
         <dd>{log_buffer ? log_buffer : <EmptyData />}</dd>
         <dt className={dataListTermStyle}>Global Target Table Name:</dt>
