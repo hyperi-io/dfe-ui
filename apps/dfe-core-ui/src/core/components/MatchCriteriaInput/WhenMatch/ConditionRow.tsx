@@ -1,24 +1,34 @@
 import { Tooltip } from '@/core/components/Tooltip';
 import { IconTrash } from '@repo/dfe-icons';
 import { Button, Checkbox, Input, Select } from 'antd';
-import { operatorTakesValue } from './WhenMatch.helpers';
-import { TMatchFormNode, TMatchOperator } from './WhenMatch.types';
+import { issueMessage, operatorTakesValue } from './WhenMatch.helpers';
+import { FieldPath, TMatchFormNode, TMatchOperator } from './WhenMatch.types';
+
+const FieldMessage = ({ message }: { message?: string }) =>
+  message ? <span className="text-xs text-error">{message}</span> : null;
 
 export const ConditionRow = ({
   number,
   node,
+  path,
+  issues,
   onRemove,
   onChange,
   operatorOptions,
 }: {
   number: string;
   node: TMatchFormNode;
+  path: FieldPath;
+  issues?: { path: FieldPath; message: string }[];
   onRemove: () => void;
   onChange: (next: TMatchFormNode | null) => void;
   operatorOptions: { label: string; value: TMatchOperator }[];
 }) => {
   const takesValue = operatorTakesValue(node.operator);
   const name = `Condition ${number}`;
+  const fieldError = issueMessage(issues, [...path, 'field']);
+  const operatorError = issueMessage(issues, [...path, 'operator']);
+  const valueError = issueMessage(issues, [...path, 'value']);
 
   const handleChange = (next: TMatchFormNode | null) => {
     onChange(next);
@@ -40,39 +50,51 @@ export const ConditionRow = ({
         Not
       </Checkbox>
 
-      <Input
-        aria-label={`${name} field`}
-        placeholder="Field"
-        value={node.field ?? ''}
-        onChange={(event) =>
-          handleChange({ ...node, field: event.target.value })
-        }
-      />
+      <div className="flex min-w-0 flex-col gap-1">
+        <Input
+          aria-label={`${name} field`}
+          status={fieldError ? 'error' : undefined}
+          placeholder="Field"
+          value={node.field ?? ''}
+          onChange={(event) =>
+            handleChange({ ...node, field: event.target.value })
+          }
+        />
+        <FieldMessage message={fieldError} />
+      </div>
 
-      <Select
-        aria-label={`${name} operator`}
-        placeholder="Operator"
-        value={node.operator ?? undefined}
-        onChange={(value) => {
-          const operator = value as TMatchOperator;
-          handleChange({
-            ...node,
-            operator,
-            value: operatorTakesValue(operator) ? node.value : '',
-          });
-        }}
-        options={operatorOptions}
-      />
+      <div className="flex flex-col gap-1">
+        <Select
+          aria-label={`${name} operator`}
+          status={operatorError ? 'error' : undefined}
+          placeholder="Operator"
+          value={node.operator ?? undefined}
+          onChange={(value) => {
+            const operator = value as TMatchOperator;
+            handleChange({
+              ...node,
+              operator,
+              value: operatorTakesValue(operator) ? node.value : '',
+            });
+          }}
+          options={operatorOptions}
+        />
+        <FieldMessage message={operatorError} />
+      </div>
 
-      <Input
-        aria-label={`${name} value`}
-        disabled={!takesValue}
-        placeholder="Value"
-        value={node.value ?? ''}
-        onChange={(event) =>
-          handleChange({ ...node, value: event.target.value })
-        }
-      />
+      <div className="flex min-w-0 flex-col gap-1">
+        <Input
+          aria-label={`${name} value`}
+          status={valueError ? 'error' : undefined}
+          disabled={!takesValue}
+          placeholder="Value"
+          value={node.value ?? ''}
+          onChange={(event) =>
+            handleChange({ ...node, value: event.target.value })
+          }
+        />
+        <FieldMessage message={valueError} />
+      </div>
 
       <Tooltip title={`Remove condition ${number}`}>
         <Button
