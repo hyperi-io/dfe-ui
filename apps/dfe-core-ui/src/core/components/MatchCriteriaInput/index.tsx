@@ -16,7 +16,18 @@ export type CriteriaFieldIssue = {
 
 const INPUT_ISSUE = new Set(['field', 'operator', 'value', 'parts']);
 
-type MatchCriteriaType = 'conditions' | 'expression' | 'sql';
+export type MatchCriteriaType = 'conditions' | 'expression' | 'sql';
+
+/** The mode a saved rule should open on. A filled SQL or CEL value wins. */
+export const matchCriteriaMode = (values?: {
+  match?: unknown;
+  cel_filter?: string | null;
+  user_sql?: string | null;
+}): MatchCriteriaType => {
+  if (values?.user_sql?.trim()) return 'sql';
+  if (values?.cel_filter?.trim()) return 'expression';
+  return 'conditions';
+};
 export type ValidateCel = {
   data: {
     valid: boolean;
@@ -44,6 +55,8 @@ export type ValidateSql = {
 interface MatchCriteriaInputProps {
   value?: string | TMatchFormNode | null;
   onChange?: (value?: string | TMatchFormNode) => void;
+  /** The mode to show. The selected tab stays highlighted. */
+  mode?: MatchCriteriaType;
   onModeChange?: (mode: MatchCriteriaType) => void;
   modes?: MatchCriteriaType[];
   operatorOptions: { label: string; value: TMatchOperator }[];
@@ -61,6 +74,7 @@ interface MatchCriteriaInputProps {
 export const MatchCriteriaInput = ({
   value,
   onChange,
+  mode,
   onModeChange,
   modes = ['conditions', 'expression', 'sql'],
   operatorOptions,
@@ -69,11 +83,14 @@ export const MatchCriteriaInput = ({
   actions,
   issues,
 }: MatchCriteriaInputProps) => {
-  const [matchMode, setMatchMode] = useState<MatchCriteriaType>('conditions');
+  const [matchMode, setMatchMode] = useState<MatchCriteriaType>(
+    mode ?? 'conditions',
+  );
+  const selectedMode = mode ?? matchMode;
 
-  const handleModeChange = (mode: MatchCriteriaType) => {
-    setMatchMode(mode);
-    onModeChange?.(mode);
+  const handleModeChange = (next: MatchCriteriaType) => {
+    setMatchMode(next);
+    onModeChange?.(next);
   };
 
   return (
@@ -82,6 +99,7 @@ export const MatchCriteriaInput = ({
         <Radio.Group
           aria-label="Match mode"
           optionType="button"
+          value={selectedMode}
           options={[
             { label: 'Conditions', value: 'conditions' },
             { label: 'CEL Fast expression', value: 'expression' },
@@ -93,7 +111,7 @@ export const MatchCriteriaInput = ({
         />
         {actions}
       </div>
-      {modes.includes('conditions') && matchMode === 'conditions' && (
+      {modes.includes('conditions') && selectedMode === 'conditions' && (
         <MatchConditionsEditor
           value={value != null && typeof value === 'object' ? value : null}
           onChange={(next) => onChange?.(next ?? undefined)}
@@ -102,11 +120,19 @@ export const MatchCriteriaInput = ({
           issues={issues}
         />
       )}
-      {modes.includes('expression') && matchMode === 'expression' && (
-        <CelExpressionMatch onChange={onChange} validateCel={validate.cel} />
+      {modes.includes('expression') && selectedMode === 'expression' && (
+        <CelExpressionMatch
+          value={typeof value === 'string' ? value : undefined}
+          onChange={onChange}
+          validateCel={validate.cel}
+        />
       )}
-      {modes.includes('sql') && matchMode === 'sql' && (
-        <SqlMatch onChange={onChange} validateSql={validate.sql} />
+      {modes.includes('sql') && selectedMode === 'sql' && (
+        <SqlMatch
+          value={typeof value === 'string' ? value : undefined}
+          onChange={onChange}
+          validateSql={validate.sql}
+        />
       )}
       {issues
         ?.filter((issue) => !INPUT_ISSUE.has(String(issue.path.at(-1))))

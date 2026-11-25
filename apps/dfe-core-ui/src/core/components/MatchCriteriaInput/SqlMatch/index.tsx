@@ -24,6 +24,15 @@ const documentFor = (whereClause: string) => `${SQL_PREFIX}\n${whereClause}`;
 const whereClauseOf = (document: string) =>
   document.split('\n').slice(READONLY_LINES).join('\n');
 
+/** A stored rule may be the full statement or only the clause under WHERE. */
+const clauseFrom = (value?: string) => {
+  if (!value?.trim()) return '';
+  if (value.startsWith(SQL_PREFIX)) return whereClauseOf(value);
+  const afterWhere = value.split(/\bWHERE\b/i);
+  if (afterWhere.length > 1) return afterWhere.slice(1).join('WHERE').trim();
+  return value.trim();
+};
+
 const NOTICE_COMMANDS = new Set(['insertstring', 'backspace']);
 
 type NoticePoint = { top: number; left: number };
@@ -106,7 +115,7 @@ export const SqlMatch = ({
   const [notice, setNotice] = useState<NoticePoint | null>(null);
   const hideNotice = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const [sql, setSql] = useState(value ?? '');
+  const [sql, setSql] = useState(() => clauseFrom(value));
   const editorRef = useRef<Editor | null>(null);
 
   const showNotice = useCallback((editor: Editor) => {

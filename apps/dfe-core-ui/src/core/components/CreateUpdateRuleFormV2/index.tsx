@@ -1,6 +1,9 @@
 import { ApiErrorNotification } from '@/core/components/ApiErrorNotification';
 import { Form } from '@/core/components/Form';
-import { MatchCriteriaInput } from '@/core/components/MatchCriteriaInput';
+import {
+  MatchCriteriaInput,
+  matchCriteriaMode,
+} from '@/core/components/MatchCriteriaInput';
 import { useCheckCel } from '@/core/hooks/useCelCheck';
 import { useValidateRule } from '@/core/hooks/useValidateRuleV2';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
@@ -55,7 +58,12 @@ const CreateUpdateRuleFormBase = ({
   const formValidation =
     useAntdZodResolver<CreateUpdateRuleFormData>(formSchema);
   const [matchCriteriaFormName, setMatchCriteriaFormName] =
-    useState<MatchCriteriaField>('match');
+    useState<MatchCriteriaField>(() => {
+      const mode = matchCriteriaMode(initialValues);
+      if (mode === 'expression') return 'cel_filter';
+      if (mode === 'sql') return 'user_sql';
+      return 'match';
+    });
   const [showCriteriaErrors, setShowCriteriaErrors] = useState(false);
   const watchedMatch = Form.useWatch('match', form);
   const watchedCel = Form.useWatch('cel_filter', form);
@@ -136,6 +144,13 @@ const CreateUpdateRuleFormBase = ({
     }
   };
 
+  const criteriaMode =
+    matchCriteriaFormName === 'cel_filter'
+      ? 'expression'
+      : matchCriteriaFormName === 'user_sql'
+        ? 'sql'
+        : 'conditions';
+
   const criteriaField = (actions?: ReactNode) => (
     <Form.Item
       label="Match Criteria"
@@ -149,6 +164,7 @@ const CreateUpdateRuleFormBase = ({
           cel: validateCel,
           sql: validateSql,
         }}
+        mode={criteriaMode}
         actions={actions}
         issues={showCriteriaErrors ? issues : undefined}
         onModeChange={handleModeChange}
