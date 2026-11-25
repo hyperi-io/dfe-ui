@@ -9,6 +9,9 @@ import { useLogin } from '@/core/hooks/useLogin';
 import { Spin } from 'antd';
 import { useState } from 'react';
 
+// The first account administers the deployment.
+const FIRST_ACCOUNT_GROUPS = ['dfe-admins'];
+
 export const ConfigureLocalUser = ({ goNext }: { goNext: () => void }) => {
   const [loginValues, setLoginValues] = useState<{
     username: string;
@@ -43,6 +46,7 @@ export const ConfigureLocalUser = ({ goNext }: { goNext: () => void }) => {
     reauth.ask(() =>
       createAccount({
         ...values,
+        groups: FIRST_ACCOUNT_GROUPS,
         phone: values.phone ?? '',
         name: values.name ?? '',
         org: '',
@@ -60,7 +64,7 @@ export const ConfigureLocalUser = ({ goNext }: { goNext: () => void }) => {
         initialValues={{
           username: '',
           password: '',
-          groups: ['dfe-admins'],
+          groups: FIRST_ACCOUNT_GROUPS,
           email: '',
           phone: '',
           name: '',
