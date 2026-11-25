@@ -1,13 +1,75 @@
+import {
+  formatEpochSecondsAgo,
+  formatEpochSecondsLocal,
+} from '@/core/helpers/date.helpers';
 import { cn } from '@/core/utils/style';
 import { THuntDetailResponse } from '@/Hunts/hooks/useFetchHuntDetail/types';
+import { useFetchHuntRunState } from '@/Hunts/hooks/useFetchHuntRunState';
+import { useNow } from '@/Hunts/hooks/useNow';
 import { IconExternalLink } from '@repo/dfe-icons';
 import Link from 'next/link';
+import type { ReactNode } from 'react';
 
 const dataListTermStyle =
   'font-medium text-foreground/40 dark:text-dark-foreground/40';
-const EmptyData = () => (
-  <span className="text-foreground/40 dark:text-dark-foreground/40">None</span>
+const mutedStyle = 'text-foreground-muted dark:text-dark-foreground-muted';
+const EmptyData = ({ text = 'None' }: { text?: string }) => (
+  <span className={mutedStyle}>{text}</span>
 );
+
+/** When the hunt last fired, what that run wrote, and whether another run is on its way. */
+const HuntRunRows = ({ name }: { name: string }) => {
+  const { run, isLoading, error } = useFetchHuntRunState({ name });
+  const now = useNow();
+
+  let fired: ReactNode;
+  let rows: ReactNode;
+  let status: ReactNode;
+  if (isLoading) {
+    fired = rows = status = <EmptyData text="Loading" />;
+  } else if (error) {
+    fired = <span className="text-error">Could not read the run state</span>;
+    rows = status = <EmptyData text="Not available" />;
+  } else if (!run) {
+    fired = rows = status = <EmptyData text="Not available" />;
+  } else {
+    fired =
+      run.last_run == null ? (
+        <EmptyData text="Never run" />
+      ) : (
+        <span className="flex flex-wrap items-baseline gap-x-3">
+          <span>{formatEpochSecondsLocal(run.last_run)}</span>
+          <span className={mutedStyle}>
+            {formatEpochSecondsAgo(run.last_run, now)}
+          </span>
+        </span>
+      );
+    rows =
+      run.last_run_rows == null ? (
+        <EmptyData />
+      ) : (
+        run.last_run_rows.toLocaleString()
+      );
+    status = run.running ? (
+      <span className="font-medium">Running now</span>
+    ) : run.run_requested ? (
+      <span className="font-medium">Run queued</span>
+    ) : (
+      <EmptyData text="Idle" />
+    );
+  }
+
+  return (
+    <>
+      <dt className={dataListTermStyle}>Last Fired:</dt>
+      <dd>{fired}</dd>
+      <dt className={dataListTermStyle}>Rows Written:</dt>
+      <dd>{rows}</dd>
+      <dt className={dataListTermStyle}>Run Status:</dt>
+      <dd>{status}</dd>
+    </>
+  );
+};
 
 export const ConfigurationDetailsTabContent = ({
   name,
@@ -30,6 +92,7 @@ export const ConfigurationDetailsTabContent = ({
         <dd>{display_name ? display_name : <EmptyData />}</dd>
         <dt className={dataListTermStyle}>Cron:</dt>
         <dd>{cronText ? cronText : <EmptyData />}</dd>
+        <HuntRunRows name={name} />
         <dt className={dataListTermStyle}>Log Buffer:</dt>
         <dd>{log_buffer ? log_buffer : <EmptyData />}</dd>
         <dt className={dataListTermStyle}>Global Target Table Name:</dt>

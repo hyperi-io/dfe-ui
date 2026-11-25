@@ -1,7 +1,63 @@
+import { API_CONFIG_MOCKS } from '@/core/config/api/endpoints/generator';
+import {
+  formatEpochSecondsAgo,
+  formatEpochSecondsLocal,
+} from '@/core/helpers/date.helpers';
+import type { THuntListItem } from '@/core/hooks/useFetchInfiniteFilteredHunts/types';
+import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
+import { pageOf } from '@/core/utils/test-utils/pageOf';
 import type { THuntDetailResponse } from '@/Hunts/hooks/useFetchHuntDetail/types';
-import { render, screen } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import { render, screen, waitFor } from '@testing-library/react';
+import { http, HttpResponse } from 'msw';
+import { setupServer } from 'msw/node';
+import {
+  afterAll,
+  afterEach,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+} from 'vitest';
 import { ConfigurationDetailsTabContent } from '.';
+
+const server = setupServer();
+
+beforeAll(() => server.listen({ onUnhandledRequest: 'error' }));
+afterEach(() => server.resetHandlers());
+afterAll(() => server.close());
+
+const { wrapper } = buildTestWrapper().withReactQuery();
+
+const listItem = (extra: Partial<THuntListItem> = {}) =>
+  ({
+    name: 'my_hunt',
+    display_name: 'My Hunt',
+    source_table: 'windows_audit',
+    target_table: 'hunts',
+    customer: 'org_a',
+    cron: '0 * * * *',
+    rules: [],
+    running: false,
+    too_aggressive: false,
+    run_requested: false,
+    enabled: true,
+    auto_disabled_at: null,
+    auto_disabled_reason: '',
+    error: '',
+    ...extra,
+  }) satisfies THuntListItem;
+
+const listing = (items: THuntListItem[]) =>
+  server.use(
+    http.get(API_CONFIG_MOCKS.hunts.default.mockedUrl, ({ request }) =>
+      HttpResponse.json(pageOf(items, request)),
+    ),
+  );
+
+// The value shown beside a label of the detail list.
+const valueOf = (label: string) =>
+  screen.getByText(label).nextElementSibling as HTMLElement;
 
 const hunt = (cron: THuntDetailResponse['cron']): THuntDetailResponse => ({
   name: 'my_hunt',
@@ -23,6 +79,8 @@ const hunt = (cron: THuntDetailResponse['cron']): THuntDetailResponse => ({
 });
 
 describe('ConfigurationDetailsTabContent cron', () => {
+  beforeEach(() => listing([listItem()]));
+
   it.each([
     { case: 'a single expression', cron: '0 * * * *', shown: '0 * * * *' },
     {
@@ -31,14 +89,116 @@ describe('ConfigurationDetailsTabContent cron', () => {
       shown: '0 * * * *, 0 0 * * *',
     },
   ])('shows $case', ({ cron, shown }) => {
-    render(<ConfigurationDetailsTabContent {...hunt(cron)} />);
+    render(<ConfigurationDetailsTabContent {...hunt(cron)} />, { wrapper });
 
     expect(screen.getByText(shown)).toBeInTheDocument();
   });
 
   it('shows None when the hunt has no expression', () => {
-    render(<ConfigurationDetailsTabContent {...hunt([])} />);
+    render(<ConfigurationDetailsTabContent {...hunt([])} />, { wrapper });
 
     expect(screen.getAllByText('None').length).toBeGreaterThan(0);
   });
+});
+
+const RAN_AT = 1_790_516_564;
+const RAN = `${formatEpochSecondsLocal(RAN_AT)}${formatEpochSecondsAgo(RAN_AT)}`;
+
+describe('ConfigurationDetailsTabContent run state', () => {
+  it.each([
+    {
+      case: 'a hunt that never ran',
+      items: [listItem({ last_run: null, last_run_rows: null })],
+      fired: 'Never run',
+      rows: 'None',
+      status: 'Idle',
+    },
+    {
+      case: 'a hunt that ran',
+      items: [listItem({ last_run: RAN_AT, last_run_rows: 1234 })],
+      fired: RAN,
+      rows: '1,234',
+      status: 'Idle',
+    },
+    {
+      case: 'a run that wrote no rows',
+      items: [listItem({ last_run: RAN_AT, last_run_rows: 0 })],
+      fired: RAN,
+      rows: '0',
+      status: 'Idle',
+    },
+    {
+      case: 'a run that is queued',
+      items: [
+        listItem({ last_run: RAN_AT, last_run_rows: 5, run_requested: true }),
+      ],
+      fired: RAN,
+      rows: '5',
+      status: 'Run queued',
+    },
+    {
+      case: 'a run that is going',
+      items: [listItem({ last_run: null, running: true })],
+      fired: 'Never run',
+      rows: 'None',
+      status: 'Running now',
+    },
+    {
+      case: 'a hunt the list does not carry',
+      items: [listItem({ name: 'someone_else' })],
+      fired: 'Not available',
+      rows: 'Not available',
+      status: 'Not available',
+    },
+  ])('shows $case', async ({ items, fired, rows, status }) => {
+    listing(items);
+    render(<ConfigurationDetailsTabContent {...hunt('0 * * * *')} />, {
+      wrapper,
+    });
+
+    await waitFor(() =>
+      expect(valueOf('Last Fired:')).toHaveTextContent(fired),
+    );
+    expect(valueOf('Rows Written:')).toHaveTextContent(rows);
+    expect(valueOf('Run Status:')).toHaveTextContent(status);
+  });
+
+  it('reads a time ahead of the viewer clock as just now, never as in the future', async () => {
+    listing([listItem({ last_run: Math.floor(Date.now() / 1000) + 3600 })]);
+    render(<ConfigurationDetailsTabContent {...hunt('0 * * * *')} />, {
+      wrapper,
+    });
+
+    await waitFor(() =>
+      expect(valueOf('Last Fired:')).toHaveTextContent('a few seconds ago'),
+    );
+    expect(valueOf('Last Fired:')).not.toHaveTextContent('in ');
+  });
+
+  it('shows a failed read as an error, apart from the muted None of an empty value', async () => {
+    server.use(API_CONFIG_MOCKS.hunts.default.get.error({ status: 500 }));
+    render(<ConfigurationDetailsTabContent {...hunt('0 * * * *')} />, {
+      wrapper,
+    });
+
+    const failure = await screen.findByText('Could not read the run state');
+    expect(failure).toHaveClass('text-error');
+    expect(valueOf('Rows Written:')).not.toHaveTextContent('None');
+  });
+
+  it.each(['Never run', 'None', 'Idle'])(
+    'draws %s in the muted text colour, not a faded foreground',
+    async (text) => {
+      listing([listItem({ last_run: null, last_run_rows: null })]);
+      render(<ConfigurationDetailsTabContent {...hunt('0 * * * *')} />, {
+        wrapper,
+      });
+
+      const shown = await screen.findAllByText(text);
+      shown.forEach((element) => {
+        expect(element).toHaveClass('text-foreground-muted');
+        expect(element.className).not.toMatch(/foreground\/\d+/);
+      });
+    },
+  );
 });

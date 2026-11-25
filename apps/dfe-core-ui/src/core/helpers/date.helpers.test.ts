@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import {
   formatDateToString,
   formatDateXAgo,
+  formatEpochSecondsAgo,
   formatEpochSecondsLocal,
   parseValidDate,
 } from './date.helpers';
@@ -92,6 +93,48 @@ describe('.formatEpochSecondsLocal', () => {
     'a non-finite value (%s) reads as Invalid date',
     (value) => {
       expect(formatEpochSecondsLocal(value)).toBe('Invalid date');
+    },
+  );
+});
+
+describe('.formatEpochSecondsAgo', () => {
+  const NOW = new Date('2026-11-26T12:00:00Z');
+  const nowSeconds = NOW.getTime() / 1000;
+
+  beforeEach(() => {
+    vi.useFakeTimers();
+    vi.setSystemTime(NOW);
+  });
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  test.each([
+    [10, 'a few seconds ago'],
+    [60, 'a minute ago'],
+    [5 * 60, '5 minutes ago'],
+    [3 * 3600, '3 hours ago'],
+    [2 * 86400, '2 days ago'],
+    [0, 'a few seconds ago'],
+    [-30, 'a few seconds ago'],
+    [-3 * 3600, 'a few seconds ago'],
+  ])('%s seconds back reads as %s', (back, expected) => {
+    expect(formatEpochSecondsAgo(nowSeconds - back)).toBe(expected);
+  });
+
+  test('reads a time in milliseconds by mistake as just now, not as a date years ahead', () => {
+    expect(formatEpochSecondsAgo(NOW.getTime())).toBe('a few seconds ago');
+  });
+
+  test('is measured from the `now` it is given', () => {
+    const readAt = NOW.getTime() + 10 * 60 * 1000;
+    expect(formatEpochSecondsAgo(nowSeconds, readAt)).toBe('10 minutes ago');
+  });
+
+  test.each([Number.NaN, Number.POSITIVE_INFINITY])(
+    'a non-finite value (%s) reads as Invalid date',
+    (value) => {
+      expect(formatEpochSecondsAgo(value)).toBe('Invalid date');
     },
   );
 });
