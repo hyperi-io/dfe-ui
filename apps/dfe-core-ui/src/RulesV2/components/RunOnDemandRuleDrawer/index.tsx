@@ -1,4 +1,3 @@
-import { AceEditor } from '@/core/components/AceEditor';
 import { Drawer } from '@/core/components/Drawer';
 import { Form } from '@/core/components/Form';
 import { Modal } from '@/core/components/Modal';
@@ -6,6 +5,7 @@ import { NotificationCard } from '@/core/components/NotificationCard';
 import { RbacProtected } from '@/core/components/RbacProtected';
 import { SourceSelect } from '@/core/components/SourceSelect';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
+import { RunOnDemandResult } from '@/RulesV2/components/RunOnDemandRuleDrawer/RunOnDemandResult';
 import { TRuleDetail } from '@/RulesV2/hooks/useFetchRuleDetail/types';
 import { useTriggerOnDemandRule } from '@/RulesV2/hooks/useTriggerOnDemandRule';
 import { TTriggerOnDemandRuleResponse } from '@/RulesV2/hooks/useTriggerOnDemandRule/types';
@@ -37,6 +37,7 @@ export const RunOnDemandRuleDrawer = ({
 
   const [openModal, setOpenModal] = useState(false);
   const [openDrawer, setOpenDrawer] = useState(false);
+  const [source, setSource] = useState<string>();
 
   const onSuccess = (data: TTriggerOnDemandRuleResponse) => {
     setOpenDrawer(true);
@@ -58,12 +59,17 @@ export const RunOnDemandRuleDrawer = ({
     setOpenModal(true);
   };
 
-  const handleRunOnDemandRule = (values: FormData) => {
+  const run = (nextSource: string) => {
+    setSource(nextSource);
     runOnDemandRuleMutation({
-      source: values.source,
+      source: nextSource,
       name: rule.name,
       source_type: rule.source_type ?? 'raw',
     });
+  };
+
+  const handleRunOnDemandRule = (values: FormData) => {
+    run(values.source);
   };
 
   return (
@@ -162,6 +168,30 @@ export const RunOnDemandRuleDrawer = ({
           enabled: false,
         }}
       >
+        <div className="mb-4 flex items-end gap-2">
+          <div className="flex min-w-0 flex-1 flex-col gap-1">
+            <label
+              htmlFor="on-demand-result-source"
+              className="text-xs font-medium"
+            >
+              Source
+            </label>
+            <SourceSelect
+              id="on-demand-result-source"
+              value={source}
+              onChange={(next: string) => setSource(next)}
+            />
+          </div>
+          <Button
+            type="primary"
+            htmlType="button"
+            loading={isPending}
+            disabled={!source}
+            onClick={() => source && run(source)}
+          >
+            Rerun
+          </Button>
+        </div>
         {isPending && (
           <div className="flex items-center w-full">
             <Spin /> <span className="sr-only">Loading</span>
@@ -174,15 +204,7 @@ export const RunOnDemandRuleDrawer = ({
             type="error"
           />
         )}
-        {data && (
-          <AceEditor
-            value={JSON.stringify(data, null, 2)}
-            readOnly
-            theme="github"
-            height="100%"
-            width="100%"
-          />
-        )}
+        {data && <RunOnDemandResult data={data} rule={rule} />}
       </Drawer>
     </>
   );
