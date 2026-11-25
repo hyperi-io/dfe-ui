@@ -17,10 +17,9 @@ export const useTriggerOnDemandRule = ({
 }) => {
   const queryClient = useQueryClient();
   const { data, mutate, isPending, error, reset } = useMutation({
-    mutationFn: (rule: TTriggerOnDemandRuleRequest) =>
+    mutationFn: (body: TTriggerOnDemandRuleRequest) =>
       triggerOnDemandRule({
-        body: rule,
-        pathParams: { name },
+        body,
       }),
     onSuccess: (data) => {
       queryClient.invalidateQueries({

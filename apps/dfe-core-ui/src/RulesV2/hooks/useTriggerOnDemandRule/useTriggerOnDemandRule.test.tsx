@@ -30,8 +30,10 @@ const { wrapper } = buildTestWrapper().withReactQuery();
 
 describe('.useUpdateRule', () => {
   const requestBody: TTriggerOnDemandRuleRequest = {
-    source: 'name',
+    source: 'string',
     cost_window_minutes: 0,
+    name: 'string',
+    source_type: 'raw',
   };
 
   const name = 'name';
@@ -58,9 +60,20 @@ describe('.useUpdateRule', () => {
           rows_in_window: 0,
           projected_per_day: 0,
           match_ratio: 0,
-          band: 'warn',
+          band: 'unmeasured',
           window_minutes: 0,
+          duration_ms: 0,
+          warnings: ['string'],
         },
+        sql_errors: [
+          {
+            message: 'string',
+            position: 0,
+            suggestion: 'string',
+          },
+        ],
+        columns: ['string'],
+        results: [],
         execution_time_ms: 0,
         truncated: false,
       };

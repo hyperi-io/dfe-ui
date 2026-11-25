@@ -14270,25 +14270,14 @@
         }
       }
     },
-    "/api/v1/rules-v2/{name}/run": {
+    "/api/v1/rules-v2/run": {
       "post": {
         "tags": [
           "Rules V2"
         ],
-        "summary": "Run Rule",
-        "description": "Run one stored rule against a source, writing nothing.\n\nThe source is read the way a sample of it is read: its own table when that\nversion is deployed, otherwise the landing table filtered to the source's\nmatch. The volume estimate and the SELECT of matching rows share the\nlookback window, and both are held to the orgs the caller may read. A\ndetection the hunt runner would refuse, or a SELECT ClickHouse rejects,\ncomes back with 200 and the reason in ``sql_errors``.",
+        "summary": "Run Rule Draft",
+        "description": "Run a stored rule, or a detection that has not been saved, writing nothing.\n\nGive ``name`` to run a stored rule, or one of ``where_clause``, ``cel_filter``,\n``user_sql``, or ``match`` to run that detection without creating a rule.\nThe source is read the way a sample of it is read: its own table when that\nversion is deployed, otherwise the landing table filtered to the source's\nmatch. The volume estimate and the SELECT of matching rows share the lookback\nwindow, and both are held to the orgs the caller may read. A detection the\nhunt runner would refuse, or a SELECT ClickHouse rejects, comes back with\n200 and the reason in ``sql_errors``.",
         "operationId": "rules-v2.run",
-        "parameters": [
-          {
-            "name": "name",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Name"
-            }
-          }
-        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -52548,6 +52537,78 @@
             ],
             "title": "Cost Window Minutes",
             "description": "Lookback window in minutes the volume estimate and the run both use. Absent or 0 uses the deployment's preview window."
+          },
+          "where_clause": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Where Clause",
+            "description": "Detection condition to run, the SQL after WHERE. Give this or one other detection to run a rule that has not been saved"
+          },
+          "cel_filter": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cel Filter",
+            "description": "CEL expression to run. Give this or one other detection, not more"
+          },
+          "user_sql": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "User Sql",
+            "description": "Full detection query to run. The FROM is dropped, as on save, and the source in this request names the table. Give this or one other detection, not more"
+          },
+          "source_type": {
+            "type": "string",
+            "enum": [
+              "raw",
+              "hyperdx"
+            ],
+            "title": "Source Type",
+            "description": "'raw' or 'hyperdx'. Applies to ``user_sql``",
+            "default": "raw"
+          },
+          "match": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RuleCondition"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Structured match to run, the same shape as a source match. Give this or one other detection, not more"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name",
+            "description": "Stored rule to run. Omit it and give one detection (where_clause, cel_filter, user_sql, or match) to run a rule that has not been saved"
           }
         },
         "additionalProperties": false,
@@ -52556,7 +52617,7 @@
           "source"
         ],
         "title": "RuleV2RunRequest",
-        "description": "A source to run one stored rule against, and the window to count."
+        "description": "A source to run against, and either a stored rule name or one unsaved detection."
       },
       "RuleV2RunResponse": {
         "properties": {

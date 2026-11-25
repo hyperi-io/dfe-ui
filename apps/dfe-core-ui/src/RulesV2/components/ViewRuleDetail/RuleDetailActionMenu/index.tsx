@@ -3,10 +3,11 @@ import { useListRulesContext } from '@/core/contexts/ListRulesContextV2';
 import { TRuleCreateResponse } from '@/core/hooks/useCreateRuleV2/types';
 import { CloneRuleModal } from '@/RulesV2/components/CloneRuleModal';
 import { DeleteRuleModal } from '@/RulesV2/components/DeleteRuleModal';
+import { RunOnDemandRuleDrawer } from '@/RulesV2/components/RunOnDemandRuleDrawer';
 import { UpdateRuleDrawer } from '@/RulesV2/components/UpdateRuleDrawer';
 import { TRuleDetail } from '@/RulesV2/hooks/useFetchRuleDetail/types';
 import { TRuleUpdateResponse } from '@/RulesV2/hooks/useUpdateRule/types';
-import { IconCopy, IconEdit, IconTrash } from '@repo/dfe-icons';
+import { IconCopy, IconEdit, IconPlayerPlay, IconTrash } from '@repo/dfe-icons';
 import { App, Button } from 'antd';
 
 interface RuleDetailActionMenuProps {
@@ -58,6 +59,20 @@ export const RuleDetailActionMenu = ({
           </Button>
         }
         onSuccess={onEditSuccess}
+      />
+      <RunOnDemandRuleDrawer
+        key="run-on-demand-rule"
+        rule={rule}
+        trigger={
+          <Button
+            className="flex items-center justify-start"
+            type="text"
+            icon={<IconPlayerPlay />}
+            aria-label="Run on Demand Rule"
+          >
+            Run on Demand Rule
+          </Button>
+        }
       />
       <CloneRuleModal
         key="clone-rule"

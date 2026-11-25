@@ -2421,7 +2421,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/rules-v2/{name}/run": {
+    "/api/v1/rules-v2/run": {
         parameters: {
             query?: never;
             header?: never;
@@ -2431,8 +2431,8 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Run Rule
-         * @description Run one stored rule against a source, writing nothing.
+         * Run Rule Draft
+         * @description Run a stored rule, or a detection that has not been saved, writing nothing. Give ``name`` to run a stored rule.
          *
          *     The source is read the way a sample of it is read: its own table when that
          *     version is deployed, otherwise the landing table filtered to the source's
@@ -14265,7 +14265,7 @@ export interface components {
         };
         /**
          * RuleV2RunRequest
-         * @description A source to run one stored rule against, and the window to count.
+         * @description A source to run against, and either a stored rule name or one unsaved detection.
          */
         RuleV2RunRequest: {
             /**
@@ -14278,6 +14278,35 @@ export interface components {
              * @description Lookback window in minutes the volume estimate and the run both use. Absent or 0 uses the deployment's preview window.
              */
             cost_window_minutes?: number | null;
+            /**
+             * Where Clause
+             * @description Detection condition to run, the SQL after WHERE. Give this or one other detection to run a rule that has not been saved
+             */
+            where_clause?: string | null;
+            /**
+             * Cel Filter
+             * @description CEL expression to run. Give this or one other detection, not more
+             */
+            cel_filter?: string | null;
+            /**
+             * User Sql
+             * @description Full detection query to run. The FROM is dropped, as on save, and the source in this request names the table. Give this or one other detection, not more
+             */
+            user_sql?: string | null;
+            /**
+             * Source Type
+             * @description 'raw' or 'hyperdx'. Applies to ``user_sql``
+             * @default raw
+             * @enum {string}
+             */
+            source_type: "raw" | "hyperdx";
+            /** @description Structured match to run, the same shape as a source match. Give this or one other detection, not more */
+            match?: components["schemas"]["RuleCondition"] | null;
+            /**
+             * Name
+             * @description Stored rule to run. Omit it and give one detection (where_clause, cel_filter, user_sql, or match) to run a rule that has not been saved
+             */
+            name?: string | null;
         };
         /**
          * RuleV2RunResponse
@@ -26757,9 +26786,7 @@ export interface operations {
         parameters: {
             query?: never;
             header?: never;
-            path: {
-                name: string;
-            };
+            path?: never;
             cookie?: never;
         };
         requestBody: {
