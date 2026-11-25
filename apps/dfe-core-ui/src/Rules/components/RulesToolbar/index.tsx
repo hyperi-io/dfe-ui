@@ -1,6 +1,7 @@
 'use client';
 
-import { CreateRuleDrawer } from '@/core/components/CreateRuleDrawer';
+import { ButtonLinkSavedSearch } from '@/core/components/ButtonLinkSavedSearch';
+import { CreateCustomRuleDrawer } from '@/core/components/CreateCustomRuleDrawer';
 import { Toolbar } from '@/core/components/Toolbar';
 import { ListRulesProvider } from '@/core/contexts/ListRulesContext';
 import { cn } from '@/core/utils/style';
@@ -50,7 +51,10 @@ export const RulesToolbar = () => {
           ))}
         </nav>
 
-        <CreateRuleDrawer />
+        <div className="flex gap-x-2">
+          <CreateCustomRuleDrawer button={{ type: 'default' }} />
+          <ButtonLinkSavedSearch />
+        </div>
       </Toolbar>
     </ListRulesProvider>
   );

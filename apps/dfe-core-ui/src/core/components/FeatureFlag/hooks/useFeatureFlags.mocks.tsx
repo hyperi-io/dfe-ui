@@ -1,0 +1,12 @@
+import { API_CONFIG_MOCKS } from '@/core/config/api/endpoints/generator';
+import { setupServer } from 'msw/node';
+
+const handlers = [
+  API_CONFIG_MOCKS.clientConfig.features.get.success({
+    mockedResponse: {
+      NEW_VIEW_2: true,
+    },
+  }),
+];
+
+export const server = setupServer(...handlers);

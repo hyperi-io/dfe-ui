@@ -1,5 +1,5 @@
-import { getNextPageToken, toOrderBy } from '@/core/config/api/pagination';
 import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
+import { getNextPageToken, toOrderBy } from '@/core/config/api/pagination';
 import { useDebounce } from '@/core/hooks/useDebounce';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { useEffect, useMemo, useRef } from 'react';
@@ -19,7 +19,9 @@ const SEARCH_DEBOUNCE_MS = 300;
  * @returns A list of hunts.
  */
 export const useFetchInfiniteFilteredHunts = ({
+  queryEnabled = true,
   search,
+  rule,
   page_size,
   sort_by,
   sort_order,
@@ -37,6 +39,7 @@ export const useFetchInfiniteFilteredHunts = ({
   } = useInfiniteQuery({
     queryKey: QUERY_KEYS.hunts.default({
       search: debouncedSearch,
+      rule,
       sort_by,
       sort_order,
       page_size,
@@ -45,6 +48,7 @@ export const useFetchInfiniteFilteredHunts = ({
       fetchInfiniteFilteredHunts({
         queryParams: {
           search: debouncedSearch || undefined,
+          rule: rule || undefined,
           order_by: toOrderBy(sort_by, sort_order),
           page_token: pageParam,
           page_size,
@@ -53,6 +57,7 @@ export const useFetchInfiniteFilteredHunts = ({
       }),
     getNextPageParam: getNextPageToken,
     initialPageParam: undefined as string | undefined,
+    enabled: queryEnabled,
   });
 
   const flattenedData = useMemo(() => {

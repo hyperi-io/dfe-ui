@@ -7,6 +7,7 @@ import React from 'react';
 import { fetch, Headers, Request, Response } from 'undici';
 import { afterEach, beforeEach, vi } from 'vitest';
 import './src/core/config/zodJitless';
+import { useFeatureFlagStore } from './src/core/stores/system/featureFlagStore';
 import { useSystemDeploymentStore } from './src/core/stores/system/systemDeploymentStore';
 
 // jsdom does not provide ResizeObserver - required by Ant Design
@@ -154,6 +155,7 @@ afterEach(async () => {
     useAuthStore.getState().reset();
     useSystemDefaultsStore.getState().reset();
     useSystemDeploymentStore.getState().reset();
+    useFeatureFlagStore.getState().reset();
     resetCachedSession();
   } catch {
     // The file replaced a dependency this graph imports. Nothing shared to reset.

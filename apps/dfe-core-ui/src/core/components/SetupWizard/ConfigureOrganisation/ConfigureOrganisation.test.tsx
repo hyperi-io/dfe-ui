@@ -55,7 +55,7 @@ describe('ConfigureOrganisationStep', () => {
     await submitAnOrganisation(goNext);
 
     expect(
-      await screen.findByText(/never reached the engine/),
+      await screen.findByText(/with a web page, not data/),
     ).toBeInTheDocument();
     expect(goNext).not.toHaveBeenCalled();
   });

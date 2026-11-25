@@ -2,6 +2,7 @@ import { RbacProtected } from '@/core/components/RbacProtected';
 import type { UI_DISPLAY_ACTIONS_TYPE } from '@/core/components/RbacProtected/hooks/rbac.constants';
 import {
   IconArrowBounce,
+  IconArrowsExchange,
   IconBookmark,
   IconBooks,
   IconChartDots,
@@ -65,11 +66,17 @@ const observeItems = (hyperdxUrl?: string): SidebarNavItem[] =>
           icon: <IconLayoutGrid />,
           actions: [rbacActions.dashboard_read],
         },
-        // Hunt Results is a saved-search view over dfe.detection, so it sits
-        // with the dashboards it reads like, last of the observe group.
+      ]
+    : [];
+
+// The search over dfe.detection, listed under Detect beside the hunts that
+// write it. It is a HyperDX embed, so it needs the HyperDX URL too.
+const detectionItems = (hyperdxUrl?: string): SidebarNavItem[] =>
+  hyperdxUrl
+    ? [
         {
           key: '/observe/hunt-results',
-          label: 'Hunt Results',
+          label: 'Detections',
           icon: <IconRadar />,
           actions: [rbacActions.dashboard_read],
         },
@@ -82,9 +89,9 @@ const observeItems = (hyperdxUrl?: string): SidebarNavItem[] =>
  *
  * Observe is where the data is looked at. Data flow defines what comes in, how
  * it is transformed and where it lands. Detect defines what to look for, and
- * Stack is what is running. Each group is one RBAC family, so
- * a user sees a heading exactly when at least one destination under it is
- * theirs.
+ * Stack is what is running. A user sees a heading exactly when at least one
+ * destination under it is theirs. Detections is the one entry whose action
+ * belongs to another group's family (dashboard_read, Observe's).
  *
  * Entries are DATA. One renderer draws every one of them, so a destination is a
  * row added here rather than another copy of the RbacProtected wrapper.
@@ -148,6 +155,17 @@ export const buildSidebarMenuGroups = (
           rbacActions.hunt_read,
           rbacActions.hunt_write,
           rbacActions.hunt_delete,
+        ],
+      },
+      ...detectionItems(hyperdxUrl),
+      {
+        key: '/field-maps',
+        label: 'Field Maps',
+        icon: <IconArrowsExchange />,
+        actions: [
+          rbacActions.fieldmap_read,
+          rbacActions.fieldmap_write,
+          rbacActions.fieldmap_delete,
         ],
       },
     ],

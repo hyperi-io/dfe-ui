@@ -44,6 +44,7 @@ const CONSOLE_RULES: Record<string, Validator> = {
   'ReauthRequest.target': STORE_NAME_VALIDATOR,
   'HuntCreateRequest.name': RULE_HUNT_NAME_VALIDATOR,
   'RuleCreateRequest.name': RULE_HUNT_NAME_VALIDATOR,
+  'RuleV2CreateRequest.name': RULE_HUNT_NAME_VALIDATOR,
 };
 
 /**

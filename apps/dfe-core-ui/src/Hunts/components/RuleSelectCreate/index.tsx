@@ -1,11 +1,19 @@
-import { CreateRuleDrawer } from '@/core/components/CreateRuleDrawer';
+import { CreateCustomRuleDrawer } from '@/core/components/CreateCustomRuleDrawer';
 import { RbacProtected } from '@/core/components/RbacProtected';
 import { ListRulesProvider } from '@/core/contexts/ListRulesContext';
 import { useFetchInfiniteFilteredRules } from '@/core/hooks/useFetchInfiniteFilteredRules';
 import { Select, SelectProps } from 'antd';
 import { useMemo, useState } from 'react';
 
-export const RuleSelect = ({ value, ...props }: SelectProps) => {
+interface RuleSelectProps extends SelectProps {
+  showCreate?: boolean;
+}
+
+export const RuleSelect = ({
+  value,
+  showCreate = true,
+  ...props
+}: RuleSelectProps) => {
   const [ruleValue, setRuleValue] = useState<string[] | null>(value ?? null);
   const {
     data: { items: rules = [] } = {},
@@ -47,16 +55,19 @@ export const RuleSelect = ({ value, ...props }: SelectProps) => {
             loading={isLoading}
             disabled={isLoading || !!error}
             onChange={handleChange}
-            mode="tags"
           />
-          <ListRulesProvider>
-            <CreateRuleDrawer
-              onSuccess={(response) => {
-                handleChange([...(ruleValue ?? []), response.rule.name]);
-              }}
-              redirectOnCreate={false}
-            />
-          </ListRulesProvider>
+          {showCreate && (
+            <ListRulesProvider>
+              <CreateCustomRuleDrawer
+                onSuccess={(response) => {
+                  handleChange([...(ruleValue ?? []), response.rule.name]);
+                }}
+                redirectOnCreate={false}
+                button={{ type: 'default' }}
+                showCreateFromSearch={true}
+              />
+            </ListRulesProvider>
+          )}
         </div>
       </RbacProtected.Unrestricted>
       <RbacProtected.Restricted tooltip={{ show: true }}>

@@ -46,7 +46,6 @@ describe('SidebarMenu', () => {
         'Saved Searches',
         'Chart Explorer',
         'Dashboards',
-        'Hunt Results',
         // Data flow
         'Sources',
         'Meta Schemas',
@@ -54,6 +53,8 @@ describe('SidebarMenu', () => {
         // Detect
         'Rules',
         'Hunts',
+        'Detections',
+        'Field Maps',
         // Stack
         'Components',
         'Admin Tools',
@@ -73,6 +74,65 @@ describe('SidebarMenu', () => {
         await screen.findByRole('link', { name: 'Admin Tools' }),
       ).toHaveAttribute('href', '/admin-tools');
     });
+
+    it('shows Field Maps to a role holding fieldmap:read', async () => {
+      server.use(
+        API_CONFIG_MOCKS.auth.me.get.success({
+          mockedResponse: meWithPermissions(['fieldmap:read']),
+        }),
+      );
+
+      render(<SidebarMenu collapsed={false} />, { wrapper });
+
+      expect(
+        await screen.findByRole('link', { name: 'Field Maps' }),
+      ).toHaveAttribute('href', '/field-maps');
+    });
+
+    it('hides Field Maps from a role without a fieldmap action', async () => {
+      server.use(
+        API_CONFIG_MOCKS.auth.me.get.success({
+          mockedResponse: meWithPermissions(['rule:read']),
+        }),
+      );
+
+      render(<SidebarMenu collapsed={false} />, { wrapper });
+
+      expect(
+        await screen.findByRole('link', { name: 'Rules' }),
+      ).toBeInTheDocument();
+      expect(screen.queryByRole('link', { name: 'Field Maps' })).toBeNull();
+    });
+
+    // Detections asks for dashboard:read, unlike the rest of Detect, so either
+    // family alone shows the Detect heading over a different set of links.
+    it.each([
+      {
+        permission: 'dashboard:read',
+        shown: 'Detections',
+        hidden: 'Hunts',
+      },
+      { permission: 'hunt:read', shown: 'Hunts', hidden: 'Detections' },
+    ])(
+      'shows $shown under Detect, not $hidden, to a role holding only $permission',
+      async ({ permission, shown, hidden }) => {
+        server.use(
+          API_CONFIG_MOCKS.auth.me.get.success({
+            mockedResponse: meWithPermissions([permission]),
+          }),
+        );
+
+        render(<SidebarMenu collapsed={false} />, { wrapper });
+
+        expect(
+          await screen.findByRole('link', { name: shown }),
+        ).toBeInTheDocument();
+        expect(screen.queryByRole('link', { name: hidden })).toBeNull();
+        expect(
+          screen.getAllByRole('presentation').map((item) => item.textContent),
+        ).toContain('Detect');
+      },
+    );
 
     it('never shows Admin Tools to a role that only reads deployments', async () => {
       server.use(

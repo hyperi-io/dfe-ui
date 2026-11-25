@@ -1,0 +1,151 @@
+import { CustomScrollbar } from '@/core/components/CustomScrollbar';
+import { EmptyDetail } from '@/core/components/EmptyDetail';
+import { GenericErrorCard } from '@/core/components/GenericError';
+import { NotificationCard } from '@/core/components/NotificationCard';
+import { useListRulesContext } from '@/core/contexts/ListRulesContextV2';
+import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
+import { useFetchRuleDetail } from '@/RulesV2/hooks/useFetchRuleDetail';
+import { IconAlertCircle } from '@repo/dfe-icons';
+import { cn } from '@repo/dfe-shared-ui';
+import { Spin } from 'antd';
+import { HuntBanner } from './HuntBanner';
+import { RuleDetailActionMenu } from './RuleDetailActionMenu';
+
+const dataListTermStyle =
+  'font-medium text-foreground/40 dark:text-dark-foreground/40';
+
+export const ViewRuleDetail = () => {
+  const { selectedRuleName } = useListRulesContext();
+  const {
+    data: ruleDetail,
+    isLoading,
+    error,
+  } = useFetchRuleDetail({
+    name: selectedRuleName,
+  });
+
+  const { componentHeight } = useSetComponentHeight({
+    offset: 100,
+  });
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <Spin />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <GenericErrorCard
+        title="Error fetching rule detail"
+        description={error.message}
+      />
+    );
+  }
+
+  if (!ruleDetail) {
+    return (
+      <EmptyDetail
+        title="No rule selected"
+        description="Select a rule from the list to view its configuration."
+      />
+    );
+  }
+
+  return (
+    <CustomScrollbar height={componentHeight} className="flex flex-col gap-4">
+      <div className="flex items-center justify-between">
+        <h4 className="flex items-center w-full gap-2 text-lg font-medium">
+          <span className="text-foreground/50 dark:text-dark-foreground/50">
+            Rule Configuration:
+          </span>{' '}
+          {ruleDetail.display_name}
+        </h4>
+        <RuleDetailActionMenu rule={ruleDetail} />
+      </div>
+      <div className="flex flex-col gap-4">
+        <HuntBanner ruleName={selectedRuleName ?? ''} />
+        <dl className="grid grid-cols-[140px_1fr_140px_1fr] gap-x-6 gap-y-1">
+          <dt className={dataListTermStyle}>Name:</dt>
+          <dd>{ruleDetail.name}</dd>
+          <dt className={dataListTermStyle}>Severity:</dt>
+          <dd>{ruleDetail.severity}</dd>
+          {ruleDetail.description && (
+            <>
+              <dt className={dataListTermStyle}>Description:</dt>
+              <dd className="col-span-3">{ruleDetail.description}</dd>
+            </>
+          )}
+          {ruleDetail.where_clause && (
+            <>
+              <dt className={dataListTermStyle}>Where Clause:</dt>
+              <dd
+                className={cn(
+                  'text-xs font-mono bg-foreground/5 dark:bg-dark-foreground/5 p-2 rounded-md',
+                  !ruleDetail.cel_filter && 'col-span-3',
+                )}
+              >
+                {ruleDetail.where_clause}
+              </dd>
+            </>
+          )}
+          {ruleDetail.cel_filter && (
+            <>
+              <dt className={dataListTermStyle}>CEL Filter:</dt>
+              <dd
+                className={cn(
+                  'text-xs font-mono bg-foreground/5 dark:bg-dark-foreground/5 p-2 rounded-md',
+                  !ruleDetail.where_clause && 'col-span-3',
+                )}
+              >
+                {ruleDetail.cel_filter}
+              </dd>
+            </>
+          )}
+        </dl>
+      </div>
+
+      {ruleDetail.warnings && ruleDetail.warnings.length > 0 && (
+        <NotificationCard
+          title={
+            <span className="flex items-center gap-x-2">
+              <IconAlertCircle /> Warnings
+            </span>
+          }
+          description={
+            <>
+              <ul className="text-xs list-disc list-inside ">
+                {ruleDetail.warnings.map((warning) => (
+                  <li key={warning}>{warning}</li>
+                ))}
+              </ul>
+            </>
+          }
+          type="warning"
+        />
+      )}
+
+      {ruleDetail.sql_errors && ruleDetail.sql_errors.length > 0 && (
+        <NotificationCard
+          title={
+            <span className="flex items-center gap-x-2">
+              <IconAlertCircle /> SQL Errors
+            </span>
+          }
+          description={
+            <>
+              <ul className="text-xs list-disc list-inside ">
+                {ruleDetail.sql_errors.map((error) => (
+                  <li key={error.message}>{error.message}</li>
+                ))}
+              </ul>
+            </>
+          }
+          type="error"
+        />
+      )}
+    </CustomScrollbar>
+  );
+};
