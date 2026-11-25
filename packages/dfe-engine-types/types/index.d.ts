@@ -7562,7 +7562,7 @@ export interface components {
             data_stream: string;
             /**
              * Dataset
-             * @description package.data_stream - what a Beats event stamps
+             * @description package.data_stream, the dataset a Beats event carries in data_stream.dataset (Elastic Agent) or event.dataset (plain Filebeat)
              */
             dataset: string;
             /**
@@ -11190,6 +11190,27 @@ export interface components {
          */
         ManagedBy: "dfe" | "provider" | "external";
         /**
+         * MatchTest
+         * @description One branch of an any group a sample was filtered on.
+         */
+        MatchTest: {
+            /**
+             * Field
+             * @description Field the branch reads, a dotted path into the record
+             */
+            field: string;
+            /**
+             * Operator
+             * @description How the branch compares the field (equals, includes, ...)
+             */
+            operator: string;
+            /**
+             * Value
+             * @description Value the branch compares with, null for exists
+             */
+            value?: string | null;
+        };
+        /**
          * MeshFacts
          * @description Whether this deployment's stage pools sit behind balancing listeners.
          */
@@ -14358,7 +14379,7 @@ export interface components {
             table: string;
             /**
              * Match Field
-             * @description Match field rows were filtered on, or null when the source owns its own table (whole-table sample).
+             * @description Match field rows were filtered on, or null when the source owns its own table (whole-table sample) or the match is an any group (see match_any).
              */
             match_field?: string | null;
             /**
@@ -14371,6 +14392,11 @@ export interface components {
              * @description Match operator used when filtering (equals, exists, includes, ...).
              */
             match_operator?: string | null;
+            /**
+             * Match Any
+             * @description The branches of an any group rows were filtered on: a row is kept when any one holds. Empty for a single test, a whole-table sample or a source that owns its table.
+             */
+            match_any?: components["schemas"]["MatchTest"][];
             /**
              * Columns
              * @description Column names present in the sampled rows.
