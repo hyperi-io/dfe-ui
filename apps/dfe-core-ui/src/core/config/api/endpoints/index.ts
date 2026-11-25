@@ -54,6 +54,7 @@ export const API_CONFIG = Object.freeze({
     default: '/api/v1/rules-v2',
     validate: '/api/v1/rules-v2/validate',
     rule: '/api/v1/rules-v2/{name}',
+    run: '/api/v1/rules-v2/{name}/run',
   },
   alerts: {
     destinations: '/api/v1/alerts/destinations',
