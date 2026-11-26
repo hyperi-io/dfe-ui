@@ -23,7 +23,11 @@ export const EnableDisableOrganisation = ({
   const icon = enabled ? <IconBan /> : <IconCircleCheck />;
 
   // Disabling or enabling moves every account of the org, so it asks for the password.
-  const reauth = useReauthGrant(org_name, 'org');
+  const reauth = useReauthGrant(
+    org_name,
+    'org',
+    enabled ? 'disable' : 'enable',
+  );
   const { mutate, isPending, error, reset } = useUpdateOrganisation({
     org_name,
     reauth: reauth.grant,

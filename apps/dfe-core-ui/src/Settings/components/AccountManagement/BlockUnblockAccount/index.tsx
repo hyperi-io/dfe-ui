@@ -21,7 +21,11 @@ export const BlockUnblockAccount = ({
   const isEnabled = !isBlocked;
 
   // Every change asks for the password again.
-  const reauth = useReauthGrant(username);
+  const reauth = useReauthGrant(
+    username,
+    'account',
+    isBlocked ? 'unblock' : 'block',
+  );
   const { mutate, isPending, error, reset } = useUpdateAccount({
     reauth: reauth.grant,
     username,
