@@ -3,12 +3,14 @@ import {
   chooseCredentialSource,
   SOURCE_SWITCH_TEST_TIMEOUT_MS,
 } from '@/core/components/CredentialField/CredentialField.mocks';
+import { listedOrgs } from '@/core/components/OrgChoiceFormItem/OrgChoiceFormItem.mocks';
 import { ADMIN_MOCKED_RESPONSE } from '@/core/components/RbacProtected/hooks/hooks.mocks';
 import { API_CONFIG_MOCKS } from '@/core/config/api/endpoints/generator';
 import { GOOGLE_SERVICE_ACCOUNT_HINT } from '@/core/constants/oidcProviders.constants';
 import { useAuthStore } from '@/core/stores/authStore';
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
 import { expectFieldError } from '@/core/utils/test-utils/expectFieldError';
+import { expectLabelTooltip } from '@/core/utils/test-utils/expectLabelTooltip';
 import { UpdateOidcProviderDrawer } from '@/Settings/components/OidcProviderManagement/UpdateOidcDrawer';
 import { TOidcProviderListItem } from '@/Settings/hooks/oidcProviders/useFetchInfiniteFilteredOidcProviders/types';
 import { render, screen, waitFor } from '@testing-library/react';
@@ -121,6 +123,10 @@ const groupsRequest = ({
 const onPut = vi.fn();
 
 const server = setupServer(
+  listedOrgs,
+  API_CONFIG_MOCKS.system.organisation.get.success({
+    mockedResponse: { name: 'hyperi', display_name: 'HyperI' },
+  }),
   API_CONFIG_MOCKS.auth.reauth.post.success(),
   API_CONFIG_MOCKS.auth.me.get.success({
     mockedResponse: ADMIN_MOCKED_RESPONSE,
@@ -168,7 +174,6 @@ const openEditDrawer = async (provider: TOidcProviderListItem) => {
       { timeout: 15_000 },
     ),
   );
-  await confirmReauth(user);
   await screen.findByRole('button', { hidden: true, name: 'Update' });
   return user;
 };
@@ -243,6 +248,43 @@ describe(
   'UpdateOidcProviderDrawer',
   { timeout: SOURCE_SWITCH_TEST_TIMEOUT_MS },
   () => {
+    test('opens without a password prompt and asks only when the engine says the save needs it', async () => {
+      const grants: (string | null)[] = [];
+      server.use(
+        http.put(
+          API_CONFIG_MOCKS.oidcProviders.provider.mockedUrl.replace(
+            '{name}',
+            ':name',
+          ),
+          ({ request }) => {
+            const grant = request.headers.get('X-DFE-Reauth');
+            grants.push(grant);
+            return grant
+              ? HttpResponse.json(OKTA)
+              : HttpResponse.json(
+                  {
+                    title: 'Forbidden',
+                    code: 'reauth_required',
+                    detail: 'Confirm it is you',
+                  },
+                  { status: 403 },
+                );
+          },
+        ),
+      );
+      const user = await openEditDrawer(OKTA);
+      expect(screen.queryByLabelText('Your password')).not.toBeInTheDocument();
+
+      await user.click(
+        screen.getByRole('button', { hidden: true, name: 'Update' }),
+      );
+      await confirmReauth(user);
+
+      await waitFor(() => expect(grants).toHaveLength(2), { timeout: 15_000 });
+      expect(grants[0]).toBeNull();
+      expect(grants[1]).toBeTruthy();
+    });
+
     test('an unedited save sends no credential, so the engine keeps each as stored', async () => {
       const user = await openEditDrawer(OKTA);
       const { api_token_env: _token, ...unchangedGroups } = groupsRequest(
@@ -508,8 +550,20 @@ describe(
       expect(body.groups).not.toHaveProperty('admin_email');
     });
 
+    // A provider stays in its organisation: the edit shows which and sends none.
+    test.each([
+      { org: '', shown: 'HyperI (your organisation)' },
+      { org: 'acme', shown: 'Acme Corp' },
+    ])('the organisation shows read-only as $shown', async ({ org, shown }) => {
+      await openEditDrawer({ ...OKTA, org });
+
+      const field = screen.getByLabelText('Organisation');
+      expect(field).toBeDisabled();
+      await waitFor(() => expect(field).toHaveValue(shown));
+    });
+
     test('Google shows only its own group fields, with no admin email', async () => {
-      await openEditDrawer(GOOGLE);
+      const user = await openEditDrawer(GOOGLE);
 
       expect(field('groups_domain')).toBeInTheDocument();
       expect(screen.getByLabelText('Service Account JSON')).toBeInTheDocument();
@@ -523,7 +577,11 @@ describe(
       for (const label of ['Tenant ID', 'Directory Secret', 'API Token']) {
         expect(screen.queryByLabelText(label)).not.toBeInTheDocument();
       }
-      expect(screen.getByText(GOOGLE_SERVICE_ACCOUNT_HINT)).toBeInTheDocument();
+      await expectLabelTooltip(
+        user,
+        'Service Account JSON',
+        GOOGLE_SERVICE_ACCOUNT_HINT,
+      );
     });
 
     test('the stored scopes show as a list and an unedited save leaves them out', async () => {

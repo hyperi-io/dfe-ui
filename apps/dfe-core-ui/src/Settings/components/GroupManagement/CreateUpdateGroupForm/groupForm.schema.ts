@@ -24,22 +24,14 @@ export const createGroupFormSchema = (stored: GroupSourceLink) =>
         .refine((v) => STORE_NAME_VALIDATOR.regex.test(v), {
           message: STORE_NAME_VALIDATOR.message('Name'),
         }),
-      description: z.string(),
+      // Defaulted fields are optional, so the form marks no asterisk on them.
+      description: z.string().default(''),
       roles: z.array(z.string()).min(1, { message: 'Roles are required' }),
       members: z.array(z.string()).optional(),
-      scope: z.enum(['org', 'system']),
-      organisation: z.string().optional(),
-      source_id: z.string(),
-      source_provider: z.string(),
+      source_id: z.string().default(''),
+      source_provider: z.string().default(''),
     })
     .superRefine((data, ctx) => {
-      if (data.scope === 'org' && !data.organisation?.trim()) {
-        ctx.addIssue({
-          code: 'custom',
-          message: 'Organisation is required',
-          path: ['organisation'],
-        });
-      }
       const isSourceIdChanged = isSourceLinkFieldChanged(
         data.source_id,
         stored.source_id,

@@ -13,9 +13,9 @@ import { useState } from 'react';
 
 export const CreateGroupDrawer = () => {
   const [isOpen, setIsOpen] = useState(false);
-  // The grant names the group it creates, so it is asked for at submit.
+  // The grant names the group it creates, so it is asked for once the engine wants it.
   const [newGroup, setNewGroup] = useState('');
-  const reauth = useReauthGrant(newGroup, 'group');
+  const reauth = useReauthGrant(newGroup, 'group', 'create');
   const [api, contextHolder] = notification.useNotification();
 
   const {
@@ -43,7 +43,14 @@ export const CreateGroupDrawer = () => {
   const handleCreateGroup = (values: CreateUpdateGroupFormData) => {
     const body = createGroupTransformFormDataToRequest(values);
     setNewGroup(body.name);
-    reauth.ask(() => createGroup(body));
+    // The engine refuses a create that cannot land before it asks for the password.
+    createGroup(body, {
+      onError: (refusal) => {
+        if (reauth.askIfRequired(refusal, () => createGroup(body))) {
+          resetCreateGroup();
+        }
+      },
+    });
   };
 
   return (

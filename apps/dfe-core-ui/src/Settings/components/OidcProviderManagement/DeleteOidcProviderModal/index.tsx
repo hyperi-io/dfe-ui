@@ -1,14 +1,10 @@
-import { useReauthGrant } from '@/core/hooks/useReauthGrant';
 import { Modal } from '@/core/components/Modal';
 import { RbacProtected } from '@/core/components/RbacProtected';
 import { useDeleteOidcProvider } from '@/Settings/hooks/oidcProviders/useDeleteOidcProvider';
 import { IconTrash } from '@repo/dfe-icons';
 import { App, Button } from 'antd';
-import { useState } from 'react';
-import {
-  DeleteOidcProviderForm,
-  DeleteOidcProviderFormData,
-} from './DeleteOidcProviderForm';
+import { useRef, useState } from 'react';
+import { DeleteOidcProviderForm } from './DeleteOidcProviderForm';
 
 interface DeleteOidcProviderModalProps {
   oidcProviderName: string;
@@ -21,14 +17,15 @@ export const DeleteOidcProviderModal = ({
   onSuccess,
   disabled,
 }: DeleteOidcProviderModalProps) => {
-  const reauth = useReauthGrant(oidcProviderName, 'provider');
   const [open, setOpen] = useState(false);
   const { notification } = App.useApp();
 
-  const { mutate, isPending, error } = useDeleteOidcProvider({
-    reauth: reauth.grant,
+  // Every delete asks for the password again.
+  const grant = useRef<string>(undefined);
+  const { mutate, isPending, error, reset } = useDeleteOidcProvider({
+    reauth: () => grant.current,
     onSuccess: () => {
-      reauth.drop();
+      grant.current = undefined;
       onSuccess?.();
       setOpen(false);
       notification.success({
@@ -42,13 +39,14 @@ export const DeleteOidcProviderModal = ({
       });
     },
   });
-  const handleDeleteOidcProvider = (values: DeleteOidcProviderFormData) => {
-    mutate(values.oidcProviderName);
+
+  const close = () => {
+    reset();
+    setOpen(false);
   };
 
   return (
     <>
-      {reauth.modal}
       <RbacProtected action={RbacProtected.rbacActions.oidc_delete}>
         <RbacProtected.Unrestricted>
           <Button
@@ -56,7 +54,7 @@ export const DeleteOidcProviderModal = ({
             className="hover:text-error hover:bg-error/5"
             aria-label={`Delete ${oidcProviderName}`}
             icon={<IconTrash />}
-            onClick={() => reauth.ask(() => setOpen(true))}
+            onClick={() => setOpen(true)}
             disabled={disabled}
           >
             Delete OIDC Provider
@@ -68,7 +66,7 @@ export const DeleteOidcProviderModal = ({
             className="hover:text-error hover:bg-error/5"
             aria-label={`Delete ${oidcProviderName}`}
             icon={<IconTrash />}
-            onClick={() => reauth.ask(() => setOpen(true))}
+            onClick={() => setOpen(true)}
             disabled
           >
             Delete OIDC Provider
@@ -77,16 +75,20 @@ export const DeleteOidcProviderModal = ({
       </RbacProtected>
 
       <Modal
-        title="Delete OIDC Provider"
+        title={`Delete ${oidcProviderName}?`}
         open={open}
-        onCancel={() => setOpen(false)}
+        onCancel={close}
         footer={null}
+        destroyOnHidden
       >
         <DeleteOidcProviderForm
-          onFinish={handleDeleteOidcProvider}
+          onConfirm={(granted) => {
+            grant.current = granted;
+            mutate(oidcProviderName);
+          }}
           error={error}
           isPending={isPending}
-          onCancel={() => setOpen(false)}
+          onCancel={close}
           oidcProviderName={oidcProviderName}
         />
       </Modal>

@@ -43,6 +43,7 @@ const account = (
   oidc_type: 'string',
   admin: false,
   org_display_name: '',
+  org_enabled: true,
   enabled: true,
   blocked: false,
   disabled_at: '',
@@ -58,6 +59,7 @@ const account = (
   org: '',
   created_at: '2026-01-01T00:00:00Z',
   updated_at: '2026-01-01T00:00:00Z',
+  last_login_at: '',
   ...overrides,
 });
 

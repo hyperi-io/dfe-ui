@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test';
 
 import { TAGS } from '@e2e/config/tags.constants';
 import { prepareJourneyStack } from '@e2e/config/journey.helpers';
-import { confirmItsYou } from '@e2e/config/login.helpers';
+import { adminPassword, confirmItsYou } from '@e2e/config/login.helpers';
 
 import {
   ADMIN,
@@ -92,7 +92,8 @@ test.describe('jset: API keys', { tag: [TAGS.core, TAGS.settings] }, () => {
     await row
       .getByRole('button', { name: 'Revoke API Key', exact: true })
       .click();
-    const revoke = page.getByRole('dialog').filter({ hasText: name });
+    const revoke = page.getByRole('dialog', { name: `Revoke ${name}?` });
+    await revoke.getByLabel('Your password').fill(adminPassword());
     await revoke
       .getByRole('button', { name: 'Revoke API Key', exact: true })
       .click();

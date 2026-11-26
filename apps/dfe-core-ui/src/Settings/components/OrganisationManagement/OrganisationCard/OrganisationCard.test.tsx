@@ -33,6 +33,38 @@ const openMenu = async (organisation: Partial<TOrganisationListSummary>) => {
 
 describe('OrganisationCard', () => {
   test.each([
+    {
+      org_ids: ['acme', 'acme-eu'],
+      shown: ['acme', 'acme-eu'],
+      hidden: [],
+    },
+    { org_ids: [], shown: ['No organisation IDs'], hidden: [] },
+    {
+      org_ids: ['a1', 'a2', 'a3', 'a4', 'a5', 'a6'],
+      shown: ['a1', 'a2', 'a3', '+ 3 more'],
+      hidden: ['a4', 'a5', 'a6'],
+    },
+  ])('shows its organisation IDs $org_ids', ({ org_ids, shown, hidden }) => {
+    render(
+      <OrganisationCard
+        organisation={
+          {
+            name: 'acme',
+            display_name: 'Acme',
+            org_ids,
+          } as TOrganisationListSummary
+        }
+      />,
+      { wrapper },
+    );
+
+    shown.forEach((text) => expect(screen.getByText(text)).toBeVisible());
+    hidden.forEach((text) =>
+      expect(screen.queryByText(text)).not.toBeInTheDocument(),
+    );
+  });
+
+  test.each([
     { name: 'acme', display_name: 'Acme', org_ids: ['acme'] },
     { name: 'bare', display_name: 'Bare', org_ids: [] },
     { name: 'default', display_name: 'Default', org_ids: ['default'] },

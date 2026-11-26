@@ -1,32 +1,31 @@
 import { ApiErrorNotification } from '@/core/components/ApiErrorNotification';
 import { Form } from '@/core/components/Form';
-import {
-  chosenOrg,
-  ORG_CHOICE_NAME,
-  OrgChoiceFormItem,
-  orgChoiceOf,
-  type TOrgChoice,
-} from '@/core/components/OrgChoiceFormItem';
+import { OrganisationSelect } from '@/core/components/OrganisationSelect';
 import {
   OidcGroupFields,
   OidcLoginFields,
   useOidcProviderTypeChange,
 } from '@/core/components/OidcProviderFields';
-import { SimpleCollapse } from '@/core/components/SimpleCollapse';
 import {
   PROVIDERS,
   PROVIDERS_MAP,
 } from '@/core/constants/oidcProviders.constants';
 import { trustableEmailDomain } from '@/core/helpers/oidcProviders.helpers';
+import { useAdministeredOrg } from '@/core/hooks/useAdministeredOrg';
 import { useApiFieldErrors } from '@/core/hooks/useApiFieldErrors';
 import { useFetchCurrentUser } from '@/core/hooks/useFetchCurrentUser';
+import { useFetchYourOrganisation } from '@/core/hooks/useFetchYourOrganisation';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
 import {
   buildOidcProviderSchema,
   CreateUpdateOidcProviderFormData,
 } from '@/core/validationSchemas/oidcProviders.schema';
-import { Button, FormProps, Select, Switch } from 'antd';
+import { useOrganisationLabels } from '@/Settings/hooks/organisations/useOrganisationLabels';
+import { Button, FormProps, Input, Select, Switch } from 'antd';
 import { useMemo } from 'react';
+
+/** Where a provider's organisation comes from: yours, a customer's picked in the form, or the stored one an edit shows and keeps. */
+export type TProviderOrgScope = 'customer' | 'stored' | 'yours';
 
 interface CreateUpdateOidcProviderFormProps extends FormProps {
   disabledFields?: {
@@ -41,9 +40,60 @@ interface CreateUpdateOidcProviderFormProps extends FormProps {
   onFinish: (values: CreateUpdateOidcProviderFormData) => void;
   /** A domain to offer while Trusted Email Domains is empty. */
   suggestedDomain?: string;
+  orgScope: TProviderOrgScope;
 }
 
-const PROVIDER_ORG_CHOICES: readonly TOrgChoice[] = ['none', 'customer'];
+const ORG_HINTS: Record<TProviderOrgScope, string> = {
+  customer: "Signs in this organisation's accounts, not yours.",
+  stored:
+    'A provider stays in its organisation. To move it, delete it and create it again.',
+  yours: "Signs in your organisation's accounts.",
+};
+
+/** The org a your-organisation provider is created in: an org admin's own, else none, which signs people into yours. */
+const useYourProviderOrg = () => useAdministeredOrg() ?? '';
+
+/** The provider's organisation: a required picker for a customer's, else the organisation shown read-only. */
+const ProviderOrgField = ({
+  scope,
+  storedOrg,
+}: {
+  scope: TProviderOrgScope;
+  storedOrg: string;
+}) => {
+  const yourProviderOrg = useYourProviderOrg();
+  const { data: yourOrg } = useFetchYourOrganisation();
+  const { isYours, orgLabel, yourLabel } = useOrganisationLabels();
+
+  if (scope === 'customer') {
+    return (
+      <Form.Item
+        name="org"
+        label="Organisation"
+        extra={ORG_HINTS.customer}
+        rules={[{ required: true, message: 'Select an organisation' }]}
+      >
+        <OrganisationSelect
+          aria-label="Organisation"
+          currentOrganisation={yourOrg?.name ?? undefined}
+          placeholder="Pick an organisation"
+        />
+      </Form.Item>
+    );
+  }
+  const org = scope === 'yours' ? yourProviderOrg : storedOrg;
+  return (
+    <Form.Item label="Organisation" extra={ORG_HINTS[scope]}>
+      <Input
+        aria-label="Organisation"
+        disabled
+        value={
+          isYours(org) ? `${yourLabel} (your organisation)` : orgLabel(org)
+        }
+      />
+    </Form.Item>
+  );
+};
 
 export const CreateUpdateOidcProviderForm = ({
   disabledFields,
@@ -53,10 +103,12 @@ export const CreateUpdateOidcProviderForm = ({
   isPending = false,
   error,
   initialValues,
+  orgScope,
   suggestedDomain,
   ...props
 }: CreateUpdateOidcProviderFormProps) => {
   const [form] = Form.useForm();
+  const yourProviderOrg = useYourProviderOrg();
   const { changeType, issuerBuilder } = useOidcProviderTypeChange({ form });
   useApiFieldErrors({ error, form });
   const loginSecretPath = initialValues?.client_secret_path;
@@ -75,15 +127,11 @@ export const CreateUpdateOidcProviderForm = ({
   );
   const formValidation = useAntdZodResolver(schema);
 
-  const handleFinish = ({
-    org_choice,
-    ...values
-  }: CreateUpdateOidcProviderFormData & { org_choice?: TOrgChoice }) => {
-    onFinish?.({
-      ...values,
-      org: chosenOrg({ choice: org_choice, org: values.org, ownOrg: '' }),
-    });
-  };
+  // A customer's org is a field of its own, and an edit sends none, so it never moves.
+  const handleFinish = (values: CreateUpdateOidcProviderFormData) =>
+    onFinish(
+      orgScope === 'yours' ? { ...values, org: yourProviderOrg } : values,
+    );
 
   return (
     <Form
@@ -95,19 +143,11 @@ export const CreateUpdateOidcProviderForm = ({
         client_secret_env: '',
         ...PROVIDERS_MAP['google']?.initialValues,
         ...initialValues,
-        // A new provider's organisation is picked on purpose, never defaulted.
-        ...(initialValues?.name
-          ? {
-              [ORG_CHOICE_NAME]: orgChoiceOf({
-                allowsNone: true,
-                org: initialValues.org,
-                yourOrg: undefined,
-              }),
-            }
-          : {}),
       }}
       onFinish={handleFinish}
     >
+      <ProviderOrgField scope={orgScope} storedOrg={initialValues?.org ?? ''} />
+
       <div className="flex gap-2">
         <Form.Item
           className="grow"
@@ -134,11 +174,6 @@ export const CreateUpdateOidcProviderForm = ({
         </Form.Item>
       </div>
 
-      <OrgChoiceFormItem
-        choices={PROVIDER_ORG_CHOICES}
-        noneLabel="Platform provider: signs in your organisation's accounts"
-      />
-
       <div className="grid grid-cols-2 gap-4">
         <OidcLoginFields
           rule={formValidation}
@@ -146,23 +181,19 @@ export const CreateUpdateOidcProviderForm = ({
           disabledFields={disabledFields}
           hasStoredScopes={!!initialValues?.scopes?.length}
           suggestedDomain={suggestedDomain}
+          suggestsNames={!disabledFields?.name}
         />
       </div>
 
-      <SimpleCollapse
-        title="Groups"
-        classNames={{
-          // No side padding, so the group fields line up with the fields above.
-          container: 'px-0',
-          content: 'grid grid-cols-2 gap-4',
-        }}
-        defaultOpen={true}
-      >
-        <OidcGroupFields
-          rule={formValidation}
-          derivesFromIssuer={!disabledFields?.issuer}
-        />
-      </SimpleCollapse>
+      <section className="flex flex-col gap-2" aria-label="Groups">
+        <h2 className="font-medium">Groups</h2>
+        <div className="grid grid-cols-2 gap-4">
+          <OidcGroupFields
+            rule={formValidation}
+            derivesFromIssuer={!disabledFields?.issuer}
+          />
+        </div>
+      </section>
 
       {error && <ApiErrorNotification error={error} />}
 

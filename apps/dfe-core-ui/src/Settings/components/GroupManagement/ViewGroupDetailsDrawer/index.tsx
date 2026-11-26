@@ -32,7 +32,13 @@ export const ViewGroupDetailsDrawer = ({
         </RbacProtected.Restricted>
       </RbacProtected>
 
-      <Drawer title="Group Details" open={open} onClose={() => setOpen(false)}>
+      <Drawer
+        title="Group Details"
+        open={open}
+        onClose={() => setOpen(false)}
+        // Nothing here is edited, so there is nothing to lose by clicking away.
+        preventClickaway={{ enabled: false }}
+      >
         <ViewGroupDetails group_name={group_name} />
       </Drawer>
     </>

@@ -59,6 +59,7 @@ describe('.useCreateOrganisation', () => {
           isPending: false,
           error: null,
           mutate: expect.any(Function),
+          reset: expect.any(Function),
           data: expectedResponse,
         });
       });

@@ -35,7 +35,12 @@ export const ViewAccountDrawer = ({ username }: { username: string }) => {
         </RbacProtected.Restricted>
       </RbacProtected>
 
-      <Drawer title={title} open={open} onClose={() => setOpen(false)}>
+      <Drawer
+        title={title}
+        open={open}
+        onClose={() => setOpen(false)}
+        preventClickaway={{ enabled: false }}
+      >
         <ViewAccountDetails username={username} />
       </Drawer>
     </>

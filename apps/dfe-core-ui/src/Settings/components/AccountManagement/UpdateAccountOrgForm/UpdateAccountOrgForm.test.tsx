@@ -64,6 +64,7 @@ const kim = (org: string, groups: string[]): TAccountDetailResponse => ({
   oidc_type: '',
   admin: false,
   org_display_name: '',
+  org_enabled: true,
   enabled: true,
   blocked: false,
   disabled_at: '',
@@ -79,6 +80,7 @@ const kim = (org: string, groups: string[]): TAccountDetailResponse => ({
   org,
   created_at: 'string',
   updated_at: 'string',
+  last_login_at: '',
 });
 
 const renderForm = (stored: { groups: string[]; org: string }) => {

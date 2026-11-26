@@ -3,6 +3,7 @@ import { Form } from '@/core/components/Form';
 import { FormNotification } from '@/core/components/FormNotification';
 import { useFetchInfiniteFilteredHunts } from '@/core/hooks/useFetchInfiniteFilteredHunts';
 import { useFetchInfiniteFilteredOrganisations } from '@/core/hooks/useFetchInfiniteFilteredOrganisations';
+import { cn } from '@/core/utils/style';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
 import { ORG_NAME_VALIDATOR } from '@/core/validationSchemas/utils';
 import { IconChevronDown, IconChevronUp } from '@repo/dfe-icons';
@@ -161,14 +162,17 @@ export const CreateUpdateOrganisationForm = ({
     }
   };
 
+  // Set when a refusal put its messages on the field, so a cleared error takes them off again.
+  const refusalShown = useRef(false);
   useEffect(() => {
     const messages = getRefusedOrgIdMessages(
       error,
       form.getFieldValue(ORG_IDS_FIELD),
     );
-    if (messages.length > 0) {
+    if (messages.length > 0 || refusalShown.current) {
       form.setFields([{ name: ORG_IDS_FIELD, errors: messages }]);
     }
+    refusalShown.current = messages.length > 0;
   }, [error, form]);
 
   const held = getHeldOrgIds(error);
@@ -194,7 +198,14 @@ export const CreateUpdateOrganisationForm = ({
             typeof value === 'string' ? value.toLowerCase() : value
           }
         >
-          <Input disabled={disabledFields?.name} placeholder="Enter name" />
+          <Input
+            // A fixed name takes no clicks, so it never shows a caret.
+            className={cn(
+              disabledFields?.name && 'pointer-events-none caret-transparent',
+            )}
+            disabled={disabledFields?.name}
+            placeholder="Enter name"
+          />
         </Form.Item>
       </div>
 
@@ -228,7 +239,7 @@ export const CreateUpdateOrganisationForm = ({
           name="org_ids"
           label="Organisation IDs"
           hidden={!advancedOpen}
-          extra="Records whose _org_id is one of these belong to this organisation. With none, its name is used."
+          tooltip="Records whose _org_id is one of these belong to this organisation. With none, its name is used."
           rules={[formValidation]}
         >
           {/* Tenant IDs matched against the data's _org_id values - free

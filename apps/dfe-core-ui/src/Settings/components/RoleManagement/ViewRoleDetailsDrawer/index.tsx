@@ -23,7 +23,13 @@ export const ViewRoleDetailsDrawer = ({ role_name }: { role_name: string }) => {
         </RbacProtected.Restricted>
       </RbacProtected>
 
-      <Drawer title="Role Details" open={open} onClose={() => setOpen(false)}>
+      <Drawer
+        title="Role Details"
+        open={open}
+        onClose={() => setOpen(false)}
+        // Nothing here is edited, so there is nothing to lose by clicking away.
+        preventClickaway={{ enabled: false }}
+      >
         <ViewRoleDetails role_name={role_name} />
       </Drawer>
     </>

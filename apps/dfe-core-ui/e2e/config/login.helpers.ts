@@ -207,8 +207,21 @@ export const confirmItsYou = async (page: Page) => {
   await reauth.getByRole('button', { name: 'Confirm', exact: true }).click();
 };
 
-/** Take an Invite user dialog on to its Organisation tab and place the account in your organisation. */
-export const chooseYourOrganisation = async (create: Locator) => {
+/** Take an Invite user dialog on to its Organisation tab and place the account in your organisation, in *group*, since an account needs one. */
+export const chooseYourOrganisation = async (
+  create: Locator,
+  group = 'dfe-viewers',
+) => {
   await create.getByRole('button', { name: 'Next', exact: true }).click();
   await create.getByRole('radio', { name: /^Your organisation/ }).check();
+  await create
+    .locator('.ant-select')
+    .filter({ hasText: 'Select groups' })
+    .click();
+  await create.page().keyboard.type(group);
+  await create
+    .page()
+    .locator('.ant-select-dropdown .ant-select-item-option-content')
+    .getByText(group, { exact: true })
+    .click();
 };

@@ -3,6 +3,8 @@ import { ApiErrorNotification } from '@/core/components/ApiErrorNotification';
 import { ProviderBadge } from '@/Settings/components/AccountManagement/ProviderBadge';
 import { RbacProtected } from '@/core/components/RbacProtected';
 import { formatDateXAgo } from '@/core/helpers/date.helpers';
+import { cn } from '@/core/utils/style';
+import { TAG_CLASS } from '@/Settings/components/GroupManagement/GroupCard/TagList';
 import type { TAccountDetailResponse } from '@/Settings/hooks/accounts/useFetchAccountDetail/types';
 import { useUnlinkIdentity } from '@/Settings/hooks/accounts/useUnlinkIdentity';
 import { Button, Popconfirm } from 'antd';
@@ -33,7 +35,12 @@ export const LinkedSignIns = ({
           >
             <span className="flex flex-col">
               <span>
-                <span className="inline-flex items-center gap-1 text-xs bg-foreground/10 dark:bg-dark-foreground/10 rounded-md px-2 py-0.5 mr-2">
+                <span
+                  className={cn(
+                    TAG_CLASS,
+                    'mr-2 inline-flex items-center gap-1',
+                  )}
+                >
                   <ProviderBadge size="small" type={identity.provider_type} />
                   {identity.provider}
                 </span>

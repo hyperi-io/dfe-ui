@@ -1,7 +1,7 @@
 import { server } from '@/core/components/RbacProtected/hooks/hooks.mocks';
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
 import { TOidcProviderListItem } from '@/Settings/hooks/oidcProviders/useFetchInfiniteFilteredOidcProviders/types';
-import { render, screen, within } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterAll, afterEach, beforeAll, describe, expect, test } from 'vitest';
 import { OidcProviderCard } from '.';
@@ -47,11 +47,6 @@ const GOOGLE: TOidcProviderListItem = {
   sync_error: '',
 };
 
-const lastSync = () =>
-  Array.from(document.querySelectorAll('dt')).find(
-    (term) => term.textContent === 'Last Sync:',
-  );
-
 const openActions = async (mode: TOidcProviderListItem['groups']['mode']) => {
   const user = userEvent.setup();
   render(
@@ -63,16 +58,38 @@ const openActions = async (mode: TOidcProviderListItem['groups']['mode']) => {
   await user.click(
     screen.getByRole('button', { name: 'OIDC Provider actions' }),
   );
-  return screen.findAllByRole('listitem');
+  // The card's own tags are list items too, so the actions are read from the menu alone.
+  const menu = await waitFor(() => {
+    const popover = document.querySelector<HTMLElement>('.ant-popover');
+    expect(popover).not.toBeNull();
+    return popover as HTMLElement;
+  });
+  return within(menu).findAllByRole('listitem');
 };
 
 describe('OidcProviderCard last sync', () => {
-  test('shows how the last sync ended, user_token included', () => {
+  test('a sync that ran shows its time on hover', async () => {
+    const user = userEvent.setup();
+    render(
+      <OidcProviderCard oidcProvider={{ ...GOOGLE, last_sync_status: 'ok' }} />,
+      { wrapper },
+    );
+
+    await user.hover(screen.getByText('OK'));
+    expect(await screen.findByText(/^Last sync /)).toBeInTheDocument();
+  });
+
+  test('user_token reads Read at login, with no tooltip for a sync it never ran', async () => {
+    const user = userEvent.setup();
     render(<OidcProviderCard oidcProvider={GOOGLE} />, { wrapper });
 
-    expect(lastSync()).toBeDefined();
     expect(screen.getByText('Read at login')).toBeVisible();
     expect(screen.queryByText('user_token')).not.toBeInTheDocument();
+
+    await user.hover(screen.getByText('Read at login'));
+    await expect(
+      screen.findByRole('tooltip', {}, { timeout: 500 }),
+    ).rejects.toThrow();
   });
 
   test('names the group mode as the forms do', () => {
@@ -90,7 +107,7 @@ describe('OidcProviderCard last sync', () => {
       { wrapper },
     );
 
-    expect(lastSync()).toBeUndefined();
+    expect(screen.queryByText('Read at login')).not.toBeInTheDocument();
   });
 });
 
@@ -121,41 +138,39 @@ describe('OidcProviderCard actions', () => {
   );
 });
 
-describe('OidcProviderCard enabled status', () => {
+describe('OidcProviderCard heading', () => {
   test.each([
-    [true, 'Provider is enabled'],
-    [false, 'Provider is disabled'],
-  ])('enabled=%s shows "%s"', async (enabled, status) => {
-    const user = userEvent.setup();
-    render(<OidcProviderCard oidcProvider={{ ...GOOGLE, enabled }} />, {
+    { enabled: true, disabledTag: false },
+    { enabled: false, disabledTag: true },
+  ])(
+    'enabled=$enabled heads the card with its display name',
+    ({ enabled, disabledTag }) => {
+      render(<OidcProviderCard oidcProvider={{ ...GOOGLE, enabled }} />, {
+        wrapper,
+      });
+
+      const heading = screen.getByRole('heading', { level: 3 });
+      expect(heading).toHaveTextContent(
+        disabledTag ? 'Google WorkspaceDisabled' : 'Google Workspace',
+      );
+      expect(screen.getByText('google')).toBeInTheDocument();
+    },
+  );
+
+  test('shows enrich at login only where the provider does it', () => {
+    const { rerender } = render(<OidcProviderCard oidcProvider={GOOGLE} />, {
       wrapper,
     });
+    expect(screen.getByText('Enriched at login')).toBeVisible();
 
-    await user.hover(screen.getByRole('img', { name: status }));
-
-    expect(
-      await screen.findByRole('tooltip', { name: status }),
-    ).toBeInTheDocument();
-  });
-
-  test('the status sits inside the heading, which stays one run of text', () => {
-    render(<OidcProviderCard oidcProvider={GOOGLE} />, { wrapper });
-
-    const heading = screen.getByRole('heading', { level: 3 });
-    expect(heading).toHaveTextContent('Google Workspace (google)');
-    expect(heading).not.toHaveClass('flex');
-    expect(
-      within(heading).getByRole('img', { name: 'Provider is enabled' }),
-    ).toBeInTheDocument();
-  });
-
-  test('the status is not a control', () => {
-    render(<OidcProviderCard oidcProvider={GOOGLE} />, { wrapper });
-
-    const heading = screen.getByRole('heading', { level: 3 });
-    expect(within(heading).queryByRole('button')).not.toBeInTheDocument();
-    expect(
-      within(heading).getByRole('img', { name: 'Provider is enabled' }),
-    ).not.toHaveAttribute('tabindex');
+    rerender(
+      <OidcProviderCard
+        oidcProvider={{
+          ...GOOGLE,
+          groups: { ...GOOGLE.groups, enrich_on_login: false },
+        }}
+      />,
+    );
+    expect(screen.queryByText('Enriched at login')).not.toBeInTheDocument();
   });
 });

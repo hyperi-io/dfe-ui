@@ -23,6 +23,7 @@ export const UpdateOidcProviderDrawer = ({
     mutate: updateOidcProvider,
     isPending,
     error,
+    reset,
   } = useUpdateOidcProvider({
     reauth: reauth.grant,
     name: oidcProvider.name,
@@ -37,14 +38,28 @@ export const UpdateOidcProviderDrawer = ({
         ),
         placement: 'bottomLeft',
       });
-      setOpen(false);
+      close();
     },
   });
+
+  // A refusal belongs to the attempt that drew it, not to the next opening.
+  function close() {
+    setOpen(false);
+    reset();
+  }
 
   const handleUpdateOidcProvider = (
     values: CreateUpdateOidcProviderFormData,
   ) => {
-    updateOidcProvider(toUpdateOidcProviderBody(values, oidcProvider));
+    const body = toUpdateOidcProviderBody(values, oidcProvider);
+    // The engine asks for the password only when the change needs it.
+    updateOidcProvider(body, {
+      onError: (refusal) => {
+        if (reauth.askIfRequired(refusal, () => updateOidcProvider(body))) {
+          reset();
+        }
+      },
+    });
   };
   return (
     <>
@@ -56,7 +71,7 @@ export const UpdateOidcProviderDrawer = ({
             type="text"
             aria-label={`Edit ${oidcProvider.display_name}`}
             icon={<IconEdit />}
-            onClick={() => reauth.ask(() => setOpen(true))}
+            onClick={() => setOpen(true)}
           >
             Edit OIDC Provider
           </Button>
@@ -68,12 +83,9 @@ export const UpdateOidcProviderDrawer = ({
         </RbacProtected.Restricted>
       </RbacProtected>
 
-      <Drawer
-        title="Edit OIDC Provider"
-        open={open}
-        onClose={() => setOpen(false)}
-      >
+      <Drawer title="Edit OIDC Provider" open={open} onClose={close}>
         <OidcProviderDrawerForm
+          orgScope="stored"
           initialValues={oidcProvider}
           onFinish={handleUpdateOidcProvider}
           error={error}

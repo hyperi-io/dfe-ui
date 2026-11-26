@@ -1,42 +1,48 @@
 'use client';
 
-import { CustomScrollbar } from '@/core/components/CustomScrollbar';
 import { GenericErrorCard } from '@/core/components/GenericError';
 import { NotificationCard } from '@/core/components/NotificationCard';
 import { RbacProtected } from '@/core/components/RbacProtected';
 import { SectionCard } from '@/core/components/SectionCard';
+import { orgOfRoleGroup } from '@/core/helpers/orgRoles';
 import { useFetchInfiniteFilteredGroups } from '@/core/hooks/useFetchInfiniteFilteredGroups';
-import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
 import { CreateGroupDrawer } from '@/Settings/components/GroupManagement/CreateGroupDrawer';
 import { GroupCard } from '@/Settings/components/GroupManagement/GroupCard';
+import { PagedList } from '@/Settings/components/PagedList';
+import { SHOW_ALL_PAGE_SIZE, useShowMore } from '@/Settings/hooks/useShowMore';
 import { IconInfoCircle } from '@repo/dfe-icons';
 import { Input, Spin } from 'antd';
 import { useState } from 'react';
 
 export const UserGroups = () => {
   const [search, setSearch] = useState('');
+  const paging = useShowMore();
 
+  // Read whole, since the organisations' role groups are dropped below and a page could otherwise come back near empty.
   const {
     data: { items: groups = [] },
+    fetchNextPage,
+    hasNextPage,
     isFetchingNextPage,
-    loadMoreRef,
     isLoading,
     error,
   } = useFetchInfiniteFilteredGroups({
     search,
-    page_size: 12,
+    page_size: SHOW_ALL_PAGE_SIZE,
+    sort_by: 'name',
+    sort_order: 'asc',
   });
-
-  const { componentHeight: outerComponentHeight } = useSetComponentHeight({
-    offset: 100,
-  });
-
-  const { componentHeight: innerComponentHeight } = useSetComponentHeight({
-    offset: 295,
+  // Each organisation's admin and viewer groups follow its accounts' roles, so they are listed in its Users tab instead.
+  const shown = groups.filter((group) => orgOfRoleGroup(group) === null);
+  const { hasMore, loadMore, visible } = paging.view({
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    items: shown,
   });
 
   return (
-    <CustomScrollbar height={outerComponentHeight}>
+    <>
       <SectionCard
         title="Configure a new group"
         description="Create a group and assign roles to its members."
@@ -51,6 +57,7 @@ export const UserGroups = () => {
             placeholder="Search groups"
             onChange={(e) => {
               setSearch(e.target.value);
+              paging.reset();
             }}
             value={search}
             allowClear
@@ -70,26 +77,29 @@ export const UserGroups = () => {
                 description={error.message}
               />
             )}
-            {!isLoading && !error && groups.length === 0 && (
+            {!isLoading && !error && visible.length === 0 && (
               <NotificationCard
                 className="w-full"
                 description="No groups found"
                 icon={<IconInfoCircle />}
               />
             )}
-            {!isLoading && !error && groups.length > 0 && (
-              <CustomScrollbar height={innerComponentHeight}>
+            {visible.length > 0 && (
+              <PagedList
+                hasMore={hasMore}
+                loading={isFetchingNextPage}
+                onLoadMore={loadMore}
+                onShowMore={paging.showMore}
+                scrolling={paging.scrolling}
+              >
                 <ul className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-                  {groups.map((group) => (
+                  {visible.map((group) => (
                     <li key={group.name}>
                       <GroupCard group={group} />
                     </li>
                   ))}
-                  <div ref={loadMoreRef} className="h-4 flex justify-center">
-                    {isFetchingNextPage && <Spin size="small" />}
-                  </div>
                 </ul>
-              </CustomScrollbar>
+              </PagedList>
             )}
           </RbacProtected.Unrestricted>
           <RbacProtected.Restricted>
@@ -102,6 +112,6 @@ export const UserGroups = () => {
           </RbacProtected.Restricted>
         </RbacProtected>
       </SectionCard>
-    </CustomScrollbar>
+    </>
   );
 };

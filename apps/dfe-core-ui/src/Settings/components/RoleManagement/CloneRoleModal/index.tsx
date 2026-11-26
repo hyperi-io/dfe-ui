@@ -1,4 +1,3 @@
-import { useReauthGrant } from '@/core/hooks/useReauthGrant';
 import { Modal } from '@/core/components/Modal';
 import { RbacProtected } from '@/core/components/RbacProtected';
 import { CreateUpdateRoleFormData } from '@/Settings/components/RoleManagement/CreateUpdateRoleForm';
@@ -9,16 +8,12 @@ import { useState } from 'react';
 import { CloneRoleForm } from './CloneRoleForm';
 
 export const CloneRoleModal = ({ role_name }: { role_name: string }) => {
-  const [reauthTarget, setReauthTarget] = useState('');
-  const reauth = useReauthGrant(reauthTarget, 'role');
   const [open, setOpen] = useState(false);
 
   const { notification } = App.useApp();
 
   const { mutate, isPending, error } = useCreateRole({
-    reauth: reauth.grant,
     onSuccess: () => {
-      reauth.drop();
       notification.success({
         title: `Role ${role_name} cloned successfully`,
         placement: 'bottomLeft',
@@ -27,13 +22,13 @@ export const CloneRoleModal = ({ role_name }: { role_name: string }) => {
     },
   });
 
-  const handleCloneRole = (values: CreateUpdateRoleFormData) => {
-    setReauthTarget(values.name);
-    reauth.ask(() => mutate(values));
+  const handleCloneRole = (
+    values: CreateUpdateRoleFormData & { scoped: boolean },
+  ) => {
+    mutate(values);
   };
   return (
     <>
-      {reauth.modal}
       <RbacProtected action={RbacProtected.rbacActions.role_write}>
         <RbacProtected.Unrestricted>
           <Button

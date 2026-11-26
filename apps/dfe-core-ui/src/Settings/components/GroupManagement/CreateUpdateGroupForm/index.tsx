@@ -1,12 +1,11 @@
 import { Form } from '@/core/components/Form';
 import { FormNotification } from '@/core/components/FormNotification';
 import { NotificationCard } from '@/core/components/NotificationCard';
-import { OrganisationSelect } from '@/core/components/OrganisationSelect';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
 import { GroupMemberSelect } from '@/Settings/components/GroupManagement/GroupMemberSelect';
 import { GroupRoleSelect } from '@/Settings/components/GroupManagement/GroupRoleSelect';
 import { GroupSourceProviderInput } from '@/Settings/components/GroupManagement/GroupSourceProviderInput';
-import { Button, Input, Select } from 'antd';
+import { Button, Input } from 'antd';
 import { useMemo, useState } from 'react';
 import {
   createGroupFormSchema,
@@ -30,8 +29,6 @@ export const CreateUpdateGroupForm = ({
     description: '',
     roles: [],
     members: [],
-    scope: 'system',
-    organisation: '',
     source_id: '',
     source_provider: '',
   },
@@ -50,8 +47,6 @@ export const CreateUpdateGroupForm = ({
   initialValues?: CreateUpdateGroupFormData;
   disabledFields?: {
     name?: boolean;
-    scope?: boolean;
-    organisation?: boolean;
   };
   showMembersField?: boolean;
   /** The link as the engine holds it now, which can move after the form opens. */
@@ -77,9 +72,6 @@ export const CreateUpdateGroupForm = ({
     form.setFieldsValue(savedLink);
   };
 
-  const watchScope = Form.useWatch('scope', form);
-  const isScopeOrg = watchScope === 'org';
-
   return (
     <Form
       name={name}
@@ -103,31 +95,6 @@ export const CreateUpdateGroupForm = ({
         <GroupRoleSelect />
       </Form.Item>
 
-      <Form.Item name="scope" label="Scope" rules={[formValidation]}>
-        <Select
-          onChange={(value) => {
-            if (value === 'system') {
-              form.setFieldsValue({ organisation: '' });
-            }
-          }}
-          disabled={disabledFields?.scope}
-          options={[
-            { label: 'Organisation', value: 'org' },
-            { label: 'System', value: 'system' },
-          ]}
-        />
-      </Form.Item>
-
-      {isScopeOrg && (
-        <Form.Item
-          name="organisation"
-          label="Organisation"
-          rules={[formValidation]}
-        >
-          <OrganisationSelect disabled={disabledFields?.organisation} />
-        </Form.Item>
-      )}
-
       {linkMoved && (
         <Form.Item>
           <NotificationCard
@@ -146,7 +113,7 @@ export const CreateUpdateGroupForm = ({
       <Form.Item
         name="source_id"
         label="Source ID"
-        extra="The identifier your identity provider sends for this group in its tokens: the group name for Okta, dex and Keycloak, the object ID for Entra. Leave empty for a group managed only in DFE."
+        tooltip="The group's name in your identity provider (object ID for Entra)."
         rules={[formValidation]}
       >
         <Input placeholder="Enter source ID" />
@@ -155,7 +122,7 @@ export const CreateUpdateGroupForm = ({
       <Form.Item
         name="source_provider"
         label="Source Provider"
-        extra="The identity provider whose logins this link answers: an OIDC provider name or scim for SCIM-provisioned groups. Required with a source ID."
+        tooltip="The OIDC provider the group comes from (scim for SCIM)."
         dependencies={['source_id']}
         rules={[formValidation]}
       >

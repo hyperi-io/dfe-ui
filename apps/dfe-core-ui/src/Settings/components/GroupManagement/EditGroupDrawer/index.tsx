@@ -11,7 +11,6 @@ import { UpdateGroupForm, UpdateGroupFormData } from './UpdateGroupForm';
 
 export const EditGroupDrawer = ({ group_name }: { group_name: string }) => {
   const [open, setOpen] = useState(false);
-  // Held only while the drawer is open, so every change asks for the password again.
   const reauth = useReauthGrant(group_name, 'group');
   const [api, contextHolder] = notification.useNotification();
 
@@ -46,7 +45,13 @@ export const EditGroupDrawer = ({ group_name }: { group_name: string }) => {
   };
 
   const handleUpdateGroup = (values: UpdateGroupFormData) => {
-    updateGroup(values);
+    updateGroup(values, {
+      onError: (refusal) => {
+        if (reauth.askIfRequired(refusal, () => updateGroup(values))) {
+          resetUpdateGroup();
+        }
+      },
+    });
   };
 
   return (
@@ -54,11 +59,7 @@ export const EditGroupDrawer = ({ group_name }: { group_name: string }) => {
       {contextHolder}
       <RbacProtected action={RbacProtected.rbacActions.group_write}>
         <RbacProtected.Unrestricted>
-          <Button
-            type="text"
-            icon={<IconEdit />}
-            onClick={() => reauth.ask(() => setOpen(true))}
-          >
+          <Button type="text" icon={<IconEdit />} onClick={() => setOpen(true)}>
             Edit Group
           </Button>
         </RbacProtected.Unrestricted>
@@ -67,7 +68,7 @@ export const EditGroupDrawer = ({ group_name }: { group_name: string }) => {
             disabled
             type="text"
             icon={<IconEdit />}
-            onClick={() => reauth.ask(() => setOpen(true))}
+            onClick={() => setOpen(true)}
           >
             Edit Group
           </Button>

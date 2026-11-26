@@ -16,7 +16,7 @@ export const useCreateOrganisation = ({
   onError,
 }: UseCreateOrganisationProps = {}) => {
   const queryClient = useQueryClient();
-  const { data, mutate, isPending, error } = useMutation({
+  const { data, mutate, isPending, error, reset } = useMutation({
     mutationFn: (organisation: TOrganisationCreateRequestBody) =>
       createOrganisation({
         body: organisation,
@@ -37,5 +37,6 @@ export const useCreateOrganisation = ({
     mutate,
     isPending,
     error,
+    reset,
   };
 };

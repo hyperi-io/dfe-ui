@@ -33,7 +33,7 @@ export const PROVIDERS: readonly {
     name: 'Entra ID',
     description: <>Configure Entra ID as an OIDC provider</>,
     initialValues: {
-      name: 'entra_id',
+      name: 'entra',
       type: 'entra_id',
       display_name: 'Entra ID',
       issuer: '',
@@ -61,7 +61,7 @@ export const PROVIDERS: readonly {
     name: 'Custom OIDC Provider',
     description: <>Configure custom OIDC provider</>,
     initialValues: {
-      name: 'custom_oidc',
+      name: 'custom',
       type: 'generic',
       display_name: 'Custom OIDC',
       issuer: 'https://your-custom-oidc-provider.com',
@@ -92,18 +92,24 @@ export const groupModeOptions = (type: TOidcProviderType) =>
 export const GROUPS_FORM_NAME = 'groups';
 
 export const MANUAL_MODE_HINT =
-  "Group membership is managed in DFE. The token's groups are ignored and nothing syncs.";
+  "Groups are managed in DFE: the token's groups are ignored and nothing syncs.";
 
 export const GOOGLE_SERVICE_ACCOUNT_HINT =
   'Optional. For the group sync, and for logins whose own token cannot read their groups.';
 
 export const ENTRA_API_SECRET_HINT =
-  'The directory secret is optional: the login client secret is used when both are empty.';
+  'Optional. The Client Secret is used when this is empty.';
 
 export const ENTRA_TOKEN_CLAIM_HINT =
   'Optional. Read only when a user is in too many groups for the token to list them.';
 
+export const PROVIDER_NAME_HINT =
+  'Permanent: every account that signs in through this provider is stamped with it.';
+
 export const SCOPES_PLACEHOLDER = 'Provider type default';
+
+export const TRUSTED_EMAIL_DOMAINS_HINT =
+  'Only a verified email in these domains can sign in, linking to the DFE account with that email. Trust only domains whose directory you control.';
 
 export const UNTRUSTED_DOMAINS_WARNING =
   "With no trusted domain, nobody can sign in through this provider. Add your users' email domains.";

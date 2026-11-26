@@ -104,6 +104,38 @@ describe('ReauthModal', () => {
     );
   });
 
+  it.each([
+    {
+      verb: undefined,
+      kind: undefined,
+      text: 'You are about to change account',
+    },
+    {
+      verb: 'create',
+      kind: 'group' as const,
+      text: 'You are about to create group',
+    },
+  ])('says "$text"', async ({ verb, kind, text }) => {
+    signedIn(false);
+    render(
+      <ReauthModal
+        kind={kind}
+        open
+        target="bob"
+        verb={verb}
+        onCancel={vi.fn()}
+        onGranted={vi.fn()}
+      />,
+      { wrapper },
+    );
+
+    const line = await screen.findByText(
+      (_, element) =>
+        element?.tagName === 'P' && element.textContent === `${text} bob.`,
+    );
+    expect(line).toBeInTheDocument();
+  });
+
   it('sends an identity-provider account to sign in again and takes the grant its window posts back', async () => {
     const started = signedIn(true);
     const popup = openedWindow();

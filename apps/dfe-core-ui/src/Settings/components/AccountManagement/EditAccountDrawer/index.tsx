@@ -1,5 +1,5 @@
 import { useReauthGrant } from '@/core/hooks/useReauthGrant';
-import { Drawer } from '@/core/components/Drawer';
+import { Drawer, TABBED_DRAWER_STYLES } from '@/core/components/Drawer';
 import { RbacProtected } from '@/core/components/RbacProtected';
 import { Tooltip } from '@/core/components/Tooltip';
 import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
@@ -23,7 +23,6 @@ export const EditAccountDrawer = ({
 }) => {
   const { data: currentUser } = useFetchCurrentUser();
   const [open, setOpen] = useState(false);
-  // Held only while the drawer is open, so every edit asks for the password again.
   const reauth = useReauthGrant(username);
   const [api, contextHolder] = notification.useNotification();
   const title = `Edit ${username}`;
@@ -47,16 +46,36 @@ export const EditAccountDrawer = ({
     });
   };
   const {
-    mutate: updateAccount,
+    mutate: mutateAccount,
     isPending,
     error,
+    reset: resetAccount,
   } = useUpdateAccount({ reauth: reauth.grant, username, onSuccess });
   // Its own mutation, so a failed org change shows only on the Organisation tab.
   const {
-    mutate: updateOrg,
+    mutate: mutateOrg,
     isPending: isOrgPending,
     error: orgError,
+    reset: resetOrg,
   } = useUpdateAccount({ reauth: reauth.grant, username, onSuccess });
+
+  // The engine asks for the password only when the change needs it.
+  const updateAccount = (body: Parameters<typeof mutateAccount>[0]) =>
+    mutateAccount(body, {
+      onError: (refusal) => {
+        if (reauth.askIfRequired(refusal, () => mutateAccount(body))) {
+          resetAccount();
+        }
+      },
+    });
+  const updateOrg = (body: Parameters<typeof mutateOrg>[0]) =>
+    mutateOrg(body, {
+      onError: (refusal) => {
+        if (reauth.askIfRequired(refusal, () => mutateOrg(body))) {
+          resetOrg();
+        }
+      },
+    });
 
   const router = useRouter();
   // Your own password changes on your profile, which asks for the current one.
@@ -72,7 +91,7 @@ export const EditAccountDrawer = ({
         </span>
       </Tooltip>
     ) : (
-      <ResetAccountPasswordDrawer reauth={reauth.grant()} username={username} />
+      <ResetAccountPasswordDrawer username={username} />
     );
 
   return (
@@ -84,7 +103,7 @@ export const EditAccountDrawer = ({
             aria-label={title}
             type="text"
             icon={<IconEdit />}
-            onClick={() => reauth.ask(() => setOpen(true))}
+            onClick={() => setOpen(true)}
           >
             Edit Account
           </Button>
@@ -95,7 +114,7 @@ export const EditAccountDrawer = ({
             type="text"
             disabled
             icon={<IconEdit />}
-            onClick={() => reauth.ask(() => setOpen(true))}
+            onClick={() => setOpen(true)}
           >
             Edit Account
           </Button>
@@ -104,7 +123,12 @@ export const EditAccountDrawer = ({
 
       {reauth.modal}
 
-      <Drawer title={title} open={open} onClose={handleClose}>
+      <Drawer
+        title={title}
+        open={open}
+        onClose={handleClose}
+        styles={TABBED_DRAWER_STYLES}
+      >
         <Tabs
           items={[
             {

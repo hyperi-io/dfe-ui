@@ -3,7 +3,7 @@ import { FormNotification } from '@/core/components/FormNotification';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
 import { STORE_NAME_VALIDATOR } from '@/core/validationSchemas/utils';
 import { RoleScopeSelect } from '@/Settings/components/RoleManagement/RoleScopeSelect';
-import { Button, Input, Switch } from 'antd';
+import { Button, Input } from 'antd';
 import { useMemo } from 'react';
 import z from 'zod';
 
@@ -21,7 +21,6 @@ const buildFormSchema = (nameIsNew: boolean) =>
     permissions: z
       .array(z.string())
       .min(1, { message: 'Permissions are required' }),
-    scoped: z.boolean(),
   });
 
 export type CreateUpdateRoleFormData = z.infer<
@@ -39,7 +38,6 @@ export const CreateUpdateRoleForm = ({
     name: '',
     permissions: [],
     description: '',
-    scoped: false,
   },
   disabledFields,
 }: {
@@ -91,9 +89,6 @@ export const CreateUpdateRoleForm = ({
         rules={[formValidation]}
       >
         <RoleScopeSelect />
-      </Form.Item>
-      <Form.Item name="scoped" label="Scoped" rules={[formValidation]}>
-        <Switch />
       </Form.Item>
 
       {error && (

@@ -47,6 +47,7 @@ describe('.useAuthMe', () => {
         oidc_type: 'string',
         admin: false,
         org_display_name: '',
+        org_enabled: true,
         enabled: true,
         blocked: false,
         disabled_at: '',
@@ -62,6 +63,7 @@ describe('.useAuthMe', () => {
         org: '',
         created_at: 'string',
         updated_at: 'string',
+        last_login_at: '',
       };
 
       await waitFor(() => {

@@ -12,7 +12,6 @@ const baseFormValues: CreateUpdateGroupFormData = {
   description: 'Analyst group',
   roles: ['role_a'],
   members: ['user_a'],
-  scope: 'system',
   source_id: '',
   source_provider: '',
 };
@@ -24,13 +23,12 @@ const linkedFormValues: CreateUpdateGroupFormData = {
 };
 
 describe('createGroupTransformFormDataToRequest', () => {
-  test('maps system scope unchanged', () => {
+  test('maps the form to a create body with no scope', () => {
     const expected: TGroupCreateRequestBody = {
       name: 'analysts',
       description: 'Analyst group',
       roles: ['role_a'],
       members: ['user_a'],
-      scope: 'system',
       source_id: '',
       source_provider: '',
     };
@@ -38,24 +36,6 @@ describe('createGroupTransformFormDataToRequest', () => {
     expect(createGroupTransformFormDataToRequest(baseFormValues)).toEqual(
       expected,
     );
-  });
-
-  test('maps org scope to org:<organisation>', () => {
-    const values: CreateUpdateGroupFormData = {
-      ...baseFormValues,
-      scope: 'org',
-      organisation: 'acme',
-    };
-
-    expect(createGroupTransformFormDataToRequest(values)).toEqual({
-      name: 'analysts',
-      description: 'Analyst group',
-      roles: ['role_a'],
-      members: ['user_a'],
-      scope: 'org:acme',
-      source_id: '',
-      source_provider: '',
-    });
   });
 
   test('defaults members to an empty array when omitted', () => {

@@ -15,37 +15,17 @@ const systemGroup: TGroupDetailResponse = {
 };
 
 describe('createUpdateGroupRequestToFormData', () => {
-  test('parses system scope', () => {
+  test('maps a group to the form', () => {
     const expected: CreateUpdateGroupFormData = {
       name: 'analysts',
       description: 'Analyst group',
       roles: ['role_a'],
       members: ['user_a'],
-      scope: 'system',
-      organisation: undefined,
       source_id: '',
       source_provider: '',
     };
 
     expect(createUpdateGroupRequestToFormData(systemGroup)).toEqual(expected);
-  });
-
-  test('parses org:<organisation> scope', () => {
-    const request: TGroupDetailResponse = {
-      ...systemGroup,
-      scope: 'org:acme',
-    };
-
-    expect(createUpdateGroupRequestToFormData(request)).toEqual({
-      name: 'analysts',
-      description: 'Analyst group',
-      roles: ['role_a'],
-      members: ['user_a'],
-      scope: 'org',
-      organisation: 'acme',
-      source_id: '',
-      source_provider: '',
-    });
   });
 
   test('carries the source ID and provider into the form', () => {
@@ -61,10 +41,9 @@ describe('createUpdateGroupRequestToFormData', () => {
     expect(formData.source_provider).toBe('okta');
   });
 
-  test('round-trips org-scoped detail through create request transform', () => {
+  test('round-trips a linked group through the create request transform', () => {
     const request: TGroupDetailResponse = {
       ...systemGroup,
-      scope: 'org:acme',
       source_id: 'dfe-viewers',
       source_provider: 'okta',
     };
@@ -76,7 +55,6 @@ describe('createUpdateGroupRequestToFormData', () => {
       description: 'Analyst group',
       roles: ['role_a'],
       members: ['user_a'],
-      scope: 'org:acme',
       source_id: 'dfe-viewers',
       source_provider: 'okta',
     });

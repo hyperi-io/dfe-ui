@@ -1,15 +1,12 @@
 import { CustomScrollbar } from '@/core/components/CustomScrollbar';
-import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
 import { UserGroups } from './UserGroups';
 
-/** Tab shell for future organisation-scoped groups; mirrors RoleManagement layout. */
-export const GroupManagement = () => {
-  const { componentHeight } = useSetComponentHeight({
-    offset: 100,
-  });
-  return (
-    <CustomScrollbar height={componentHeight}>
+/** The groups an admin manages. Each organisation's admins and viewers are listed in its Users tab under Organisation Management. */
+export const GroupManagement = () => (
+  // CSS sizes the box before the first paint, so no scrollbar shows while JS measures the window.
+  <div className="h-[calc(100dvh-100px)]">
+    <CustomScrollbar>
       <UserGroups />
     </CustomScrollbar>
-  );
-};
+  </div>
+);

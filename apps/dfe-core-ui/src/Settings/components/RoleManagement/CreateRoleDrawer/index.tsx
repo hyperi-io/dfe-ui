@@ -1,4 +1,3 @@
-import { useReauthGrant } from '@/core/hooks/useReauthGrant';
 import { Drawer } from '@/core/components/Drawer';
 import { RbacProtected } from '@/core/components/RbacProtected';
 import {
@@ -11,8 +10,6 @@ import { Button, notification } from 'antd';
 import { useState } from 'react';
 
 export const CreateRoleDrawer = () => {
-  const [reauthTarget, setReauthTarget] = useState('');
-  const reauth = useReauthGrant(reauthTarget, 'role');
   const [isOpen, setIsOpen] = useState(false);
   const [api, contextHolder] = notification.useNotification();
 
@@ -21,9 +18,7 @@ export const CreateRoleDrawer = () => {
     isPending,
     error,
   } = useCreateRole({
-    reauth: reauth.grant,
     onSuccess: () => {
-      reauth.drop();
       setIsOpen(false);
       api.success({
         title: 'Role created successfully',
@@ -33,12 +28,11 @@ export const CreateRoleDrawer = () => {
   });
 
   const handleCreateRole = (values: CreateUpdateRoleFormData) => {
-    setReauthTarget(values.name);
-    reauth.ask(() => createRole(values));
+    // A new role reads every organisation: a group scoped to one organisation narrows it.
+    createRole({ ...values, scoped: false });
   };
   return (
     <>
-      {reauth.modal}
       {contextHolder}
       <RbacProtected action={RbacProtected.rbacActions.role_write}>
         <RbacProtected.Unrestricted>

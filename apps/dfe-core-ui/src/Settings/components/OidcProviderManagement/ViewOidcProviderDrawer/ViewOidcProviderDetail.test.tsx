@@ -3,6 +3,7 @@ import { TOidcProviderListItem } from '@/Settings/hooks/oidcProviders/useFetchIn
 import { render, screen } from '@testing-library/react';
 import { describe, expect, test } from 'vitest';
 import { ViewOidcProviderDetail } from './ViewOidcProviderDetail';
+import { ViewOidcProviderGroups } from './ViewOidcProviderGroups';
 
 const NO_GROUPS: TOidcProviderListItem['groups'] = {
   mode: 'manual',
@@ -84,15 +85,22 @@ const GOOGLE: TOidcProviderListItem = {
 
 const { wrapper } = buildTestWrapper().withTheme();
 
-const renderRows = (provider: TOidcProviderListItem) => {
-  const { container } = render(
-    <ViewOidcProviderDetail oidcProvider={provider} />,
-    { wrapper },
-  );
-  return Array.from(container.querySelectorAll('dt')).map((term) => [
+const rowsOf = (container: HTMLElement) =>
+  Array.from(container.querySelectorAll('dt')).map((term) => [
     term.textContent,
     term.nextElementSibling?.textContent,
   ]);
+
+/** The Details and Groups tabs together, as label and value pairs. */
+const renderRows = (provider: TOidcProviderListItem) => {
+  const { container } = render(
+    <>
+      <ViewOidcProviderDetail oidcProvider={provider} />
+      <ViewOidcProviderGroups oidcProvider={provider} />
+    </>,
+    { wrapper },
+  );
+  return rowsOf(container);
 };
 
 describe('ViewOidcProviderDetail', () => {
@@ -193,6 +201,48 @@ describe('ViewOidcProviderDetail', () => {
     ]);
   });
 
+  test.each([
+    { enabled: true, status: 'Enabled', heading: 'Okta' },
+    { enabled: false, status: 'Disabled', heading: 'OktaDisabled' },
+  ])(
+    'heads the details with the name and reads as $status',
+    ({ enabled, status, heading }) => {
+      const rows = renderRows({ ...OKTA, display_name: 'Okta', enabled });
+
+      expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(
+        heading,
+      );
+      expect(rows).toContainEqual(['Status:', status]);
+      expect(rows.map(([label]) => label)).toContain('Created At:');
+    },
+  );
+
+  test('the group settings sit on their own tab', () => {
+    const { container } = render(
+      <ViewOidcProviderDetail oidcProvider={OKTA} />,
+      { wrapper },
+    );
+    const labels = rowsOf(container).map(([label]) => label);
+
+    expect(labels).toContain('Issuer:');
+    expect(labels).not.toContain('Mode:');
+    expect(labels).not.toContain('API Token Environment Variable:');
+  });
+
+  test('a client credential with no variable shows no variable row', () => {
+    const labels = renderRows({
+      ...PROVIDER,
+      client_id_env: '',
+      client_secret_env: '',
+      groups: { ...NO_GROUPS, sync_interval: 0 },
+    }).map(([label]) => label);
+
+    expect(labels).toContain('Client ID:');
+    expect(labels).not.toContain('Client ID Environment Variable:');
+    expect(labels).not.toContain('Client Secret Environment Variable:');
+    expect(labels).not.toContain('Sync Interval:');
+  });
+
   test('enrich on login shows No when it is off', () => {
     expect(renderRows(GOOGLE)).toContainEqual(['Enrich on Login:', 'No']);
     expect(renderRows(OKTA)).toContainEqual(['Enrich on Login:', 'Yes']);
@@ -207,36 +257,40 @@ const REFUSED_MESSAGE =
   'The directory API could not use the configured credential: check it is current and valid; the engine log has the reason';
 
 describe('ViewOidcProviderDetail sync status', () => {
+  // Groups read at login never sync, so neither the stored time, the scheduler's last look, nor a message the tag already gives is shown.
   test.each([
     {
       status: 'ok',
-      label: 'OK',
       syncError: '',
+      syncRow: ['Last Sync:', `OK${SYNCED_AT_LABEL}`],
+      header: /^Last synced /,
       message: 'Every directory group synced.',
     },
     {
       status: 'not_configured',
-      label: 'Not configured',
       syncError: NOT_CONFIGURED_MESSAGE,
+      syncRow: ['Last Sync:', `Not configured${SYNCED_AT_LABEL}`],
+      header: /^Last synced /,
       message:
         'The provider has no directory credential. Edit the provider to add one, then sync again.',
     },
     {
       status: 'user_token',
-      label: 'Read at login',
       syncError: '',
-      message:
-        "Each user's groups are read from their own token when they log in, so there is no directory to sync.",
+      syncRow: ['Group Sync:', 'Read at login'],
+      header: /^Groups read at login$/,
+      message: undefined,
     },
     {
       status: 'error',
-      label: 'Failed',
       syncError: REFUSED_MESSAGE,
+      syncRow: ['Last Sync:', `Failed${SYNCED_AT_LABEL}`],
+      header: /^Last synced /,
       message: REFUSED_MESSAGE,
     },
   ])(
-    'a $status sync reads $label, with what happened under it',
-    ({ status, label, syncError, message }) => {
+    'a $status sync reads $syncRow, with what happened under it',
+    ({ header, message, status, syncError, syncRow }) => {
       const rows = renderRows({
         ...OKTA,
         last_sync_at: SYNCED_AT,
@@ -244,7 +298,8 @@ describe('ViewOidcProviderDetail sync status', () => {
         sync_error: syncError,
       });
 
-      expect(rows).toContainEqual(['Last Sync:', `${label}${SYNCED_AT_LABEL}`]);
+      expect(rows).toContainEqual(syncRow);
+      expect(screen.getByText(header)).toBeInTheDocument();
       expect(rows.find(([term]) => term === 'Sync Message:')?.[1]).toBe(
         message,
       );

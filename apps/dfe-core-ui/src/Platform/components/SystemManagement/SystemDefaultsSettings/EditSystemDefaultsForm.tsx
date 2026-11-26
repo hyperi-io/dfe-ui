@@ -1,3 +1,4 @@
+import { useReauthGrant } from '@/core/hooks/useReauthGrant';
 import { CommonHeaderSelect } from '@/core/components/CommonHeaderSelect';
 import { Form } from '@/core/components/Form';
 import { FormNotification } from '@/core/components/FormNotification';
@@ -93,12 +94,15 @@ export const EditSystemDefaultsForm = ({
 }) => {
   const { notification } = App.useApp();
 
+  const reauth = useReauthGrant('retention', 'setting');
   const {
     mutate: updateSystemDefaults,
     isPending: isUpdating,
     error,
   } = useUpdateSystemDefaults({
+    reauth: reauth.grant,
     onSuccess: (response) => {
+      reauth.drop();
       const changed = hasDefaultsChanged({
         initial_ttl_days: initialValues?.ttl_days ?? 0,
         initial_engine: initialValues?.engine ?? '',
@@ -179,82 +183,90 @@ export const EditSystemDefaultsForm = ({
   }, [commonHeaderVersions]);
 
   const handleFinish = (values: TFormValues) => {
-    updateSystemDefaults(values);
+    // A shorter retention deletes rows for good, so changing it asks for the password.
+    if (values.ttl_days !== (initialValues?.ttl_days ?? 0)) {
+      reauth.ask(() => updateSystemDefaults(values));
+    } else {
+      updateSystemDefaults(values);
+    }
   };
 
   return (
-    <Form
-      layout="inline"
-      className="grid grid-cols-2 gap-1"
-      initialValues={initialValues}
-      form={form}
-      onFinish={handleFinish}
-    >
-      <Form.Item
-        label="Default Retention"
-        layout="horizontal"
-        name="ttl_days"
-        rules={[formValidation]}
+    <>
+      {reauth.modal}
+      <Form
+        layout="inline"
+        className="grid grid-cols-2 gap-1"
+        initialValues={initialValues}
+        form={form}
+        onFinish={handleFinish}
       >
-        <InputNumber
-          onChange={handleChangeTtlDays}
-          size="small"
-          min={0}
-          inputMode="decimal"
-        />
-      </Form.Item>
-
-      <Form.Item
-        layout="horizontal"
-        label="Default Engine"
-        name="engine"
-        rules={[formValidation]}
-      >
-        <SourceEngineSelect size="small" />
-      </Form.Item>
-
-      <Form.Item
-        label="Common Header"
-        name="common_header_type"
-        layout="horizontal"
-        rules={[formValidation]}
-      >
-        <CommonHeaderSelect
-          className="min-w-60"
-          onChange={handleChangeCommonHeader}
-          size="small"
-        />
-      </Form.Item>
-
-      <Form.Item
-        label="Version"
-        name="common_header_version"
-        layout="horizontal"
-        rules={[formValidation]}
-      >
-        <Select
-          className="min-w-32"
-          options={commonHeaderVersionsOptions}
-          size="small"
-        />
-      </Form.Item>
-
-      {error && <FormNotification text={error.message} type="error" />}
-
-      <div className="flex gap-2 justify-end col-span-2">
-        <Button type="default" onClick={onClose}>
-          Cancel
-        </Button>
-
-        <Button
-          type="primary"
-          htmlType="submit"
-          loading={isUpdating}
-          disabled={!canUpdate}
+        <Form.Item
+          label="Default Retention"
+          layout="horizontal"
+          name="ttl_days"
+          rules={[formValidation]}
         >
-          Update
-        </Button>
-      </div>
-    </Form>
+          <InputNumber
+            onChange={handleChangeTtlDays}
+            size="small"
+            min={0}
+            inputMode="decimal"
+          />
+        </Form.Item>
+
+        <Form.Item
+          layout="horizontal"
+          label="Default Engine"
+          name="engine"
+          rules={[formValidation]}
+        >
+          <SourceEngineSelect size="small" />
+        </Form.Item>
+
+        <Form.Item
+          label="Common Header"
+          name="common_header_type"
+          layout="horizontal"
+          rules={[formValidation]}
+        >
+          <CommonHeaderSelect
+            className="min-w-60"
+            onChange={handleChangeCommonHeader}
+            size="small"
+          />
+        </Form.Item>
+
+        <Form.Item
+          label="Version"
+          name="common_header_version"
+          layout="horizontal"
+          rules={[formValidation]}
+        >
+          <Select
+            className="min-w-32"
+            options={commonHeaderVersionsOptions}
+            size="small"
+          />
+        </Form.Item>
+
+        {error && <FormNotification text={error.message} type="error" />}
+
+        <div className="flex gap-2 justify-end col-span-2">
+          <Button type="default" onClick={onClose}>
+            Cancel
+          </Button>
+
+          <Button
+            type="primary"
+            htmlType="submit"
+            loading={isUpdating}
+            disabled={!canUpdate}
+          >
+            Update
+          </Button>
+        </div>
+      </Form>
+    </>
   );
 };

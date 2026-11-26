@@ -92,16 +92,6 @@ interface TStoredOidcProvider {
   trusted_email_domains?: readonly string[];
 }
 
-/** The org an edit sends: only one that differs from the stored one, a cleared choice moving it to the platform. */
-const toOrgRequest = (
-  values: { org?: string },
-  stored: string | undefined,
-): { org?: string } => {
-  if (!Object.hasOwn(values, 'org')) return {};
-  const org = values.org ?? '';
-  return org === (stored ?? '') ? {} : { org };
-};
-
 /** The trusted email domains an edit sends: only a list that differs from the stored one. */
 const toDomainsRequest = (
   domains: readonly string[] | undefined,
@@ -281,7 +271,6 @@ export const toUpdateOidcProviderBody = (
   return {
     enabled: values.enabled,
     display_name: values.display_name,
-    ...toOrgRequest(values, stored.org),
     ...(clientId.value === undefined ? {} : { client_id: clientId.value }),
     ...(clientId.env === undefined ? {} : { client_id_env: clientId.env }),
     ...(clientSecret.value === undefined

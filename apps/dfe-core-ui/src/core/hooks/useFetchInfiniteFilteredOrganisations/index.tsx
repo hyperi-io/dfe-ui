@@ -1,9 +1,12 @@
 import { getNextPageToken, toOrderBy } from '@/core/config/api/pagination';
 import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
-import { useInfiniteQuery } from '@tanstack/react-query';
+import { useDebounce } from '@/core/hooks/useDebounce';
+import { keepPreviousData, useInfiniteQuery } from '@tanstack/react-query';
 import { useEffect, useMemo, useRef } from 'react';
 import { fetchOrganisations } from './api';
 import { UseFetchInfiniteFilteredOrganisationsProps } from './types';
+
+const SEARCH_DEBOUNCE_MS = 300;
 
 /** useFetchInfiniteFilteredOrganisations props */
 /**
@@ -21,6 +24,7 @@ export const useFetchInfiniteFilteredOrganisations = ({
   sort_order,
   page_size,
 }: UseFetchInfiniteFilteredOrganisationsProps = {}) => {
+  const debouncedSearch = useDebounce(search ?? '', SEARCH_DEBOUNCE_MS);
   const {
     data,
     isLoading,
@@ -31,7 +35,7 @@ export const useFetchInfiniteFilteredOrganisations = ({
     isFetchingNextPage,
   } = useInfiniteQuery({
     queryKey: QUERY_KEYS.orgs.default({
-      search,
+      search: debouncedSearch,
       sort_by,
       sort_order,
       page_size,
@@ -39,7 +43,7 @@ export const useFetchInfiniteFilteredOrganisations = ({
     queryFn: async ({ pageParam, signal }) =>
       fetchOrganisations({
         queryParams: {
-          search,
+          search: debouncedSearch || undefined,
           order_by: toOrderBy(sort_by, sort_order),
           page_token: pageParam,
           page_size,
@@ -48,6 +52,8 @@ export const useFetchInfiniteFilteredOrganisations = ({
       }),
     getNextPageParam: getNextPageToken,
     initialPageParam: undefined as string | undefined,
+    // The last results stay up while a new search loads, so the list never blanks.
+    placeholderData: keepPreviousData,
   });
 
   const flattenedData = useMemo(() => {

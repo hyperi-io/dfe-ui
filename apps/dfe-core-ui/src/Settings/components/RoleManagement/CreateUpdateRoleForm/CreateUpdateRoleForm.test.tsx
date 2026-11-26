@@ -53,7 +53,6 @@ describe('CreateUpdateRoleForm name', () => {
           name: '_legacy role',
           description: 'Imported role',
           permissions: ['rules:read'],
-          scoped: false,
         }}
         buttonLabel="Update Role"
       />,

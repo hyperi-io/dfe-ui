@@ -47,6 +47,7 @@ describe('.useDeleteRole', () => {
           isPending: false,
           error: null,
           mutate: expect.any(Function),
+          reset: expect.any(Function),
         });
       });
 

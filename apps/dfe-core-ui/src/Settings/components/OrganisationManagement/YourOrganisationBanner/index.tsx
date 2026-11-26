@@ -1,7 +1,13 @@
 import { SectionCard } from '@/core/components/SectionCard';
+import { Tooltip } from '@/core/components/Tooltip';
 import { useFetchYourOrganisation } from '@/core/hooks/useFetchYourOrganisation';
+import {
+  TagList,
+  TagOverflow,
+} from '@/Settings/components/GroupManagement/GroupCard/TagList';
 import { EditOrganisationDrawer } from '@/Settings/components/OrganisationManagement/EditOrganisationDrawer';
 import { ViewOrganisationDrawer } from '@/Settings/components/OrganisationManagement/ViewOrganisationDrawer';
+import { ORG_ID_TAG_CLASS, ORG_ID_TAG_LIMIT } from '@/Settings/helpers/orgIds';
 import { useFetchOrganisationDetail } from '@/Settings/hooks/organisations/useFetchOrganisationDetail';
 import { Tag } from 'antd';
 
@@ -20,15 +26,39 @@ export const YourOrganisationBanner = () => {
 
   return (
     <SectionCard
+      // pb-4 gives back the tags' mt-2, keeping this divider level with the first one on the other Settings tabs.
+      className="pb-4"
       title={
         <>
           {label}
-          <Tag color="blue" className="m-0">
-            Your organisation
-          </Tag>
+          <Tooltip
+            styles={{ root: { maxWidth: 'none' } }}
+            title="The organisation running this platform."
+          >
+            <Tag color="blue" className="m-0">
+              Your organisation
+            </Tag>
+          </Tooltip>
         </>
       }
-      description={`The organisation running this platform (${name}).`}
+      description={
+        organisation && (
+          <div className="flex items-center gap-2 mt-2 text-foreground dark:text-dark-foreground">
+            <ul className="flex flex-nowrap gap-2 min-w-0 overflow-hidden">
+              <TagList
+                items={organisation.org_ids}
+                limit={ORG_ID_TAG_LIMIT}
+                emptyLabel="No organisation IDs"
+                tagClassName={ORG_ID_TAG_CLASS}
+              />
+            </ul>
+            <TagOverflow
+              count={organisation.org_ids.length}
+              limit={ORG_ID_TAG_LIMIT}
+            />
+          </div>
+        )
+      }
       rightTitleSlot={
         organisation && (
           <div className="flex gap-2">

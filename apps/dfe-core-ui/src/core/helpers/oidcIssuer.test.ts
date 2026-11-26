@@ -3,8 +3,10 @@ import {
   buildEntraIssuer,
   buildOktaIssuer,
   entraTenantFromIssuer,
+  issuerHost,
   issuerOnTypeChange,
-  oktaDomainFromIssuer,
+  suggestedCredentialEnv,
+  suggestedProviderName,
   TEntraIssuerParts,
   TIssuerMode,
   TOktaIssuerParts,
@@ -58,14 +60,120 @@ describe('buildOktaIssuer', () => {
   });
 });
 
-describe('oktaDomainFromIssuer', () => {
+describe('issuerHost', () => {
   test.each([
     ['https://dev-123.okta.com', 'dev-123.okta.com'],
     ['https://dev-123.okta.com/oauth2/default', 'dev-123.okta.com'],
     [' HTTPS://id.example.com/ ', 'id.example.com'],
     ['', ''],
   ])('issuer "%s"', (issuer, expected) => {
-    expect(oktaDomainFromIssuer({ issuer })).toBe(expected);
+    expect(issuerHost({ issuer })).toBe(expected);
+  });
+});
+
+describe('suggestedProviderName', () => {
+  test.each<{
+    expected: string;
+    issuer: string;
+    name: string;
+    trustedEmailDomains?: string[];
+    type: 'google' | 'entra_id' | 'okta' | 'generic';
+  }>([
+    {
+      name: 'okta with no issuer yet',
+      type: 'okta',
+      issuer: '',
+      expected: 'okta',
+    },
+    {
+      name: 'okta org domain',
+      type: 'okta',
+      issuer: 'https://integrator-8938607.okta.com/oauth2/default',
+      expected: 'okta-integrator-8938607',
+    },
+    {
+      name: 'okta preview domain',
+      type: 'okta',
+      issuer: 'https://dev-1.oktapreview.com',
+      expected: 'okta-dev-1',
+    },
+    {
+      name: 'okta custom domain keeps the host',
+      type: 'okta',
+      issuer: 'https://login.corp.com',
+      expected: 'okta-login.corp.com',
+    },
+    {
+      name: 'entra tenant ID keeps its first block',
+      type: 'entra_id',
+      issuer:
+        'https://login.microsoftonline.com/7225ac34-c752-42e4-bb89-d60e419f6de0/v2.0',
+      expected: 'entra-7225ac34',
+    },
+    {
+      name: 'entra tenant domain keeps its first label',
+      type: 'entra_id',
+      issuer: 'https://login.microsoftonline.com/contoso.onmicrosoft.com/v2.0',
+      expected: 'entra-contoso',
+    },
+    {
+      name: 'entra multi-tenant alias names no tenant',
+      type: 'entra_id',
+      issuer: 'https://login.microsoftonline.com/common/v2.0',
+      expected: 'entra',
+    },
+    {
+      name: 'google takes the first trusted domain',
+      type: 'google',
+      issuer: 'https://accounts.google.com',
+      trustedEmailDomains: ['hyperi.io', 'corp.com'],
+      expected: 'google-hyperi.io',
+    },
+    {
+      name: 'google with no trusted domain',
+      type: 'google',
+      issuer: 'https://accounts.google.com',
+      expected: 'google',
+    },
+    {
+      name: 'custom placeholder issuer names nothing',
+      type: 'generic',
+      issuer: 'https://your-custom-oidc-provider.com',
+      expected: 'custom',
+    },
+    {
+      name: 'custom issuer host, case and stray characters cleaned',
+      type: 'generic',
+      issuer: 'https://Dex.Corp.com:5556/dex',
+      expected: 'custom-dex.corp.com-5556',
+    },
+  ])('$name', ({ expected, issuer, trustedEmailDomains = [], type }) => {
+    expect(suggestedProviderName({ issuer, trustedEmailDomains, type })).toBe(
+      expected,
+    );
+  });
+});
+
+describe('suggestedCredentialEnv', () => {
+  test.each<{
+    expected: string;
+    name: string;
+    suffix: 'CLIENT_ID' | 'CLIENT_SECRET';
+  }>([
+    { name: 'okta', suffix: 'CLIENT_ID', expected: 'DFE_OIDC_OKTA_CLIENT_ID' },
+    {
+      name: 'okta-integrator-8938607',
+      suffix: 'CLIENT_SECRET',
+      expected: 'DFE_OIDC_OKTA_INTEGRATOR_8938607_CLIENT_SECRET',
+    },
+    {
+      name: 'google-hyperi.io',
+      suffix: 'CLIENT_ID',
+      expected: 'DFE_OIDC_GOOGLE_HYPERI_IO_CLIENT_ID',
+    },
+    { name: '--', suffix: 'CLIENT_ID', expected: '' },
+  ])('name "$name"', ({ expected, name, suffix }) => {
+    expect(suggestedCredentialEnv({ name, suffix })).toBe(expected);
   });
 });
 

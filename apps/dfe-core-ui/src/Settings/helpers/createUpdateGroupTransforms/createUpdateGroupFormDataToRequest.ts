@@ -6,11 +6,6 @@ import { isSourceLinkFieldChanged } from '@/Settings/components/GroupManagement/
 import { TGroupCreateRequestBody } from '@/Settings/hooks/groups/useCreateGroup/types';
 import { TGroupUpdateRequestBody } from '@/Settings/hooks/groups/useUpdateGroup/types';
 
-const toGroupScope = (
-  scope: CreateUpdateGroupFormData['scope'],
-  organisation?: string,
-) => (scope === 'org' ? `${scope}:${organisation}` : scope);
-
 // The engine refuses a padded source ID because logins strip each group they assert before matching it.
 const toGroupSourceLink = ({
   source_id,
@@ -23,21 +18,13 @@ const toGroupSourceLink = ({
 export const createGroupTransformFormDataToRequest = (
   values: CreateUpdateGroupFormData,
 ): TGroupCreateRequestBody => {
-  const {
-    name,
-    description,
-    roles,
-    members = [],
-    scope,
-    organisation,
-  } = values;
+  const { name, description, roles, members = [] } = values;
 
   return {
     name,
     description,
     roles,
     members,
-    scope: toGroupScope(scope, organisation),
     ...toGroupSourceLink(values),
   };
 };

@@ -610,7 +610,7 @@ export interface paths {
         put?: never;
         /**
          * Create Group
-         * @description Create a new RBAC group at a scope.
+         * @description Create a new system-wide RBAC group.
          */
         post: operations["auth.groups.create"];
         delete?: never;
@@ -639,7 +639,7 @@ export interface paths {
         post?: never;
         /**
          * Delete Group
-         * @description Delete a group (checked at the group's scope).
+         * @description Delete a group and drop its members from it (checked at the group's scope).
          */
         delete: operations["auth.groups.delete"];
         options?: never;
@@ -2139,6 +2139,9 @@ export interface paths {
         /**
          * List Rules
          * @description List detection rules with pagination and search.
+         *
+         *     A stored rule with no registered source whose table is a registered source's label is
+         *     listed under that source. One that names none lists with its stored source as it is.
          */
         get: operations["rules.list"];
         put?: never;
@@ -2146,17 +2149,44 @@ export interface paths {
          * Create Rule
          * @description Create a new hunt rule via RuleCreationService.
          *
-         *     The rule is written as SQL or as a structured ``condition``, which the engine
-         *     compiles to the SQL and stores with it. The service sanitizes the SQL,
-         *     applies CEL->SQL transpilation, validates column references, and optionally
-         *     estimates query cost. A rule whose SQL the hunt runner could not compile is
-         *     refused with 422. The cost preview counts only the orgs the hunts running the
-         *     rule read, cut to the orgs its author may read.
+         *     The rule is written as SQL, as a ``where_clause`` on ``source``, or as a structured
+         *     ``condition``, which the engine compiles to the SQL and stores with it. A named
+         *     ``source`` must be a registered source. The service applies CEL->SQL transpilation,
+         *     validates column references, and optionally estimates query cost. A rule whose SQL
+         *     the hunt runner could not compile is refused with 422. A ``_json`` path the source's
+         *     recent rows never carried comes back as a warning. The cost preview counts only the
+         *     orgs the hunts running the rule read, cut to the orgs its author may read.
          *
          *     A production+team write is routed to a review branch instead of the branch the
          *     runner git-syncs, and the ``X-DFE-Review-Required`` header says so.
          */
         post: operations["rules.create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/rules/import": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Import a SELECT as a Rule's Fields
+         * @description Read a SELECT into the source and WHERE clause a rule is saved with, saving nothing.
+         *
+         *     The FROM becomes ``source`` when its table is a registered source. Otherwise
+         *     ``source`` is null and the caller picks one. The column list, ORDER BY, LIMIT, SETTINGS,
+         *     a ``{timestamp_condition}`` placeholder and time bounds on timestamp columns are dropped
+         *     and listed in ``dropped``. GROUP BY, HAVING, a JOIN, a UNION, a WITH clause and a
+         *     subquery in FROM are refused with 422 ``import_refused``.
+         */
+        post: operations["rules.import"];
         delete?: never;
         options?: never;
         head?: never;
@@ -2247,14 +2277,19 @@ export interface paths {
         /**
          * Get Rule
          * @description Get a detection rule by file name.
+         *
+         *     A stored rule with no source whose table is a registered source's label is returned
+         *     under that source.
          */
         get: operations["rules.get"];
         /**
          * Update Rule
          * @description Replace a detection rule (re-runs creation pipeline, preserves created_at).
          *
-         *     The replacement is written as SQL or as a ``condition``, as on create, and a
-         *     rule replaced with SQL no longer carries a condition.
+         *     The replacement is written as SQL, a ``where_clause`` or a ``condition``, as on
+         *     create, and a rule replaced with SQL or a WHERE no longer carries a condition. With
+         *     no ``source`` in the body the stored one stands, read as the registered source its
+         *     table names when it names none. Only a source the body sets or changes must be registered.
          *
          *     A replacement the hunt runner could not compile is refused with 422 and the
          *     stored rule is left as it was. A production+team write is routed to a review
@@ -2866,6 +2901,10 @@ export interface paths {
          * Create Hunt
          * @description Create a new hunt configuration YAML.
          *
+         *     Each rule the hunt names passes the query check a rule save runs, and the results
+         *     table is checked against the columns the runner writes (422 ``invalid_sql``,
+         *     ``invalid_target``).
+         *
          *     A production+team write is routed to a review branch instead of the branch the
          *     runner git-syncs, and the ``X-DFE-Review-Required`` header says so. 422
          *     ``unknown_org`` when a customer names no registered org.
@@ -2894,6 +2933,10 @@ export interface paths {
         /**
          * Update Hunt
          * @description Replace an existing hunt configuration, resolving its customers afresh.
+         *
+         *     A rule that stays in the hunt keeps its stored entry, per-rule source and target
+         *     included. A rule the edit adds is stored by name. The rule and results-table checks
+         *     of the create apply to the kept entries.
          *
          *     A production+team write is routed to a review branch instead of the branch the
          *     runner git-syncs, and the ``X-DFE-Review-Required`` header says so. 422
@@ -6421,6 +6464,12 @@ export interface components {
              */
             org_display_name: string;
             /**
+             * Org Enabled
+             * @description False while the account's org is disabled, which refuses its sign-in whatever the account's own state
+             * @default true
+             */
+            org_enabled: boolean;
+            /**
              * External
              * @description True when the account authenticates through an identity provider
              */
@@ -6459,10 +6508,21 @@ export interface components {
              * @default false
              */
             password_change_required: boolean;
+            /**
+             * Linked Groups
+             * @description The groups in groups held only through an IdP sign-in, each with its provider, so they change with what the IdP asserts rather than with a membership write
+             */
+            linked_groups?: components["schemas"]["LinkedGroupResponse"][];
             /** Created At */
             created_at: string;
             /** Updated At */
             updated_at: string;
+            /**
+             * Last Login At
+             * @description When the account last signed in, by password or through an identity provider, empty if it never has
+             * @default
+             */
+            last_login_at: string;
         };
         /**
          * ActionDef
@@ -7502,7 +7562,7 @@ export interface components {
             data_stream: string;
             /**
              * Dataset
-             * @description package.data_stream - what a Beats event stamps
+             * @description package.data_stream, the dataset a Beats event carries in data_stream.dataset (Elastic Agent) or event.dataset (plain Filebeat)
              */
             dataset: string;
             /**
@@ -8452,9 +8512,9 @@ export interface components {
             email: string;
             /**
              * Groups
-             * @description Group memberships
+             * @description Group memberships, at least one: an account holds its roles only through its groups
              */
-            groups?: string[];
+            groups: string[];
             /**
              * Phone
              * @description Contact phone
@@ -8513,7 +8573,7 @@ export interface components {
         };
         /**
          * CreateGroupRequest
-         * @description Body for creating a group.
+         * @description Body for creating a system-wide group.
          */
         CreateGroupRequest: {
             /**
@@ -8532,12 +8592,6 @@ export interface components {
              * @default
              */
             description: string;
-            /**
-             * Scope
-             * @description 'system' (roles bind system-wide) or 'org:<name>' (group exists only inside that org; roles bind at that org's scope)
-             * @default system
-             */
-            scope: string;
             /**
              * Members
              * @description Account usernames in this group (local login resolves roles from this list)
@@ -9121,6 +9175,22 @@ export interface components {
              * @description Column classification for JSON promotion drafts (always 'promoted').
              */
             _field_type: string;
+        };
+        /**
+         * DroppedPartResponse
+         * @description One piece of the SELECT the rule does not keep.
+         */
+        DroppedPartResponse: {
+            /**
+             * Kind
+             * @description columns, order_by, limit, offset, settings, format, distinct, time_bound or time_placeholder
+             */
+            kind: string;
+            /**
+             * Text
+             * @description The piece as written
+             */
+            text: string;
         };
         /**
          * DryRunEventModel
@@ -10139,7 +10209,10 @@ export interface components {
             rule_name: string;
             /** Target Table Name */
             target_table_name?: string | null;
-            /** Source */
+            /**
+             * Source
+             * @description The table the rule reads in place of the hunt's, stored as source_table_name, the key the runner reads
+             */
             source?: string | null;
             /** Initial Checkpoint Lookback Minutes */
             initial_checkpoint_lookback_minutes?: number | null;
@@ -10888,6 +10961,25 @@ export interface components {
             outdated: boolean;
         };
         /**
+         * LinkedGroupResponse
+         * @description A group an account holds only through an IdP sign-in.
+         */
+        LinkedGroupResponse: {
+            /** Name */
+            name: string;
+            /**
+             * Provider
+             * @description The provider whose assertion links the group
+             */
+            provider: string;
+            /**
+             * Provider Type
+             * @description The provider's type (google, entra_id, okta or generic), empty once it is no longer registered
+             * @default
+             */
+            provider_type: string;
+        };
+        /**
          * LinkedIdentityResponse
          * @description An IdP sign-in linked to an account, which reaches it without a password.
          */
@@ -11097,6 +11189,27 @@ export interface components {
          * @enum {string}
          */
         ManagedBy: "dfe" | "provider" | "external";
+        /**
+         * MatchTest
+         * @description One branch of an any group a sample was filtered on.
+         */
+        MatchTest: {
+            /**
+             * Field
+             * @description Field the branch reads, a dotted path into the record
+             */
+            field: string;
+            /**
+             * Operator
+             * @description How the branch compares the field (equals, includes, ...)
+             */
+            operator: string;
+            /**
+             * Value
+             * @description Value the branch compares with, null for exists
+             */
+            value?: string | null;
+        };
         /**
          * MeshFacts
          * @description Whether this deployment's stage pools sit behind balancing listeners.
@@ -12981,7 +13094,7 @@ export interface components {
         /** @enum {string} */
         RbacScope: "group:write" | "group:read" | "group:delete" | "group:add_member" | "group:remove_member" | "account:write" | "account:read" | "account:delete" | "accounts:reset_password" | "account:attributes:read" | "account:attributes:write" | "account:attributes:read_sensitive" | "account:attributes:write_sensitive" | "group:attributes:read" | "group:attributes:write" | "group:attributes:read_sensitive" | "group:attributes:write_sensitive" | "alert:read" | "alert:write" | "alert:delete" | "api_key:read" | "api_key:write" | "api_key:delete" | "cel:check" | "clickhouse_cloud:manage" | "dashboard:read" | "synthetic-data:read" | "synthetic-data:run" | "deployment:read" | "deployment:write" | "deployment:delete" | "deployment:admin_links:read" | "fieldmap:read" | "fieldmap:write" | "fieldmap:delete" | "hunt:read" | "hunt:write" | "hunt:delete" | "hunt:execute" | "oidc:read" | "oidc:write" | "oidc:delete" | "org:read" | "org:write" | "org:delete" | "org:ingest_credentials:write" | "pipeline:read" | "pipeline:write" | "query:read" | "query:execute" | "raw_query:execute" | "repository:read" | "repository:write" | "role:read" | "role:write" | "role:delete" | "role:scopes" | "rule:read" | "rule:write" | "rule:delete" | "rule:validate" | "sampler:read" | "schema:read" | "schema:write" | "schema:delete" | "service_surface:read" | "service_surface:write" | "service:read" | "service:write" | "service:delete" | "service:validate" | "sigma:read" | "sigma:write" | "sigma:admin" | "source:read" | "source:write" | "source:delete" | "source:deploy" | "system:read" | "system:write" | "task:read" | "task:write" | "transform:compile" | "transform:test" | "usage:read" | "governance:read" | "governance:write" | "helmvars:read" | "helmvars:write" | "dryrun:execute" | "library:read" | "library:write" | "lifecycle:read" | "config:write";
         /** @enum {string} */
-        ReauthKind: "account" | "api_key" | "group" | "provider" | "role";
+        ReauthKind: "account" | "api_key" | "credential" | "group" | "org" | "provider" | "role" | "setting";
         /**
          * ReauthRequest
          * @description Your own password, and the account you are about to edit.
@@ -13419,10 +13532,15 @@ export interface components {
             severity: string;
             /**
              * User Sql
-             * @description Full detection query: SELECT ... FROM <db>.<table> WHERE ... (the FROM names the source table). Give this or ``condition``, not both. A rule saved this way has no ``condition``
+             * @description Full detection query: SELECT ... FROM <db>.<table> WHERE ... (the FROM names the source table). Give this, ``where_clause`` or ``condition``, one of the three. A rule saved this way has no ``condition``
              */
             user_sql?: string | null;
-            /** @description The rule's structured condition, which the engine compiles to its SQL and stores with it, so the builder reopens on it. Reads the table of ``source``. Give this or ``user_sql``, not both */
+            /**
+             * Where Clause
+             * @description The row filter on the table of ``source``, written as the part after WHERE, with no time bound and no {...} placeholder, since the time window comes from the hunt schedule. Give this, ``user_sql`` or ``condition``, one of the three
+             */
+            where_clause?: string | null;
+            /** @description The rule's structured condition, which the engine compiles to its SQL and stores with it, so the builder reopens on it. Reads the table of ``source``. Give this, ``user_sql`` or ``where_clause``, one of the three */
             condition?: components["schemas"]["RuleCondition"] | null;
             /**
              * Cel Filter
@@ -13436,7 +13554,7 @@ export interface components {
             hunt_name?: string | null;
             /**
              * Source
-             * @description Source label (e.g. windows_audit)
+             * @description Source label (e.g. windows_audit). A label no registered source carries is refused
              */
             source?: string | null;
             /**
@@ -13457,11 +13575,11 @@ export interface components {
             name: string;
             /**
              * Source Type
-             * @description 'raw' (plain SQL) or 'hyperdx' (Search saved search format)
+             * @description 'raw' (plain SQL). SQL a Search view renders goes to POST /rules/from-hyperdx
              * @default raw
-             * @enum {string}
+             * @constant
              */
-            source_type: "raw" | "hyperdx";
+            source_type: "raw";
         };
         /**
          * RuleCreateResponse
@@ -13547,6 +13665,53 @@ export interface components {
             warnings?: string[];
             /** Sql Errors */
             sql_errors?: components["schemas"]["SqlValidationError"][];
+        };
+        /**
+         * RuleImportRequest
+         * @description A SELECT to read into a source and a WHERE clause.
+         */
+        RuleImportRequest: {
+            /**
+             * Sql
+             * @description One ClickHouse SELECT of a single table, at most 262144 characters, ClickHouse's default max_query_size
+             */
+            sql: string;
+        };
+        /**
+         * RuleImportResponse
+         * @description What a SELECT becomes as a rule's fields. Nothing is saved.
+         */
+        RuleImportResponse: {
+            /**
+             * Source
+             * @description The registered source the FROM names. Null when the author must pick one
+             */
+            source?: string | null;
+            /**
+             * Needs Source
+             * @description True when the author must pick a source to save
+             */
+            needs_source: boolean;
+            /**
+             * From Table
+             * @description The FROM as written, or the placeholders it was
+             */
+            from_table: string;
+            /**
+             * Where Clause
+             * @description The row filter with the time window removed, empty when nothing is left
+             */
+            where_clause: string;
+            /**
+             * Dropped
+             * @description Everything in the SELECT the rule does not keep
+             */
+            dropped?: components["schemas"]["DroppedPartResponse"][];
+            /**
+             * Warnings
+             * @description What to look at before saving the fields
+             */
+            warnings?: string[];
         };
         /**
          * RuleOrderRequest
@@ -13766,10 +13931,15 @@ export interface components {
             severity: string;
             /**
              * User Sql
-             * @description Full detection query: SELECT ... FROM <db>.<table> WHERE ... (the FROM names the source table). Give this or ``condition``, not both. A rule saved this way has no ``condition``
+             * @description Full detection query: SELECT ... FROM <db>.<table> WHERE ... (the FROM names the source table). Give this, ``where_clause`` or ``condition``, one of the three. A rule saved this way has no ``condition``
              */
             user_sql?: string | null;
-            /** @description The rule's structured condition, which the engine compiles to its SQL and stores with it, so the builder reopens on it. Reads the table of ``source``. Give this or ``user_sql``, not both */
+            /**
+             * Where Clause
+             * @description The row filter on the table of ``source``, written as the part after WHERE, with no time bound and no {...} placeholder, since the time window comes from the hunt schedule. Give this, ``user_sql`` or ``condition``, one of the three
+             */
+            where_clause?: string | null;
+            /** @description The rule's structured condition, which the engine compiles to its SQL and stores with it, so the builder reopens on it. Reads the table of ``source``. Give this, ``user_sql`` or ``where_clause``, one of the three */
             condition?: components["schemas"]["RuleCondition"] | null;
             /**
              * Cel Filter
@@ -13783,7 +13953,7 @@ export interface components {
             hunt_name?: string | null;
             /**
              * Source
-             * @description Source label (e.g. windows_audit)
+             * @description Source label (e.g. windows_audit). A label no registered source carries is refused
              */
             source?: string | null;
             /**
@@ -14209,7 +14379,7 @@ export interface components {
             table: string;
             /**
              * Match Field
-             * @description Match field rows were filtered on, or null when the source owns its own table (whole-table sample).
+             * @description Match field rows were filtered on, or null when the source owns its own table (whole-table sample) or the match is an any group (see match_any).
              */
             match_field?: string | null;
             /**
@@ -14222,6 +14392,11 @@ export interface components {
              * @description Match operator used when filtering (equals, exists, includes, ...).
              */
             match_operator?: string | null;
+            /**
+             * Match Any
+             * @description The branches of an any group rows were filtered on: a row is kept when any one holds. Empty for a single test, a whole-table sample or a source that owns its table.
+             */
+            match_any?: components["schemas"]["MatchTest"][];
             /**
              * Columns
              * @description Column names present in the sampled rows.
@@ -17175,7 +17350,7 @@ export interface components {
         UpdateAccountRequest: {
             /**
              * Groups
-             * @description Replace group memberships
+             * @description Replace group memberships, with at least one
              */
             groups?: string[] | null;
             /**
@@ -19104,7 +19279,7 @@ export interface operations {
             query?: {
                 /** @description Search in username, name, or email */
                 search?: string | null;
-                /** @description Exact match on the OIDC provider name last used to log the account in */
+                /** @description Exact match on an OIDC provider the account signs in through: its own, or one with a sign-in linked to it */
                 oidc_id?: string | null;
                 /** @description Exact match on the org the account belongs to, where your org also matches the root accounts naming none. Empty matches only the root accounts. */
                 org?: string | null;
@@ -21197,10 +21372,7 @@ export interface operations {
     "auth.roles.create": {
         parameters: {
             query?: never;
-            header?: {
-                /** @description The grant POST /auth/reauth returned for this change */
-                "X-DFE-Reauth"?: string;
-            };
+            header?: never;
             path?: never;
             cookie?: never;
         };
@@ -22177,7 +22349,10 @@ export interface operations {
     "orgs.apply": {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description The grant POST /auth/reauth returned for this change */
+                "X-DFE-Reauth"?: string;
+            };
             path: {
                 name: string;
             };
@@ -22239,7 +22414,10 @@ export interface operations {
     "orgs.delete": {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description The grant POST /auth/reauth returned for this change */
+                "X-DFE-Reauth"?: string;
+            };
             path: {
                 name: string;
             };
@@ -22425,6 +22603,8 @@ export interface operations {
                 dry_run?: boolean;
             };
             header?: {
+                /** @description The grant POST /auth/reauth returned for this change */
+                "X-DFE-Reauth"?: string;
                 /** @description The current ETag: the write fails with 412 if it has changed */
                 "If-Match"?: string | null;
                 /** @description `*` to create: the write fails with 412 if the resource exists */
@@ -22496,6 +22676,8 @@ export interface operations {
                 dry_run?: boolean;
             };
             header?: {
+                /** @description The grant POST /auth/reauth returned for this change */
+                "X-DFE-Reauth"?: string;
                 /** @description The current ETag: the write fails with 412 if it has changed */
                 "If-Match"?: string | null;
                 /** @description `*` to create: the write fails with 412 if the resource exists */
@@ -22561,6 +22743,8 @@ export interface operations {
                 dry_run?: boolean;
             };
             header?: {
+                /** @description The grant POST /auth/reauth returned for this change */
+                "X-DFE-Reauth"?: string;
                 /** @description The current ETag: the write fails with 412 if it has changed */
                 "If-Match"?: string | null;
                 /** @description `*` to create: the write fails with 412 if the resource exists */
@@ -25636,7 +25820,67 @@ export interface operations {
                     "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused, nothing written. The body failed validation (code validation_error). Or the hunt runner could not compile the rule -- its SQL does not parse as one SELECT, names no <db>.<table> source, names a source that is not a table name (letters, digits, '_' and '-'), has no WHERE to detect with, or calls a function that reads outside the row (url, s3, a dictionary) or sends it to another service (the ai* functions), or carries a CEL filter that does not transpile (code invalid_sql, the errors in sql_errors). Or the rule matches every event in its source (code rule_matches_everything, the source and detection WHERE in context). */
+            /** @description Refused, nothing written. The body failed validation (code validation_error). Or the hunt runner could not compile the rule -- its SQL does not parse as one SELECT, names no <db>.<table> source, names a source that is not a table name (letters, digits, '_' and '-'), has no WHERE to detect with, or calls a function that reads outside the row (url, s3, a dictionary) or sends it to another service (the ai* functions), or carries a CEL filter that does not transpile. A ``source`` that is not a registered source is refused, and so is a ``where_clause`` that is empty, carries a {...} placeholder or a time bound, or holds more than a row filter (code invalid_sql, the errors in sql_errors). Or the rule matches every event in its source (code rule_matches_everything, the source and detection WHERE in context). */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+        };
+    };
+    "rules.import": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RuleImportRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RuleImportResponse"];
+                };
+            };
+            /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Refused. The body failed validation (code validation_error), or the SELECT has a shape a rule cannot carry: GROUP BY, HAVING, a JOIN, a UNION, a WITH clause or a subquery in FROM (code import_refused, the reason in detail). */
             422: {
                 headers: {
                     [name: string]: unknown;
@@ -25696,7 +25940,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused, nothing written. The body failed validation (code validation_error). Or the hunt runner could not compile the rule -- its SQL does not parse as one SELECT, names no <db>.<table> source, names a source that is not a table name (letters, digits, '_' and '-'), has no WHERE to detect with, or calls a function that reads outside the row (url, s3, a dictionary) or sends it to another service (the ai* functions), or carries a CEL filter that does not transpile (code invalid_sql, the errors in sql_errors). Or the rule matches every event in its source (code rule_matches_everything, the source and detection WHERE in context). */
+            /** @description Refused, nothing written. The body failed validation (code validation_error). Or the hunt runner could not compile the rule -- its SQL does not parse as one SELECT, names no <db>.<table> source, names a source that is not a table name (letters, digits, '_' and '-'), has no WHERE to detect with, or calls a function that reads outside the row (url, s3, a dictionary) or sends it to another service (the ai* functions), or carries a CEL filter that does not transpile. A ``source`` that is not a registered source is refused, and so is a ``where_clause`` that is empty, carries a {...} placeholder or a time bound, or holds more than a row filter (code invalid_sql, the errors in sql_errors). Or the rule matches every event in its source (code rule_matches_everything, the source and detection WHERE in context). */
             422: {
                 headers: {
                     [name: string]: unknown;
@@ -25936,7 +26180,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused, nothing written. The body failed validation (code validation_error). Or the hunt runner could not compile the rule -- its SQL does not parse as one SELECT, names no <db>.<table> source, names a source that is not a table name (letters, digits, '_' and '-'), has no WHERE to detect with, or calls a function that reads outside the row (url, s3, a dictionary) or sends it to another service (the ai* functions), or carries a CEL filter that does not transpile (code invalid_sql, the errors in sql_errors). Or the rule matches every event in its source (code rule_matches_everything, the source and detection WHERE in context). */
+            /** @description Refused, nothing written. The body failed validation (code validation_error). Or the hunt runner could not compile the rule -- its SQL does not parse as one SELECT, names no <db>.<table> source, names a source that is not a table name (letters, digits, '_' and '-'), has no WHERE to detect with, or calls a function that reads outside the row (url, s3, a dictionary) or sends it to another service (the ai* functions), or carries a CEL filter that does not transpile. A ``source`` that is not a registered source is refused, and so is a ``where_clause`` that is empty, carries a {...} placeholder or a time bound, or holds more than a row filter (code invalid_sql, the errors in sql_errors). Or the rule matches every event in its source (code rule_matches_everything, the source and detection WHERE in context). */
             422: {
                 headers: {
                     [name: string]: unknown;
@@ -27087,7 +27331,10 @@ export interface operations {
     "system.retention.apply": {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description The grant POST /auth/reauth returned for this change */
+                "X-DFE-Reauth"?: string;
+            };
             path?: never;
             cookie?: never;
         };
@@ -27218,6 +27465,8 @@ export interface operations {
                 dry_run?: boolean;
             };
             header?: {
+                /** @description The grant POST /auth/reauth returned for this change */
+                "X-DFE-Reauth"?: string;
                 /** @description The current ETag: the write fails with 412 if it has changed */
                 "If-Match"?: string | null;
                 /** @description `*` to create: the write fails with 412 if the resource exists */
@@ -27356,7 +27605,10 @@ export interface operations {
     "system.defaults.update": {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description The grant POST /auth/reauth returned for this change */
+                "X-DFE-Reauth"?: string;
+            };
             path?: never;
             cookie?: never;
         };

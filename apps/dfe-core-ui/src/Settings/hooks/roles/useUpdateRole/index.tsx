@@ -11,7 +11,7 @@ export const useUpdateRole = ({
   onError,
 }: UseUpdateRoleProps) => {
   const queryClient = useQueryClient();
-  const { data, mutate, isPending, error } = useMutation({
+  const { data, mutate, isPending, error, reset } = useMutation({
     mutationFn: (role: TRoleUpdateRequest) =>
       updateRole({
         headerParams: { [REAUTH_HEADER]: reauth?.() },
@@ -35,5 +35,5 @@ export const useUpdateRole = ({
     },
   });
 
-  return { data, mutate, isPending, error };
+  return { data, mutate, isPending, error, reset };
 };

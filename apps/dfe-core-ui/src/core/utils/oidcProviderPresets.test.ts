@@ -121,7 +121,7 @@ describe('presetFieldsForType', () => {
         type: 'entra_id',
       }),
     ).toEqual({
-      name: 'entra_id',
+      name: 'entra',
       type: 'entra_id',
       display_name: 'Entra ID',
       issuer: '',

@@ -6,22 +6,21 @@ import {
   TResetPasswordFormValues,
 } from '@/core/components/ResetPasswordForm';
 import { useAccountResetPassword } from '@/core/hooks/useAccountResetPassword';
+import { useReauthGrant } from '@/core/hooks/useReauthGrant';
 import { App, Button } from 'antd';
 import { useState } from 'react';
 
 /** The Reset password row of an account's edit view, which sets a new password in a drawer of its own. */
 export const ResetAccountPasswordDrawer = ({
-  reauth,
   username,
   onSuccess,
 }: {
-  /** The re-auth grant the edit drawer holds for *username*. */
-  reauth?: string;
   username: string;
   onSuccess?: () => void;
 }) => {
   const [open, setOpen] = useState(false);
   const { notification } = App.useApp();
+  const reauth = useReauthGrant(username);
 
   const {
     data,
@@ -30,9 +29,10 @@ export const ResetAccountPasswordDrawer = ({
     isPending,
     error,
   } = useAccountResetPassword({
-    reauth,
+    reauth: reauth.grant,
     username,
     onSuccess: () => {
+      reauth.drop();
       notification.success({
         title: 'Password reset successfully',
         placement: 'bottomLeft',
@@ -48,8 +48,14 @@ export const ResetAccountPasswordDrawer = ({
   };
 
   const handleFinish = ({ new_password }: TResetPasswordFormValues) => {
-    resetPassword({
-      new_password,
+    const body = { new_password };
+    // The engine asks for the password only when the reset needs it.
+    resetPassword(body, {
+      onError: (refusal) => {
+        if (reauth.askIfRequired(refusal, () => resetPassword(body))) {
+          clearResetError();
+        }
+      },
     });
   };
 
@@ -87,6 +93,7 @@ export const ResetAccountPasswordDrawer = ({
         />
       </Drawer>
 
+      {reauth.modal}
       <GitEnabledPendingReviewModal pending={data?.git.pending} />
     </>
   );

@@ -1143,10 +1143,10 @@
                   "type": "null"
                 }
               ],
-              "description": "Exact match on the OIDC provider name last used to log the account in",
+              "description": "Exact match on an OIDC provider the account signs in through: its own, or one with a sign-in linked to it",
               "title": "Oidc Id"
             },
-            "description": "Exact match on the OIDC provider name last used to log the account in"
+            "description": "Exact match on an OIDC provider the account signs in through: its own, or one with a sign-in linked to it"
           },
           {
             "name": "org",
@@ -2905,7 +2905,7 @@
           "Groups"
         ],
         "summary": "Create Group",
-        "description": "Create a new RBAC group at a scope.",
+        "description": "Create a new system-wide RBAC group.",
         "operationId": "auth.groups.create",
         "parameters": [
           {
@@ -3377,7 +3377,7 @@
           "Groups"
         ],
         "summary": "Delete Group",
-        "description": "Delete a group (checked at the group's scope).",
+        "description": "Delete a group and drop its members from it (checked at the group's scope).",
         "operationId": "auth.groups.delete",
         "parameters": [
           {
@@ -4654,20 +4654,6 @@
         "summary": "Create Role",
         "description": "Create a new RBAC role granting no more than the caller holds.",
         "operationId": "auth.roles.create",
-        "parameters": [
-          {
-            "name": "X-DFE-Reauth",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "description": "The grant POST /auth/reauth returned for this change",
-              "default": "",
-              "title": "X-Dfe-Reauth"
-            },
-            "description": "The grant POST /auth/reauth returned for this change"
-          }
-        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -6565,6 +6551,18 @@
               "type": "string",
               "title": "Name"
             }
+          },
+          {
+            "name": "X-DFE-Reauth",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "description": "The grant POST /auth/reauth returned for this change",
+              "default": "",
+              "title": "X-Dfe-Reauth"
+            },
+            "description": "The grant POST /auth/reauth returned for this change"
           }
         ],
         "requestBody": {
@@ -6666,6 +6664,18 @@
               "type": "string",
               "title": "Name"
             }
+          },
+          {
+            "name": "X-DFE-Reauth",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "description": "The grant POST /auth/reauth returned for this change",
+              "default": "",
+              "title": "X-Dfe-Reauth"
+            },
+            "description": "The grant POST /auth/reauth returned for this change"
           }
         ],
         "responses": {
@@ -7022,6 +7032,18 @@
             "description": "Validate and report the change without committing it"
           },
           {
+            "name": "X-DFE-Reauth",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "description": "The grant POST /auth/reauth returned for this change",
+              "default": "",
+              "title": "X-Dfe-Reauth"
+            },
+            "description": "The grant POST /auth/reauth returned for this change"
+          },
+          {
             "name": "If-Match",
             "in": "header",
             "required": false,
@@ -7181,6 +7203,18 @@
             "description": "Validate and report the change without committing it"
           },
           {
+            "name": "X-DFE-Reauth",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "description": "The grant POST /auth/reauth returned for this change",
+              "default": "",
+              "title": "X-Dfe-Reauth"
+            },
+            "description": "The grant POST /auth/reauth returned for this change"
+          },
+          {
             "name": "If-Match",
             "in": "header",
             "required": false,
@@ -7323,6 +7357,18 @@
               "title": "Dry Run"
             },
             "description": "Validate and report the change without committing it"
+          },
+          {
+            "name": "X-DFE-Reauth",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "description": "The grant POST /auth/reauth returned for this change",
+              "default": "",
+              "title": "X-Dfe-Reauth"
+            },
+            "description": "The grant POST /auth/reauth returned for this change"
           },
           {
             "name": "If-Match",
@@ -12746,7 +12792,7 @@
           "Rules"
         ],
         "summary": "List Rules",
-        "description": "List detection rules with pagination and search.",
+        "description": "List detection rules with pagination and search.\n\nA stored rule with no registered source whose table is a registered source's label is\nlisted under that source. One that names none lists with its stored source as it is.",
         "operationId": "rules.list",
         "parameters": [
           {
@@ -12944,7 +12990,7 @@
           "Rules"
         ],
         "summary": "Create Rule",
-        "description": "Create a new hunt rule via RuleCreationService.\n\nThe rule is written as SQL or as a structured ``condition``, which the engine\ncompiles to the SQL and stores with it. The service sanitizes the SQL,\napplies CEL->SQL transpilation, validates column references, and optionally\nestimates query cost. A rule whose SQL the hunt runner could not compile is\nrefused with 422. The cost preview counts only the orgs the hunts running the\nrule read, cut to the orgs its author may read.\n\nA production+team write is routed to a review branch instead of the branch the\nrunner git-syncs, and the ``X-DFE-Review-Required`` header says so.",
+        "description": "Create a new hunt rule via RuleCreationService.\n\nThe rule is written as SQL, as a ``where_clause`` on ``source``, or as a structured\n``condition``, which the engine compiles to the SQL and stores with it. A named\n``source`` must be a registered source. The service applies CEL->SQL transpilation,\nvalidates column references, and optionally estimates query cost. A rule whose SQL\nthe hunt runner could not compile is refused with 422. A ``_json`` path the source's\nrecent rows never carried comes back as a warning. The cost preview counts only the\norgs the hunts running the rule read, cut to the orgs its author may read.\n\nA production+team write is routed to a review branch instead of the branch the\nrunner git-syncs, and the ``X-DFE-Review-Required`` header says so.",
         "operationId": "rules.create",
         "requestBody": {
           "required": true,
@@ -12988,7 +13034,7 @@
             }
           },
           "422": {
-            "description": "Refused, nothing written. The body failed validation (code validation_error). Or the hunt runner could not compile the rule -- its SQL does not parse as one SELECT, names no <db>.<table> source, names a source that is not a table name (letters, digits, '_' and '-'), has no WHERE to detect with, or calls a function that reads outside the row (url, s3, a dictionary) or sends it to another service (the ai* functions), or carries a CEL filter that does not transpile (code invalid_sql, the errors in sql_errors). Or the rule matches every event in its source (code rule_matches_everything, the source and detection WHERE in context).",
+            "description": "Refused, nothing written. The body failed validation (code validation_error). Or the hunt runner could not compile the rule -- its SQL does not parse as one SELECT, names no <db>.<table> source, names a source that is not a table name (letters, digits, '_' and '-'), has no WHERE to detect with, or calls a function that reads outside the row (url, s3, a dictionary) or sends it to another service (the ai* functions), or carries a CEL filter that does not transpile. A ``source`` that is not a registered source is refused, and so is a ``where_clause`` that is empty, carries a {...} placeholder or a time bound, or holds more than a row filter (code invalid_sql, the errors in sql_errors). Or the rule matches every event in its source (code rule_matches_everything, the source and detection WHERE in context).",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -13027,6 +13073,98 @@
             "positional": []
           },
           "action": "rule:write"
+        }
+      }
+    },
+    "/api/v1/rules/import": {
+      "post": {
+        "tags": [
+          "Rules"
+        ],
+        "summary": "Import a SELECT as a Rule's Fields",
+        "description": "Read a SELECT into the source and WHERE clause a rule is saved with, saving nothing.\n\nThe FROM becomes ``source`` when its table is a registered source. Otherwise\n``source`` is null and the caller picks one. The column list, ORDER BY, LIMIT, SETTINGS,\na ``{timestamp_condition}`` placeholder and time bounds on timestamp columns are dropped\nand listed in ``dropped``. GROUP BY, HAVING, a JOIN, a UNION, a WITH clause and a\nsubquery in FROM are refused with 422 ``import_refused``.",
+        "operationId": "rules.import",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RuleImportRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RuleImportResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Refused. The body failed validation (code validation_error), or the SELECT has a shape a rule cannot carry: GROUP BY, HAVING, a JOIN, a UNION, a WITH clause or a subquery in FROM (code import_refused, the reason in detail).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Problem details (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "x-scalo": {
+          "group": "rules",
+          "resource": "rules",
+          "hierarchy": [
+            "rules"
+          ],
+          "verb": "import",
+          "read_only": false,
+          "cli": {
+            "hidden": false,
+            "aliases": [],
+            "positional": []
+          },
+          "action": "rule:validate"
         }
       }
     },
@@ -13080,7 +13218,7 @@
             }
           },
           "422": {
-            "description": "Refused, nothing written. The body failed validation (code validation_error). Or the hunt runner could not compile the rule -- its SQL does not parse as one SELECT, names no <db>.<table> source, names a source that is not a table name (letters, digits, '_' and '-'), has no WHERE to detect with, or calls a function that reads outside the row (url, s3, a dictionary) or sends it to another service (the ai* functions), or carries a CEL filter that does not transpile (code invalid_sql, the errors in sql_errors). Or the rule matches every event in its source (code rule_matches_everything, the source and detection WHERE in context).",
+            "description": "Refused, nothing written. The body failed validation (code validation_error). Or the hunt runner could not compile the rule -- its SQL does not parse as one SELECT, names no <db>.<table> source, names a source that is not a table name (letters, digits, '_' and '-'), has no WHERE to detect with, or calls a function that reads outside the row (url, s3, a dictionary) or sends it to another service (the ai* functions), or carries a CEL filter that does not transpile. A ``source`` that is not a registered source is refused, and so is a ``where_clause`` that is empty, carries a {...} placeholder or a time bound, or holds more than a row filter (code invalid_sql, the errors in sql_errors). Or the rule matches every event in its source (code rule_matches_everything, the source and detection WHERE in context).",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -13312,7 +13450,7 @@
           "Rules"
         ],
         "summary": "Get Rule",
-        "description": "Get a detection rule by file name.",
+        "description": "Get a detection rule by file name.\n\nA stored rule with no source whose table is a registered source's label is returned\nunder that source.",
         "operationId": "rules.get",
         "parameters": [
           {
@@ -13403,7 +13541,7 @@
           "Rules"
         ],
         "summary": "Update Rule",
-        "description": "Replace a detection rule (re-runs creation pipeline, preserves created_at).\n\nThe replacement is written as SQL or as a ``condition``, as on create, and a\nrule replaced with SQL no longer carries a condition.\n\nA replacement the hunt runner could not compile is refused with 422 and the\nstored rule is left as it was. A production+team write is routed to a review\nbranch instead of the branch the runner git-syncs, and the\n``X-DFE-Review-Required`` header says so.",
+        "description": "Replace a detection rule (re-runs creation pipeline, preserves created_at).\n\nThe replacement is written as SQL, a ``where_clause`` or a ``condition``, as on\ncreate, and a rule replaced with SQL or a WHERE no longer carries a condition. With\nno ``source`` in the body the stored one stands, read as the registered source its\ntable names when it names none. Only a source the body sets or changes must be registered.\n\nA replacement the hunt runner could not compile is refused with 422 and the\nstored rule is left as it was. A production+team write is routed to a review\nbranch instead of the branch the runner git-syncs, and the\n``X-DFE-Review-Required`` header says so.",
         "operationId": "rules.apply",
         "parameters": [
           {
@@ -13458,7 +13596,7 @@
             }
           },
           "422": {
-            "description": "Refused, nothing written. The body failed validation (code validation_error). Or the hunt runner could not compile the rule -- its SQL does not parse as one SELECT, names no <db>.<table> source, names a source that is not a table name (letters, digits, '_' and '-'), has no WHERE to detect with, or calls a function that reads outside the row (url, s3, a dictionary) or sends it to another service (the ai* functions), or carries a CEL filter that does not transpile (code invalid_sql, the errors in sql_errors). Or the rule matches every event in its source (code rule_matches_everything, the source and detection WHERE in context).",
+            "description": "Refused, nothing written. The body failed validation (code validation_error). Or the hunt runner could not compile the rule -- its SQL does not parse as one SELECT, names no <db>.<table> source, names a source that is not a table name (letters, digits, '_' and '-'), has no WHERE to detect with, or calls a function that reads outside the row (url, s3, a dictionary) or sends it to another service (the ai* functions), or carries a CEL filter that does not transpile. A ``source`` that is not a registered source is refused, and so is a ``where_clause`` that is empty, carries a {...} placeholder or a time bound, or holds more than a row filter (code invalid_sql, the errors in sql_errors). Or the rule matches every event in its source (code rule_matches_everything, the source and detection WHERE in context).",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -15400,15 +15538,29 @@
         "summary": "Put Retention",
         "description": "Store the override in the deploy repo and return, leaving the tables to a background pass.\n\nThe pass brings the engine's own tables and every deployed source's table to the\nstored value with ``ALTER TABLE ... MODIFY TTL`` (or ``REMOVE TTL`` for 0). A table\nthat declares its own TTL is left alone. The pass runs again until every table\nhas it, so a ClickHouse that is down when the value is stored gets it once it is\nback, and a restart does not lose it.",
         "operationId": "system.retention.apply",
+        "parameters": [
+          {
+            "name": "X-DFE-Reauth",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "description": "The grant POST /auth/reauth returned for this change",
+              "default": "",
+              "title": "X-Dfe-Reauth"
+            },
+            "description": "The grant POST /auth/reauth returned for this change"
+          }
+        ],
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/RetentionUpdate"
               }
             }
-          },
-          "required": true
+          }
         },
         "responses": {
           "200": {
@@ -15604,6 +15756,18 @@
               "title": "Dry Run"
             },
             "description": "Validate and report the change without committing it"
+          },
+          {
+            "name": "X-DFE-Reauth",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "description": "The grant POST /auth/reauth returned for this change",
+              "default": "",
+              "title": "X-Dfe-Reauth"
+            },
+            "description": "The grant POST /auth/reauth returned for this change"
           },
           {
             "name": "If-Match",
@@ -15836,15 +16000,29 @@
         "summary": "Patch Defaults",
         "description": "Store the named defaults. Only ttl_days is applied to live tables.\n\nOmitted fields are left alone. null clears that override. Common-header type,\nversion and engine are what a source inherits the next time it is deployed.\nThis request does not rewrite them onto live tables. A patch that names\nttl_days stores it and returns, and the same background pass as PUT /retention\napplies it.",
         "operationId": "system.defaults.update",
+        "parameters": [
+          {
+            "name": "X-DFE-Reauth",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "description": "The grant POST /auth/reauth returned for this change",
+              "default": "",
+              "title": "X-Dfe-Reauth"
+            },
+            "description": "The grant POST /auth/reauth returned for this change"
+          }
+        ],
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/SystemDefaultsPatch"
               }
             }
-          },
-          "required": true
+          }
         },
         "responses": {
           "200": {
@@ -16678,7 +16856,7 @@
           "hunts"
         ],
         "summary": "Create Hunt",
-        "description": "Create a new hunt configuration YAML.\n\nA production+team write is routed to a review branch instead of the branch the\nrunner git-syncs, and the ``X-DFE-Review-Required`` header says so. 422\n``unknown_org`` when a customer names no registered org.",
+        "description": "Create a new hunt configuration YAML.\n\nEach rule the hunt names passes the query check a rule save runs, and the results\ntable is checked against the columns the runner writes (422 ``invalid_sql``,\n``invalid_target``).\n\nA production+team write is routed to a review branch instead of the branch the\nrunner git-syncs, and the ``X-DFE-Review-Required`` header says so. 422\n``unknown_org`` when a customer names no registered org.",
         "operationId": "hunts.create",
         "requestBody": {
           "required": true,
@@ -16861,7 +17039,7 @@
           "hunts"
         ],
         "summary": "Update Hunt",
-        "description": "Replace an existing hunt configuration, resolving its customers afresh.\n\nA production+team write is routed to a review branch instead of the branch the\nrunner git-syncs, and the ``X-DFE-Review-Required`` header says so. 422\n``unknown_org`` when a customer names no registered org, 422 ``unknown_rule`` when a\nrule newly named has no stored rule file.",
+        "description": "Replace an existing hunt configuration, resolving its customers afresh.\n\nA rule that stays in the hunt keeps its stored entry, per-rule source and target\nincluded. A rule the edit adds is stored by name. The rule and results-table checks\nof the create apply to the kept entries.\n\nA production+team write is routed to a review branch instead of the branch the\nrunner git-syncs, and the ``X-DFE-Review-Required`` header says so. 422\n``unknown_org`` when a customer names no registered org, 422 ``unknown_rule`` when a\nrule newly named has no stored rule file.",
         "operationId": "hunts.apply",
         "parameters": [
           {
@@ -37437,6 +37615,12 @@
             "description": "The display name of the org the account is bound to, which for a root account is your org, else that org's name when it has none. Empty while it is bound to none.",
             "default": ""
           },
+          "org_enabled": {
+            "type": "boolean",
+            "title": "Org Enabled",
+            "description": "False while the account's org is disabled, which refuses its sign-in whatever the account's own state",
+            "default": true
+          },
           "external": {
             "type": "boolean",
             "title": "External",
@@ -37486,6 +37670,14 @@
             "description": "True until the account replaces an issued password. The account's own read reports no groups while it is set, as its session holds none.",
             "default": false
           },
+          "linked_groups": {
+            "items": {
+              "$ref": "#/components/schemas/LinkedGroupResponse"
+            },
+            "type": "array",
+            "title": "Linked Groups",
+            "description": "The groups in groups held only through an IdP sign-in, each with its provider, so they change with what the IdP asserts rather than with a membership write"
+          },
           "created_at": {
             "type": "string",
             "title": "Created At"
@@ -37493,6 +37685,12 @@
           "updated_at": {
             "type": "string",
             "title": "Updated At"
+          },
+          "last_login_at": {
+            "type": "string",
+            "title": "Last Login At",
+            "description": "When the account last signed in, by password or through an identity provider, empty if it never has",
+            "default": ""
           }
         },
         "type": "object",
@@ -39256,7 +39454,7 @@
           "dataset": {
             "type": "string",
             "title": "Dataset",
-            "description": "package.data_stream - what a Beats event stamps"
+            "description": "package.data_stream, the dataset a Beats event carries in data_stream.dataset (Elastic Agent) or event.dataset (plain Filebeat)"
           },
           "intakes": {
             "items": {
@@ -40873,8 +41071,9 @@
               "type": "string"
             },
             "type": "array",
+            "minItems": 1,
             "title": "Groups",
-            "description": "Group memberships"
+            "description": "Group memberships, at least one: an account holds its roles only through its groups"
           },
           "phone": {
             "type": "string",
@@ -40899,6 +41098,7 @@
         "required": [
           "username",
           "password",
+          "groups",
           "name"
         ],
         "title": "CreateAccountRequest",
@@ -40982,12 +41182,6 @@
             "description": "Human-readable description",
             "default": ""
           },
-          "scope": {
-            "type": "string",
-            "title": "Scope",
-            "description": "'system' (roles bind system-wide) or 'org:<name>' (group exists only inside that org; roles bind at that org's scope)",
-            "default": "system"
-          },
           "members": {
             "items": {
               "type": "string"
@@ -41009,13 +41203,14 @@
             "default": ""
           }
         },
+        "additionalProperties": false,
         "type": "object",
         "required": [
           "name",
           "roles"
         ],
         "title": "CreateGroupRequest",
-        "description": "Body for creating a group."
+        "description": "Body for creating a system-wide group."
       },
       "CreateInstanceRequest": {
         "properties": {
@@ -41876,6 +42071,27 @@
         ],
         "title": "DraftColumn",
         "description": "A ready-to-send meta-schema column derived from a discovered JSON path.\n\nShaped to drop straight into ``MetaSchemaAddVersionRequest.columns`` (the\ncreate-version endpoint) or a new meta-schema's version -- the UI sends these\nverbatim, no field mapping. ``type`` is derived from the first observed\nClickHouse type. For a multi-type path (``is_consistent=false``) confirm it\nbefore saving."
+      },
+      "DroppedPartResponse": {
+        "properties": {
+          "kind": {
+            "type": "string",
+            "title": "Kind",
+            "description": "columns, order_by, limit, offset, settings, format, distinct, time_bound or time_placeholder"
+          },
+          "text": {
+            "type": "string",
+            "title": "Text",
+            "description": "The piece as written"
+          }
+        },
+        "type": "object",
+        "required": [
+          "kind",
+          "text"
+        ],
+        "title": "DroppedPartResponse",
+        "description": "One piece of the SELECT the rule does not keep."
       },
       "DryRunEventModel": {
         "properties": {
@@ -43681,7 +43897,8 @@
                 "type": "null"
               }
             ],
-            "title": "Source"
+            "title": "Source",
+            "description": "The table the rule reads in place of the hunt's, stored as source_table_name, the key the runner reads"
           },
           "initial_checkpoint_lookback_minutes": {
             "anyOf": [
@@ -45021,6 +45238,32 @@
         "title": "LinkStatusModel",
         "description": "A link, with how the content in the file set compares to the artefact."
       },
+      "LinkedGroupResponse": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "provider": {
+            "type": "string",
+            "title": "Provider",
+            "description": "The provider whose assertion links the group"
+          },
+          "provider_type": {
+            "type": "string",
+            "title": "Provider Type",
+            "description": "The provider's type (google, entra_id, okta or generic), empty once it is no longer registered",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "provider"
+        ],
+        "title": "LinkedGroupResponse",
+        "description": "A group an account holds only through an IdP sign-in."
+      },
       "LinkedIdentityResponse": {
         "properties": {
           "key": {
@@ -45385,6 +45628,39 @@
         ],
         "title": "ManagedBy",
         "description": "Who runs a backing service."
+      },
+      "MatchTest": {
+        "properties": {
+          "field": {
+            "type": "string",
+            "title": "Field",
+            "description": "Field the branch reads, a dotted path into the record"
+          },
+          "operator": {
+            "type": "string",
+            "title": "Operator",
+            "description": "How the branch compares the field (equals, includes, ...)"
+          },
+          "value": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Value",
+            "description": "Value the branch compares with, null for exists"
+          }
+        },
+        "type": "object",
+        "required": [
+          "field",
+          "operator"
+        ],
+        "title": "MatchTest",
+        "description": "One branch of an any group a sample was filtered on."
       },
       "MeshFacts": {
         "properties": {
@@ -49898,9 +50174,12 @@
         "enum": [
           "account",
           "api_key",
+          "credential",
           "group",
+          "org",
           "provider",
-          "role"
+          "role",
+          "setting"
         ]
       },
       "ReauthRequest": {
@@ -50641,7 +50920,19 @@
               }
             ],
             "title": "User Sql",
-            "description": "Full detection query: SELECT ... FROM <db>.<table> WHERE ... (the FROM names the source table). Give this or ``condition``, not both. A rule saved this way has no ``condition``"
+            "description": "Full detection query: SELECT ... FROM <db>.<table> WHERE ... (the FROM names the source table). Give this, ``where_clause`` or ``condition``, one of the three. A rule saved this way has no ``condition``"
+          },
+          "where_clause": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Where Clause",
+            "description": "The row filter on the table of ``source``, written as the part after WHERE, with no time bound and no {...} placeholder, since the time window comes from the hunt schedule. Give this, ``user_sql`` or ``condition``, one of the three"
           },
           "condition": {
             "anyOf": [
@@ -50652,7 +50943,7 @@
                 "type": "null"
               }
             ],
-            "description": "The rule's structured condition, which the engine compiles to its SQL and stores with it, so the builder reopens on it. Reads the table of ``source``. Give this or ``user_sql``, not both"
+            "description": "The rule's structured condition, which the engine compiles to its SQL and stores with it, so the builder reopens on it. Reads the table of ``source``. Give this, ``user_sql`` or ``where_clause``, one of the three"
           },
           "cel_filter": {
             "anyOf": [
@@ -50688,7 +50979,7 @@
               }
             ],
             "title": "Source",
-            "description": "Source label (e.g. windows_audit)"
+            "description": "Source label (e.g. windows_audit). A label no registered source carries is refused"
           },
           "estimate_cost": {
             "type": "boolean",
@@ -50717,12 +51008,9 @@
           },
           "source_type": {
             "type": "string",
-            "enum": [
-              "raw",
-              "hyperdx"
-            ],
+            "const": "raw",
             "title": "Source Type",
-            "description": "'raw' (plain SQL) or 'hyperdx' (Search saved search format)",
+            "description": "'raw' (plain SQL). SQL a Search view renders goes to POST /rules/from-hyperdx",
             "default": "raw"
           }
         },
@@ -50891,6 +51179,79 @@
         ],
         "title": "RuleFromHyperdxResponse",
         "description": "The rule created from a Search query."
+      },
+      "RuleImportRequest": {
+        "properties": {
+          "sql": {
+            "type": "string",
+            "maxLength": 262144,
+            "minLength": 1,
+            "title": "Sql",
+            "description": "One ClickHouse SELECT of a single table, at most 262144 characters, ClickHouse's default max_query_size"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "sql"
+        ],
+        "title": "RuleImportRequest",
+        "description": "A SELECT to read into a source and a WHERE clause."
+      },
+      "RuleImportResponse": {
+        "properties": {
+          "source": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source",
+            "description": "The registered source the FROM names. Null when the author must pick one"
+          },
+          "needs_source": {
+            "type": "boolean",
+            "title": "Needs Source",
+            "description": "True when the author must pick a source to save"
+          },
+          "from_table": {
+            "type": "string",
+            "title": "From Table",
+            "description": "The FROM as written, or the placeholders it was"
+          },
+          "where_clause": {
+            "type": "string",
+            "title": "Where Clause",
+            "description": "The row filter with the time window removed, empty when nothing is left"
+          },
+          "dropped": {
+            "items": {
+              "$ref": "#/components/schemas/DroppedPartResponse"
+            },
+            "type": "array",
+            "title": "Dropped",
+            "description": "Everything in the SELECT the rule does not keep"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Warnings",
+            "description": "What to look at before saving the fields"
+          }
+        },
+        "type": "object",
+        "required": [
+          "needs_source",
+          "from_table",
+          "where_clause"
+        ],
+        "title": "RuleImportResponse",
+        "description": "What a SELECT becomes as a rule's fields. Nothing is saved."
       },
       "RuleOrderRequest": {
         "properties": {
@@ -51387,7 +51748,19 @@
               }
             ],
             "title": "User Sql",
-            "description": "Full detection query: SELECT ... FROM <db>.<table> WHERE ... (the FROM names the source table). Give this or ``condition``, not both. A rule saved this way has no ``condition``"
+            "description": "Full detection query: SELECT ... FROM <db>.<table> WHERE ... (the FROM names the source table). Give this, ``where_clause`` or ``condition``, one of the three. A rule saved this way has no ``condition``"
+          },
+          "where_clause": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Where Clause",
+            "description": "The row filter on the table of ``source``, written as the part after WHERE, with no time bound and no {...} placeholder, since the time window comes from the hunt schedule. Give this, ``user_sql`` or ``condition``, one of the three"
           },
           "condition": {
             "anyOf": [
@@ -51398,7 +51771,7 @@
                 "type": "null"
               }
             ],
-            "description": "The rule's structured condition, which the engine compiles to its SQL and stores with it, so the builder reopens on it. Reads the table of ``source``. Give this or ``user_sql``, not both"
+            "description": "The rule's structured condition, which the engine compiles to its SQL and stores with it, so the builder reopens on it. Reads the table of ``source``. Give this, ``user_sql`` or ``where_clause``, one of the three"
           },
           "cel_filter": {
             "anyOf": [
@@ -51434,7 +51807,7 @@
               }
             ],
             "title": "Source",
-            "description": "Source label (e.g. windows_audit)"
+            "description": "Source label (e.g. windows_audit). A label no registered source carries is refused"
           },
           "estimate_cost": {
             "type": "boolean",
@@ -52216,7 +52589,7 @@
               }
             ],
             "title": "Match Field",
-            "description": "Match field rows were filtered on, or null when the source owns its own table (whole-table sample)."
+            "description": "Match field rows were filtered on, or null when the source owns its own table (whole-table sample) or the match is an any group (see match_any)."
           },
           "match_value": {
             "anyOf": [
@@ -52241,6 +52614,14 @@
             ],
             "title": "Match Operator",
             "description": "Match operator used when filtering (equals, exists, includes, ...)."
+          },
+          "match_any": {
+            "items": {
+              "$ref": "#/components/schemas/MatchTest"
+            },
+            "type": "array",
+            "title": "Match Any",
+            "description": "The branches of an any group rows were filtered on: a row is kept when any one holds. Empty for a single test, a whole-table sample or a source that owns its table."
           },
           "columns": {
             "items": {
@@ -57903,14 +58284,15 @@
                 "items": {
                   "type": "string"
                 },
-                "type": "array"
+                "type": "array",
+                "minItems": 1
               },
               {
                 "type": "null"
               }
             ],
             "title": "Groups",
-            "description": "Replace group memberships"
+            "description": "Replace group memberships, with at least one"
           },
           "enabled": {
             "anyOf": [

@@ -1,3 +1,5 @@
+import { cn } from '@/core/utils/style';
+import { TAG_CLASS } from '@/Settings/components/GroupManagement/GroupCard/TagList';
 import { EmptyDetail } from '@/core/components/EmptyDetail';
 import { GenericErrorCard } from '@/core/components/GenericError';
 import { LinkedMemberName } from '@/Settings/components/GroupManagement/LinkedMemberName';
@@ -44,63 +46,64 @@ export const ViewGroupDetails = ({ group_name }: { group_name: string }) => {
   }
 
   return (
-    <dl className="grid grid-cols-[160px_1fr] gap-x-6 gap-y-1">
-      <dt className={dataListTermStyle}>Group name:</dt>
-      <dd>{data.name}</dd>
-      <dt className={dataListTermStyle}>Description:</dt>
-      <dd>{data.description || <EmptyData />}</dd>
-      <dt className={dataListTermStyle}>Scope:</dt>
-      <dd className="text-xs bg-foreground/10 dark:bg-dark-foreground/10 rounded-md px-2 py-0.5 whitespace-nowrap mr-auto">
-        {data.scope}
-      </dd>
-      <dt className={dataListTermStyle}>Source ID:</dt>
-      <dd className="break-all">
-        {data.source_id || <EmptyData label="Not linked" />}
-      </dd>
-      <dt className={dataListTermStyle}>Source provider:</dt>
-      <dd>{data.source_provider || <EmptyData />}</dd>
-      <dt className={dataListTermStyle}>Roles:</dt>
-      <dd>
-        {data.roles?.length > 0 ? (
-          <ul className="flex flex-wrap items-center gap-1">
-            {data.roles.map((role) => (
-              <li
-                key={role}
-                className="text-xs bg-foreground/10 dark:bg-dark-foreground/10 rounded-md px-2 py-0.5 whitespace-nowrap"
-              >
-                {role}
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <EmptyData />
-        )}
-      </dd>
-      <dt className={dataListTermStyle}>Members:</dt>
-      <dd>
-        {data.members?.length > 0 || (data.linked_members ?? []).length > 0 ? (
-          <ul className="flex flex-wrap items-center gap-1">
-            {data.members.map((member) => (
-              <li
-                key={`member-${member}`}
-                className="text-xs bg-foreground/10 dark:bg-dark-foreground/10 rounded-md px-2 py-0.5 whitespace-nowrap"
-              >
-                {member}
-              </li>
-            ))}
-            {(data.linked_members ?? []).map((member) => (
-              <li
-                key={`linked-${member}`}
-                className="text-xs bg-foreground/10 dark:bg-dark-foreground/10 rounded-md px-2 py-0.5 whitespace-nowrap"
-              >
-                <LinkedMemberName username={member} />
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <EmptyData />
-        )}
-      </dd>
-    </dl>
+    <div className="flex flex-col gap-4">
+      <h1 className="text-lg font-semibold">{data.name}</h1>
+      {/* Baselines line each label up with the first line of its value, tags included. */}
+      <dl className="grid grid-cols-[160px_1fr] items-baseline gap-x-6 gap-y-3">
+        <dt className={dataListTermStyle}>Description:</dt>
+        <dd>{data.description || <EmptyData />}</dd>
+        <dt className={dataListTermStyle}>Linked To:</dt>
+        <dd className="break-all">
+          {data.source_provider ? (
+            `${data.source_provider}${data.source_id ? ` (${data.source_id})` : ''}`
+          ) : (
+            <EmptyData label="Not linked" />
+          )}
+        </dd>
+        <dt className={dataListTermStyle}>Roles:</dt>
+        <dd>
+          {data.roles?.length > 0 ? (
+            <ul className="flex flex-wrap items-center gap-2">
+              {data.roles.map((role) => (
+                <li
+                  key={role}
+                  className={cn(TAG_CLASS, 'whitespace-normal break-all')}
+                >
+                  {role}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <EmptyData />
+          )}
+        </dd>
+        <dt className={dataListTermStyle}>Members:</dt>
+        <dd>
+          {data.members?.length > 0 ||
+          (data.linked_members ?? []).length > 0 ? (
+            <ul className="flex flex-wrap items-center gap-2">
+              {data.members.map((member) => (
+                <li
+                  key={`member-${member}`}
+                  className={cn(TAG_CLASS, 'whitespace-normal break-all')}
+                >
+                  {member}
+                </li>
+              ))}
+              {(data.linked_members ?? []).map((member) => (
+                <li
+                  key={`linked-${member}`}
+                  className={cn(TAG_CLASS, 'whitespace-normal break-all')}
+                >
+                  <LinkedMemberName username={member} />
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <EmptyData />
+          )}
+        </dd>
+      </dl>
+    </div>
   );
 };

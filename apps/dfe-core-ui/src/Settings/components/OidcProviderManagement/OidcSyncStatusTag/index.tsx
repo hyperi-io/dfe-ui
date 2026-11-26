@@ -68,8 +68,7 @@ export const SYNC_STATES: Record<TSyncState, TSyncStateCopy> = {
     color: 'blue',
     icon: <IconUserCircle aria-hidden className={ICON_CLASS} />,
     title: 'No sync needed',
-    message:
-      "Each user's groups are read from their own token when they log in, so there is no directory to sync.",
+    message: "Groups come from the user's token at login.",
     notice: 'info',
   },
   skipped: {
@@ -82,6 +81,9 @@ export const SYNC_STATES: Record<TSyncState, TSyncStateCopy> = {
     notice: 'default',
   },
 };
+
+/** Whether groups are read from each login's own token. Nothing then syncs, and the stored time is only when the scheduler last found no directory to list. */
+export const isReadAtLogin = (status: string) => status === 'user_token';
 
 /** What happened and, where there is one, the next step, as one line. */
 export const syncStateText = (state: TSyncState) => {

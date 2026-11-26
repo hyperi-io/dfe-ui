@@ -17,15 +17,22 @@ export const CreateOrganisationDrawer = () => {
     mutate: createOrganisation,
     isPending,
     error,
+    reset,
   } = useCreateOrganisation({
     onSuccess: () => {
       api.success({
         title: 'Organisation created successfully',
         placement: 'bottomLeft',
       });
-      setIsOpen(false);
+      close();
     },
   });
+
+  // A refusal belongs to the attempt that drew it, not to the next opening.
+  function close() {
+    setIsOpen(false);
+    reset();
+  }
 
   const handleCreateOrganisation = (
     values: CreateUpdateOrganisationFormData,
@@ -54,11 +61,7 @@ export const CreateOrganisationDrawer = () => {
         </RbacProtected.Restricted>
       </RbacProtected>
 
-      <Drawer
-        title="Create Organisation"
-        open={isOpen}
-        onClose={() => setIsOpen(false)}
-      >
+      <Drawer title="Create Organisation" open={isOpen} onClose={close}>
         <CreateUpdateOrganisationForm
           initialValues={{
             display_name: '',

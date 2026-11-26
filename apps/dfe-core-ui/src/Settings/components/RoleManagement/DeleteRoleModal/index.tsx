@@ -1,11 +1,10 @@
-import { useReauthGrant } from '@/core/hooks/useReauthGrant';
 import { Modal } from '@/core/components/Modal';
 import { RbacProtected } from '@/core/components/RbacProtected';
 import { useDeleteRole } from '@/Settings/hooks/roles/useDeleteRole';
 import { IconTrash } from '@repo/dfe-icons';
 import { App, Button } from 'antd';
-import { useState } from 'react';
-import { DeleteRoleForm, DeleteRoleFormData } from './DeleteRoleForm';
+import { useRef, useState } from 'react';
+import { DeleteRoleForm } from './DeleteRoleForm';
 
 interface DeleteRoleModalProps {
   role_name: string;
@@ -18,14 +17,14 @@ export const DeleteRoleModal = ({
   onSuccess,
   disabled,
 }: DeleteRoleModalProps) => {
-  const reauth = useReauthGrant(role_name, 'role');
+  const grant = useRef<string>(undefined);
   const [open, setOpen] = useState(false);
   const { notification } = App.useApp();
 
-  const { mutate, isPending, error } = useDeleteRole({
-    reauth: reauth.grant,
+  const { mutate, isPending, error, reset } = useDeleteRole({
+    reauth: () => grant.current,
     onSuccess: () => {
-      reauth.drop();
+      grant.current = undefined;
       onSuccess?.();
       setOpen(false);
       notification.success({
@@ -39,13 +38,13 @@ export const DeleteRoleModal = ({
       });
     },
   });
-  const handleDeleteRole = (values: DeleteRoleFormData) => {
-    mutate(values.role_name);
+  const close = () => {
+    reset();
+    setOpen(false);
   };
 
   return (
     <>
-      {reauth.modal}
       <RbacProtected action={RbacProtected.rbacActions.role_delete}>
         <RbacProtected.Unrestricted>
           <Button
@@ -53,7 +52,7 @@ export const DeleteRoleModal = ({
             className="hover:text-error hover:bg-error/5"
             aria-label={`Delete ${role_name}`}
             icon={<IconTrash />}
-            onClick={() => reauth.ask(() => setOpen(true))}
+            onClick={() => setOpen(true)}
             disabled={disabled}
           >
             Delete Role
@@ -74,16 +73,20 @@ export const DeleteRoleModal = ({
       </RbacProtected>
 
       <Modal
-        title="Delete Role"
+        title={`Delete ${role_name}?`}
         open={open}
-        onCancel={() => setOpen(false)}
+        destroyOnHidden
+        onCancel={close}
         footer={null}
       >
         <DeleteRoleForm
-          onFinish={handleDeleteRole}
+          onConfirm={(granted) => {
+            grant.current = granted;
+            mutate(role_name);
+          }}
           error={error}
           isPending={isPending}
-          onCancel={() => setOpen(false)}
+          onCancel={close}
           role_name={role_name}
         />
       </Modal>

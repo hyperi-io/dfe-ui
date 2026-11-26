@@ -1,12 +1,11 @@
-import { useReauthGrant } from '@/core/hooks/useReauthGrant';
 import { Modal } from '@/core/components/Modal';
 import { RbacProtected } from '@/core/components/RbacProtected';
 import { Tooltip } from '@/core/components/Tooltip';
 import { useDeleteAccount } from '@/Settings/hooks/accounts/useDeleteAccount';
 import { IconTrash } from '@repo/dfe-icons';
 import { App, Button } from 'antd';
-import { useState } from 'react';
-import { DeleteAccountForm, DeleteAccountFormData } from './DeleteAccountForm';
+import { useRef, useState } from 'react';
+import { DeleteAccountForm } from './DeleteAccountForm';
 
 export const DeleteAccountDrawer = ({
   username,
@@ -20,12 +19,12 @@ export const DeleteAccountDrawer = ({
   isExternal: boolean;
 }) => {
   const [open, setOpen] = useState(false);
-  // Held only while the confirmation is open, so every delete asks for the password again.
-  const reauth = useReauthGrant(username);
+  // Every delete asks for the password again.
+  const grant = useRef<string>(undefined);
   const { notification } = App.useApp();
   const title = `Delete ${username}`;
 
-  const { mutate, isPending, error } = useDeleteAccount({
+  const { mutate, isPending, error, reset } = useDeleteAccount({
     onSuccess: () => {
       handleClose();
       notification.success({
@@ -49,19 +48,13 @@ export const DeleteAccountDrawer = ({
       });
       return;
     }
-    reauth.ask(() => setOpen(true));
+    setOpen(true);
   };
 
   const handleClose = () => {
     setOpen(false);
-    reauth.drop();
-  };
-
-  const handleDelete = (values: DeleteAccountFormData) => {
-    const grant = reauth.grant();
-    if (grant) {
-      mutate({ reauth: grant, username: values.username });
-    }
+    grant.current = undefined;
+    reset();
   };
 
   return (
@@ -106,10 +99,8 @@ export const DeleteAccountDrawer = ({
         </RbacProtected.Restricted>
       </RbacProtected>
 
-      {reauth.modal}
-
       <Modal
-        title="Delete Account"
+        title={`Delete ${username}?`}
         open={open}
         onCancel={handleClose}
         footer={null}
@@ -117,7 +108,10 @@ export const DeleteAccountDrawer = ({
       >
         <DeleteAccountForm
           username={username}
-          onFinish={handleDelete}
+          onConfirm={(granted) => {
+            grant.current = granted;
+            mutate({ reauth: granted, username });
+          }}
           error={error}
           isPending={isPending}
           onCancel={handleClose}

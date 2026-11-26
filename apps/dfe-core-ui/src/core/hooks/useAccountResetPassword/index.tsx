@@ -7,8 +7,8 @@ import {
 } from './types';
 
 interface UseAccountResetPasswordProps {
-  /** The re-auth grant for *username*, which the engine requires on a reset. */
-  reauth?: string;
+  /** The re-auth grant for *username*, which the engine requires on a reset, read when the request goes out. */
+  reauth?: () => string | undefined;
   username: string;
   onSuccess?: (data: TAccountResetPasswordResponse) => void;
   onError?: (error: Error) => void;
@@ -24,7 +24,7 @@ export const useAccountResetPassword = ({
     mutationFn: (body: TAccountResetPasswordRequestBody) =>
       resetPassword({
         body,
-        headerParams: { [REAUTH_HEADER]: reauth },
+        headerParams: { [REAUTH_HEADER]: reauth?.() },
         pathParams: { username },
       }),
 

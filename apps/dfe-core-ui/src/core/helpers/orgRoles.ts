@@ -25,3 +25,13 @@ export const isOrgAccount = (
 /** The role an account of *org* holding *groups* has, viewer unless it holds the admin group. */
 export const orgRoleOf = (org: string, groups: readonly string[]): TOrgRole =>
   groups.includes(orgRoleGroup(org, 'admin')) ? 'admin' : 'viewer';
+
+/** The org whose admin or viewer group *group* is, else null: the engine scopes each to `org:<org>`. */
+export const orgOfRoleGroup = (group: {
+  name: string;
+  scope: string;
+}): string | null => {
+  if (!group.scope.startsWith('org:')) return null;
+  const org = group.scope.slice('org:'.length);
+  return orgRoleGroups(org).includes(group.name) ? org : null;
+};

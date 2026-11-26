@@ -2,7 +2,15 @@ import { useMutation } from '@tanstack/react-query';
 import { reauth } from './api';
 
 /** Whether a grant is for an account or a group. */
-export type TReauthKind = 'account' | 'api_key' | 'group' | 'provider' | 'role';
+export type TReauthKind =
+  | 'account'
+  | 'api_key'
+  | 'credential'
+  | 'group'
+  | 'org'
+  | 'provider'
+  | 'role'
+  | 'setting';
 
 /** The header a change carries its re-auth grant in. */
 export const REAUTH_HEADER = 'X-DFE-Reauth';

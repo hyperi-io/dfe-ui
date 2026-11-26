@@ -15,7 +15,7 @@ export const CloneRoleForm = ({
   isPending,
 }: {
   name: string;
-  onFinish: (values: CreateUpdateRoleFormData) => void;
+  onFinish: (values: CreateUpdateRoleFormData & { scoped: boolean }) => void;
   role_name: string;
   error: Error | null;
   isPending: boolean;
@@ -56,7 +56,10 @@ export const CloneRoleForm = ({
   return (
     <CreateUpdateRoleForm
       name={name}
-      onFinish={onFinish}
+      // A clone keeps its source's scope, which the form does not offer.
+      onFinish={(values) =>
+        onFinish({ ...values, scoped: roleDetailData.scoped })
+      }
       error={error}
       isPending={isPending}
       buttonLabel="Clone Role"

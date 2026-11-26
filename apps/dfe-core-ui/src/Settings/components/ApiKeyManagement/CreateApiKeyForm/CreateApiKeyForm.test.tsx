@@ -13,6 +13,7 @@ import {
 import { API_CONFIG_MOCKS } from '@/core/config/api/endpoints/generator';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { http, HttpResponse } from 'msw';
 import { setupServer } from 'msw/node';
 import {
   afterAll,
@@ -113,10 +114,41 @@ describe('CreateApiKeyForm organisation', () => {
       await user.click(await screen.findByTitle(pick));
     }
     await user.click(screen.getByRole('button', { name: 'Generate' }));
-    await confirmReauth(user);
 
     await waitFor(() => expect(sent).toHaveLength(1));
     expect(await sent[0]?.json()).toMatchObject({ org: sends });
+    expect(screen.queryByLabelText('Your password')).not.toBeInTheDocument();
+  });
+
+  test('asks for the password when the engine says the key needs it, then retries with the grant', async () => {
+    server.use(
+      http.post(API_CONFIG_MOCKS.apiKeys.default.mockedUrl, ({ request }) =>
+        request.headers.get('X-DFE-Reauth')
+          ? HttpResponse.json({ name: 'ci-deploy', full_key: 'k' })
+          : HttpResponse.json(
+              {
+                title: 'Forbidden',
+                code: 'reauth_required',
+                detail: 'Confirm it is you',
+              },
+              { status: 403 },
+            ),
+      ),
+    );
+    const user = userEvent.setup();
+    render(<CreateApiKeyForm />, { wrapper });
+
+    await user.type(screen.getByLabelText(/^Name/), 'ci-deploy');
+    await user.type(screen.getByLabelText(/^Description/), 'CI deploys');
+    await user.click(await screen.findByRole('radio', { name: /^No org/ }));
+    await user.click(screen.getByRole('button', { name: 'Generate' }));
+    await confirmReauth(user);
+
+    await waitFor(() => expect(sent).toHaveLength(2));
+    expect(sent.map((r) => r.headers.get('X-DFE-Reauth'))).toEqual([
+      null,
+      'reauth-grant',
+    ]);
   });
 
   test('generates nothing until an organisation is chosen', async () => {

@@ -6,13 +6,11 @@ import { rx } from '@e2e/config/regex.helpers';
 import { TAGS } from '@e2e/config/tags.constants';
 
 /**
- * Provider names sort alphabetically. The engine's own page is 50, which is
- * this whole seed, so the search and scroll tests ask for 25.
- * `Searchable Provider 0` stays on the first page. `Searchable Provider 49`
- * then lands on the next one. Users of `searchable-oidc-0` are the seeded
- * accounts, and those tests ask for the same page of 25.
+ * The page reads every provider and shows your organisation's sorted by name, six of them until
+ * "Show more". `Searchable Provider 0` is among the six and `Searchable Provider 49` is not.
+ * Users of `searchable-oidc-0` are the seeded accounts, read 25 to a page.
  */
-const PROVIDER_PAGE = 25;
+const PROVIDER_STEP = 6;
 const USER_PAGE = 25;
 const PROVIDER_MATCH = 'Searchable Provider 49';
 const PROVIDER_OTHER = 'Searchable Provider 0';
@@ -37,11 +35,15 @@ const openProviders = async (page: Page, pageSize?: number) => {
   await expect(page).toHaveURL(`${BASE_URL}${path}`);
 };
 
-/** The card. The header holds the search box; its parent holds the grid. */
+/** Your organisation's card, where the seeded platform providers list. The header holds the search box; its parent holds the grid. */
 const providersSection = (page: Page) =>
   page
     .locator('div')
-    .filter({ has: page.getByText('OIDC providers', { exact: true }) })
+    .filter({
+      has: page.getByText("Your organisation's OIDC providers", {
+        exact: true,
+      }),
+    })
     .filter({ has: page.getByPlaceholder('Search providers', { exact: true }) })
     .last()
     .locator('..');
@@ -59,14 +61,6 @@ const searchProviders = async (section: Locator, keyword: string) => {
 };
 
 /** The next page loads when the sentinel under the grid scrolls into view. */
-const scrollProviders = async (section: Locator) => {
-  const grid = section.locator('ul.grid');
-  await grid.evaluate((node) => {
-    const scroller = node.parentElement;
-    if (scroller) scroller.scrollTop = scroller.scrollHeight;
-  });
-};
-
 const userRows = (drawer: Locator) =>
   drawer.locator('.ant-table-tbody tr.ant-table-row');
 
@@ -108,7 +102,7 @@ test.describe('', { tag: [TAGS.core, TAGS.search, TAGS.pagination] }, () => {
     });
 
     test('A search keeps the provider whose name matches', async ({ page }) => {
-      await openProviders(page, PROVIDER_PAGE);
+      await openProviders(page);
       const section = providersSection(page);
 
       await expect(providerName(section, PROVIDER_OTHER)).toBeVisible();
@@ -125,21 +119,19 @@ test.describe('', { tag: [TAGS.core, TAGS.search, TAGS.pagination] }, () => {
       await expect(providerName(section, PROVIDER_MATCH)).toHaveCount(0);
     });
 
-    test('Scrolling the list loads the next page', async ({ page }) => {
-      await openProviders(page, PROVIDER_PAGE);
+    test('Show more opens the rest of the list to scroll', async ({ page }) => {
+      await openProviders(page);
       const section = providersSection(page);
 
-      await expect(providerCards(section)).toHaveCount(PROVIDER_PAGE);
+      await expect(providerCards(section)).toHaveCount(PROVIDER_STEP);
       await expect(providerName(section, PROVIDER_OTHER)).toBeVisible();
       await expect(providerName(section, PROVIDER_MATCH)).toHaveCount(0);
 
-      await expect(async () => {
-        await scrollProviders(section);
-        await expect(providerName(section, PROVIDER_MATCH)).toBeAttached();
-      }).toPass({ timeout: 20_000 });
+      await section.getByRole('button', { name: 'Show more' }).click();
 
+      await expect(providerName(section, PROVIDER_MATCH)).toBeAttached();
       expect(await providerCards(section).count()).toBeGreaterThan(
-        PROVIDER_PAGE,
+        PROVIDER_STEP,
       );
     });
 

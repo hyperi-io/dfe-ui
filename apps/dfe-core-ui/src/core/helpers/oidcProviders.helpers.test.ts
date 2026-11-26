@@ -321,36 +321,11 @@ describe('oidcProviders.helpers', () => {
       );
     });
 
-    // The org as the form shows it, against the provider's stored one.
-    test.each<{
-      expected: Record<string, string>;
-      name: string;
-      shown: { org?: string };
-    }>([
-      {
-        name: 'an unedited org sends nothing',
-        shown: { org: 'acme' },
-        expected: {},
-      },
-      {
-        name: 'a changed org is sent',
-        shown: { org: 'globex' },
-        expected: { org: 'globex' },
-      },
-      {
-        name: 'a cleared org moves the provider to the platform',
-        shown: { org: undefined },
-        expected: { org: '' },
-      },
-      {
-        name: 'an org the form did not render sends nothing',
-        shown: {},
-        expected: {},
-      },
-    ])('$name', ({ expected, shown }) => {
+    // A provider stays in its organisation, so an edit never sends one.
+    test('an edit sends no organisation, even one the values hold', () => {
       expect(
-        toUpdateOidcProviderBody(shown, { ...stored, org: 'acme' }),
-      ).toEqual(expected);
+        toUpdateOidcProviderBody({ org: 'globex' }, { ...stored, org: 'acme' }),
+      ).toEqual({});
     });
 
     // The engine drops a stored secret for an env var name sent without a value, so these bodies decide it.

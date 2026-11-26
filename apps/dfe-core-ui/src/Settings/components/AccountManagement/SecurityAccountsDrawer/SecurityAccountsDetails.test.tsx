@@ -4,6 +4,7 @@ import { TAccountResetPasswordResponse } from '@/core/hooks/useAccountResetPassw
 import { TFetchSetupStatusResponse } from '@/core/hooks/useFetchSetupStatus/types';
 import { useAuthStore } from '@/core/stores/authStore';
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
+import { confirmReauth } from '@/core/utils/test-utils/confirmReauth';
 import { TAccountDetailResponse } from '@/Settings/hooks/accounts/useFetchAccountDetail/types';
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -27,6 +28,7 @@ const account = (
   oidc_type: '',
   admin: false,
   org_display_name: '',
+  org_enabled: true,
   enabled: true,
   blocked: false,
   disabled_at: '',
@@ -38,6 +40,7 @@ const account = (
   groups: ['dfe-admins'],
   created_at: '2026-10-14T00:00:00Z',
   updated_at: '2026-10-14T00:00:00Z',
+  last_login_at: '',
   email: `${username}@dfe.local`,
   phone: '',
   name: '',
@@ -91,12 +94,23 @@ const setupStatus = (overrides: Partial<TFetchSetupStatusResponse> = {}) =>
     mockedResponse: status(overrides),
   });
 
+// As the engine does, a reset without the caller's re-auth grant is refused.
 const resetAnswer = (
   username: string,
   git: TAccountResetPasswordResponse['git'],
   seen: { username: string; body: unknown }[] = [],
 ) =>
   http.post(RESET_URL.replace('{username}', username), async ({ request }) => {
+    if (!request.headers.get('X-DFE-Reauth')) {
+      return HttpResponse.json(
+        {
+          title: 'Forbidden',
+          code: 'reauth_required',
+          detail: 'Confirm it is you',
+        },
+        { status: 403 },
+      );
+    }
     seen.push({ username, body: await request.json() });
     return HttpResponse.json({ message: 'password reset', git });
   });
@@ -113,6 +127,7 @@ const server = setupServer(
   API_CONFIG_MOCKS.auth.me.get.success({
     mockedResponse: ADMIN_MOCKED_RESPONSE,
   }),
+  API_CONFIG_MOCKS.auth.reauth.post.success(),
 );
 
 beforeAll(() => server.listen({ onUnhandledRequest: 'error' }));
@@ -133,7 +148,7 @@ const card = async (name: string) =>
     'div.mb-4',
   ) as HTMLElement;
 
-const resetThrough = async (username: string) => {
+const resetThrough = async (username: string, { reauth = true } = {}) => {
   const user = userEvent.setup();
   const target = await card(username);
   await user.click(
@@ -152,6 +167,10 @@ const resetThrough = async (username: string) => {
   await user.click(
     within(dialog).getByRole('button', { name: /Reset Password/ }),
   );
+  // The engine refuses the first try without a grant, so the reset asks for the caller's password.
+  if (reauth) {
+    await confirmReauth(user);
+  }
   return dialog;
 };
 
@@ -392,7 +411,7 @@ describe('SecurityAccountsDetails', () => {
     );
 
     render(<SecurityAccountsDetails />, { wrapper });
-    const dialog = await resetThrough('admin');
+    const dialog = await resetThrough('admin', { reauth: false });
 
     expect(
       await within(dialog).findByText(
@@ -401,5 +420,7 @@ describe('SecurityAccountsDetails', () => {
         BACKSTOP,
       ),
     ).toBeInTheDocument();
+    // A refusal the engine answers without a grant shows with no password prompt.
+    expect(screen.queryByLabelText('Your password')).not.toBeInTheDocument();
   });
 });

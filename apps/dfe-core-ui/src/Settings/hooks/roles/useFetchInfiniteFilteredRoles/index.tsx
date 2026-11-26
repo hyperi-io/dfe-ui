@@ -1,7 +1,7 @@
 import { getNextPageToken } from '@/core/config/api/pagination';
 import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
 import { useDebounce } from '@/core/hooks/useDebounce';
-import { useInfiniteQuery } from '@tanstack/react-query';
+import { keepPreviousData, useInfiniteQuery } from '@tanstack/react-query';
 import { useEffect, useMemo, useRef } from 'react';
 import { fetchInfiniteFilteredRoles } from './api';
 import { ResourceType, UseFetchInfiniteFilteredRolesProps } from './types';
@@ -50,6 +50,8 @@ export const useFetchInfiniteFilteredRoles = ({
       }),
     getNextPageParam: getNextPageToken,
     initialPageParam: undefined as string | undefined,
+    // The last results stay up while a new search or page size loads, so the grid never blanks.
+    placeholderData: keepPreviousData,
   });
 
   const flattenedData = useMemo(() => {

@@ -1,5 +1,7 @@
+import { ADMIN_MOCKED_RESPONSE } from '@/core/components/RbacProtected/hooks/hooks.mocks';
 import { API_CONFIG_MOCKS } from '@/core/config/api/endpoints/generator';
 import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
+import { confirmReauth } from '@/core/utils/test-utils/confirmReauth';
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
 import {
   GROUP_DRAWER_TEST_TIMEOUT_MS,
@@ -86,8 +88,6 @@ const openEditDrawer = async (group: TGroupDetailResponse = LINKED_GROUP) => {
       { timeout: 15_000 },
     ),
   );
-  await user.type(await screen.findByLabelText('Your password'), 'pw');
-  await user.click(screen.getByRole('button', { name: 'Confirm' }));
   await screen.findByRole(
     'button',
     { name: 'Update Group' },
@@ -165,8 +165,6 @@ describe('EditGroupDrawer', { timeout: GROUP_DRAWER_TEST_TIMEOUT_MS }, () => {
         { timeout: 15_000 },
       ),
     );
-    await user.type(await screen.findByLabelText('Your password'), 'pw');
-    await user.click(screen.getByRole('button', { name: 'Confirm' }));
     await waitFor(
       () =>
         expect(
@@ -207,8 +205,6 @@ describe('EditGroupDrawer', { timeout: GROUP_DRAWER_TEST_TIMEOUT_MS }, () => {
         { timeout: 15_000 },
       ),
     );
-    await user.type(await screen.findByLabelText('Your password'), 'pw');
-    await user.click(screen.getByRole('button', { name: 'Confirm' }));
 
     await user.click(
       await screen.findByRole(
@@ -224,6 +220,39 @@ describe('EditGroupDrawer', { timeout: GROUP_DRAWER_TEST_TIMEOUT_MS }, () => {
       screen.queryByText('The saved link changed since this form opened'),
     ).not.toBeInTheDocument();
     expect(await submitAndReadBody(user)).toEqual(UNCHANGED_BODY);
+  });
+
+  test('opens without a password prompt and asks only when the engine says the save needs it', async () => {
+    const sent: (string | null)[] = [];
+    server.use(
+      API_CONFIG_MOCKS.auth.me.get.success({
+        mockedResponse: ADMIN_MOCKED_RESPONSE,
+      }),
+      API_CONFIG_MOCKS.auth.reauth.post.success(),
+      http.put(groupUrl, ({ request }) => {
+        const grant = request.headers.get('X-DFE-Reauth');
+        sent.push(grant);
+        return grant
+          ? HttpResponse.json(LINKED_GROUP)
+          : HttpResponse.json(
+              {
+                title: 'Forbidden',
+                code: 'reauth_required',
+                detail: 'Confirm',
+              },
+              { status: 403 },
+            );
+      }),
+    );
+    const user = await openEditDrawer();
+    expect(screen.queryByLabelText('Your password')).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: 'Update Group' }));
+    await confirmReauth(user);
+
+    await waitFor(() => expect(sent).toHaveLength(2), { timeout: 15_000 });
+    expect(sent[0]).toBeNull();
+    expect(sent[1]).toBeTruthy();
   });
 
   test('an unmoved link shows no notice', async () => {
@@ -254,9 +283,6 @@ describe('EditGroupDrawer', { timeout: GROUP_DRAWER_TEST_TIMEOUT_MS }, () => {
 
     await closeDrawer(user);
     await user.click(screen.getByRole('button', { name: /Edit Group/ }));
-    // Every reopen asks for the password again.
-    await user.type(await screen.findByLabelText('Your password'), 'pw');
-    await user.click(screen.getByRole('button', { name: 'Confirm' }));
     await screen.findByRole(
       'button',
       { name: 'Update Group' },

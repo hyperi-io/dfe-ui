@@ -87,7 +87,7 @@ export const CreateApiKeyForm = ({
 }) => {
   // The grant names the key it creates, so it is asked for at submit.
   const [reauthTarget, setReauthTarget] = useState('');
-  const reauth = useReauthGrant(reauthTarget, 'api_key');
+  const reauth = useReauthGrant(reauthTarget, 'api_key', 'create');
   const {
     data,
     mutate: generateApiKey,
@@ -130,7 +130,14 @@ export const CreateApiKeyForm = ({
         : null,
     };
     setReauthTarget(values.name);
-    reauth.ask(() => generateApiKey(body));
+    // The engine asks for the password only when the change needs it.
+    generateApiKey(body, {
+      onError: (refusal) => {
+        if (reauth.askIfRequired(refusal, () => generateApiKey(body))) {
+          reset();
+        }
+      },
+    });
   };
 
   return (
