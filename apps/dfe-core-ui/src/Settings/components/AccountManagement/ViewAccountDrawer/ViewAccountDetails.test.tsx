@@ -245,7 +245,15 @@ describe('ViewAccountDetails', () => {
       await screen.findByRole('button', { name: 'Unlink okta sign-in' }),
     );
     await user.click(await screen.findByRole('button', { name: 'Unlink' }));
-    // The unlink asks for the password first.
+    // The unlink asks for the password first, and the prompt names the unlink.
+    expect(
+      await screen.findByText(
+        (_, element) =>
+          element?.tagName === 'P' &&
+          element.textContent ===
+            'You are about to unlink a sign-in from account kaz.',
+      ),
+    ).toBeInTheDocument();
     await user.type(await screen.findByLabelText('Your password'), 'pw');
     await user.click(screen.getByRole('button', { name: 'Confirm' }));
 

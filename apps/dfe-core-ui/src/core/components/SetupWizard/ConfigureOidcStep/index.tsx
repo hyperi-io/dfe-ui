@@ -35,9 +35,10 @@ export const ConfigureOidcStep = ({
   const effectiveOidcProvider = oidcProvider ?? createdOidcProvider;
   const [isOidcTested, setIsOidcTested] = useState(false);
   const [form] = Form.useForm();
-  // The grant names the provider it changes, so it is asked for at submit.
+  // The grant names the provider it creates or updates, so it is asked for at submit.
   const [reauthTarget, setReauthTarget] = useState('');
-  const reauth = useReauthGrant(reauthTarget, 'provider');
+  const [reauthVerb, setReauthVerb] = useState('create');
+  const reauth = useReauthGrant(reauthTarget, 'provider', reauthVerb);
   const {
     mutate: createOidcProvider,
     isPending: isCreateOidcProviderPending,
@@ -75,12 +76,14 @@ export const ConfigureOidcStep = ({
         scopes: initialScopes ?? [],
       });
       setReauthTarget(effectiveOidcProvider.name);
+      setReauthVerb('change');
       reauth.ask(() => updateOidcProvider(changes));
       return;
     }
 
     const body = toCreateOidcProviderBody(values);
     setReauthTarget(body.name);
+    setReauthVerb('create');
     reauth.ask(() => createOidcProvider(body));
   };
   return (

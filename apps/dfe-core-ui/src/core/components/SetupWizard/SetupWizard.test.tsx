@@ -180,6 +180,14 @@ describe('SetupWizard', () => {
       await user.paste('a-long-enough-password');
       await user.click(screen.getByRole('button', { name: 'Create Account' }));
 
+      expect(
+        await screen.findByText(
+          (_, element) =>
+            element?.tagName === 'P' &&
+            element.textContent ===
+              'You are about to create account first-user.',
+        ),
+      ).toBeInTheDocument();
       await user.type(
         await screen.findByLabelText('Your password'),
         'the-admin-password',
