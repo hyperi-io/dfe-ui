@@ -2682,7 +2682,8 @@ export interface paths {
          *
          *     ``If-None-Match: *`` names the first, or replaces a doc that cannot be read or names an org no longer registered, and ``If-Match`` changes it. With gitops on this
          *     is a direct commit to the deploy repo's ``governance/settings/organisation.yaml``,
-         *     else that file under the config directory.
+         *     else that file under the config directory. The apps then recompile, stamping its
+         *     first tenant id on every record that names no org.
          */
         put: operations["system.organisation.apply"];
         post?: never;
@@ -9352,7 +9353,7 @@ export interface components {
             credential_ref?: string | null;
             /**
              * Org
-             * @description The registered org the records belong to; null is the unassigned tenant
+             * @description The registered org the records belong to. Null is your org, or the unassigned tenant while none is named
              */
             org?: string | null;
             /**
@@ -15843,7 +15844,7 @@ export interface components {
             credential_ref?: string | null;
             /**
              * Org
-             * @description The registered org the pipeline's records belong to. Unset is the unassigned tenant. A record carrying any other _org_id lands here, unless allowed_org_ids lists it
+             * @description The registered org the pipeline's records belong to. Unset is your org, or the unassigned tenant while none is named. A record carrying any other _org_id lands here, unless allowed_org_ids lists it
              */
             org?: string | null;
             /**
@@ -15896,7 +15897,7 @@ export interface components {
             routes?: components["schemas"]["FetcherRoute"][];
             /**
              * Org
-             * @description The registered org every fetched record belongs to: the fetcher stamps its first tenant id as _org_id. Unset is the unassigned tenant
+             * @description The registered org every fetched record belongs to: the fetcher stamps its first tenant id as _org_id. Unset is your org, or the unassigned tenant while none is named
              */
             org?: string | null;
         };
@@ -16401,7 +16402,7 @@ export interface components {
             credential_ref?: string | null;
             /**
              * Org
-             * @description The registered org the pipeline's records belong to. Unset is the unassigned tenant. A record carrying any other _org_id lands here, unless allowed_org_ids lists it
+             * @description The registered org the pipeline's records belong to. Unset is your org, or the unassigned tenant while none is named. A record carrying any other _org_id lands here, unless allowed_org_ids lists it
              */
             org?: string | null;
             /**
