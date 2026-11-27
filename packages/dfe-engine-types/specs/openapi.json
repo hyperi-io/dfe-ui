@@ -5217,7 +5217,7 @@
           "OIDC Providers"
         ],
         "summary": "Create Provider",
-        "description": "Create a new OIDC provider configuration (admin only).\n\nSecret values in the body are written to the secret store before the YAML, and only once the name is free and the provider passes the field rules for its type and mode, so a refused provider leaves nothing behind. A secret named by an env var the engine does not set, with no value sent for it, is refused the same way (``env_var_not_set``).",
+        "description": "Create a new OIDC provider configuration (admin only).\n\nSecret values in the body are written to the secret store before the YAML, and only once the name is free and the provider passes the field rules for its type and mode, so a refused provider leaves nothing behind. A secret named by an env var the engine does not set, with no value sent for it, is refused the same way (``env_var_not_set``).\n\nThe engine fetches the issuer from its own pod, so a caller who does not act across every org may not name one on a loopback, link-local or cloud metadata address (``host_blocked``).",
         "operationId": "auth.oidc-providers.create",
         "parameters": [
           {
@@ -5579,7 +5579,7 @@
           "OIDC Providers"
         ],
         "summary": "Update Provider",
-        "description": "Update an OIDC provider configuration (admin only).\n\nA secret the body omits, value and env var name alike, keeps what the provider already holds, so an update that only flips ``enabled`` does not strand a stored credential. An empty env var name clears the name and keeps the stored copy. A secret the body names an env var for and sends no value for moves onto that env var and its stored copy is deleted once the update is saved, unless the name is the one already held with nothing stored. A move onto an env var the engine does not set is refused (``env_var_not_set``). Any update that touches more than ``enabled``, ``display_name`` and ``trusted_email_domains`` must leave the provider passing the field rules. Both are checked before a secret is written or deleted.",
+        "description": "Update an OIDC provider configuration (admin only).\n\nA secret the body omits, value and env var name alike, keeps what the provider already holds, so an update that only flips ``enabled`` does not strand a stored credential. An empty env var name clears the name and keeps the stored copy. A secret the body names an env var for and sends no value for moves onto that env var and its stored copy is deleted once the update is saved, unless the name is the one already held with nothing stored. A move onto an env var the engine does not set is refused (``env_var_not_set``). Any update that touches more than ``enabled``, ``display_name`` and ``trusted_email_domains`` must leave the provider passing the field rules. Both are checked before a secret is written or deleted.\n\nThe engine fetches the issuer from its own pod, so a caller who does not act across every org may not name one on a loopback, link-local or cloud metadata address (``host_blocked``).",
         "operationId": "auth.oidc-providers.apply",
         "parameters": [
           {
@@ -8872,7 +8872,7 @@
           "Sources"
         ],
         "summary": "Deploy Source Schema",
-        "description": "Plan (``dry_run=true``) or deploy a source version's schema to ClickHouse.\n\nRuns the v2 YAML -> DDL pipeline. In plan mode the CREATE TABLE (+ any standard\nviews) and validation errors are returned for review WITHOUT touching\nClickHouse. In deploy mode the DDL is applied: an absent table is created, and\nan existing one gains the columns it lacks and moves to the version's TTL, so a\nre-deploy changes only what differs. The engine and the type of an existing\ncolumn are left as created. A schema that failed validation is never deployed.\nA source on the bus transport whose Kafka topics the broker did not create is\nnot marked deployed either, and the call answers 502 naming each topic.",
+        "description": "Plan (``dry_run=true``) or deploy a source version's schema to ClickHouse.\n\nRuns the v2 YAML -> DDL pipeline. In plan mode the CREATE TABLE (+ any standard\nviews) and validation errors are returned for review WITHOUT touching\nClickHouse. In deploy mode the DDL is applied: an absent table is created, and\nan existing one gains the columns it lacks and moves to the version's TTL, so a\nre-deploy changes only what differs. The engine and the type of an existing\ncolumn are left as created. A schema that failed validation is never deployed.\nA source on the bus transport whose Kafka topics the broker did not create is\nnot marked deployed either, and the call answers 502 naming each topic.\n\nIn production with ``DFE_ENGINE_GITOPS_MODE=team`` the deploy is held: the record\ngoes to review with ``review_required``, and no table, topic, app or HyperDX\nsource changes. The engine deploys the version within\n``gitops.converge_interval_seconds`` of the review merging, and a review closed\nunmerged changes nothing.",
         "operationId": "sources.deploy",
         "parameters": [
           {
@@ -13034,7 +13034,7 @@
             }
           },
           "422": {
-            "description": "Refused, nothing written. The body failed validation (code validation_error). Or the hunt runner could not compile the rule -- its SQL does not parse as one SELECT, names no <db>.<table> source, names a source that is not a table name (letters, digits, '_' and '-'), has no WHERE to detect with, or calls a function that reads outside the row (url, s3, a dictionary) or sends it to another service (the ai* functions), or carries a CEL filter that does not transpile. A ``source`` that is not a registered source is refused, and so is a ``where_clause`` that is empty, carries a {...} placeholder or a time bound, or holds more than a row filter (code invalid_sql, the errors in sql_errors). Or the rule matches every event in its source (code rule_matches_everything, the source and detection WHERE in context).",
+            "description": "Refused, nothing written. The body failed validation (code validation_error). Or the hunt runner could not compile the rule -- its SQL does not parse as one SELECT, names no <db>.<table> source, names a source that is not a table name (letters, digits, '_' and '-'), has no WHERE to detect with, or calls a function that reads outside the row (url, s3, a dictionary) or sends it to another service (the ai* functions), or carries a CEL filter that does not transpile. A ``source`` that is not a registered source is refused, and so is a ``where_clause`` that is empty, carries a {...} placeholder or a time bound, or holds more than a row filter (code invalid_sql, the errors in sql_errors). Or a search left no filter once the time bounds the hunt window owns were taken out (code rule_empty_filter, the bounds taken out in dropped_bounds). Or the rule matches every event in its source (code rule_matches_everything, the source and detection WHERE in context).",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -13174,7 +13174,7 @@
           "Rules"
         ],
         "summary": "Create Rule From Search",
-        "description": "Create a hunt rule from the SQL a Search view renders to.\n\nWraps the create pipeline with ``source_type='hyperdx'`` and auto-derives a\nunique rule id from the saved-search name, so the caller need not supply one.\nA view whose SQL the hunt runner could not compile, or that matches every\nevent, is refused with 422. RBAC: ``rule:write`` (data_analyst) --\n``org_viewer`` has neither this grant nor the UI button.",
+        "description": "Create a hunt rule from the SQL a Search view renders to.\n\nWraps the create pipeline with ``source_type='hyperdx'`` and auto-derives a\nunique rule id from the saved-search name, so the caller need not supply one.\nA view whose SQL the hunt runner could not compile, or that matches every\nevent, is refused with 422. RBAC: ``rule:write`` (data_analyst) --\n``org_viewer`` has neither this grant nor the UI button.\n``POST /rules/from-hyperdx/validate`` runs the same checks and writes nothing.",
         "operationId": "rules.from-hyperdx",
         "requestBody": {
           "content": {
@@ -13218,7 +13218,7 @@
             }
           },
           "422": {
-            "description": "Refused, nothing written. The body failed validation (code validation_error). Or the hunt runner could not compile the rule -- its SQL does not parse as one SELECT, names no <db>.<table> source, names a source that is not a table name (letters, digits, '_' and '-'), has no WHERE to detect with, or calls a function that reads outside the row (url, s3, a dictionary) or sends it to another service (the ai* functions), or carries a CEL filter that does not transpile. A ``source`` that is not a registered source is refused, and so is a ``where_clause`` that is empty, carries a {...} placeholder or a time bound, or holds more than a row filter (code invalid_sql, the errors in sql_errors). Or the rule matches every event in its source (code rule_matches_everything, the source and detection WHERE in context).",
+            "description": "Refused, nothing written. The body failed validation (code validation_error). Or the hunt runner could not compile the rule -- its SQL does not parse as one SELECT, names no <db>.<table> source, names a source that is not a table name (letters, digits, '_' and '-'), has no WHERE to detect with, or calls a function that reads outside the row (url, s3, a dictionary) or sends it to another service (the ai* functions), or carries a CEL filter that does not transpile. A ``source`` that is not a registered source is refused, and so is a ``where_clause`` that is empty, carries a {...} placeholder or a time bound, or holds more than a row filter (code invalid_sql, the errors in sql_errors). Or a search left no filter once the time bounds the hunt window owns were taken out (code rule_empty_filter, the bounds taken out in dropped_bounds). Or the rule matches every event in its source (code rule_matches_everything, the source and detection WHERE in context).",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -13257,6 +13257,99 @@
             "positional": []
           },
           "action": "rule:write"
+        }
+      }
+    },
+    "/api/v1/rules/from-hyperdx/validate": {
+      "post": {
+        "tags": [
+          "Rules"
+        ],
+        "summary": "Validate Rule From Search",
+        "description": "Check the SQL a Search view renders to as ``POST /rules/from-hyperdx`` would, writing nothing.\n\nRuns every check a create runs and answers the same 422 refusals, including\n``rule_empty_filter``. A search that would save answers 200. Nothing is written and\nno alert-volume preview runs, so a Search view can ask before the user presses Create.\nAn engine without this route answers 404, which is how a caller tells it is older.",
+        "operationId": "rules.from-hyperdx.validate",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RuleFromHyperdxRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RuleFromSearchCheck"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Refused, nothing written. The body failed validation (code validation_error). Or the hunt runner could not compile the rule -- its SQL does not parse as one SELECT, names no <db>.<table> source, names a source that is not a table name (letters, digits, '_' and '-'), has no WHERE to detect with, or calls a function that reads outside the row (url, s3, a dictionary) or sends it to another service (the ai* functions), or carries a CEL filter that does not transpile. A ``source`` that is not a registered source is refused, and so is a ``where_clause`` that is empty, carries a {...} placeholder or a time bound, or holds more than a row filter (code invalid_sql, the errors in sql_errors). Or a search left no filter once the time bounds the hunt window owns were taken out (code rule_empty_filter, the bounds taken out in dropped_bounds). Or the rule matches every event in its source (code rule_matches_everything, the source and detection WHERE in context).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Problem details (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "x-scalo": {
+          "group": "rules",
+          "resource": "from-hyperdx",
+          "hierarchy": [
+            "rules",
+            "from-hyperdx"
+          ],
+          "verb": "validate",
+          "read_only": false,
+          "cli": {
+            "hidden": false,
+            "aliases": [],
+            "positional": []
+          },
+          "action": "rule:validate"
         }
       }
     },
@@ -13541,7 +13634,7 @@
           "Rules"
         ],
         "summary": "Update Rule",
-        "description": "Replace a detection rule (re-runs creation pipeline, preserves created_at).\n\nThe replacement is written as SQL, a ``where_clause`` or a ``condition``, as on\ncreate, and a rule replaced with SQL or a WHERE no longer carries a condition. With\nno ``source`` in the body the stored one stands, read as the registered source its\ntable names when it names none. Only a source the body sets or changes must be registered.\n\nA replacement the hunt runner could not compile is refused with 422 and the\nstored rule is left as it was. A production+team write is routed to a review\nbranch instead of the branch the runner git-syncs, and the\n``X-DFE-Review-Required`` header says so.",
+        "description": "Replace a detection rule (re-runs creation pipeline, preserves created_at).\n\nThe replacement is written as SQL, a ``where_clause`` or a ``condition``, as on\ncreate, and a rule replaced with SQL or a WHERE no longer carries a condition. With\nno ``source`` in the body the stored one stands, read as the registered source its\ntable names when it names none. A source the body sets or changes must be registered,\nand SQL on a registered source must read its table. A stored source no longer\nregistered is not checked, so the rule stays editable.\n\nA replacement the hunt runner could not compile is refused with 422 and the\nstored rule is left as it was. A production+team write is routed to a review\nbranch instead of the branch the runner git-syncs, and the\n``X-DFE-Review-Required`` header says so.",
         "operationId": "rules.apply",
         "parameters": [
           {
@@ -13596,7 +13689,7 @@
             }
           },
           "422": {
-            "description": "Refused, nothing written. The body failed validation (code validation_error). Or the hunt runner could not compile the rule -- its SQL does not parse as one SELECT, names no <db>.<table> source, names a source that is not a table name (letters, digits, '_' and '-'), has no WHERE to detect with, or calls a function that reads outside the row (url, s3, a dictionary) or sends it to another service (the ai* functions), or carries a CEL filter that does not transpile. A ``source`` that is not a registered source is refused, and so is a ``where_clause`` that is empty, carries a {...} placeholder or a time bound, or holds more than a row filter (code invalid_sql, the errors in sql_errors). Or the rule matches every event in its source (code rule_matches_everything, the source and detection WHERE in context).",
+            "description": "Refused, nothing written. The body failed validation (code validation_error). Or the hunt runner could not compile the rule -- its SQL does not parse as one SELECT, names no <db>.<table> source, names a source that is not a table name (letters, digits, '_' and '-'), has no WHERE to detect with, or calls a function that reads outside the row (url, s3, a dictionary) or sends it to another service (the ai* functions), or carries a CEL filter that does not transpile. A ``source`` that is not a registered source is refused, and so is a ``where_clause`` that is empty, carries a {...} placeholder or a time bound, or holds more than a row filter (code invalid_sql, the errors in sql_errors). Or a search left no filter once the time bounds the hunt window owns were taken out (code rule_empty_filter, the bounds taken out in dropped_bounds). Or the rule matches every event in its source (code rule_matches_everything, the source and detection WHERE in context).",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -14826,7 +14919,7 @@
           "Alerts"
         ],
         "summary": "Create Destination",
-        "description": "Create an alert destination.\n\nLinking it to a hunt writes the hunt YAML, so in production+team that link is\nrouted to a review branch and ``X-DFE-Review-Required`` says so.",
+        "description": "Create an alert destination.\n\nLinking it to a hunt writes the hunt YAML, so in production+team that link is\nrouted to a review branch and ``X-DFE-Review-Required`` says so. A URL whose scheme\nApprise has no service for is 422 ``unsupported_url_scheme``, and one naming a\nloopback, link-local or cloud metadata host is 422 ``host_blocked``.",
         "operationId": "alerts.create-destination",
         "requestBody": {
           "required": true,
@@ -15010,7 +15103,7 @@
           "Alerts"
         ],
         "summary": "Update Destination",
-        "description": "Update an alert destination.\n\nLinking it to a hunt writes the hunt YAML, so in production+team that link is\nrouted to a review branch and ``X-DFE-Review-Required`` says so.",
+        "description": "Update an alert destination.\n\nLinking it to a hunt writes the hunt YAML, so in production+team that link is\nrouted to a review branch and ``X-DFE-Review-Required`` says so. A changed URL is\nchecked as a create checks it.",
         "operationId": "alerts.destinations.apply",
         "parameters": [
           {
@@ -17269,7 +17362,7 @@
           "hunts"
         ],
         "summary": "Update Hunt",
-        "description": "Replace an existing hunt configuration, resolving its customers afresh.\n\nA rule that stays in the hunt keeps its stored entry, per-rule source and target\nincluded. A rule the edit adds is stored by name. The rule and results-table checks\nof the create apply to the kept entries.\n\nA production+team write is routed to a review branch instead of the branch the\nrunner git-syncs, and the ``X-DFE-Review-Required`` header says so. 422\n``unknown_org`` when a customer names no registered org, 422 ``unknown_rule`` when a\nrule newly named has no stored rule file.",
+        "description": "Replace an existing hunt configuration, resolving its customers afresh.\n\nA rule that stays in the hunt keeps its stored entry, per-rule source and target\nincluded. A rule the edit adds is stored by name. The rule and results-table checks\nof the create apply to the kept entries, except that ClickHouse is not asked to plan\na hunt the update leaves disabled.\n\nA production+team write is routed to a review branch instead of the branch the\nrunner git-syncs, and the ``X-DFE-Review-Required`` header says so. 422\n``unknown_org`` when a customer names no registered org, 422 ``unknown_rule`` when a\nrule newly named has no stored rule file.",
         "operationId": "hunts.apply",
         "parameters": [
           {
@@ -19010,7 +19103,7 @@
           "synthetic-data"
         ],
         "summary": "Start Stream",
-        "description": "Start a stream task that posts generated events to an ingest URL.\n\nThe stream presents the engine's own ingest credential, minted for the primary org\non the first stream, unless the request's ``headers`` carry an ``Authorization``.",
+        "description": "Start a stream task that posts generated events to an ingest URL.\n\nA stream to the deployment's own receiver (the host of\n``synthetic_data.autostart_receiver_url`` or one of ``allowed_receiver_hosts``, over\nhttp or https) presents the engine's own ingest credential, minted for the primary\norg on the first such stream, unless the request's ``headers`` carry an\n``Authorization``. Any other host gets no engine credential, whatever the scheme.",
         "operationId": "synthetic-data.stream",
         "requestBody": {
           "content": {
@@ -39704,26 +39797,6 @@
             "title": "Default Intake",
             "description": "The intake a create takes when it names none: the first of fetcher, beats and receiver the entry lists"
           },
-          "framing": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Framing",
-            "description": "Receiver intakes only: whether the pipeline wants the syslog line or the body"
-          },
-          "beats": {
-            "additionalProperties": {
-              "type": "string"
-            },
-            "type": "object",
-            "title": "Beats",
-            "description": "Beats module and fileset carrying the same source, when one does"
-          },
           "has_schema": {
             "type": "boolean",
             "title": "Has Schema",
@@ -41466,6 +41539,7 @@
         "properties": {
           "name": {
             "type": "string",
+            "maxLength": 64,
             "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$",
             "title": "Name",
             "description": "Unique org name (used as identifier)"
@@ -49804,7 +49878,7 @@
           "secret_path": {
             "type": "string",
             "title": "Secret Path",
-            "description": "Path in the secret store holding the token or key",
+            "description": "Path under sigma/ in the secret store holding the token or key",
             "default": ""
           },
           "username": {
@@ -51520,6 +51594,28 @@
         ],
         "title": "RuleFromHyperdxResponse",
         "description": "The rule created from a Search query."
+      },
+      "RuleFromSearchCheck": {
+        "properties": {
+          "valid": {
+            "type": "boolean",
+            "const": true,
+            "title": "Valid",
+            "description": "Always true: a refusal is a 422",
+            "default": true
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Warnings",
+            "description": "What to look at before creating the rule"
+          }
+        },
+        "type": "object",
+        "title": "RuleFromSearchCheck",
+        "description": "A search that would make a rule."
       },
       "RuleImportRequest": {
         "properties": {
@@ -53840,7 +53936,7 @@
           "review_required": {
             "type": "boolean",
             "title": "Review Required",
-            "description": "True when production+team sent the deployed-version record to a review branch: the table is live, and main records the version once it merges",
+            "description": "True when production+team sent the deployed-version record to a review branch: nothing is applied yet, and the engine deploys the version once the review merges",
             "default": false
           },
           "pr_url": {

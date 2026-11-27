@@ -4,7 +4,10 @@ import { FormNotification } from '@/core/components/FormNotification';
 import { Modal } from '@/core/components/Modal';
 import { RbacProtected } from '@/core/components/RbacProtected';
 import { useCreateRule } from '@/core/hooks/useCreateRuleV2';
-import { TRuleCreateResponse } from '@/core/hooks/useCreateRuleV2/types';
+import {
+  TRuleCreateRequest,
+  TRuleCreateResponse,
+} from '@/core/hooks/useCreateRuleV2/types';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
 import { RULE_HUNT_NAME_VALIDATOR } from '@/core/validationSchemas/utils';
 import { TRuleDetail } from '@/RulesV2/hooks/useFetchRuleDetail/types';
@@ -23,6 +26,25 @@ const formSchema = z.object({
 });
 
 type FormData = z.infer<typeof formSchema>;
+
+/** The source rule's one detection, in the field a create takes it in. */
+const detectionOf = (
+  rule: TRuleDetail,
+): Pick<
+  TRuleCreateRequest,
+  'match' | 'cel_filter' | 'user_sql' | 'where_clause' | 'source_type'
+> => {
+  if (rule.match) return { match: rule.match, source_type: 'raw' };
+  if (rule.cel_filter)
+    return { cel_filter: rule.cel_filter, source_type: 'raw' };
+  if (rule.original_sql) {
+    return {
+      user_sql: rule.original_sql,
+      source_type: rule.source_type ?? 'raw',
+    };
+  }
+  return { where_clause: rule.where_clause, source_type: 'raw' };
+};
 
 interface CloneRuleModalProps {
   rule: TRuleDetail;
@@ -55,9 +77,10 @@ export const CloneRuleModal = ({
   });
   const handleCloneRule = (values: FormData) => {
     createRuleMutation({
+      ...detectionOf(rule),
       severity: rule.severity as 'low' | 'medium' | 'high' | 'critical',
-      source_type: rule.source_type ?? 'raw',
-      cel_filter: rule.cel_filter,
+      display_name: rule.display_name || undefined,
+      description: rule.description || undefined,
       name: values.name,
     });
   };

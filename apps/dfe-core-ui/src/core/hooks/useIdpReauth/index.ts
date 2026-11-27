@@ -33,7 +33,7 @@ const isReauthMessage = (data: unknown): data is TReauthMessage =>
   data !== null &&
   (data as { type?: unknown }).type === REAUTH_MESSAGE;
 
-/** Confirm the signed-in user by a fresh sign-in at its identity provider, in its own window, handing back the grant the engine signs for one account or group. */
+/** Confirm the signed-in user by a fresh sign-in at its identity provider, in its own window, handing back the grant the engine signs for the target. */
 export const useIdpReauth = ({
   onGranted,
 }: {

@@ -32,7 +32,7 @@ sequenceDiagram
   auth-->>page: Session
 ```
 
-*Figure 1. L4 Detail -- OIDC sign-in. Solid arrows are requests, dashed arrows are answers.* Up: [L3 Components -- dfe-ui](architecture.md).
+*Figure 1. L4 Detail -- OIDC sign-in. The engine token reaches the console in the URL fragment.* Up: [L3 Components -- dfe-ui](architecture.md).
 
 ## Sign-in goes through the engine
 

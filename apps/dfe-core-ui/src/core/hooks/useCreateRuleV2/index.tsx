@@ -16,7 +16,7 @@ export const useCreateRule = ({
   const { data, mutate, reset, isPending, error } = useMutation({
     mutationFn: (rule: TRuleCreateRequest) => createRule({ body: rule }),
     onSuccess: (data) => {
-      queryClient.invalidateQueries({
+      void queryClient.invalidateQueries({
         queryKey: QUERY_KEYS.rulesV2.default(),
       });
       onSuccess?.(data);

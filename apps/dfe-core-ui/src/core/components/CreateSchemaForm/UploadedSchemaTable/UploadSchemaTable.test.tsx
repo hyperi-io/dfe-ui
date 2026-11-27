@@ -1,5 +1,8 @@
 import { type AddSchemaTableProps } from '@/core/components/CreateSchemaForm/AddSchemaTable';
-import { CreateSchemaFormProvider } from '@/core/components/CreateSchemaForm/contexts/CreateSchemaForm.context';
+import {
+  CreateSchemaFormProvider,
+  useCreateSchemaFormContext,
+} from '@/core/components/CreateSchemaForm/contexts/CreateSchemaForm.context';
 import type {
   CreateSchemaFormContextValue,
   InvalidColumns,
@@ -10,7 +13,7 @@ import { Form } from '@/core/components/Form';
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
 import { rowSchema } from '@/core/validationSchemas/CreateSchemaForm/AddSchemaTable.schema';
 import { render, screen } from '@testing-library/react';
-import type { FormInstance, FormRule } from 'antd';
+import type { FormRule } from 'antd';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 import { UploadedSchemaTable } from './index';
 
@@ -78,20 +81,23 @@ const validUploadedColumn: UploadedSchemaRow = {
   _field_type: SCHEMA_FIELD_TYPES.ELASTIC_IMPORT,
 };
 
-const renderUploadedSchemaTable = (form?: FormInstance) => {
-  const FormShell = () => {
-    const [innerForm] = Form.useForm();
-    const activeForm = form ?? innerForm;
-    return (
-      <CreateSchemaFormProvider>
-        <Form form={activeForm}>
-          <UploadedSchemaTable />
-        </Form>
-      </CreateSchemaFormProvider>
-    );
-  };
-  return render(<FormShell />, { wrapper });
+/** The provider's own form, connected as CreateSchemaForm connects it. */
+const FormShell = () => {
+  const { form } = useCreateSchemaFormContext();
+  return (
+    <Form form={form}>
+      <UploadedSchemaTable />
+    </Form>
+  );
 };
+
+const renderUploadedSchemaTable = () =>
+  render(
+    <CreateSchemaFormProvider>
+      <FormShell />
+    </CreateSchemaFormProvider>,
+    { wrapper },
+  );
 
 describe('UploadedSchemaTable', () => {
   const handleRemoveUploadedSchemaColumn = vi.fn();

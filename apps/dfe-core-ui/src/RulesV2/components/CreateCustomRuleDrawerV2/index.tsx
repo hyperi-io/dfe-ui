@@ -65,6 +65,7 @@ export const CreateCustomRuleDrawer = ({
   const handleCreateRule = (values: CreateUpdateRuleFormData) => {
     createRuleMutation({
       ...values,
+      display_name: values.display_name || undefined,
       match: values.match ? toApiRootMatch(values.match) : values.match,
     });
   };

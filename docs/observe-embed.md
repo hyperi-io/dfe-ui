@@ -29,7 +29,7 @@ sequenceDiagram
   end
 ```
 
-*Figure 1. L4 Detail -- Observe embed. Solid arrows are requests, the dashed arrow is the load event.* Up: [L3 Components -- dfe-ui](architecture.md).
+*Figure 1. L4 Detail -- Observe embed. The page posts the theme only once the frame has loaded.* Up: [L3 Components -- dfe-ui](architecture.md).
 
 The frame signs in from the `dfe_token` cookie the proxy plants ([authentication.md](authentication.md#sessions-renew-and-end-at-the-engine)).
 

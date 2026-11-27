@@ -76,19 +76,35 @@ describe('OidcProviderList', () => {
     expect(screen.getByText('Globex Google')).toBeInTheDocument();
   });
 
-  test("a link's organisation opens on its providers, ready to edit", async () => {
-    serve(EVERY_PROVIDER);
+  // Seven more organisations, sorted before Globex, push it past the first six cards.
+  const BEYOND_THE_FIRST_SIX = [
+    ...EVERY_PROVIDER,
+    ...['h', 'i', 'j', 'k', 'l', 'm', 'n'].map((o) =>
+      provider(`${o}-okta`, `aa-${o}`),
+    ),
+  ];
 
-    render(<OidcProviderList openOrg="globex" scope="customer" />, { wrapper });
+  test.each([
+    ['among the first six cards', EVERY_PROVIDER],
+    ['past the first six cards', BEYOND_THE_FIRST_SIX],
+  ])(
+    "a link's organisation opens on its providers, ready to edit, %s",
+    async (_, providers) => {
+      serve(providers);
 
-    expect(
-      await screen.findByRole('dialog', { name: 'Globex OIDC Providers' }),
-    ).toBeInTheDocument();
-    expect(await screen.findByText('Globex Okta')).toBeInTheDocument();
-    expect(
-      screen.getAllByRole('button', { name: 'OIDC Provider actions' }),
-    ).toHaveLength(2);
-  });
+      render(<OidcProviderList openOrg="globex" scope="customer" />, {
+        wrapper,
+      });
+
+      expect(
+        await screen.findByRole('dialog', { name: 'Globex OIDC Providers' }),
+      ).toBeInTheDocument();
+      expect(await screen.findByText('Globex Okta')).toBeInTheDocument();
+      expect(
+        screen.getAllByRole('button', { name: 'OIDC Provider actions' }),
+      ).toHaveLength(2);
+    },
+  );
 
   test("an organisation's name finds its card alone", async () => {
     serve(EVERY_PROVIDER);

@@ -54,7 +54,7 @@ test('login and three pages load against a native engine', async ({ page }) => {
     name: 'Login with Local',
     exact: true,
   });
-  const username = field(page, 'Username');
+  const username = field(page, 'Username or Email');
   await expect(username.or(localTab).first()).toBeVisible();
   if (await localTab.isVisible()) {
     await localTab.click();

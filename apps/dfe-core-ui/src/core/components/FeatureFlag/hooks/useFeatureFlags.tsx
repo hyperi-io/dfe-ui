@@ -7,7 +7,6 @@ import { useMemo } from 'react';
 // Anything but an array would throw in includes(), or match a flag by substring.
 const isList = (value: unknown): value is unknown[] => Array.isArray(value);
 
-// Can be replaced with a call to the API in the future
 const getFeatureFlags = (): unknown[] =>
   readStorageJson('featureFlags', isList) ?? [];
 

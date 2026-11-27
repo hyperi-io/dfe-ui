@@ -36,7 +36,7 @@ stateDiagram-v2
   class Invalid error
 ```
 
-*Figure 1. L4 Detail -- Uploaded row lifecycle. Orange is a row that failed `rowSchema`.* Up: [L3 Components -- dfe-ui](architecture.md).
+*Figure 1. L4 Detail -- Uploaded row lifecycle. Invalid is a row that failed `rowSchema`.* Up: [L3 Components -- dfe-ui](architecture.md).
 
 1. Import. `SchemaUploadFileSection` converts the file (`transformDataToUploadedSchemaRow`) and passes the rows to `handleSetUploadedSchemaColumns`, which runs `rowSchema.safeParse` per row. Every row goes into `uploadedSchemaColumns`, and the rows that fail are listed in `invalidUploadedSchemaColumns` with their Zod issues.
 2. Form lists. `AddSchemaTable` uses `useLayoutEffect` to `setFieldsValue` its `Form.List` when the `initialValues` signature changes, so a parent passing a new array each render does not reset the list.
@@ -56,7 +56,7 @@ The uploaded table passes `pagination` to the table, so rows off the current pag
 - Repeat parses. Each row is parsed at import and again at submit.
 - Mounted tabs. Both `SchemaUploadCollapse` tabs set `forceRender: true`, so the uploaded and manual tables stay mounted together.
 
-CSV conversion (`convertCsv`, a server action) and Elastic conversion (`useElasticConvert`, an engine call) run before any of this, so a payload or timeout limit there fails before paging can help.
+CSV conversion (`convertCsv`, a server action that refuses a caller with no signed-in session) and Elastic conversion (`useElasticConvert`, an engine call) run before any of this, so a payload or timeout limit there fails before paging can help.
 
 ## What breaks if a change ignores the model
 

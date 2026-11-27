@@ -16,8 +16,10 @@ const SOURCE_COLUMN_ITEM: TSourceColumnItem = {
 };
 
 const TOTAL_ITEMS = 25;
-const ALL_ITEMS = Array.from({ length: TOTAL_ITEMS }, () => ({
+/** Column names are unique within a source, so each item gets its own. */
+const ALL_ITEMS = Array.from({ length: TOTAL_ITEMS }, (_, i) => ({
   ...SOURCE_COLUMN_ITEM,
+  name: `column_${i}`,
 }));
 
 function createPaginatedSourceColumnsHandler() {

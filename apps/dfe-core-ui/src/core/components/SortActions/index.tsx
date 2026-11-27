@@ -105,6 +105,9 @@ export const SortActions = ({
             <Button
               size="small"
               className={cn('w-10', classNames?.button)}
+              aria-label={
+                sortDirection === 'asc' ? 'Sort ascending' : 'Sort descending'
+              }
               icon={
                 sortDirection === 'asc' ? (
                   <IconSortDescending />

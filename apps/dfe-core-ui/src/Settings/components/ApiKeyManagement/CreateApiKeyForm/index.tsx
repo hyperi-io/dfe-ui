@@ -85,7 +85,7 @@ export const CreateApiKeyForm = ({
   onSuccess?: (data: TApiKeyCreateResponse) => void;
   onAccept?: () => void;
 }) => {
-  // The grant names the key it creates, so it is asked for at submit.
+  // The grant names the key it creates, so it is asked for once the engine wants it.
   const [reauthTarget, setReauthTarget] = useState('');
   const reauth = useReauthGrant(reauthTarget, 'api_key', 'create');
   const {

@@ -1,16 +1,16 @@
 import { TRuleCreateResponse } from '@/core/hooks/useCreateRuleV2/types';
 import type { NotificationArgsProps } from 'antd';
 
-/** The rule's warnings and its preview's, once each. The engine copies the preview's onto the rule only while the detection guard is on. */
+/** The saved rule's warnings, once each. */
 export const ruleSaveWarnings = (response: TRuleCreateResponse): string[] => [
-  ...new Set([...(response.rule.warnings ?? [])]),
+  ...new Set(response.rule.warnings ?? []),
 ];
 
 /** Whether the engine said anything about a saved rule beyond storing it. */
 const hasSummary = (response: TRuleCreateResponse) =>
   ruleSaveWarnings(response).length > 0;
 
-/** What the engine said about a saved rule: its warnings and, when asked for, its alert-volume preview. */
+/** The engine's warnings about a saved rule. */
 export const RuleSaveSummary = ({
   response,
 }: {

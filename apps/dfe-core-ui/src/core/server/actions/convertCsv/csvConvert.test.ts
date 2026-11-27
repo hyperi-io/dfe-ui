@@ -1,7 +1,30 @@
-import { describe, expect, test } from 'vitest';
+import { getServerSession } from 'next-auth';
+import { beforeEach, describe, expect, test, vi } from 'vitest';
 import { convertCsv } from './index';
 
+const signedIn = {
+  user: { name: 'admin', accessToken: 'valid-token' },
+  expires: '2099-12-31',
+};
+
+beforeEach(() => {
+  vi.mocked(getServerSession).mockResolvedValue(signedIn);
+});
+
 describe('convertCsv', () => {
+  test.each([
+    ['no session', null],
+    ['a session with no engine token', { ...signedIn, user: { name: 'x' } }],
+    [
+      'an expired session',
+      { ...signedIn, error: 'AccessTokenExpired' as const },
+    ],
+  ])('refuses a call with %s before reading the file', async (_, session) => {
+    vi.mocked(getServerSession).mockResolvedValue(session);
+    const f = new File(['id\n1'], 'data.csv', { type: 'text/csv' });
+    await expect(convertCsv(f)).rejects.toThrow('Sign in to upload a schema.');
+  });
+
   test('returns empty array when file is missing', async () => {
     await expect(convertCsv(undefined as unknown as File)).resolves.toEqual([]);
   });

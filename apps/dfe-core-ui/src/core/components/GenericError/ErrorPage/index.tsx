@@ -25,7 +25,7 @@ export const GenericErrorPage = ({
       <div className="flex flex-col items-center justify-center">
         <ErrorHoundSvg className="w-4/12 h-auto m-auto dark:fill-white fill-primary" />
         {title && (
-          <h1 className="mt-8 text-2xl font-light">
+          <h1 className="mt-8 text-2xl font-light flex items-center justify-center">
             <IconWrapper
               icon={<ExclamationCircleOutlined />}
               className="w-6 h-6 text-red-500 mr-2"

@@ -1,6 +1,7 @@
 import type { RowSchema } from '@/core/components/CreateSchemaForm/AddSchemaTable';
 import { SCHEMA_FIELD_TYPES } from '@/core/components/CreateSchemaForm/fieldType.constants';
 import type { UploadedSchemaRow } from '@/core/components/CreateSchemaForm/types';
+import { Form } from '@/core/components/Form';
 import type { CreateSchemaFormData } from '@/core/validationSchemas/CreateSchemaForm/CreateSchemaForm.schema';
 // Used by antd form
 import type { FieldError } from '@rc-component/form/es/interface';
@@ -51,6 +52,16 @@ afterEach(async () => {
   vi.restoreAllMocks();
 });
 
+/** The provider's own form, connected as CreateSchemaForm connects it. */
+const ConnectedForm = ({ children }: { children: ReactNode }) => {
+  const { form } = useCreateSchemaFormContext();
+  return (
+    <Form form={form} component={false}>
+      {children}
+    </Form>
+  );
+};
+
 const TestHarness = ({
   children,
   initialValues,
@@ -59,7 +70,7 @@ const TestHarness = ({
   initialValues?: Partial<CreateSchemaFormData>;
 }) => (
   <CreateSchemaFormProvider initialValues={initialValues}>
-    {children}
+    <ConnectedForm>{children}</ConnectedForm>
   </CreateSchemaFormProvider>
 );
 
@@ -76,7 +87,7 @@ const renderContextWithTestValue = (
   renderHook(() => useCreateSchemaFormContext(), {
     wrapper: ({ children }) => (
       <CreateSchemaFormProvider testValue={testValue}>
-        {children}
+        <ConnectedForm>{children}</ConnectedForm>
       </CreateSchemaFormProvider>
     ),
   });

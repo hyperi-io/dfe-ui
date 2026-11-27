@@ -4,7 +4,7 @@ import type { TReauthKind } from '@/core/hooks/useReauth';
 import { useRef, useState } from 'react';
 
 /**
- * Ask for the signed-in user's password before a change to the account or group *target*, then run the change.
+ * Ask for the signed-in user's password before a change to *target*, then run the change.
  * The grant the engine signs is kept until dropped, so the caller decides how long one confirmation lasts.
  */
 export const useReauthGrant = (

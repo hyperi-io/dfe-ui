@@ -17,6 +17,7 @@ const withCopySuffix = (base: string) =>
 /** The engine's account, group, API key, OIDC provider and role name rule (openapi.json CreateGroupRequest.name and siblings). */
 export const STORE_NAME_VALIDATOR = {
   regex: new RegExp(`^[a-zA-Z0-9][a-zA-Z0-9._-]{0,${MAX_NAME_LENGTH - 1}}$`),
+  maxLength: MAX_NAME_LENGTH,
   message: (fieldName: string = 'Name') =>
     `${fieldName} must start with a letter or number, contain only letters, numbers, dots, underscores and hyphens, and be at most ${MAX_NAME_LENGTH} characters`,
   /** A default name for a copy of `name` that this rule accepts, whatever `name` holds. */
@@ -28,16 +29,21 @@ export const STORE_NAME_VALIDATOR = {
   },
 };
 
+/** The longest organisation name the engine takes (openapi.json maxLength), checked apart from the pattern. */
+const MAX_ORG_NAME_LENGTH = 64;
+
 /** The engine's organisation name rule (openapi.json CreateOrgRequest.name). */
 export const ORG_NAME_VALIDATOR = {
   regex: /^[A-Za-z0-9][A-Za-z0-9._-]*$/,
+  maxLength: MAX_ORG_NAME_LENGTH,
   message: (fieldName: string = 'Name') =>
-    `${fieldName} must start with a letter or number and contain only letters, numbers, dots, underscores and hyphens`,
+    `${fieldName} must start with a letter or number, contain only letters, numbers, dots, underscores and hyphens, and be at most ${MAX_ORG_NAME_LENGTH} characters`,
 };
 
 /** The engine's rule and hunt name rule (openapi.json RuleCreateRequest.name and HuntCreateRequest.name). */
 export const RULE_HUNT_NAME_VALIDATOR = {
   regex: new RegExp(`^[A-Za-z0-9_-]{1,${MAX_NAME_LENGTH}}$`),
+  maxLength: MAX_NAME_LENGTH,
   message: (fieldName: string = 'Name') =>
     `${fieldName} must contain only letters, numbers, underscores and hyphens, and be at most ${MAX_NAME_LENGTH} characters`,
   /** A default name for a copy of `name` that this rule accepts, whatever `name` holds. */

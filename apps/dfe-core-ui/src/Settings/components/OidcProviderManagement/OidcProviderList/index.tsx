@@ -60,9 +60,14 @@ export const OidcProviderList = ({
   for (const provider of shown) {
     grouped.set(provider.org, [...(grouped.get(provider.org) ?? []), provider]);
   }
+  // A linked organisation's card leads, so the slice before Show more always holds it.
   const orgCards = [...grouped.entries()]
     .map(([org, held]) => ({ held, org }))
-    .sort((a, b) => orgLabel(a.org).localeCompare(orgLabel(b.org)));
+    .sort(
+      (a, b) =>
+        Number(b.org === openOrg) - Number(a.org === openOrg) ||
+        orgLabel(a.org).localeCompare(orgLabel(b.org)),
+    );
   const providerView = paging.view({ ...NO_MORE_PAGES, items: shown });
   const orgView = paging.view({ ...NO_MORE_PAGES, items: orgCards });
 
