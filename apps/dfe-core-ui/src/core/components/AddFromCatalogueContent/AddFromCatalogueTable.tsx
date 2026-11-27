@@ -38,12 +38,12 @@ export const toSourceName = (entryName: string) =>
     .toLowerCase()
     .slice(0, 40);
 
-const toSelectedEntry = (
+export const toSelectedEntry = (
   row: TSourceCatalogueItem,
 ): AddFromCatalogueFormValues => ({
   entry: row.name,
   name: toSourceName(row.name),
-  intake: row.intakes?.[0] as AddFromCatalogueFormValues['intake'],
+  intake: row.default_intake,
   transport: 'bus',
   archive: false,
   intakeOptions: row.intakes,

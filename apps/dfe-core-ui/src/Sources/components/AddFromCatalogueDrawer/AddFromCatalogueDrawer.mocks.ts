@@ -23,7 +23,7 @@ const ADMIN: TAuthMeResponse = {
   hyperdx_identity: 'string',
 };
 
-/** An entry that compiles to two variants and arrives by receiver unless told otherwise. */
+/** An entry that compiles to two variants and arrives by Beats unless told otherwise. */
 export const COREDNS_CATALOGUE_ENTRY: TSourceCatalogueItem = {
   ...OKTA_CATALOGUE_ENTRY,
   name: 'coredns-log',
@@ -32,8 +32,7 @@ export const COREDNS_CATALOGUE_ENTRY: TSourceCatalogueItem = {
   data_stream: 'log',
   dataset: 'coredns.log',
   intakes: ['beats', 'receiver'],
-  default_intake: 'receiver',
-  beats: { module: 'coredns', fileset: 'log' },
+  default_intake: 'beats',
   variant: 'filebeat.coredns_log.default',
   variants: ['filebeat.coredns_log.default', 'filebeat.coredns_log.json'],
 };

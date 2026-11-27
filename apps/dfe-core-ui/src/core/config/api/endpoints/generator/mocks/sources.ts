@@ -31,8 +31,6 @@ export const OKTA_CATALOGUE_ENTRY: TSourceCataloguesResponse['items'][number] =
     dataset: 'okta.system',
     intakes: ['beats', 'fetcher'],
     default_intake: 'fetcher',
-    framing: null,
-    beats: { module: 'okta', fileset: 'system' },
     has_schema: true,
     engine: 'elastic',
     variant: 'filebeat.okta.default',
