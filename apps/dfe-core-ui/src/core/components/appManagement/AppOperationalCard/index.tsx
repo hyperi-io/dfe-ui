@@ -17,6 +17,7 @@ import { IconChevronDown } from '@repo/dfe-icons';
 import { Dropdown, Spin, Tag } from 'antd';
 import Link from 'next/link';
 import { ReactNode, useState } from 'react';
+import { ArgoSyncStatus } from './ArgoSyncStatus';
 import {
   CPU_SECONDS,
   describeMetric,
@@ -368,6 +369,7 @@ export const AppOperationalCard = ({
             </RbacProtected>
           )}
         </div>
+        <ArgoSyncStatus sync={status?.sync} />
       </SectionCard>
 
       <SectionCard title="Metrics">
