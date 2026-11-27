@@ -1,13 +1,13 @@
 import { Page, expect } from '@playwright/test';
 
 import { clickhouse, qualifiedTable } from '@e2e/config/engineApi.helpers';
-
-import { deleteIfPresent } from '../Sources/sources.helpers';
+import { deleteIfPresent } from '@e2e/specs/Journeys/Sources/sources.helpers';
 import {
   addSourceInUi,
   buildAndDeployInUi,
   submitDrawer,
-} from '../Sources/ui.helpers';
+} from '@e2e/specs/Journeys/Sources/ui.helpers';
+
 import { sendEvents } from './createRuleStored.helpers';
 
 export const SOURCE = 'jcrs-own';
