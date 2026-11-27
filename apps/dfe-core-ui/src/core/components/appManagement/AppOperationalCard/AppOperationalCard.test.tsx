@@ -96,7 +96,9 @@ describe('AppOperationalCard Argo CD state', () => {
     expect(await screen.findByText('ComparisonError')).toBeInTheDocument();
     expect(screen.getByText(REFUSED_MESSAGE)).toBeInTheDocument();
     expect(screen.getByText('Sync unknown')).toBeInTheDocument();
-    expect(screen.getByText('Healthy')).toBeInTheDocument();
+    // Argo still reports Healthy on a refusal, which the card doesn't repeat
+    expect(screen.getByText('Health unknown')).toBeInTheDocument();
+    expect(screen.queryByText('Healthy')).not.toBeInTheDocument();
   });
 
   it.each([

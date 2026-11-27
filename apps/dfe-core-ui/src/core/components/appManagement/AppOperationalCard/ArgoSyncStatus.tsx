@@ -74,6 +74,10 @@ const noticeType = (conditionType: string) => {
  */
 export const ArgoSyncStatus = ({ sync }: { sync?: TArgoSync | null }) => {
   if (!sync) return null;
+  // Argo keeps the last health it saw on an Application it can't compare, so it says nothing about this one
+  const refused =
+    sync.status === 'Unknown' &&
+    sync.conditions.some((condition) => condition.type.endsWith('Error'));
   const revision = sync.revision
     ? `revision ${shortRevision(sync.revision)}`
     : 'no revision yet';
@@ -90,7 +94,7 @@ export const ArgoSyncStatus = ({ sync }: { sync?: TArgoSync | null }) => {
         />
         <ArgoTag
           labels={HEALTH_LABELS}
-          status={sync.health.status}
+          status={refused ? 'Unknown' : sync.health.status}
           hint="Argo CD health"
         />
       </div>
