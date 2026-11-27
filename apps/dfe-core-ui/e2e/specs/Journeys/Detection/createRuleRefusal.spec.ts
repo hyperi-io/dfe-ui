@@ -14,7 +14,7 @@ import {
   hyperdxSourceId,
   expectNoOverlap,
   openSearch,
-  trackCreateRuleRequests,
+  trackRuleRequests,
 } from './createRuleFromSearch.helpers';
 import {
   editSeverity,
@@ -44,7 +44,7 @@ test(
     await sendEvents([{ cr_kind: 'crfix', cr_mark: MARK, level: 'high' }]);
     await expectLanded('main', MARK, 1);
     const before = await searchRuleCount();
-    const sent = trackCreateRuleRequests(page);
+    const sent = trackRuleRequests(page);
     const precheck = page.getByTestId('create-rule-precheck');
     const button = page.getByTestId('create-rule-from-search-button');
     const search = { language: 'sql' as const };
@@ -94,9 +94,7 @@ test(
     await button.click({ force: true });
     await expect(precheck).toContainText('This search only filters on time.');
     await expect(precheck).toContainText('The hunt sets its own time window.');
-    await expect(precheck).toContainText(
-      'Left out of the rule, because the hunt sets its own time window:',
-    );
+    await expect(precheck).toContainText('Left out of the rule:');
     await expect(precheck).toContainText('_timestamp_load < now()');
     await expectNoOverlap(precheck, controls);
     await captureDialog(page, 'precheck-refused-open');
@@ -120,12 +118,10 @@ test(
     await button.click({ force: true });
     await expect(precheck).toContainText('nosuchcol');
 
-    // Only dry runs have gone to the engine, and no rule was written.
-    expect(sent.length).toBeGreaterThan(0);
-    expect(
-      sent.every((r) => r.dryRun),
-      JSON.stringify(sent),
-    ).toBe(true);
+    // The engine was asked through the validate route only. No create request
+    // has been sent, and no rule was written.
+    expect(sent.validate.length).toBeGreaterThan(0);
+    expect(sent.create, JSON.stringify(sent)).toEqual([]);
     expect(await searchRuleCount()).toBe(before);
 
     // The same search with a real filter clears the check, saves, and the rule
@@ -138,7 +134,7 @@ test(
     await captureDialog(page, 'precheck-valid');
     const fixed = await clickCreateRule(page, context);
     expect(fixed.status, JSON.stringify(fixed.body)).toBe(201);
-    expect(sent.filter((r) => !r.dryRun)).toHaveLength(1);
+    expect(sent.create).toHaveLength(1);
     const id = createdRuleId(fixed.body);
     try {
       if (!fixed.editor) {

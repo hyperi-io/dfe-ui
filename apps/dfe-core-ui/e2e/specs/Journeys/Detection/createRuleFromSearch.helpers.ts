@@ -112,16 +112,16 @@ export const expectNoOverlap = async (
   }
 };
 
-/** Every create-rule request the page sends, with whether it was a dry run. */
-export const trackCreateRuleRequests = (page: Page) => {
-  const sent: { dryRun: boolean; url: string }[] = [];
+/** The save and validate requests the page sends to HyperDX's server, by route. */
+export const trackRuleRequests = (page: Page) => {
+  const sent = { create: [] as string[], validate: [] as string[] };
   page.on('request', (request) => {
-    const url = new URL(request.url());
-    if (!url.pathname.endsWith('/api/dfe/create-rule')) return;
-    sent.push({
-      dryRun: url.searchParams.get('dry_run') === 'true',
-      url: request.url(),
-    });
+    const { pathname } = new URL(request.url());
+    if (pathname.endsWith('/api/dfe/create-rule')) {
+      sent.create.push(request.url());
+    } else if (pathname.endsWith('/api/dfe/validate-rule')) {
+      sent.validate.push(request.url());
+    }
   });
   return sent;
 };
