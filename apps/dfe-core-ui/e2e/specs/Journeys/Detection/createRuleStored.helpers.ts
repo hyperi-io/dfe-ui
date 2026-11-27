@@ -21,9 +21,18 @@ export type StoredRule = {
 export const storedRule = (name: string) =>
   engine<StoredRule>('GET', `/api/v1/rules/${name}`);
 
-export const ruleTotal = async () =>
-  (await engine<{ total_size: number }>('GET', '/api/v1/rules?page_size=1'))
-    .total_size;
+/**
+ * How many rules Create Rule has made with its default name. A search saved
+ * with no name takes `hyperdx-rule`, so a refused search must leave this alone.
+ * The journeys run one at a time (workers: 1 in playwright.config.ts).
+ */
+export const searchRuleCount = async () =>
+  (
+    await engine<{ total_size: number }>(
+      'GET',
+      '/api/v1/rules?search=hyperdx-rule&page_size=1',
+    )
+  ).total_size;
 
 /** A rule holds the search's filter, bound to its table, and nothing else HyperDX added. */
 export const expectFilterOnly = (rule: StoredRule, table: string) => {
@@ -83,36 +92,44 @@ export const createHunt = async (
   expect(made.ok(), await made.text()).toBeTruthy();
 };
 
-/** Run the hunt on demand once the events have aged past its own second. */
-export const runHunt = async (page: Page, api: Api, hunt: string) => {
-  await page.waitForTimeout(2_500);
+/**
+ * Run the hunt on demand once no event of the run sits in the current second:
+ * a fire reads _timestamp_load strictly before its own second.
+ */
+export const runHunt = async (
+  api: Api,
+  hunt: string,
+  table: string,
+  mark: string,
+) => {
+  await expect
+    .poll(
+      async () =>
+        clickhouse(
+          `SELECT count() FROM dfe.\`${table}\` WHERE _timestamp_load >= toStartOfSecond(now64()) AND toString(_json) LIKE '%${mark}%'`,
+        ),
+      { timeout: 30_000, intervals: [250] },
+    )
+    .toBe('0');
   const queued = await api.post(`/hunts/${hunt}/run`);
   expect(queued.status(), await queued.text()).toBe(202);
 };
 
-/** The values of one JSON field across the events the hunt matched for the rule, sorted. */
-export const matched = async (
-  hunt: string,
-  ruleId: string,
-  mark: string,
-  field: string,
-) =>
-  clickhouse(
-    `SELECT arraySort(groupUniqArray(toString(_json.${field}))) FROM dfe.detection WHERE hunt_name = '${hunt}' AND rule_id = '${ruleId}' AND _json.cr_mark = '${mark}' FORMAT TSV`,
-  );
-
-/** How many events of one batch the hunt matched for the rule, counted once each. */
-export const matchedInBatch = async (
+/** The values of one JSON field across one batch's events the hunt matched for the rule, sorted. */
+export const matchedIds = async (
   hunt: string,
   ruleId: string,
   mark: string,
   batch: string,
+  field: string,
 ) =>
-  Number(
+  (
     await clickhouse(
-      `SELECT count(DISTINCT matched_uuid) FROM dfe.detection WHERE hunt_name = '${hunt}' AND rule_id = '${ruleId}' AND _json.cr_mark = '${mark}' AND _json.cr_batch = '${batch}'`,
-    ),
-  );
+      `SELECT arrayStringConcat(arraySort(groupUniqArray(toString(_json.${field}))), ',') FROM dfe.detection WHERE hunt_name = '${hunt}' AND rule_id = '${ruleId}' AND _json.cr_mark = '${mark}' AND _json.cr_batch = '${batch}' FORMAT TSV`,
+    )
+  )
+    .split(',')
+    .filter(Boolean);
 
 /** The rule page a created rule opens in, edited to a new severity and saved. */
 export const editSeverity = async (editor: Page, from: string, to: string) => {

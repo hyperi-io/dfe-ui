@@ -21,9 +21,20 @@ const accepts = async (receiverUrl: string, token: string) =>
     })
   ).status !== 401;
 
+/** The `code` of a problem+json body, or undefined for any other body. */
+const problemCode = (body: string): unknown => {
+  try {
+    return JSON.parse(body)?.code;
+  } catch {
+    return undefined;
+  }
+};
+
 /**
- * The grant an engine asks for before it changes a credential. An engine that
- * asks for none refuses the call, and the change goes ahead without one.
+ * The grant an engine asks for before it changes a credential. An engine with no
+ * re-auth route (404) and an account with no local password (409
+ * `reauth_via_idp`) get none. Any other refusal, a wrong password included,
+ * fails here with what the engine said.
  */
 const reauthHeader = async (
   headers: Record<string, string>,
@@ -38,9 +49,23 @@ const reauthHeader = async (
       password: adminPassword(),
     }),
   });
-  return earned.ok
-    ? { 'X-DFE-Reauth': (await earned.json()).grant as string }
-    : {};
+  const body = await earned.text();
+  if (earned.status === 404) return {};
+  if (earned.status === 409 && problemCode(body) === 'reauth_via_idp') {
+    return {};
+  }
+  if (!earned.ok) {
+    throw new Error(
+      `re-auth for credential ${target}: ${earned.status} ${body}`,
+    );
+  }
+  const grant: unknown = JSON.parse(body).grant;
+  if (typeof grant !== 'string' || grant === '') {
+    throw new Error(
+      `re-auth for credential ${target} returned no grant: ${body}`,
+    );
+  }
+  return { 'X-DFE-Reauth': grant };
 };
 
 const mint = async (receiverUrl: string): Promise<string> => {

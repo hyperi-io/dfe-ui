@@ -8,14 +8,14 @@ import { TAGS } from '@e2e/config/tags.constants';
 import { apiPrimaryOrganisation, engineClient } from './detection.helpers';
 import {
   clickCreateRule,
+  createdRuleId,
   hyperdxOrigin,
   hyperdxSourceId,
   openSearch,
 } from './createRuleFromSearch.helpers';
 import {
   createHunt,
-  matched,
-  matchedInBatch,
+  matchedIds,
   expectFilterOnly,
   expectLanded,
   runHunt,
@@ -66,7 +66,7 @@ test(
 
     const created = await clickCreateRule(page, context);
     expect(created.status, JSON.stringify(created.body)).toBe(201);
-    const id: string = created.body.id;
+    const id = createdRuleId(created.body);
     try {
       expect(created.editor?.url()).toContain(id);
       const rule = await storedRule(id);
@@ -75,18 +75,22 @@ test(
       expect(rule.where_clause).toContain(`'high'`);
       expect(rule.where_clause).toMatch(/cr_n.*>= 2/);
 
-      // The hunt finds the events the search showed: n = 2 and n = 4, and no other.
       await createHunt(api, HUNT, rule, primary.name);
       await sendEvents(batch('after'));
       await expectLanded('main', MARK, 8);
-      await runHunt(page, api, HUNT);
+      await runHunt(api, HUNT, 'main', MARK);
+      // The events the search showed, and no other: the batch sent after the
+      // hunt matches exactly, and an earlier batch the hunt's first run also
+      // reads may match no event outside that set.
+      const expected = ['2', '4'];
       await expect
-        .poll(() => matched(HUNT, id, MARK, 'cr_n'), {
+        .poll(() => matchedIds(HUNT, id, MARK, 'after', 'cr_n'), {
           timeout: 150_000,
           intervals: [5_000],
         })
-        .toBe("['2','4']");
-      expect(await matchedInBatch(HUNT, id, MARK, 'after')).toBe(2);
+        .toEqual(expected);
+      const earlier = await matchedIds(HUNT, id, MARK, 'before', 'cr_n');
+      expect(earlier.filter((value) => !expected.includes(value))).toEqual([]);
     } finally {
       await api.del(`/hunts/${HUNT}`);
       await api.del(`/rules/${id}`);

@@ -59,16 +59,17 @@ export const deployOwnSource = async (page: Page) => {
   });
   await submitDrawer(page, drawer);
   await buildAndDeployInUi(page, SOURCE);
+  // The receiver reloads its routing a while after the deploy answers, so a
+  // probe goes in on each poll until one reaches the table.
   await expect
     .poll(
       async () => {
         await sendEvents([ownEvent('probe', 'probe', 0, 'probe', 'p', 'p')]);
-        await page.waitForTimeout(8_000);
         return clickhouse(
           `SELECT count() FROM ${await qualifiedTable(SOURCE)}`,
         );
       },
-      { timeout: 150_000 },
+      { timeout: 150_000, intervals: [8_000] },
     )
     .not.toBe('0');
 };
