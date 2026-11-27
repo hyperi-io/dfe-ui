@@ -82,6 +82,14 @@ describe('EnableDisableOrganisation', () => {
     );
 
     await user.click(screen.getByRole('button', { name: 'Enable Globex' }));
+    expect(
+      await screen.findByText(
+        (_, element) =>
+          element?.tagName === 'P' &&
+          element.textContent ===
+            'You are about to enable organisation globex.',
+      ),
+    ).toBeInTheDocument();
     await confirmReauth(user);
 
     await waitFor(() => expect(sent).toHaveLength(1));

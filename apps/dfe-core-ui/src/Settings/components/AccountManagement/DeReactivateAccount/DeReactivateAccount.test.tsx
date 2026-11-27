@@ -44,6 +44,13 @@ describe('DeReactivateAccount', () => {
       await screen.findByRole('button', { name: 'Deactivate Account' }),
     );
     expect(sent).toEqual([]);
+    expect(
+      await screen.findByText(
+        (_, element) =>
+          element?.tagName === 'P' &&
+          element.textContent === 'You are about to deactivate account bob.',
+      ),
+    ).toBeInTheDocument();
     await user.type(await screen.findByLabelText('Your password'), 'pw');
     await user.click(screen.getByRole('button', { name: 'Confirm' }));
 
