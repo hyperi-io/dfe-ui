@@ -3,6 +3,17 @@
 Rendered by CI and committed back at the end of a release -- do not edit by
 hand. Release notes also appear on the GitHub Releases page, one per tag.
 
+## [1.7.47](https://github.com/hyperi-io/dfe-ui/compare/v1.7.46...v1.7.47) (2026-11-27)
+
+### What's Changed
+* fix(auth): correct the setup wizard's re-auth prompt by @catinspace-au in https://github.com/hyperi-io/dfe-ui/pull/795
+* fix(auth): name the action in re-auth prompts by @catinspace-au in https://github.com/hyperi-io/dfe-ui/pull/796
+* fix(apps): show Argo CD sync state in the status card by @catinspace-au in https://github.com/hyperi-io/dfe-ui/pull/797
+* fix: start a catalogue add on its default intake by @kazmosahebi in https://github.com/hyperi-io/dfe-ui/pull/800
+* fix(rules): fix on-demand rule runs and hunt executions by @catinspace-au in https://github.com/hyperi-io/dfe-ui/pull/799
+* test(e2e): cover Create Rule from a HyperDX search by @catinspace-au in https://github.com/hyperi-io/dfe-ui/pull/804
+* fix(console): sync engine types and fix form bugs by @catinspace-au in https://github.com/hyperi-io/dfe-ui/pull/810
+
 ## [1.7.46](https://github.com/hyperi-io/dfe-ui/compare/v1.7.45...v1.7.46) (2026-11-23)
 
 ### What's Changed
