@@ -1425,6 +1425,12 @@ export interface paths {
          *     column are left as created. A schema that failed validation is never deployed.
          *     A source on the bus transport whose Kafka topics the broker did not create is
          *     not marked deployed either, and the call answers 502 naming each topic.
+         *
+         *     In production with ``DFE_ENGINE_GITOPS_MODE=team`` the deploy is held: the record
+         *     goes to review with ``review_required``, and no table, topic, app or HyperDX
+         *     source changes. The engine deploys the version within
+         *     ``gitops.converge_interval_seconds`` of the review merging, and a review closed
+         *     unmerged changes nothing.
          */
         post: operations["sources.deploy"];
         delete?: never;
@@ -2682,7 +2688,8 @@ export interface paths {
          *
          *     ``If-None-Match: *`` names the first, or replaces a doc that cannot be read or names an org no longer registered, and ``If-Match`` changes it. With gitops on this
          *     is a direct commit to the deploy repo's ``governance/settings/organisation.yaml``,
-         *     else that file under the config directory.
+         *     else that file under the config directory. The apps then recompile, stamping its
+         *     first tenant id on every record that names no org.
          */
         put: operations["system.organisation.apply"];
         post?: never;
@@ -9352,7 +9359,7 @@ export interface components {
             credential_ref?: string | null;
             /**
              * Org
-             * @description The registered org the records belong to; null is the unassigned tenant
+             * @description The registered org the records belong to. Null is your org, or the unassigned tenant while none is named
              */
             org?: string | null;
             /**
@@ -14680,7 +14687,7 @@ export interface components {
             applied: boolean;
             /**
              * Review Required
-             * @description True when production+team sent the deployed-version record to a review branch: the table is live, and main records the version once it merges
+             * @description True when production+team sent the deployed-version record to a review branch: nothing is applied yet, and the engine deploys the version once the review merges
              * @default false
              */
             review_required: boolean;
@@ -15843,7 +15850,7 @@ export interface components {
             credential_ref?: string | null;
             /**
              * Org
-             * @description The registered org the pipeline's records belong to. Unset is the unassigned tenant. A record carrying any other _org_id lands here, unless allowed_org_ids lists it
+             * @description The registered org the pipeline's records belong to. Unset is your org, or the unassigned tenant while none is named. A record carrying any other _org_id lands here, unless allowed_org_ids lists it
              */
             org?: string | null;
             /**
@@ -15896,7 +15903,7 @@ export interface components {
             routes?: components["schemas"]["FetcherRoute"][];
             /**
              * Org
-             * @description The registered org every fetched record belongs to: the fetcher stamps its first tenant id as _org_id. Unset is the unassigned tenant
+             * @description The registered org every fetched record belongs to: the fetcher stamps its first tenant id as _org_id. Unset is your org, or the unassigned tenant while none is named
              */
             org?: string | null;
         };
@@ -16401,7 +16408,7 @@ export interface components {
             credential_ref?: string | null;
             /**
              * Org
-             * @description The registered org the pipeline's records belong to. Unset is the unassigned tenant. A record carrying any other _org_id lands here, unless allowed_org_ids lists it
+             * @description The registered org the pipeline's records belong to. Unset is your org, or the unassigned tenant while none is named. A record carrying any other _org_id lands here, unless allowed_org_ids lists it
              */
             org?: string | null;
             /**
