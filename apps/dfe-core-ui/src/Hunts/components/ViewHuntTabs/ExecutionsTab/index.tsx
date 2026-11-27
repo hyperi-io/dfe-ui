@@ -1,8 +1,10 @@
 import { NotificationCard } from '@/core/components/NotificationCard';
+import { Tooltip } from '@/core/components/Tooltip';
+import { formatEpochSecondsLocal } from '@/core/helpers/date.helpers';
 import { Table } from '@/core/components/Table';
 import { useFetchHuntExecutions } from '@/Hunts/hooks/useFetchHuntExecutions';
 import { THuntExecutionsResponse } from '@/Hunts/hooks/useFetchHuntExecutions/types';
-import { Button, Spin, Tag, Typography } from 'antd';
+import { Button, Spin, Tag } from 'antd';
 
 type THuntExecution = THuntExecutionsResponse['items'][number];
 
@@ -27,9 +29,7 @@ const COLUMNS = [
     dataIndex: 'fire',
     key: 'fire',
     render: (fire: number) => (
-      <span className="whitespace-nowrap">
-        {new Date(fire * 1000).toLocaleString()}
-      </span>
+      <span className="whitespace-nowrap">{formatEpochSecondsLocal(fire)}</span>
     ),
     width: 200,
   },
@@ -76,11 +76,14 @@ const COLUMNS = [
     title: 'Error',
     dataIndex: 'error',
     key: 'error',
+    // Ellipsis on the cell clips a long error, and the tooltip carries all of it.
+    ellipsis: { showTitle: false },
+    width: 360,
     render: (error?: string | null) =>
       error ? (
-        <Typography.Text type="danger" ellipsis={{ tooltip: error }}>
-          {error}
-        </Typography.Text>
+        <Tooltip title={error} placement="topLeft">
+          <span className="text-error">{error}</span>
+        </Tooltip>
       ) : null,
   },
 ];
@@ -103,7 +106,8 @@ export const ExecutionsTab = ({ name }: { name: string }) => {
     );
   }
 
-  if (error) {
+  // A failed next page keeps the rows already loaded, with the retry beside Load more.
+  if (error && data.length === 0) {
     return (
       <NotificationCard
         type="error"
@@ -131,6 +135,13 @@ export const ExecutionsTab = ({ name }: { name: string }) => {
         dataSource={data}
         tableLayout="fixed"
       />
+      {error && (
+        <NotificationCard
+          type="error"
+          title="The next executions could not be loaded"
+          description={error.message}
+        />
+      )}
       {hasNextPage && (
         <div className="flex justify-center">
           <Button
@@ -138,7 +149,7 @@ export const ExecutionsTab = ({ name }: { name: string }) => {
             loading={isFetchingNextPage}
             onClick={() => void fetchNextPage()}
           >
-            Load more
+            {error ? 'Retry' : 'Load more'}
           </Button>
         </div>
       )}

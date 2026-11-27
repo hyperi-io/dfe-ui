@@ -15,6 +15,16 @@ export type OnDemandRunResponse = DfeClientSuccessResponseBody<
 
 const count = new Intl.NumberFormat('en-AU');
 
+// The matched line leads, ahead of the timestamps and ids every row carries.
+const LEAD_COLUMNS = ['_raw', '_json'];
+
+const leadFirst = (columns: string[]) => {
+  const lead = LEAD_COLUMNS.find((column) => columns.includes(column));
+  return lead
+    ? [lead, ...columns.filter((column) => column !== lead)]
+    : columns;
+};
+
 const cellText = (value: unknown) => {
   if (value == null) return '';
   if (typeof value === 'object') return JSON.stringify(value);
@@ -29,12 +39,14 @@ export const OnDemandRunResult = ({
   errorAction?: ReactNode;
 }) => {
   const rows = data.results ?? [];
-  const columnNames =
+  const columnNames = leadFirst(
     data.columns && data.columns.length > 0
       ? data.columns
       : rows[0]
         ? Object.keys(rows[0])
-        : [];
+        : [],
+  );
+  const keyedRows = rows.map((row, index) => ({ key: index, row }));
   const sqlErrors = data.sql_errors ?? [];
   const warnings = data.cost_estimate.warnings ?? [];
 
@@ -107,21 +119,21 @@ export const OnDemandRunResult = ({
         </h3>
         {columnNames.length > 0 ? (
           <Table
-            rowKey={(_row, index) => String(index)}
+            rowKey="key"
             pagination={{ pageSize: 20, hideOnSinglePage: true }}
-            dataSource={rows}
+            dataSource={keyedRows}
             columns={columnNames.map((column) => ({
               title: column,
-              dataIndex: [column],
+              dataIndex: ['row', column],
               ellipsis: true,
               render: (value: unknown) => cellText(value),
             }))}
           />
-        ) : (
+        ) : sqlErrors.length === 0 ? (
           <p className="text-xs text-foreground-muted dark:text-dark-foreground-muted">
             No rows matched in this window.
           </p>
-        )}
+        ) : null}
       </section>
     </div>
   );

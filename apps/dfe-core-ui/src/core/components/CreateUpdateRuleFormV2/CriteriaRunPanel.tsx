@@ -85,8 +85,12 @@ export const CriteriaRunPanel = ({
 
   const run = () => {
     if (!criteriaReady || !source) return;
+    // Only the criteria's own errors go, so Name and the rest keep theirs.
     (form as FormInstance).setFields(
-      form.getFieldsError().map(({ name }) => ({ name, errors: [] })),
+      form
+        .getFieldsError()
+        .filter(({ name }) => name[0] === field)
+        .map(({ name }) => ({ name, errors: [] })),
     );
     onRun();
     const values = form.getFieldsValue();

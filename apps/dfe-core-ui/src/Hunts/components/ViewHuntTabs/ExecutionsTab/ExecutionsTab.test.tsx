@@ -1,4 +1,5 @@
 import { API_CONFIG_MOCKS } from '@/core/config/api/endpoints/generator';
+import { formatEpochSecondsLocal } from '@/core/helpers/date.helpers';
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
 import { pageOf } from '@/core/utils/test-utils/pageOf';
 import { THuntExecutionsResponse } from '@/Hunts/hooks/useFetchHuntExecutions/types';
@@ -67,9 +68,7 @@ describe('ExecutionsTab', () => {
 
     await screen.findByText('completed');
     const done = rowOf('completed');
-    expect(
-      done.getByText(new Date(FIRE * 1000).toLocaleString()),
-    ).toBeInTheDocument();
+    expect(done.getByText(formatEpochSecondsLocal(FIRE))).toBeInTheDocument();
     expect(done.queryByText(String(FIRE))).not.toBeInTheDocument();
     expect(done.getByText('1,234')).toBeInTheDocument();
     expect(done.getByText('2.5 s')).toBeInTheDocument();
@@ -84,25 +83,48 @@ describe('ExecutionsTab', () => {
     ).not.toBeInTheDocument();
   });
 
-  it('loads the next page from next_page_token', async () => {
-    const all = Array.from({ length: 51 }, (_, index) => ({
-      ...completed,
-      execution_id: `hunt:${index}`,
-      fire: FIRE - index * 600,
-    }));
-    serve(all);
-    const user = userEvent.setup();
+  it.each([
+    { nextPageFails: false, last: 51 },
+    { nextPageFails: true, last: 50 },
+  ])(
+    'loads the next page from next_page_token (next page fails: $nextPageFails)',
+    async ({ nextPageFails, last }) => {
+      const all = Array.from({ length: 51 }, (_, index) => ({
+        ...completed,
+        execution_id: `hunt:${index}`,
+        fire: FIRE - index * 600,
+      }));
+      server.use(
+        http.get(EXECUTIONS_URL, ({ request }) => {
+          const nextPage = new URL(request.url).searchParams.get('page_token');
+          return nextPage && nextPageFails
+            ? HttpResponse.json({ detail: 'down' }, { status: 503 })
+            : HttpResponse.json(pageOf(all, request));
+        }),
+      );
+      const user = userEvent.setup();
 
-    render(<ExecutionsTab name="hunt" />, { wrapper });
+      render(<ExecutionsTab name="hunt" />, { wrapper });
 
-    expect(await screen.findAllByText('completed')).toHaveLength(50);
-    await user.click(screen.getByRole('button', { name: /load more/i }));
+      expect(await screen.findAllByText('completed')).toHaveLength(50);
+      await user.click(screen.getByRole('button', { name: /load more/i }));
 
-    expect(await screen.findAllByText('completed')).toHaveLength(51);
-    expect(
-      screen.queryByRole('button', { name: /load more/i }),
-    ).not.toBeInTheDocument();
-  });
+      if (nextPageFails) {
+        // The rows already loaded stay, with the retry beside them.
+        expect(
+          await screen.findByText('The next executions could not be loaded'),
+        ).toBeInTheDocument();
+        expect(
+          screen.getByRole('button', { name: /retry/i }),
+        ).toBeInTheDocument();
+      } else {
+        expect(
+          screen.queryByRole('button', { name: /load more/i }),
+        ).not.toBeInTheDocument();
+      }
+      expect(await screen.findAllByText('completed')).toHaveLength(last);
+    },
+  );
 
   it('says so when the hunt has never run', async () => {
     serve([]);

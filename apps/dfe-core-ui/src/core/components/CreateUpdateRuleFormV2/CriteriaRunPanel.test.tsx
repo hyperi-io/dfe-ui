@@ -87,6 +87,12 @@ const renderPanel = () =>
       <Form.Item name="source_type" hidden>
         <input />
       </Form.Item>
+      <Form.Item
+        name="name"
+        rules={[{ required: true, message: 'Name is required' }]}
+      >
+        <input aria-label="Name" />
+      </Form.Item>
       <CriteriaRunPanel
         field="cel_filter"
         criteriaReady
@@ -105,7 +111,7 @@ const renderPanel = () =>
   );
 
 describe('CriteriaRunPanel', () => {
-  test('runs the detection as the rule, beside the source it reads', async () => {
+  test('runs the detection as the rule, and leaves the other fields their errors', async () => {
     grant(['rule:validate', 'schema:read']);
     let received: unknown;
     server.use(
@@ -117,6 +123,8 @@ describe('CriteriaRunPanel', () => {
     const user = userEvent.setup();
     renderPanel();
 
+    await user.clear(screen.getByLabelText('Name'));
+    expect(await screen.findByText('Name is required')).toBeInTheDocument();
     await user.click(await screen.findByRole('button', { name: /test/i }));
     await user.type(screen.getByLabelText('Source'), 'winlog');
     await user.click(screen.getByRole('button', { name: /run/i }));
@@ -127,6 +135,7 @@ describe('CriteriaRunPanel', () => {
         rule: { source_type: 'raw', cel_filter: 'event.action == "login"' },
       }),
     );
+    expect(screen.getByText('Name is required')).toBeInTheDocument();
   });
 
   test.each([

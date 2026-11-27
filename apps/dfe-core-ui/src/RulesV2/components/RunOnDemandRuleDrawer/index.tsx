@@ -16,7 +16,9 @@ import { cloneElement, useState } from 'react';
 import z from 'zod';
 
 const formSchema = z.object({
-  source: z.string().min(1, { message: 'Source is required' }),
+  source: z
+    .string({ error: 'Source is required' })
+    .min(1, { message: 'Source is required' }),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -41,6 +43,7 @@ export const RunOnDemandRuleDrawer = ({
   const [source, setSource] = useState<string>();
 
   const onSuccess = (data: TTriggerOnDemandRuleResponse) => {
+    setOpenModal(false);
     setOpenDrawer(true);
     onSuccessProp?.(data);
   };
@@ -160,6 +163,7 @@ export const RunOnDemandRuleDrawer = ({
       <Drawer
         title={`On-demand Result for ${rule.display_name ?? rule.name}`}
         open={openDrawer}
+        onClose={() => setOpenDrawer(false)}
         footer={null}
         size="80%"
         destroyOnHidden
