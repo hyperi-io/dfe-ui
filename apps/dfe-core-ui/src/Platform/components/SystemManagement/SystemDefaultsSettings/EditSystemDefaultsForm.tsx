@@ -22,6 +22,20 @@ export const buildFormSchema = (maxTtlDays: number) =>
 
 type TFormValues = z.infer<ReturnType<typeof buildFormSchema>>;
 
+/**
+ * The patch a save sends. The engine asks for the password whenever the body's
+ * retention differs from the stored override, so retention goes only when it changed.
+ */
+export const defaultsPatch = (
+  values: TFormValues,
+  initialTtlDays: number,
+): { body: Partial<TFormValues>; asksForPassword: boolean } => {
+  const { ttl_days, ...others } = values;
+  return ttl_days === initialTtlDays
+    ? { body: others, asksForPassword: false }
+    : { body: values, asksForPassword: true };
+};
+
 const normalizeHeaderType = (value?: string) =>
   (value ?? '').replace(/^common-header\//, '');
 
@@ -183,11 +197,14 @@ export const EditSystemDefaultsForm = ({
   }, [commonHeaderVersions]);
 
   const handleFinish = (values: TFormValues) => {
-    // A shorter retention deletes rows for good, so changing it asks for the password.
-    if (values.ttl_days !== (initialValues?.ttl_days ?? 0)) {
-      reauth.ask(() => updateSystemDefaults(values));
+    const { body, asksForPassword } = defaultsPatch(
+      values,
+      initialValues?.ttl_days ?? 0,
+    );
+    if (asksForPassword) {
+      reauth.ask(() => updateSystemDefaults(body));
     } else {
-      updateSystemDefaults(values);
+      updateSystemDefaults(body);
     }
   };
 

@@ -106,7 +106,7 @@ export const ExecutionsTab = ({ name }: { name: string }) => {
     );
   }
 
-  // A failed next page keeps the rows already loaded, with the retry beside Load more.
+  // A failed next page keeps the rows already loaded, and Load more turns into Retry.
   if (error && data.length === 0) {
     return (
       <NotificationCard

@@ -203,7 +203,7 @@ const TrustedEmailDomainsField = ({
           className="col-span-2"
           type="warning"
           showIcon
-          message={UNTRUSTED_DOMAINS_WARNING}
+          title={UNTRUSTED_DOMAINS_WARNING}
           action={
             suggestedDomain && (
               <Button

@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import { defineConfig } from 'vitest/config';
 
-const appRoot = __dirname;
+const appRoot = import.meta.dirname;
 
 // vi.mock replaces the worker's module cache. Later files in that worker then
 // see the first mock, and which file runs first changes with the worker count.

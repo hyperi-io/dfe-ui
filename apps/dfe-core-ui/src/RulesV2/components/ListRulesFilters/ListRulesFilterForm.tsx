@@ -68,10 +68,9 @@ export const ListRulesFilterForm = ({
         sortByValue={filters.sort_by}
         sortDirectionValue={filters.sort_order}
         sortByOptions={[
-          { label: 'Hunt Name', value: 'hunt_name' },
           { label: 'Name', value: 'name' },
+          { label: 'Display Name', value: 'display_name' },
           { label: 'Severity', value: 'severity' },
-          { label: 'Source', value: 'source' },
           { label: 'Created At', value: 'created_at' },
         ]}
         onChange={({ sortBy, sortDirection }) =>
@@ -90,7 +89,7 @@ export const ListRulesFilterForm = ({
       >
         <Input
           size="small"
-          placeholder="Filter keyword: name, hunt, or rule id"
+          placeholder="Filter keyword: name, display name or description"
         />
       </Form.Item>
 

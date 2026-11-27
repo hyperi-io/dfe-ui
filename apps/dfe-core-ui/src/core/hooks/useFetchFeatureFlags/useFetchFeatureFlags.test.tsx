@@ -53,6 +53,10 @@ describe('.useFetchFeatureFlags', () => {
 
     test('returns store data without refetching when already set', async () => {
       useFeatureFlagStore.getState().setFeatures(expectedFeatures);
+      let requests = 0;
+      server.events.on('request:start', () => {
+        requests += 1;
+      });
 
       const { result } = renderHook(() => useFetchFeatureFlags(), {
         wrapper,
@@ -63,6 +67,9 @@ describe('.useFetchFeatureFlags', () => {
         isLoading: false,
         error: null,
       });
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      server.events.removeAllListeners();
+      expect(requests).toBe(0);
     });
   });
 

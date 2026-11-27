@@ -1,5 +1,8 @@
 import type { AddSchemaTableProps } from '@/core/components/CreateSchemaForm/AddSchemaTable';
-import { CreateSchemaFormProvider } from '@/core/components/CreateSchemaForm/contexts/CreateSchemaForm.context';
+import {
+  CreateSchemaFormProvider,
+  useCreateSchemaFormContext,
+} from '@/core/components/CreateSchemaForm/contexts/CreateSchemaForm.context';
 import type { CreateSchemaFormContextValue } from '@/core/components/CreateSchemaForm/contexts/CreateSchemaForm.context.d';
 import { createEmptyValidationErrors } from '@/core/components/CreateSchemaForm/contexts/CreateSchemaForm.context.helpers';
 import { SCHEMA_FIELD_TYPES } from '@/core/components/CreateSchemaForm/fieldType.constants';
@@ -8,7 +11,7 @@ import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
 import { CreateSchemaFormData } from '@/core/validationSchemas/CreateSchemaForm/CreateSchemaForm.schema';
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import type { FormInstance, FormRule } from 'antd';
+import type { FormRule } from 'antd';
 import { isValidElement, type ReactNode } from 'react';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 import { SchemaUploadCollapse } from './index';
@@ -116,20 +119,23 @@ const validUploadedColumn: CreateSchemaFormData['uploadedColumns'] = [
   },
 ];
 
-const renderSchemaUploadCollapse = (form?: FormInstance) => {
-  const FormShell = () => {
-    const [innerForm] = Form.useForm();
-    const activeForm = form ?? innerForm;
-    return (
-      <CreateSchemaFormProvider>
-        <Form form={activeForm}>
-          <SchemaUploadCollapse />
-        </Form>
-      </CreateSchemaFormProvider>
-    );
-  };
-  return render(<FormShell />, { wrapper });
+/** The provider's own form, connected as CreateSchemaForm connects it. */
+const FormShell = () => {
+  const { form } = useCreateSchemaFormContext();
+  return (
+    <Form form={form}>
+      <SchemaUploadCollapse />
+    </Form>
+  );
 };
+
+const renderSchemaUploadCollapse = () =>
+  render(
+    <CreateSchemaFormProvider>
+      <FormShell />
+    </CreateSchemaFormProvider>,
+    { wrapper },
+  );
 
 const getCollapseToggleButton = (container: HTMLElement) => {
   const toggle = container.querySelector('button.absolute');

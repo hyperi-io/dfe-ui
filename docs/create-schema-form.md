@@ -56,7 +56,7 @@ The uploaded table passes `pagination` to the table, so rows off the current pag
 - Repeat parses. Each row is parsed at import and again at submit.
 - Mounted tabs. Both `SchemaUploadCollapse` tabs set `forceRender: true`, so the uploaded and manual tables stay mounted together.
 
-CSV conversion (`convertCsv`, a server action) and Elastic conversion (`useElasticConvert`, an engine call) run before any of this, so a payload or timeout limit there fails before paging can help.
+CSV conversion (`convertCsv`, a server action that refuses a caller with no signed-in session) and Elastic conversion (`useElasticConvert`, an engine call) run before any of this, so a payload or timeout limit there fails before paging can help.
 
 ## What breaks if a change ignores the model
 

@@ -14,6 +14,7 @@ export const useFetchFeatureFlags = () => {
   const { data, isLoading, error } = useQuery({
     queryKey: QUERY_KEYS.clientConfig.features(),
     queryFn: () => fetchFeatureFlagsApi(),
+    enabled: queryEnabled,
   });
 
   useEffect(() => {

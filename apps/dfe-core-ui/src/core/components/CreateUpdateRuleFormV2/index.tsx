@@ -15,15 +15,11 @@ import { IconDeviceFloppy } from '@repo/dfe-icons';
 import { Button, FormProps, Input, Select, Splitter } from 'antd';
 import { ReactNode, useEffect, useMemo, useState } from 'react';
 import { CriteriaRunPanel, MatchCriteriaField } from './CriteriaRunPanel';
-import { DEFAULT_ESTIMATE_COST } from './defaults';
-import { ResponseModal } from './ResponseModal';
 import {
   buildFormSchema,
   CreateUpdateRuleFormData,
   criteriaIssues,
 } from './schema';
-
-export { DEFAULT_ESTIMATE_COST } from './defaults';
 
 export interface DisabledFields {
   name?: boolean;
@@ -176,7 +172,7 @@ const CreateUpdateRuleFormBase = ({
     <Form
       form={form}
       onFinish={onFinish}
-      initialValues={{ estimate_cost: DEFAULT_ESTIMATE_COST, ...initialValues }}
+      initialValues={initialValues}
       {...props}
     >
       <div className="flex gap-x-2">
@@ -271,6 +267,4 @@ const CreateUpdateRuleFormBase = ({
   );
 };
 
-export const CreateUpdateRuleForm = Object.assign(CreateUpdateRuleFormBase, {
-  ResponseModal: ResponseModal,
-});
+export const CreateUpdateRuleForm = CreateUpdateRuleFormBase;

@@ -28,9 +28,12 @@ const formSchema = z.object({
   name: z
     .string()
     .min(1, { message: 'Name is required' })
-    .refine((v) => ORG_NAME_VALIDATOR.regex.test(v), {
-      message: ORG_NAME_VALIDATOR.message('Name'),
-    })
+    .refine(
+      (v) =>
+        ORG_NAME_VALIDATOR.regex.test(v) &&
+        v.length <= ORG_NAME_VALIDATOR.maxLength,
+      { message: ORG_NAME_VALIDATOR.message('Name') },
+    )
     .refine((v) => v !== UNASSIGNED_ORG_ID, { message: UNASSIGNED_MESSAGE }),
   display_name: z.string().min(1, { message: 'Display name is required' }),
   org_ids: z

@@ -76,7 +76,7 @@ describe('useFetchInfiniteSourceColumns', () => {
         expect(result.current.isLoading).toBe(false);
       });
       const responseItem: TSourceColumnItem = {
-        name: 'string',
+        name: 'column_0',
         attribute: ['string'],
         use_case: 'string',
         description: 'string',
@@ -149,8 +149,8 @@ describe('useFetchInfiniteSourceColumns', () => {
       );
 
       // Data should be flattened - 20 items total
-      expect(result.current.data.items[0].name).toBe('string');
-      expect(result.current.data.items[10].name).toBe('string');
+      expect(result.current.data.items[0].name).toBe('column_0');
+      expect(result.current.data.items[10].name).toBe('column_10');
       expect(result.current.isFetchingNextPage).toBe(false);
     });
 
@@ -180,9 +180,9 @@ describe('useFetchInfiniteSourceColumns', () => {
 
       // Verify we have 20 items (pages 1 and 2)
       expect(result.current.data.items).toHaveLength(20);
-      expect(result.current.data.items[0].name).toBe('string');
-      expect(result.current.data.items[10].name).toBe('string');
-      expect(result.current.data.items[19].name).toBe('string');
+      expect(result.current.data.items[0].name).toBe('column_0');
+      expect(result.current.data.items[10].name).toBe('column_10');
+      expect(result.current.data.items[19].name).toBe('column_19');
     });
 
     it('should not have next page when all data is loaded', async () => {

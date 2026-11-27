@@ -33,7 +33,7 @@ export const HuntBanner = ({ ruleName }: { ruleName: string }) => {
 
   return hunts && hunts.length > 0 ? (
     <NotificationCard
-      title={`${total_size} hunt ${total_size === 1 ? ' is ' : 's are '} associated with this rule:`}
+      title={`${total_size} ${total_size === 1 ? 'hunt is' : 'hunts are'} associated with this rule:`}
       description={
         hunts
           ?.slice(0, 10)
@@ -51,7 +51,7 @@ export const HuntBanner = ({ ruleName }: { ruleName: string }) => {
             type="default"
             target="_blank"
             rel="noopener noreferrer"
-            href={`/hunts?rule=${ruleName}`}
+            href={`/hunts?rule=${encodeURIComponent(ruleName)}`}
           >
             View associated hunts
           </Button>

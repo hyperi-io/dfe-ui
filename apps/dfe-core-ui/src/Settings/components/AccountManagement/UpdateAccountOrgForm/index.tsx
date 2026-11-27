@@ -142,7 +142,7 @@ export const UpdateAccountOrgForm = ({
           <Alert
             type="warning"
             showIcon
-            message={`Move ${username} from ${orgLabel(storedOrg, yourOrg?.name)} to ${orgLabel(pendingMove.org ?? '', yourOrg?.name)}?`}
+            title={`Move ${username} from ${orgLabel(storedOrg, yourOrg?.name)} to ${orgLabel(pendingMove.org ?? '', yourOrg?.name)}?`}
             description={
               removed.length > 0
                 ? `It leaves ${removed.join(', ')}.`

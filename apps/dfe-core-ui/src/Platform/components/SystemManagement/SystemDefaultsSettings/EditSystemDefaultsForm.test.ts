@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { buildFormSchema } from './EditSystemDefaultsForm';
+import { buildFormSchema, defaultsPatch } from './EditSystemDefaultsForm';
 
 const values = (ttl_days: number) => ({
   ttl_days,
@@ -26,5 +26,19 @@ describe('buildFormSchema', () => {
   it('takes the bound it is given, not one of its own', () => {
     expect(buildFormSchema(30).safeParse(values(31)).success).toBe(false);
     expect(buildFormSchema(30).safeParse(values(30)).success).toBe(true);
+  });
+});
+
+describe('defaultsPatch', () => {
+  it.each([
+    ['leaves out an unchanged retention and asks nothing', 90, 90, false],
+    ['leaves out an unchanged retention of 0', 0, 0, false],
+    ['sends a shorter retention and asks for the password', 30, 90, true],
+    ['sends a retention set to 0 and asks for the password', 0, 90, true],
+  ])('%s', (_, days, initialDays, asks) => {
+    const { body, asksForPassword } = defaultsPatch(values(days), initialDays);
+    expect(asksForPassword).toBe(asks);
+    expect('ttl_days' in body).toBe(asks);
+    expect(body.engine).toBe('MergeTree');
   });
 });

@@ -81,3 +81,71 @@ describe('CloneRuleModal name', () => {
     },
   );
 });
+
+describe('CloneRuleModal detection', () => {
+  const DETECTIONS = ['match', 'cel_filter', 'user_sql', 'where_clause'];
+
+  test.each([
+    [
+      'a match',
+      {
+        match: {
+          field: 'user',
+          operator: 'equals' as const,
+          value: 'root',
+          negate: false,
+        },
+      },
+      { match: { field: 'user', operator: 'equals', value: 'root' } },
+    ],
+    [
+      'a CEL filter',
+      { cel_filter: 'failures > 5' },
+      { cel_filter: 'failures > 5' },
+    ],
+    [
+      'SQL from Search',
+      {
+        original_sql: 'SELECT * FROM logs.auth WHERE failures > 5',
+        source_type: 'hyperdx' as const,
+      },
+      {
+        user_sql: 'SELECT * FROM logs.auth WHERE failures > 5',
+        source_type: 'hyperdx',
+      },
+    ],
+    [
+      'a WHERE fragment',
+      { where_clause: 'failures > 5' },
+      { where_clause: 'failures > 5' },
+    ],
+  ])(
+    'sends the one detection of the source rule for %s',
+    async (_, source, detection) => {
+      let sent: Record<string, unknown> = {};
+      server.use(
+        http.post(
+          API_CONFIG_MOCKS.rulesV2.default.mockedUrl,
+          async ({ request }) => {
+            sent = (await request.json()) as Record<string, unknown>;
+            return HttpResponse.json({
+              rule: { ...rule, name: 'brute_force_copy' },
+            });
+          },
+        ),
+      );
+
+      await openClone({ ...rule, original_sql: '', ...source });
+      await userEvent.click(screen.getByRole('button', { name: 'Clone' }));
+
+      await waitFor(() => expect(sent).toMatchObject(detection));
+      expect(DETECTIONS.filter((key) => sent[key] != null)).toEqual(
+        Object.keys(detection).filter((key) => DETECTIONS.includes(key)),
+      );
+      expect(sent).toMatchObject({
+        display_name: 'Brute force',
+        description: 'string',
+      });
+    },
+  );
+});

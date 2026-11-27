@@ -58,6 +58,11 @@ export const UpdateRuleForm = ({ rule, onSuccess }: UpdateRuleFormProps) => {
           ...rule,
           severity: rule.severity as 'low' | 'medium' | 'high' | 'critical',
           cel_filter: rule.cel_filter ?? undefined,
+          // A rule written as SQL keeps its text in original_sql, and a bare WHERE opens in the SQL editor.
+          user_sql:
+            rule.original_sql ||
+            (rule.match || rule.cel_filter ? undefined : rule.where_clause) ||
+            undefined,
           source_type: rule.source_type ?? 'raw',
           match: rule.match ? fromApiRootMatch(rule.match) : rule.match,
         }}

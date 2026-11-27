@@ -24,7 +24,7 @@ const SPEC_PATH = join(
   'openapi.json',
 );
 
-type Validator = { regex: RegExp };
+type Validator = { regex: RegExp; maxLength: number };
 type Property = { pattern?: string; maxLength?: number };
 type Spec = {
   components: {
@@ -96,10 +96,12 @@ describe('the console name rules match the engine spec', () => {
   test.each(published.filter(({ maxLength }) => maxLength !== undefined))(
     '$field takes $maxLength characters and refuses one more',
     ({ field, maxLength = 0 }) => {
-      const rule = CONSOLE_RULES[field]?.regex;
-      expect(rule?.test('a'.repeat(maxLength))).toBe(true);
-      expect(rule?.test('a'.repeat(maxLength + 1))).toBe(false);
-      expect(maxLength).toBe(128);
+      const rule = CONSOLE_RULES[field];
+      const accepts = (v: string) =>
+        rule !== undefined && rule.regex.test(v) && v.length <= rule.maxLength;
+      expect(rule?.maxLength).toBe(maxLength);
+      expect(accepts('a'.repeat(maxLength))).toBe(true);
+      expect(accepts('a'.repeat(maxLength + 1))).toBe(false);
     },
   );
 });

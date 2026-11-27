@@ -108,8 +108,8 @@ describe('CreateUpdateOrganisationForm', () => {
       await expectNameRule({
         input: screen.getByPlaceholderText('Enter name'),
         message: ORG_NAME_VALIDATOR.message('Name'),
-        accepts: ['acme-corp.eu', 'a'.repeat(129)],
-        refuses: ['-acme', 'acme corp'],
+        accepts: ['acme-corp.eu', 'a'.repeat(64)],
+        refuses: ['-acme', 'acme corp', 'a'.repeat(65)],
       });
     },
   );

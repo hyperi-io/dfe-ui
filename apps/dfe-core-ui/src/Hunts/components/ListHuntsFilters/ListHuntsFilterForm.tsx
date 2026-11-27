@@ -80,8 +80,8 @@ export const ListHuntsFilterForm = ({
         ]}
         onChange={({ sortBy, sortDirection }) =>
           setFilters({
-            ...(sortBy !== null && { sort_by: sortBy as HuntSortBy }),
-            ...(sortDirection !== null && {
+            ...(sortBy !== undefined && { sort_by: sortBy as HuntSortBy }),
+            ...(sortDirection !== undefined && {
               sort_order: sortDirection as 'asc' | 'desc',
             }),
           })

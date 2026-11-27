@@ -49,9 +49,6 @@ export const RuleV2FeatureOff = () => {
           onClose={resetCreateRule}
         />
       )}
-      {createRuleResponse != null && (
-        <CreateUpdateRuleForm.ResponseModal onClose={resetCreateRule} />
-      )}
     </>
   );
 };

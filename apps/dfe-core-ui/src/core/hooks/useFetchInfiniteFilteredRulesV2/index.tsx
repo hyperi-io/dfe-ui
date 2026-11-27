@@ -7,11 +7,11 @@ import { fetchInfiniteRules } from './api';
 import { UseFetchInfiniteFilteredRulesProps } from './types';
 
 const SEARCH_DEBOUNCE_MS = 300;
-/** useFetchInfiniteFilteredRules
- * @param search - The search query to filter the rules by name and description.
- * @param severity - The severity of the rules to filter by (low, medium, high).
- * @param sort_by - The field to sort the rules by (name, description).
- * @param sort_order - The order to sort the rules by.
+/** The rules-v2 list, a page at a time.
+ * @param search - Matched against name, display name, description and severity.
+ * @param severity - low, medium, high or critical.
+ * @param sort_by - name, display_name, description, severity or created_at.
+ * @param sort_order - asc or desc.
  * @param page_size - The number of rules to fetch per page.
  */
 export const useFetchInfiniteFilteredRules = ({

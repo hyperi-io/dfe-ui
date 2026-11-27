@@ -1,16 +1,9 @@
+import type { components } from '@repo/dfe-engine-types';
 import { useMutation } from '@tanstack/react-query';
 import { reauth } from './api';
 
-/** Whether a grant is for an account or a group. */
-export type TReauthKind =
-  | 'account'
-  | 'api_key'
-  | 'credential'
-  | 'group'
-  | 'org'
-  | 'provider'
-  | 'role'
-  | 'setting';
+/** The kind of target a grant names. */
+export type TReauthKind = components['schemas']['ReauthKind'];
 
 /** The header a change carries its re-auth grant in. */
 export const REAUTH_HEADER = 'X-DFE-Reauth';
@@ -21,7 +14,7 @@ export const REAUTH_RETURN_PATH = '/login/reauth';
 /** The message type that page posts its answer to the opening window under. */
 export const REAUTH_MESSAGE = 'dfe-reauth';
 
-/** Trade the signed-in user's password for a grant to change the account or group *target*. */
+/** Trade the signed-in user's password for a grant to change *target*. */
 export const useReauth = ({
   onSuccess,
 }: {
