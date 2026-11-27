@@ -1425,6 +1425,12 @@ export interface paths {
          *     column are left as created. A schema that failed validation is never deployed.
          *     A source on the bus transport whose Kafka topics the broker did not create is
          *     not marked deployed either, and the call answers 502 naming each topic.
+         *
+         *     In production with ``DFE_ENGINE_GITOPS_MODE=team`` the deploy is held: the record
+         *     goes to review with ``review_required``, and no table, topic, app or HyperDX
+         *     source changes. The engine deploys the version within
+         *     ``gitops.converge_interval_seconds`` of the review merging, and a review closed
+         *     unmerged changes nothing.
          */
         post: operations["sources.deploy"];
         delete?: never;
@@ -2211,8 +2217,34 @@ export interface paths {
          *     A view whose SQL the hunt runner could not compile, or that matches every
          *     event, is refused with 422. RBAC: ``rule:write`` (data_analyst) --
          *     ``org_viewer`` has neither this grant nor the UI button.
+         *     ``POST /rules/from-hyperdx/validate`` runs the same checks and writes nothing.
          */
         post: operations["rules.from-hyperdx"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/rules/from-hyperdx/validate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Validate Rule From Search
+         * @description Check the SQL a Search view renders to as ``POST /rules/from-hyperdx`` would, writing nothing.
+         *
+         *     Runs every check a create runs and answers the same 422 refusals, including
+         *     ``rule_empty_filter``. A search that would save answers 200. Nothing is written and
+         *     no alert-volume preview runs, so a Search view can ask before the user presses Create.
+         *     An engine without this route answers 404, which is how a caller tells it is older.
+         */
+        post: operations["rules.from-hyperdx.validate"];
         delete?: never;
         options?: never;
         head?: never;
@@ -7641,18 +7673,6 @@ export interface components {
              */
             default_intake: "beats" | "receiver" | "fetcher";
             /**
-             * Framing
-             * @description Receiver intakes only: whether the pipeline wants the syslog line or the body
-             */
-            framing?: string | null;
-            /**
-             * Beats
-             * @description Beats module and fileset carrying the same source, when one does
-             */
-            beats?: {
-                [key: string]: string;
-            };
-            /**
              * Has Schema
              * @description Whether the entry binds a table schema. A fetcher intake without one is refused on create (422), because a fetcher on its own topic needs one
              */
@@ -12921,7 +12941,7 @@ export interface components {
             kind: components["schemas"]["AuthKind"];
             /**
              * Secret Path
-             * @description Path in the secret store holding the token or key
+             * @description Path under sigma/ in the secret store holding the token or key
              * @default
              */
             secret_path: string;
@@ -13788,6 +13808,24 @@ export interface components {
             warnings?: string[];
             /** Sql Errors */
             sql_errors?: components["schemas"]["SqlValidationError"][];
+        };
+        /**
+         * RuleFromSearchCheck
+         * @description A search that would make a rule.
+         */
+        RuleFromSearchCheck: {
+            /**
+             * Valid
+             * @description Always true: a refusal is a 422
+             * @default true
+             * @constant
+             */
+            valid: true;
+            /**
+             * Warnings
+             * @description What to look at before creating the rule
+             */
+            warnings?: string[];
         };
         /**
          * RuleImportRequest
@@ -14910,7 +14948,7 @@ export interface components {
             applied: boolean;
             /**
              * Review Required
-             * @description True when production+team sent the deployed-version record to a review branch: the table is live, and main records the version once it merges
+             * @description True when production+team sent the deployed-version record to a review branch: nothing is applied yet, and the engine deploys the version once the review merges
              * @default false
              */
             review_required: boolean;
@@ -26050,7 +26088,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused, nothing written. The body failed validation (code validation_error). Or the hunt runner could not compile the rule -- its SQL does not parse as one SELECT, names no <db>.<table> source, names a source that is not a table name (letters, digits, '_' and '-'), has no WHERE to detect with, or calls a function that reads outside the row (url, s3, a dictionary) or sends it to another service (the ai* functions), or carries a CEL filter that does not transpile. A ``source`` that is not a registered source is refused, and so is a ``where_clause`` that is empty, carries a {...} placeholder or a time bound, or holds more than a row filter (code invalid_sql, the errors in sql_errors). Or the rule matches every event in its source (code rule_matches_everything, the source and detection WHERE in context). */
+            /** @description Refused, nothing written. The body failed validation (code validation_error). Or the hunt runner could not compile the rule -- its SQL does not parse as one SELECT, names no <db>.<table> source, names a source that is not a table name (letters, digits, '_' and '-'), has no WHERE to detect with, or calls a function that reads outside the row (url, s3, a dictionary) or sends it to another service (the ai* functions), or carries a CEL filter that does not transpile. A ``source`` that is not a registered source is refused, and so is a ``where_clause`` that is empty, carries a {...} placeholder or a time bound, or holds more than a row filter (code invalid_sql, the errors in sql_errors). Or a search left no filter once the time bounds the hunt window owns were taken out (code rule_empty_filter, the bounds taken out in dropped_bounds). Or the rule matches every event in its source (code rule_matches_everything, the source and detection WHERE in context). */
             422: {
                 headers: {
                     [name: string]: unknown;
@@ -26170,7 +26208,67 @@ export interface operations {
                     "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused, nothing written. The body failed validation (code validation_error). Or the hunt runner could not compile the rule -- its SQL does not parse as one SELECT, names no <db>.<table> source, names a source that is not a table name (letters, digits, '_' and '-'), has no WHERE to detect with, or calls a function that reads outside the row (url, s3, a dictionary) or sends it to another service (the ai* functions), or carries a CEL filter that does not transpile. A ``source`` that is not a registered source is refused, and so is a ``where_clause`` that is empty, carries a {...} placeholder or a time bound, or holds more than a row filter (code invalid_sql, the errors in sql_errors). Or the rule matches every event in its source (code rule_matches_everything, the source and detection WHERE in context). */
+            /** @description Refused, nothing written. The body failed validation (code validation_error). Or the hunt runner could not compile the rule -- its SQL does not parse as one SELECT, names no <db>.<table> source, names a source that is not a table name (letters, digits, '_' and '-'), has no WHERE to detect with, or calls a function that reads outside the row (url, s3, a dictionary) or sends it to another service (the ai* functions), or carries a CEL filter that does not transpile. A ``source`` that is not a registered source is refused, and so is a ``where_clause`` that is empty, carries a {...} placeholder or a time bound, or holds more than a row filter (code invalid_sql, the errors in sql_errors). Or a search left no filter once the time bounds the hunt window owns were taken out (code rule_empty_filter, the bounds taken out in dropped_bounds). Or the rule matches every event in its source (code rule_matches_everything, the source and detection WHERE in context). */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+        };
+    };
+    "rules.from-hyperdx.validate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RuleFromHyperdxRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RuleFromSearchCheck"];
+                };
+            };
+            /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Refused, nothing written. The body failed validation (code validation_error). Or the hunt runner could not compile the rule -- its SQL does not parse as one SELECT, names no <db>.<table> source, names a source that is not a table name (letters, digits, '_' and '-'), has no WHERE to detect with, or calls a function that reads outside the row (url, s3, a dictionary) or sends it to another service (the ai* functions), or carries a CEL filter that does not transpile. A ``source`` that is not a registered source is refused, and so is a ``where_clause`` that is empty, carries a {...} placeholder or a time bound, or holds more than a row filter (code invalid_sql, the errors in sql_errors). Or a search left no filter once the time bounds the hunt window owns were taken out (code rule_empty_filter, the bounds taken out in dropped_bounds). Or the rule matches every event in its source (code rule_matches_everything, the source and detection WHERE in context). */
             422: {
                 headers: {
                     [name: string]: unknown;
@@ -26410,7 +26508,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description Refused, nothing written. The body failed validation (code validation_error). Or the hunt runner could not compile the rule -- its SQL does not parse as one SELECT, names no <db>.<table> source, names a source that is not a table name (letters, digits, '_' and '-'), has no WHERE to detect with, or calls a function that reads outside the row (url, s3, a dictionary) or sends it to another service (the ai* functions), or carries a CEL filter that does not transpile. A ``source`` that is not a registered source is refused, and so is a ``where_clause`` that is empty, carries a {...} placeholder or a time bound, or holds more than a row filter (code invalid_sql, the errors in sql_errors). Or the rule matches every event in its source (code rule_matches_everything, the source and detection WHERE in context). */
+            /** @description Refused, nothing written. The body failed validation (code validation_error). Or the hunt runner could not compile the rule -- its SQL does not parse as one SELECT, names no <db>.<table> source, names a source that is not a table name (letters, digits, '_' and '-'), has no WHERE to detect with, or calls a function that reads outside the row (url, s3, a dictionary) or sends it to another service (the ai* functions), or carries a CEL filter that does not transpile. A ``source`` that is not a registered source is refused, and so is a ``where_clause`` that is empty, carries a {...} placeholder or a time bound, or holds more than a row filter (code invalid_sql, the errors in sql_errors). Or a search left no filter once the time bounds the hunt window owns were taken out (code rule_empty_filter, the bounds taken out in dropped_bounds). Or the rule matches every event in its source (code rule_matches_everything, the source and detection WHERE in context). */
             422: {
                 headers: {
                     [name: string]: unknown;
