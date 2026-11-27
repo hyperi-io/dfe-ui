@@ -1,6 +1,7 @@
 import { API_CONFIG_MOCKS } from '@/core/config/api/endpoints/generator';
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
 import { renderHook, waitFor } from '@testing-library/react';
+import { http, HttpResponse } from 'msw';
 import {
   afterAll,
   afterEach,
@@ -28,15 +29,35 @@ afterAll(() => server.close());
 
 const { wrapper } = buildTestWrapper().withReactQuery();
 
-describe('.useUpdateRule', () => {
+describe('.useTriggerOnDemandRule', () => {
   const requestBody: TTriggerOnDemandRuleRequest = {
     source: 'string',
     cost_window_minutes: 0,
-    name: 'string',
-    source_type: 'raw',
+    rule: { name: 'string' },
   };
 
-  const name = 'name';
+  test('sends the source beside the rule it runs', async () => {
+    let received: unknown;
+    server.use(
+      http.post(API_CONFIG_MOCKS.rulesV2.run.mockedUrl, async ({ request }) => {
+        received = await request.json();
+        return HttpResponse.json({});
+      }),
+    );
+    const { result } = renderHook(() => useTriggerOnDemandRule({}), {
+      wrapper,
+    });
+
+    result.current.mutate(requestBody);
+
+    await waitFor(() =>
+      expect(received).toEqual({
+        source: 'string',
+        cost_window_minutes: 0,
+        rule: { name: 'string' },
+      }),
+    );
+  });
 
   describe('onSuccess', () => {
     test('should call onSuccess', async () => {
@@ -44,7 +65,7 @@ describe('.useUpdateRule', () => {
       const onError = vi.fn();
 
       const { result } = renderHook(
-        () => useTriggerOnDemandRule({ onSuccess, onError, name }),
+        () => useTriggerOnDemandRule({ onSuccess, onError }),
         { wrapper },
       );
 
@@ -106,7 +127,7 @@ describe('.useUpdateRule', () => {
       const onError = vi.fn();
 
       const { result } = renderHook(
-        () => useTriggerOnDemandRule({ onSuccess, onError, name }),
+        () => useTriggerOnDemandRule({ onSuccess, onError }),
         { wrapper },
       );
 

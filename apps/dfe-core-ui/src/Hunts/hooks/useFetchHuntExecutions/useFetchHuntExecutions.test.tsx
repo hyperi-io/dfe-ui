@@ -1,5 +1,8 @@
+import { API_CONFIG_MOCKS } from '@/core/config/api/endpoints/generator';
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
-import { renderHook, waitFor } from '@testing-library/react';
+import { pageOf } from '@/core/utils/test-utils/pageOf';
+import { act, renderHook, waitFor } from '@testing-library/react';
+import { http, HttpResponse } from 'msw';
 import { afterAll, afterEach, beforeAll, describe, expect, test } from 'vitest';
 import { useFetchHuntExecutions } from '.';
 import { THuntExecutionsResponse } from './types';
@@ -15,82 +18,90 @@ afterAll(() => server.close());
 
 const { wrapper } = buildTestWrapper().withReactQuery();
 
+type TExecution = THuntExecutionsResponse['items'][number];
+
+const execution = (fire: number): TExecution => ({
+  execution_id: `name:${fire}`,
+  fire,
+  status: 'completed',
+  rows_returned: 1,
+  execution_time_ms: 1000,
+  cost_window_minutes: 10,
+  cost_estimate: { band: 'unmeasured', window_minutes: 10 },
+});
+
 describe('.useFetchHuntExecutions', () => {
-  describe('name is provided', () => {
-    test('should return hunt executions', async () => {
-      const { result } = renderHook(
-        () =>
-          useFetchHuntExecutions({
-            name: 'name',
-          }),
-        { wrapper },
-      );
+  test('returns the first page of executions', async () => {
+    const { result } = renderHook(
+      () => useFetchHuntExecutions({ name: 'name' }),
+      { wrapper },
+    );
 
-      const response: THuntExecutionsResponse = {
-        items: [
-          {
-            execution_id: 'execution_id',
-            fire: 1,
-            status: 'status',
-            rows_returned: 1,
-            execution_time_ms: 1000,
-            cost_window_minutes: 10,
-            cost_estimate: {
-              estimated_rows: 1000,
-              rows_in_window: 1000,
-              projected_per_day: 1000,
-              match_ratio: 1000,
-              band: 'warn',
-              window_minutes: 10,
-              duration_ms: 1000,
-            },
-          },
-        ],
-        total_size: 1,
-        next_page_token: null,
-      };
-
-      await waitFor(() => {
-        expect(result.current).toEqual({
-          data: response,
-          isLoading: false,
-          error: null,
-        });
-      });
-    });
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    expect(result.current.error).toBeNull();
+    expect(result.current.data.map((item) => item.execution_id)).toEqual([
+      'execution_id',
+    ]);
+    expect(result.current.hasNextPage).toBe(false);
   });
 
-  describe('name is not provided', () => {
-    test('should not fetch and should not return data', async () => {
-      const { result } = renderHook(
-        () => useFetchHuntExecutions({ name: undefined }),
-        { wrapper },
-      );
+  test('follows next_page_token to the next page', async () => {
+    const all = [3, 2, 1].map(execution);
+    server.use(
+      http.get(
+        API_CONFIG_MOCKS.hunts.huntExecutions.mockedUrl.replace(
+          '{name}',
+          'name',
+        ),
+        ({ request }) => HttpResponse.json(pageOf(all, request)),
+      ),
+    );
 
-      await waitFor(() => {
-        expect(result.current).toEqual({
-          data: undefined,
-          isLoading: false,
-          error: null,
-        });
-      });
-    });
+    const { result } = renderHook(
+      () => useFetchHuntExecutions({ name: 'name', pageSize: 2 }),
+      { wrapper },
+    );
 
-    test('should not fetch when name is null', async () => {
-      const { result } = renderHook(
-        () => useFetchHuntExecutions({ name: null }),
-        {
-          wrapper,
-        },
-      );
+    await waitFor(() => expect(result.current.data).toHaveLength(2));
+    expect(result.current.hasNextPage).toBe(true);
 
-      await waitFor(() => {
-        expect(result.current).toEqual({
-          data: undefined,
-          isLoading: false,
-          error: null,
-        });
-      });
-    });
+    await act(() => result.current.fetchNextPage());
+
+    await waitFor(() => expect(result.current.data).toHaveLength(3));
+    expect(result.current.data.map((item) => item.fire)).toEqual([3, 2, 1]);
+    expect(result.current.hasNextPage).toBe(false);
   });
+
+  test('surfaces a failed read as the error', async () => {
+    server.use(
+      http.get(
+        API_CONFIG_MOCKS.hunts.huntExecutions.mockedUrl.replace(
+          '{name}',
+          'name',
+        ),
+        () => HttpResponse.json({ detail: 'down' }, { status: 503 }),
+      ),
+    );
+
+    const { result } = renderHook(
+      () => useFetchHuntExecutions({ name: 'name' }),
+      { wrapper },
+    );
+
+    await waitFor(() => expect(result.current.error).not.toBeNull());
+    expect(result.current.data).toEqual([]);
+  });
+
+  test.each([undefined, null, ''])(
+    'does not fetch without a hunt name (%s)',
+    async (name) => {
+      const { result } = renderHook(() => useFetchHuntExecutions({ name }), {
+        wrapper,
+      });
+
+      await waitFor(() => expect(result.current.isLoading).toBe(false));
+      expect(result.current.data).toEqual([]);
+      expect(result.current.error).toBeNull();
+    },
+  );
 });

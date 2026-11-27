@@ -50,7 +50,6 @@ export const RunOnDemandRuleDrawer = ({
     isPending,
     error,
   } = useTriggerOnDemandRule({
-    name: rule.name,
     onSuccess,
     onError,
   });
@@ -63,8 +62,7 @@ export const RunOnDemandRuleDrawer = ({
     setSource(nextSource);
     runOnDemandRuleMutation({
       source: nextSource,
-      name: rule.name,
-      source_type: rule.source_type ?? 'raw',
+      rule: { name: rule.name },
     });
   };
 
@@ -74,7 +72,7 @@ export const RunOnDemandRuleDrawer = ({
 
   return (
     <>
-      <RbacProtected action={RbacProtected.rbacActions.rule_write}>
+      <RbacProtected action={RbacProtected.rbacActions.rule_validate}>
         <RbacProtected.Unrestricted>
           {trigger ? (
             cloneElement(trigger, {

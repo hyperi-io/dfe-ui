@@ -1,11 +1,9 @@
 import { Tooltip } from '@/core/components/Tooltip';
 import { IconTrash } from '@repo/dfe-icons';
 import { Button, Checkbox, Input, Select } from 'antd';
+import { FieldMessage } from './FieldMessage';
 import { issueMessage, operatorTakesValue } from './WhenMatch.helpers';
 import { FieldPath, TMatchFormNode, TMatchOperator } from './WhenMatch.types';
-
-const FieldMessage = ({ message }: { message?: string }) =>
-  message ? <span className="text-xs text-error">{message}</span> : null;
 
 export const ConditionRow = ({
   number,

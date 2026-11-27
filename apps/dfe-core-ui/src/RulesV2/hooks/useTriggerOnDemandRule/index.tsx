@@ -1,33 +1,24 @@
-import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
 import { triggerOnDemandRule } from './api';
 import {
   TTriggerOnDemandRuleRequest,
   TTriggerOnDemandRuleResponse,
 } from './types';
 
+// A run writes nothing, so it leaves every cached rule query as it is.
 export const useTriggerOnDemandRule = ({
   onSuccess,
   onError,
-  name,
 }: {
   onSuccess?: (data: TTriggerOnDemandRuleResponse) => void;
   onError?: (error: Error) => void;
-  name: string;
 }) => {
-  const queryClient = useQueryClient();
   const { data, mutate, isPending, error, reset } = useMutation({
     mutationFn: (body: TTriggerOnDemandRuleRequest) =>
       triggerOnDemandRule({
         body,
       }),
     onSuccess: (data) => {
-      queryClient.invalidateQueries({
-        queryKey: QUERY_KEYS.rulesV2.default(),
-      });
-      queryClient.invalidateQueries({
-        queryKey: QUERY_KEYS.rulesV2.rule({ name }),
-      });
       onSuccess?.(data);
     },
     onError: (error) => {

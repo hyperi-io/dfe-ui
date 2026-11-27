@@ -1,6 +1,7 @@
 import { ApiErrorNotification } from '@/core/components/ApiErrorNotification';
 import { Form } from '@/core/components/Form';
 import { OnDemandRunResult } from '@/core/components/OnDemandRunResult';
+import { RbacProtected } from '@/core/components/RbacProtected';
 import { SourceSelect } from '@/core/components/SourceSelect';
 import { apiClient } from '@/core/config/api';
 import {
@@ -9,11 +10,10 @@ import {
   DfeClientSuccessResponseBody,
 } from '@/core/config/api/client.types';
 import { API_CONFIG } from '@/core/config/api/endpoints';
-import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
 import { useApiFieldErrors } from '@/core/hooks/useApiFieldErrors';
 import { toApiRootMatch } from '@/core/utils/ruleMatch';
 import { IconPlayerPlay } from '@repo/dfe-icons';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
 import { Button, FormInstance, Spin } from 'antd';
 import { ReactNode, useState } from 'react';
 import { CreateUpdateRuleFormData } from './schema';
@@ -28,12 +28,14 @@ type RunResponse = DfeClientSuccessResponseBody<
   DfeClientOperationFor<typeof runPath, 'post'>
 >;
 
+type RunRule = RunRequest['rule'];
+
 export type MatchCriteriaField = 'match' | 'cel_filter' | 'user_sql';
 
 const detectionFor = (
   field: MatchCriteriaField,
   values: CreateUpdateRuleFormData,
-): Partial<RunRequest> => {
+): RunRule => {
   if (field === 'match' && values.match) {
     return { match: toApiRootMatch(values.match) };
   }
@@ -66,22 +68,11 @@ export const CriteriaRunPanel = ({
   }) => ReactNode;
 }) => {
   const form = Form.useFormInstance<CreateUpdateRuleFormData>();
-  const ruleName = Form.useWatch('name', form);
   const [source, setSource] = useState<string>();
   const [open, setOpen] = useState(false);
-  const queryClient = useQueryClient();
+  // A run writes nothing, so no cached rule query goes stale.
   const { data, mutate, isPending, error } = useMutation({
     mutationFn: (body: RunRequest) => apiClient.post(runPath, { body }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: QUERY_KEYS.rulesV2.default(),
-      });
-      if (ruleName) {
-        queryClient.invalidateQueries({
-          queryKey: QUERY_KEYS.rulesV2.rule({ name: ruleName }),
-        });
-      }
-    },
   });
 
   useApiFieldErrors({ error, form });
@@ -100,8 +91,10 @@ export const CriteriaRunPanel = ({
     const values = form.getFieldsValue();
     mutate({
       source,
-      source_type: values.source_type ?? 'raw',
-      ...detectionFor(field, values),
+      rule: {
+        source_type: values.source_type ?? 'raw',
+        ...detectionFor(field, values),
+      },
     });
   };
 
@@ -110,9 +103,21 @@ export const CriteriaRunPanel = ({
   return children({
     open,
     actions: (
-      <Button htmlType="button" icon={<IconPlayerPlay />} onClick={test}>
-        Test
-      </Button>
+      <RbacProtected action={RbacProtected.rbacActions.rule_validate}>
+        <RbacProtected.Unrestricted>
+          <Button htmlType="button" icon={<IconPlayerPlay />} onClick={test}>
+            Test
+          </Button>
+        </RbacProtected.Unrestricted>
+        <RbacProtected.Restricted
+          className="opacity-100"
+          tooltip={{ show: true, placement: 'top' }}
+        >
+          <Button htmlType="button" icon={<IconPlayerPlay />} disabled>
+            Test
+          </Button>
+        </RbacProtected.Restricted>
+      </RbacProtected>
     ),
     results: (
       <div className="flex flex-col gap-3">

@@ -2432,14 +2432,20 @@ export interface paths {
         put?: never;
         /**
          * Run Rule Draft
-         * @description Run a stored rule, or a detection that has not been saved, writing nothing. Give ``name`` to run a stored rule.
+         * @description Run a stored rule, or a detection that has not been saved, writing nothing.
          *
+         *     Give ``rule.name`` to run a stored rule, or one of ``rule.where_clause``,
+         *     ``rule.cel_filter``, ``rule.user_sql``, or ``rule.match`` to run that detection
+         *     without creating a rule.
          *     The source is read the way a sample of it is read: its own table when that
          *     version is deployed, otherwise the landing table filtered to the source's
-         *     match. The volume estimate and the SELECT of matching rows share the
-         *     lookback window, and both are held to the orgs the caller may read. A
-         *     detection the hunt runner would refuse, or a SELECT ClickHouse rejects,
-         *     comes back with 200 and the reason in ``sql_errors``.
+         *     match. The volume estimate and the SELECT of matching rows share the lookback
+         *     window, and both are held to the orgs the caller may read. A detection the
+         *     hunt runner would refuse, or a SELECT ClickHouse rejects, comes back with
+         *     200 and the reason in ``sql_errors``.
+         *
+         *     The run returns source rows, so it also needs ``schema:read``, as sample-rows
+         *     does, and reads only the orgs both grants reach. 403 without it.
          */
         post: operations["rules-v2.run"];
         delete?: never;
@@ -2709,7 +2715,8 @@ export interface paths {
          *
          *     ``If-None-Match: *`` names the first, or replaces a doc that cannot be read or names an org no longer registered, and ``If-Match`` changes it. With gitops on this
          *     is a direct commit to the deploy repo's ``governance/settings/organisation.yaml``,
-         *     else that file under the config directory.
+         *     else that file under the config directory. The apps then recompile, stamping its
+         *     first tenant id on every record that names no org.
          */
         put: operations["system.organisation.apply"];
         post?: never;
@@ -9409,7 +9416,7 @@ export interface components {
             credential_ref?: string | null;
             /**
              * Org
-             * @description The registered org the records belong to; null is the unassigned tenant
+             * @description The registered org the records belong to. Null is your org, or the unassigned tenant while none is named
              */
             org?: string | null;
             /**
@@ -14265,7 +14272,7 @@ export interface components {
         };
         /**
          * RuleV2RunRequest
-         * @description A source to run against, and either a stored rule name or one unsaved detection.
+         * @description A source to run against, and the rule to check.
          */
         RuleV2RunRequest: {
             /**
@@ -14278,39 +14285,12 @@ export interface components {
              * @description Lookback window in minutes the volume estimate and the run both use. Absent or 0 uses the deployment's preview window.
              */
             cost_window_minutes?: number | null;
-            /**
-             * Where Clause
-             * @description Detection condition to run, the SQL after WHERE. Give this or one other detection to run a rule that has not been saved
-             */
-            where_clause?: string | null;
-            /**
-             * Cel Filter
-             * @description CEL expression to run. Give this or one other detection, not more
-             */
-            cel_filter?: string | null;
-            /**
-             * User Sql
-             * @description Full detection query to run. The FROM is dropped, as on save, and the source in this request names the table. Give this or one other detection, not more
-             */
-            user_sql?: string | null;
-            /**
-             * Source Type
-             * @description 'raw' or 'hyperdx'. Applies to ``user_sql``
-             * @default raw
-             * @enum {string}
-             */
-            source_type: "raw" | "hyperdx";
-            /** @description Structured match to run, the same shape as a source match. Give this or one other detection, not more */
-            match?: components["schemas"]["RuleCondition"] | null;
-            /**
-             * Name
-             * @description Stored rule to run. Omit it and give one detection (where_clause, cel_filter, user_sql, or match) to run a rule that has not been saved
-             */
-            name?: string | null;
+            /** @description Stored rule name, or the detection to run without saving it */
+            rule: components["schemas"]["RuleV2RunRule"];
         };
         /**
          * RuleV2RunResponse
-         * @description One on-demand run of a stored rule. Nothing is written.
+         * @description One on-demand run. Nothing is written, and an unsaved detection is not stored.
          */
         RuleV2RunResponse: {
             /**
@@ -14363,6 +14343,39 @@ export interface components {
              * @default false
              */
             truncated: boolean;
+        };
+        /**
+         * RuleV2RunRule
+         * @description The rule a run checks: a stored name, or one detection that has not been saved.
+         */
+        RuleV2RunRule: {
+            /**
+             * Name
+             * @description Stored rule to run. Omit it and give one detection (where_clause, cel_filter, user_sql, or match) to run a rule that has not been saved
+             */
+            name?: string | null;
+            /**
+             * Where Clause
+             * @description Detection condition to run, the SQL after WHERE. Give this or one other detection to run a rule that has not been saved
+             */
+            where_clause?: string | null;
+            /**
+             * Cel Filter
+             * @description CEL expression to run. Give this or one other detection, not more
+             */
+            cel_filter?: string | null;
+            /**
+             * User Sql
+             * @description Full detection query to run. The FROM is dropped, as on save, and the source in this request names the table. Give this or one other detection, not more
+             */
+            user_sql?: string | null;
+            /**
+             * Source Type
+             * @description 'raw' or 'hyperdx' when the detection is ``user_sql``. Ignored otherwise
+             */
+            source_type?: ("raw" | "hyperdx") | null;
+            /** @description Structured match to run, the same shape as a source match. Give this or one other detection, not more */
+            match?: components["schemas"]["RuleCondition"] | null;
         };
         /**
          * RuleV2Summary
@@ -16060,7 +16073,7 @@ export interface components {
             credential_ref?: string | null;
             /**
              * Org
-             * @description The registered org the pipeline's records belong to. Unset is the unassigned tenant. A record carrying any other _org_id lands here, unless allowed_org_ids lists it
+             * @description The registered org the pipeline's records belong to. Unset is your org, or the unassigned tenant while none is named. A record carrying any other _org_id lands here, unless allowed_org_ids lists it
              */
             org?: string | null;
             /**
@@ -16113,7 +16126,7 @@ export interface components {
             routes?: components["schemas"]["FetcherRoute"][];
             /**
              * Org
-             * @description The registered org every fetched record belongs to: the fetcher stamps its first tenant id as _org_id. Unset is the unassigned tenant
+             * @description The registered org every fetched record belongs to: the fetcher stamps its first tenant id as _org_id. Unset is your org, or the unassigned tenant while none is named
              */
             org?: string | null;
         };
@@ -16618,7 +16631,7 @@ export interface components {
             credential_ref?: string | null;
             /**
              * Org
-             * @description The registered org the pipeline's records belong to. Unset is the unassigned tenant. A record carrying any other _org_id lands here, unless allowed_org_ids lists it
+             * @description The registered org the pipeline's records belong to. Unset is your org, or the unassigned tenant while none is named. A record carrying any other _org_id lands here, unless allowed_org_ids lists it
              */
             org?: string | null;
             /**
