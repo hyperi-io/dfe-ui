@@ -2,6 +2,7 @@ import { ApiErrorNotification } from '@/core/components/ApiErrorNotification';
 import { Form } from '@/core/components/Form';
 import { OnDemandRunResult } from '@/core/components/OnDemandRunResult';
 import { RbacProtected } from '@/core/components/RbacProtected';
+import { RULE_RUN_ACTIONS } from '@/core/components/RbacProtected/hooks/rbac.constants';
 import { SourceSelect } from '@/core/components/SourceSelect';
 import { apiClient } from '@/core/config/api';
 import {
@@ -103,7 +104,7 @@ export const CriteriaRunPanel = ({
   return children({
     open,
     actions: (
-      <RbacProtected action={RbacProtected.rbacActions.rule_validate}>
+      <RbacProtected action={RULE_RUN_ACTIONS} requireAll>
         <RbacProtected.Unrestricted>
           <Button htmlType="button" icon={<IconPlayerPlay />} onClick={test}>
             Test

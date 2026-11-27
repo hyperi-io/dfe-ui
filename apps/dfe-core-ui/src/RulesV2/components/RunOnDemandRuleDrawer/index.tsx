@@ -3,6 +3,7 @@ import { Form } from '@/core/components/Form';
 import { Modal } from '@/core/components/Modal';
 import { NotificationCard } from '@/core/components/NotificationCard';
 import { RbacProtected } from '@/core/components/RbacProtected';
+import { RULE_RUN_ACTIONS } from '@/core/components/RbacProtected/hooks/rbac.constants';
 import { SourceSelect } from '@/core/components/SourceSelect';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
 import { RunOnDemandResult } from '@/RulesV2/components/RunOnDemandRuleDrawer/RunOnDemandResult';
@@ -72,7 +73,7 @@ export const RunOnDemandRuleDrawer = ({
 
   return (
     <>
-      <RbacProtected action={RbacProtected.rbacActions.rule_validate}>
+      <RbacProtected action={RULE_RUN_ACTIONS} requireAll>
         <RbacProtected.Unrestricted>
           {trigger ? (
             cloneElement(trigger, {

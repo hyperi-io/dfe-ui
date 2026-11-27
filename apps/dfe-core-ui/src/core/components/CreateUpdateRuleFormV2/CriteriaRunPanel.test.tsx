@@ -106,7 +106,7 @@ const renderPanel = () =>
 
 describe('CriteriaRunPanel', () => {
   test('runs the detection as the rule, beside the source it reads', async () => {
-    grant(['rule:validate']);
+    grant(['rule:validate', 'schema:read']);
     let received: unknown;
     server.use(
       http.post(API_CONFIG_MOCKS.rulesV2.run.mockedUrl, async ({ request }) => {
@@ -129,8 +129,12 @@ describe('CriteriaRunPanel', () => {
     );
   });
 
-  test('offers Test only to a caller holding rule:validate', async () => {
-    grant(['rule:write']);
+  test.each([
+    { permissions: ['rule:write'], missing: 'both grants' },
+    { permissions: ['rule:validate'], missing: 'schema:read' },
+    { permissions: ['schema:read'], missing: 'rule:validate' },
+  ])('offers no Test to a caller without $missing', async ({ permissions }) => {
+    grant(permissions);
     renderPanel();
 
     expect(await screen.findByRole('button', { name: /test/i })).toBeDisabled();
