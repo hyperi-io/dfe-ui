@@ -12,6 +12,7 @@ import {
   createdRuleId,
   hyperdxOrigin,
   hyperdxSourceId,
+  expectNoOverlap,
   openSearch,
   trackCreateRuleRequests,
 } from './createRuleFromSearch.helpers';
@@ -50,7 +51,8 @@ test(
 
     // A search that filters only on time has no detection logic left: the hunt
     // window already bounds time for every rule. The engine says so before
-    // Create can be pressed, and lists the bound it would drop.
+    // Create can be pressed. Nothing shows until the user acts, because this
+    // is the ordinary state of the page.
     await openSearch(
       page,
       origin,
@@ -58,10 +60,54 @@ test(
       { ...search, where: '_timestamp_load < now()' },
       'refused',
     );
+    await expect(precheck).toHaveCount(0);
+    await captureDialog(page, 'precheck-refused-rest');
+
+    // Hover and keyboard focus explain it, and the button names that text.
+    const tooltip = page.getByRole('tooltip');
+    const controls = {
+      Run: page.getByRole('button', { name: 'Run', exact: true }),
+      'the time range': page.getByRole('textbox', { name: 'Time Range' }),
+      'the refresh interval': page.getByRole('combobox', {
+        name: 'Live tail refresh interval',
+      }),
+      'the query language': page.getByRole('combobox', {
+        name: 'Query language',
+      }),
+      Save: page.getByRole('button', { name: 'Save', exact: true }),
+    };
+    await button.hover();
+    await expect(tooltip).toContainText('This search only filters on time.');
+    await expectNoOverlap(tooltip, controls);
+    await page.mouse.move(0, 400);
+    await expect(tooltip).toHaveCount(0);
+    await button.focus();
+    await expect(tooltip).toContainText('This search only filters on time.');
+    const describedBy = await button.getAttribute('aria-describedby');
+    await expect(page.locator(`[id="${describedBy}"]`)).toContainText(
+      'The hunt sets its own time window.',
+    );
+
+    // An aria-disabled button is not actionable to Playwright, so the click is forced.
+    // A click opens the full explanation below the button, clear of the
+    // controls needed to fix the search.
+    await button.click({ force: true });
     await expect(precheck).toContainText('This search only filters on time.');
     await expect(precheck).toContainText('The hunt sets its own time window.');
+    await expect(precheck).toContainText(
+      'Left out of the rule, because the hunt sets its own time window:',
+    );
     await expect(precheck).toContainText('_timestamp_load < now()');
-    await captureDialog(page, 'precheck-refused');
+    await expectNoOverlap(precheck, controls);
+    await captureDialog(page, 'precheck-refused-open');
+
+    // It closes on Escape and on an outside click.
+    await page.keyboard.press('Escape');
+    await expect(precheck).toHaveCount(0);
+    await button.click({ force: true });
+    await expect(precheck).toBeVisible();
+    await page.mouse.click(600, 650);
+    await expect(precheck).toHaveCount(0);
 
     // Any other refusal shows the engine's reason in the same place.
     await openSearch(
@@ -71,8 +117,8 @@ test(
       { ...search, where: 'nosuchcol = 1' },
       'refused',
     );
+    await button.click({ force: true });
     await expect(precheck).toContainText('nosuchcol');
-    await expect(button).toBeDisabled();
 
     // Only dry runs have gone to the engine, and no rule was written.
     expect(sent.length).toBeGreaterThan(0);

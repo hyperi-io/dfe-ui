@@ -1,6 +1,6 @@
 import { mkdirSync, writeFileSync } from 'node:fs';
 
-import { BrowserContext, Page, expect } from '@playwright/test';
+import { BrowserContext, Locator, Page, expect } from '@playwright/test';
 
 import { BASE_URL } from '@e2e/config/e2e.client';
 
@@ -85,10 +85,31 @@ export const openSearch = async (
     await expect(button).toBeEnabled({ timeout: 30_000 });
     return;
   }
-  await expect(page.getByTestId('create-rule-precheck')).toBeVisible({
+  // A refusal turns Create off and leaves the explanation closed until asked.
+  await expect(page.getByTestId('create-rule-precheck-hint')).toBeAttached({
     timeout: 30_000,
   });
   await expect(button).toBeDisabled();
+  await expect(page.getByTestId('create-rule-precheck')).toHaveCount(0);
+};
+
+/** Assert a box overlaps none of the given controls, by their bounding boxes. */
+export const expectNoOverlap = async (
+  box: Locator,
+  controls: Record<string, Locator>,
+) => {
+  const a = await box.boundingBox();
+  if (!a) throw new Error('the box has no bounding box');
+  for (const [name, control] of Object.entries(controls)) {
+    const b = await control.boundingBox();
+    if (!b) throw new Error(`${name} has no bounding box`);
+    const overlaps =
+      a.x < b.x + b.width &&
+      a.x + a.width > b.x &&
+      a.y < b.y + b.height &&
+      a.y + a.height > b.y;
+    expect(overlaps, `the explanation covers ${name}`).toBe(false);
+  }
 };
 
 /** Every create-rule request the page sends, with whether it was a dry run. */
