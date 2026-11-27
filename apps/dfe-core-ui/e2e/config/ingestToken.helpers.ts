@@ -2,6 +2,7 @@ import { expect } from '@playwright/test';
 
 import { ENGINE_API_URL } from './e2e.client';
 import { engineToken } from './engineApi.helpers';
+import { adminPassword } from './login.helpers';
 
 // The receiver re-reads its bearer tokens every 60 seconds.
 const TOKEN_WAIT_MS = 150_000;
@@ -20,6 +21,28 @@ const accepts = async (receiverUrl: string, token: string) =>
     })
   ).status !== 401;
 
+/**
+ * The grant an engine asks for before it changes a credential. An engine that
+ * asks for none refuses the call, and the change goes ahead without one.
+ */
+const reauthHeader = async (
+  headers: Record<string, string>,
+  target: string,
+): Promise<Record<string, string>> => {
+  const earned = await fetch(`${ENGINE_API_URL}/api/v1/auth/reauth`, {
+    method: 'POST',
+    headers: { ...headers, 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      kind: 'credential',
+      target,
+      password: adminPassword(),
+    }),
+  });
+  return earned.ok
+    ? { 'X-DFE-Reauth': (await earned.json()).grant as string }
+    : {};
+};
+
 const mint = async (receiverUrl: string): Promise<string> => {
   const headers = { Authorization: `Bearer ${await engineToken()}` };
   const primary = await (
@@ -28,12 +51,14 @@ const mint = async (receiverUrl: string): Promise<string> => {
   expect(primary.name, 'no organisation is named as yours').toBeTruthy();
   const url = `${ENGINE_API_URL}/api/v1/orgs/${primary.name}/ingest-credentials/${credentialId()}`;
   const held = await fetch(url, { headers });
+  const grant = await reauthHeader(headers, credentialId());
   const response =
     held.status === 404
       ? await fetch(url, {
           method: 'PUT',
           headers: {
             ...headers,
+            ...grant,
             'Content-Type': 'application/json',
             'If-None-Match': '*',
           },
@@ -43,7 +68,10 @@ const mint = async (receiverUrl: string): Promise<string> => {
             orgs: [primary.name],
           }),
         })
-      : await fetch(`${url}/rotate`, { method: 'POST', headers });
+      : await fetch(`${url}/rotate`, {
+          method: 'POST',
+          headers: { ...headers, ...grant },
+        });
   expect(response.ok, await response.clone().text()).toBeTruthy();
   const { token } = await response.json();
   await expect
