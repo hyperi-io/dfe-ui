@@ -47,8 +47,10 @@ describe('CreateUpdateRuleForm', () => {
     ).toBeInTheDocument();
     expect(
       screen.getByRole('radio', { name: 'CEL Fast expression' }),
-    ).toBeInTheDocument();
+    ).toBeChecked();
     expect(screen.getByRole('radio', { name: 'SQL' })).toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole('radio', { name: 'Conditions' }));
     expect(screen.getByPlaceholderText('Enter field')).toBeInTheDocument();
 
     await userEvent.click(screen.getByRole('button', { name: 'Save Rule' }));

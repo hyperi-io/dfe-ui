@@ -54,6 +54,7 @@ export const API_CONFIG = Object.freeze({
     default: '/api/v1/rules-v2',
     validate: '/api/v1/rules-v2/validate',
     rule: '/api/v1/rules-v2/{name}',
+    run: '/api/v1/rules-v2/run',
   },
   alerts: {
     destinations: '/api/v1/alerts/destinations',
@@ -101,6 +102,7 @@ export const API_CONFIG = Object.freeze({
     engineStatus: '/api/v1/hunts/status',
     hunt: '/api/v1/hunts/{name}',
     huntRun: '/api/v1/hunts/{name}/run',
+    huntExecutions: '/api/v1/hunts/{name}/executions',
   },
   oidc: {
     login: '/api/v1/auth/oidc/{provider}/login',

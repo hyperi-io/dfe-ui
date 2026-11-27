@@ -1,6 +1,9 @@
 import { ApiErrorNotification } from '@/core/components/ApiErrorNotification';
 import { Form } from '@/core/components/Form';
-import { MatchCriteriaInput } from '@/core/components/MatchCriteriaInput';
+import {
+  MatchCriteriaInput,
+  matchCriteriaMode,
+} from '@/core/components/MatchCriteriaInput';
 import { useCheckCel } from '@/core/hooks/useCelCheck';
 import { useValidateRule } from '@/core/hooks/useValidateRuleV2';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
@@ -9,11 +12,16 @@ import {
   MATCH_OPERATORS,
 } from '@repo/dfe-engine-types/limits';
 import { IconDeviceFloppy } from '@repo/dfe-icons';
-import { Button, FormProps, Input, Select } from 'antd';
-import { useEffect, useMemo, useState } from 'react';
+import { Button, FormProps, Input, Select, Splitter } from 'antd';
+import { ReactNode, useEffect, useMemo, useState } from 'react';
+import { CriteriaRunPanel, MatchCriteriaField } from './CriteriaRunPanel';
 import { DEFAULT_ESTIMATE_COST } from './defaults';
 import { ResponseModal } from './ResponseModal';
-import { buildFormSchema, CreateUpdateRuleFormData } from './schema';
+import {
+  buildFormSchema,
+  CreateUpdateRuleFormData,
+  criteriaIssues,
+} from './schema';
 
 export { DEFAULT_ESTIMATE_COST } from './defaults';
 
@@ -50,7 +58,16 @@ const CreateUpdateRuleFormBase = ({
   const formValidation =
     useAntdZodResolver<CreateUpdateRuleFormData>(formSchema);
   const [matchCriteriaFormName, setMatchCriteriaFormName] =
-    useState<string>('match');
+    useState<MatchCriteriaField>(() => {
+      const mode = matchCriteriaMode(initialValues);
+      if (mode === 'expression') return 'cel_filter';
+      if (mode === 'sql') return 'user_sql';
+      return 'match';
+    });
+  const [showCriteriaErrors, setShowCriteriaErrors] = useState(false);
+  const watchedMatch = Form.useWatch('match', form);
+  const watchedCel = Form.useWatch('cel_filter', form);
+  const watchedSql = Form.useWatch('user_sql', form);
 
   useEffect(() => {
     if (resetFormFields) {
@@ -94,6 +111,66 @@ const CreateUpdateRuleFormBase = ({
     error: celCheck.error,
     reset: celCheck.reset,
   };
+
+  const issues = useMemo(
+    () =>
+      criteriaIssues(matchCriteriaFormName, {
+        match: watchedMatch,
+        cel_filter: watchedCel,
+        user_sql: watchedSql,
+      }),
+    [matchCriteriaFormName, watchedMatch, watchedCel, watchedSql],
+  );
+  const checkFailed =
+    (matchCriteriaFormName === 'cel_filter' &&
+      !!validateCel.data &&
+      !validateCel.data.valid) ||
+    (matchCriteriaFormName === 'user_sql' &&
+      !!validateSql.data &&
+      !validateSql.data.valid);
+  const criteriaReady = issues.length === 0 && !checkFailed;
+
+  const handleModeChange = (mode: 'conditions' | 'expression' | 'sql') => {
+    switch (mode) {
+      case 'conditions':
+        setMatchCriteriaFormName('match');
+        break;
+      case 'expression':
+        setMatchCriteriaFormName('cel_filter');
+        break;
+      case 'sql':
+        setMatchCriteriaFormName('user_sql');
+        break;
+    }
+  };
+
+  const criteriaMode =
+    matchCriteriaFormName === 'cel_filter'
+      ? 'expression'
+      : matchCriteriaFormName === 'user_sql'
+        ? 'sql'
+        : 'conditions';
+
+  const criteriaField = (actions?: ReactNode) => (
+    <Form.Item
+      label="Match Criteria"
+      name={matchCriteriaFormName}
+      className="mb-0"
+    >
+      <MatchCriteriaInput
+        operatorOptions={operatorOptions}
+        matchDepthLimit={MATCH_NESTING_LIMIT}
+        validate={{
+          cel: validateCel,
+          sql: validateSql,
+        }}
+        mode={criteriaMode}
+        actions={actions}
+        issues={showCriteriaErrors ? issues : undefined}
+        onModeChange={handleModeChange}
+      />
+    </Form.Item>
+  );
 
   return (
     <Form
@@ -151,29 +228,31 @@ const CreateUpdateRuleFormBase = ({
         <Input.TextArea />
       </Form.Item>
 
-      <Form.Item label="Match Criteria" name={matchCriteriaFormName}>
-        <MatchCriteriaInput
-          operatorOptions={operatorOptions}
-          matchDepthLimit={MATCH_NESTING_LIMIT}
-          validate={{
-            cel: validateCel,
-            sql: validateSql,
-          }}
-          onModeChange={(mode) => {
-            switch (mode) {
-              case 'conditions':
-                setMatchCriteriaFormName('match');
-                break;
-              case 'expression':
-                setMatchCriteriaFormName('cel_filter');
-                break;
-              case 'sql':
-                setMatchCriteriaFormName('user_sql');
-                break;
-            }
-          }}
-        />
-      </Form.Item>
+      <CriteriaRunPanel
+        field={matchCriteriaFormName}
+        criteriaReady={criteriaReady}
+        onValidateCriteria={() => setShowCriteriaErrors(true)}
+        onRun={() => {
+          setShowCriteriaErrors(false);
+          validateCel.reset();
+          validateSql.reset();
+        }}
+      >
+        {({ actions, results, open }) =>
+          open ? (
+            <Splitter className="mt-2 h-128">
+              <Splitter.Panel defaultSize="58%" min="35%" className="pr-4">
+                {criteriaField(actions)}
+              </Splitter.Panel>
+              <Splitter.Panel min="25%" className="overflow-auto pl-4">
+                {results}
+              </Splitter.Panel>
+            </Splitter>
+          ) : (
+            criteriaField(actions)
+          )
+        }
+      </CriteriaRunPanel>
 
       {error && <ApiErrorNotification error={error} />}
 

@@ -2421,6 +2421,39 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/rules-v2/run": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Run Rule Draft
+         * @description Run a stored rule, or a detection that has not been saved, writing nothing.
+         *
+         *     Give ``rule.name`` to run a stored rule, or one of ``rule.where_clause``,
+         *     ``rule.cel_filter``, ``rule.user_sql``, or ``rule.match`` to run that detection
+         *     without creating a rule.
+         *     The source is read the way a sample of it is read: its own table when that
+         *     version is deployed, otherwise the landing table filtered to the source's
+         *     match. The volume estimate and the SELECT of matching rows share the lookback
+         *     window, and both are held to the orgs the caller may read. A detection the
+         *     hunt runner would refuse, or a SELECT ClickHouse rejects, comes back with
+         *     200 and the reason in ``sql_errors``.
+         *
+         *     The run returns source rows, so it also needs ``schema:read``, as sample-rows
+         *     does, and reads only the orgs both grants reach. 403 without it.
+         */
+        post: operations["rules-v2.run"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/rules-v2/{name}": {
         parameters: {
             query?: never;
@@ -2682,7 +2715,8 @@ export interface paths {
          *
          *     ``If-None-Match: *`` names the first, or replaces a doc that cannot be read or names an org no longer registered, and ``If-Match`` changes it. With gitops on this
          *     is a direct commit to the deploy repo's ``governance/settings/organisation.yaml``,
-         *     else that file under the config directory.
+         *     else that file under the config directory. The apps then recompile, stamping its
+         *     first tenant id on every record that names no org.
          */
         put: operations["system.organisation.apply"];
         post?: never;
@@ -2916,6 +2950,34 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/hunts/{name}/executions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Hunt Executions
+         * @description List one hunt's finished fires, newest first.
+         *
+         *     Each item is one fire, named ``{hunt}:{fire}``: how many rows it wrote, the error
+         *     when it failed, how long it took, and the alert-volume estimate over its cost
+         *     window. The rows
+         *     themselves are not returned. A run-now that is still queued is not a fire yet,
+         *     and a one-off rule run is not a hunt fire, so neither appears here.
+         *
+         *     503 is reserved for ClickHouse actually being unreachable.
+         */
+        get: operations["hunts.executions.list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/hunts/{name}": {
         parameters: {
             query?: never;
@@ -2927,7 +2989,9 @@ export interface paths {
          * Get Hunt
          * @description Get full hunt configuration by file name, with the runner's stop on it if any.
          *
-         *     A hunt naming a rule with no stored rule file carries ``missing_rules`` and an ``error``.
+         *     Each rule item carries the stored rule's description. A hunt naming a rule with
+         *     no stored rule file carries ``missing_rules`` and an ``error``, and that item's
+         *     description is absent.
          */
         get: operations["hunts.get"];
         /**
@@ -9352,7 +9416,7 @@ export interface components {
             credential_ref?: string | null;
             /**
              * Org
-             * @description The registered org the records belong to; null is the unassigned tenant
+             * @description The registered org the records belong to. Null is your org, or the unassigned tenant while none is named
              */
             org?: string | null;
             /**
@@ -10201,12 +10265,62 @@ export interface components {
             scheduling_mode: string;
         };
         /**
+         * HuntExecution
+         * @description One finished fire of a hunt. The rows it wrote are not included.
+         */
+        HuntExecution: {
+            /**
+             * Execution Id
+             * @description This fire's id: the hunt name and the scheduled fire, as {hunt}:{fire}
+             */
+            execution_id: string;
+            /**
+             * Fire
+             * @description Epoch seconds of the scheduled fire
+             */
+            fire: number;
+            /**
+             * Status
+             * @description completed, or failed when the fire raised
+             */
+            status: string;
+            /**
+             * Rows Returned
+             * @description Rows the fire wrote. A failed fire is 0
+             */
+            rows_returned: number;
+            /**
+             * Error
+             * @description Why the fire failed. Absent when it completed
+             */
+            error?: string | null;
+            /**
+             * Execution Time Ms
+             * @description How long the fire took, in milliseconds
+             */
+            execution_time_ms: number;
+            /**
+             * Cost Window Minutes
+             * @description Lookback the alert-volume estimate counted over, 0 when it was not measured
+             */
+            cost_window_minutes: number;
+            cost_estimate: components["schemas"]["CostEstimate"];
+        };
+        /**
          * HuntRuleEntry
-         * @description Per-rule hunt configuration as stored in YAML.
+         * @description One rule a hunt runs, as the hunt YAML names it.
+         *
+         *     ``description`` is read from the stored rule when the detail is built. It is
+         *     not written back onto the hunt.
          */
         HuntRuleEntry: {
             /** Rule Name */
             rule_name: string;
+            /**
+             * Description
+             * @description What the stored rule detects. Absent when the rule file is missing or the rule has no description
+             */
+            description?: string | null;
             /** Target Table Name */
             target_table_name?: string | null;
             /**
@@ -12114,6 +12228,15 @@ export interface components {
         Page_HistoryEntry_: {
             /** Items */
             items: components["schemas"]["HistoryEntry"][];
+            /** Next Page Token */
+            next_page_token?: string | null;
+            /** Total Size */
+            total_size?: number | null;
+        };
+        /** Page[HuntExecution] */
+        Page_HuntExecution_: {
+            /** Items */
+            items: components["schemas"]["HuntExecution"][];
             /** Next Page Token */
             next_page_token?: string | null;
             /** Total Size */
@@ -14148,6 +14271,113 @@ export interface components {
             created_at: string;
         };
         /**
+         * RuleV2RunRequest
+         * @description A source to run against, and the rule to check.
+         */
+        RuleV2RunRequest: {
+            /**
+             * Source
+             * @description Source label whose rows the rule reads
+             */
+            source: string;
+            /**
+             * Cost Window Minutes
+             * @description Lookback window in minutes the volume estimate and the run both use. Absent or 0 uses the deployment's preview window.
+             */
+            cost_window_minutes?: number | null;
+            /** @description Stored rule name, or the detection to run without saving it */
+            rule: components["schemas"]["RuleV2RunRule"];
+        };
+        /**
+         * RuleV2RunResponse
+         * @description One on-demand run. Nothing is written, and an unsaved detection is not stored.
+         */
+        RuleV2RunResponse: {
+            /**
+             * Source
+             * @description Source label the run read
+             */
+            source: string;
+            /**
+             * Source Db
+             * @description Database the run read
+             */
+            source_db: string;
+            /**
+             * Source Table
+             * @description Table the run read
+             */
+            source_table: string;
+            /**
+             * Cost Window Minutes
+             * @description Lookback window, in minutes, the estimate and the run both used
+             */
+            cost_window_minutes: number;
+            /** @description Alert-volume estimate over that window on the source's rows */
+            cost_estimate: components["schemas"]["CostEstimate"];
+            /**
+             * Sql Errors
+             * @description Why the rule was not run, or the ClickHouse error when the SELECT failed. Empty when the run finished
+             */
+            sql_errors?: components["schemas"]["SqlValidationError"][];
+            /**
+             * Columns
+             * @description Column names in each result row. Empty when the run did not finish
+             */
+            columns?: string[];
+            /**
+             * Results
+             * @description Matching rows in the window, each a column name to value. At most the deployment's detections-per-run cap. Empty when nothing matched or the run failed
+             */
+            results?: {
+                [key: string]: unknown;
+            }[];
+            /**
+             * Execution Time Ms
+             * @description How long the SELECT of matching rows took, in milliseconds. Zero when it was not run
+             */
+            execution_time_ms: number;
+            /**
+             * Truncated
+             * @description True when the SELECT stopped at the detections-per-run cap, so more rows matched than were returned
+             * @default false
+             */
+            truncated: boolean;
+        };
+        /**
+         * RuleV2RunRule
+         * @description The rule a run checks: a stored name, or one detection that has not been saved.
+         */
+        RuleV2RunRule: {
+            /**
+             * Name
+             * @description Stored rule to run. Omit it and give one detection (where_clause, cel_filter, user_sql, or match) to run a rule that has not been saved
+             */
+            name?: string | null;
+            /**
+             * Where Clause
+             * @description Detection condition to run, the SQL after WHERE. Give this or one other detection to run a rule that has not been saved
+             */
+            where_clause?: string | null;
+            /**
+             * Cel Filter
+             * @description CEL expression to run. Give this or one other detection, not more
+             */
+            cel_filter?: string | null;
+            /**
+             * User Sql
+             * @description Full detection query to run. The FROM is dropped, as on save, and the source in this request names the table. Give this or one other detection, not more
+             */
+            user_sql?: string | null;
+            /**
+             * Source Type
+             * @description 'raw' or 'hyperdx' when the detection is ``user_sql``. Ignored otherwise
+             */
+            source_type?: ("raw" | "hyperdx") | null;
+            /** @description Structured match to run, the same shape as a source match. Give this or one other detection, not more */
+            match?: components["schemas"]["RuleCondition"] | null;
+        };
+        /**
          * RuleV2Summary
          * @description A detection rule in a listing.
          */
@@ -15843,7 +16073,7 @@ export interface components {
             credential_ref?: string | null;
             /**
              * Org
-             * @description The registered org the pipeline's records belong to. Unset is the unassigned tenant. A record carrying any other _org_id lands here, unless allowed_org_ids lists it
+             * @description The registered org the pipeline's records belong to. Unset is your org, or the unassigned tenant while none is named. A record carrying any other _org_id lands here, unless allowed_org_ids lists it
              */
             org?: string | null;
             /**
@@ -15896,7 +16126,7 @@ export interface components {
             routes?: components["schemas"]["FetcherRoute"][];
             /**
              * Org
-             * @description The registered org every fetched record belongs to: the fetcher stamps its first tenant id as _org_id. Unset is the unassigned tenant
+             * @description The registered org every fetched record belongs to: the fetcher stamps its first tenant id as _org_id. Unset is your org, or the unassigned tenant while none is named
              */
             org?: string | null;
         };
@@ -16401,7 +16631,7 @@ export interface components {
             credential_ref?: string | null;
             /**
              * Org
-             * @description The registered org the pipeline's records belong to. Unset is the unassigned tenant. A record carrying any other _org_id lands here, unless allowed_org_ids lists it
+             * @description The registered org the pipeline's records belong to. Unset is your org, or the unassigned tenant while none is named. A record carrying any other _org_id lands here, unless allowed_org_ids lists it
              */
             org?: string | null;
             /**
@@ -26565,6 +26795,66 @@ export interface operations {
             };
         };
     };
+    "rules-v2.run": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RuleV2RunRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RuleV2RunResponse"];
+                };
+            };
+            /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+        };
+    };
     "rules-v2.get": {
         parameters: {
             query?: never;
@@ -28103,6 +28393,71 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HuntDetailResponse"];
+                };
+            };
+            /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first. A SCIM route answers a refused action in the RFC 7644 error envelope */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+        };
+    };
+    "hunts.executions.list": {
+        parameters: {
+            query?: {
+                /** @description Items per page: 0 means 50, above 1000 is cut to it */
+                page_size?: number;
+                /** @description The next_page_token of the previous page */
+                page_token?: string | null;
+                /** @description Items to skip, after page_token */
+                skip?: number;
+            };
+            header?: never;
+            path: {
+                name: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Page_HuntExecution_"];
                 };
             };
             /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */

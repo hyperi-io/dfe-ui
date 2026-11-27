@@ -5,6 +5,8 @@ import { useRbac } from './hooks/useRbac';
 interface RbacProtectedProps {
   children: React.ReactNode;
   action: UI_DISPLAY_ACTIONS_TYPE | UI_DISPLAY_ACTIONS_TYPE[];
+  /** With a list of actions, authorise only a user holding every one, not any one. */
+  requireAll?: boolean;
 }
 
 export const RbacProtectedContext = createContext<{
@@ -17,8 +19,12 @@ export const RbacProtectedContext = createContext<{
   isError: false,
 });
 
-export const RbacProtected = ({ action, children }: RbacProtectedProps) => {
-  const { isAuthorized, isLoading, isError } = useRbac({ action });
+export const RbacProtected = ({
+  action,
+  requireAll,
+  children,
+}: RbacProtectedProps) => {
+  const { isAuthorized, isLoading, isError } = useRbac({ action, requireAll });
 
   const contextValue = useMemo(
     () => ({

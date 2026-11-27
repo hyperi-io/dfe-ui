@@ -73,4 +73,42 @@ describe('useRbac', () => {
       });
     });
   });
+
+  describe.each([
+    {
+      permissions: ['rule:validate', 'schema:read'],
+      requireAll: true,
+      expected: true,
+    },
+    { permissions: ['rule:validate'], requireAll: true, expected: false },
+    { permissions: [], requireAll: true, expected: false },
+    { permissions: ['rule:validate'], requireAll: false, expected: true },
+  ])(
+    'a list of actions with requireAll $requireAll for $permissions',
+    ({ permissions, requireAll, expected }) => {
+      beforeEach(() => {
+        server.use(
+          API_CONFIG_MOCKS.auth.me.get.success({
+            mockedResponse: { ...ADMIN_MOCKED_RESPONSE, permissions },
+          }),
+        );
+      });
+      it(`authorises: ${expected}`, async () => {
+        const { result } = renderHook(
+          () =>
+            useRbac({
+              action: [
+                UI_DISPLAY_ACTIONS.rule_validate,
+                UI_DISPLAY_ACTIONS.schema_read,
+              ],
+              requireAll,
+            }),
+          { wrapper },
+        );
+
+        await waitFor(() => expect(result.current.isLoading).toBe(false));
+        expect(result.current.isAuthorized).toBe(expected);
+      });
+    },
+  );
 });
